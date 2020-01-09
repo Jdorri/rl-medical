@@ -22,6 +22,12 @@ tensorpack-medical requires:
 + [gym](https://pypi.org/project/gym/)
 + [SimpleITK](https://pypi.org/project/SimpleITK/)
 
+
+### Install the libraries in the environment by launching the following command:
+```shell script
+pip3 install -r requirements.txt
+```
+
 ### User installation
 ```
 pip install -U git+https://github.com/amiralansary/rl-medical.git
