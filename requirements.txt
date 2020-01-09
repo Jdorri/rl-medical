@@ -1,6 +1,6 @@
 cycler==0.10.0
-tensorflow-gpu=1.14.0
-tensorpack=0.9.5
+tensorflow-gpu==1.14.0
+tensorpack==0.9.5
 opencv-python
 pillow
 gym
