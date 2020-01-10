@@ -33,7 +33,7 @@ class SimpleImageViewer(object):
                                            caption=self.filename,
                                            display=self.display,
                                            resizable=True,
-                                           #fullscreen=True # ruins screen resolution
+                                           fullscreen=True # ruins screen resolution
                                            )
 
         ## set location
