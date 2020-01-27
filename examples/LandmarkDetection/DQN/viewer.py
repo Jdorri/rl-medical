@@ -8,6 +8,7 @@ import math
 import io
 import PySimpleGUI as sg
 from PIL import Image, ImageTk
+import tkinter as tk
 import numpy as np
 try:
     import pyglet
@@ -42,7 +43,6 @@ class SimpleImageViewer(object):
         #                                    resizable=True,
         #                                    # fullscreen=True # ruins screen resolution
         #                                    )
-
         ## set location
         screen_width = self.window.display.get_default_screen().width
         screen_height = self.window.display.get_default_screen().height
@@ -83,6 +83,7 @@ class SimpleImageViewer(object):
         # Display first image
         # image_elem = sg.Image(data=get_img_data(path, first=True))
         # print(img.shape)
+        root = tk.Tk()
         img = img.astype(np.uint8)
         print('Done\n'*10)
         img = Image.fromarray(img)
@@ -101,6 +102,7 @@ class SimpleImageViewer(object):
 
         window = sg.Window('Image Browser', layout, return_keyboard_events=True,
                            location=(0, 0), use_default_focus=False)
+        window.read()
         return window
 
     def draw_image(self, arr):
