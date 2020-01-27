@@ -625,6 +625,9 @@ class MedicalPlayer(gym.Env):
                          interpolation=cv2.INTER_LINEAR)
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)  # congvert to rgb
 
+### FROM HERE ###
+        # cv2.imwrite("disp_imgs/image.png", img)
+        # return
         # skip if there is a viewer open
         if (not self.viewer) and self.viz:
             from viewer import SimpleImageViewer
@@ -675,6 +678,7 @@ class MedicalPlayer(gym.Env):
 
         # render and wait (viz) time between frames
         self.viewer.render()
+### TO HERE ###
         # time.sleep(self.viz)
         # save gif
         if self.saveGif:

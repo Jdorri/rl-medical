@@ -35,7 +35,7 @@ layout = [[sg.Column(col_buttons), sg.Column(col)]]
 
 window = sg.Window('Image Browser', layout, return_keyboard_events=True,
                    location=(0, 0), use_default_focus=False)
-
+# user_input('asdicasdcin')
 # loop reading the user input and displaying image, filename
 i = 1
 while True:

@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # File: viewer.py
-# Author: Alex Gaskell <alex.gaskell10@gmail.com>
+# Author: Amir Alansary <amiralansary@gmail.com>
 
 import os
 import math
-import io
-import PySimpleGUI as sg
-from PIL import Image, ImageTk
-import numpy as np
 try:
     import pyglet
     from pyglet.gl import *
 except ImportError as e:
     reraise(suffix="HINT: you can install pyglet directly via 'pip install pyglet'. But if you really just want to install all Gym dependencies and not have to think about it, 'pip install -e .[all]' or 'pip install gym[all]' will do it.")
+
+
 
 class SimpleImageViewer(object):
     ''' Simple image viewer class for rendering images using pyglet'''
@@ -30,18 +28,13 @@ class SimpleImageViewer(object):
         # initialize window with the input image
         height, width, channels = arr.shape
         assert arr.shape == (height, width, 3), "You passed in an image with the wrong number shape"
-
-        path = 'disp_imgs/image.png'
-        self.window = self.create_window(arr, path)
-        print('Done\n'*10)
-
-        # self.window = pyglet.window.Window(width=scale_x*width,
-        #                                    height=scale_y*height,
-        #                                    caption=self.filename,
-        #                                    display=self.display,
-        #                                    resizable=True,
-        #                                    # fullscreen=True # ruins screen resolution
-        #                                    )
+        self.window = pyglet.window.Window(width=scale_x*width,
+                                           height=scale_y*height,
+                                           caption=self.filename,
+                                           display=self.display,
+                                           resizable=True,
+                                           # fullscreen=True # ruins screen resolution
+                                           )
 
         ## set location
         screen_width = self.window.display.get_default_screen().width
@@ -67,41 +60,6 @@ class SimpleImageViewer(object):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-    def create_window(self, img, path):
-        def get_img_data(f, maxsize=(1200, 850), first=False):
-            """Generate image data using PIL
-            """
-            img = Image.open(f)
-            img.thumbnail(maxsize)
-            if first:                     # tkinter is inactive the first time
-                bio = io.BytesIO()
-                img.save(bio, format="PNG")
-                del img
-                return bio.getvalue()
-            return ImageTk.PhotoImage(img)
-
-        # Display first image
-        # image_elem = sg.Image(data=get_img_data(path, first=True))
-        # print(img.shape)
-        img = img.astype(np.uint8)
-        print('Done\n'*10)
-        img = Image.fromarray(img)
-        print('Done\n'*10)
-        print(img)
-        image = ImageTk.PhotoImage(image=img)
-        print('Done\n'*10)
-        # image_elem = ImageTk.Image(data=image)
-        image_elem = sg.Image(data=image)
-        print('Done\n'*10)
-        col = [[image_elem]]
-        # col_files = [[sg.Listbox(values=fnames, change_submits=True, size=(60, 30), key='listbox')],
-        #              [sg.Button('Next', size=(8, 2)), sg.Button('Prev', size=(8, 2))]]
-        col_buttons = [[sg.Button('Next', size=(8,2)),sg.Button('Prev', size=(8, 2))]]
-        layout = [[sg.Column(col_buttons), sg.Column(col)]]
-
-        window = sg.Window('Image Browser', layout, return_keyboard_events=True,
-                           location=(0, 0), use_default_focus=False)
-        return window
 
     def draw_image(self, arr):
         # convert data typoe to GLubyte
