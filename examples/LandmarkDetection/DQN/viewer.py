@@ -33,8 +33,7 @@ class SimpleImageViewer(object):
         height, width, channels = arr.shape
         assert arr.shape == (height, width, 3), "You passed in an image with the wrong number shape"
 
-        path = 'disp_imgs/image.png'
-        self.window = self.create_window(arr, path)
+        self.window = self.create_window(arr)
 
         # self.window = pyglet.window.Window(width=scale_x*width,
         #                                    height=scale_y*height,
@@ -67,8 +66,8 @@ class SimpleImageViewer(object):
         # glEnable(GL_BLEND)
         # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-    def create_window(self, img, path):
-      
+    def create_window(self, img):
+
         # 1======= try with tkinter - works
         # root = tk.Tk()
         # img = Image.fromarray(img_array)
@@ -76,16 +75,19 @@ class SimpleImageViewer(object):
         # image_elem = sg.Image(data=img)
         # lbl = tk.Label(root, image=image)
         # lbl.pack()
-        # root.mainloop()        
+        # root.mainloop()
 
         # 2======= try with pysimplegui
         # image_elem = ImageTk.Image(data=image)
         #added for pysimplegui format
-        imgbytes = cv2.imencode('.png', img)[1].tobytes()        
+        imgbytes = cv2.imencode('.png', img)[1].tobytes()
         self.image_elem = sg.Image(data=imgbytes)
         col = [[self.image_elem]]
         col_buttons = [[sg.Button('Next', size=(8,2)),sg.Button('Prev', size=(8, 2))]]
-        layout = [[sg.Column(col_buttons), sg.Column(col)]]
+        layout = [
+            [sg.Column(col), sg.Column(col), sg.Column(col_buttons)],
+            [sg.Column(col), sg.Column(col)]
+            ]
         window = sg.Window('Image Browser', layout, return_keyboard_events=True,
                            location=(0, 0), use_default_focus=False)
         window.read()
@@ -102,7 +104,7 @@ class SimpleImageViewer(object):
         # self.window.switch_to()
         # self.window.dispatch_events()
         # image.blit(0,0)
-        imgbytes = cv2.imencode('.png', arr)[1].tobytes()        
+        imgbytes = cv2.imencode('.png', arr)[1].tobytes()
         self.image_elem.update(data=imgbytes)
         self.window.read()
 
