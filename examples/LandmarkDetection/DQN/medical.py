@@ -637,22 +637,22 @@ class MedicalPlayer(gym.Env):
                                             filepath=self.filename)
             self.gif_buffer = []
         # display image
-        self.viewer.draw_image(img)
+        # self.viewer.draw_image(img)
         # draw current point
-        self.viewer.draw_circle(radius=scale_x * 1,
-                                pos_x=scale_x * current_point[0],
-                                pos_y=scale_y * current_point[1],
-                                color=(0.0, 0.0, 1.0, 1.0))
-        # draw a box around the agent - what the network sees ROI
-        self.viewer.draw_rect(scale_x*self.rectangle.xmin, scale_y*self.rectangle.ymin,
-                              scale_x*self.rectangle.xmax, scale_y*self.rectangle.ymax)
-        self.viewer.display_text('Agent ', color=(204, 204, 0, 255),
-                                 x=self.rectangle.xmin - 15,
-                                 y=self.rectangle.ymin)
-        # display info
-        text = 'Spacing ' + str(self.xscale)
-        self.viewer.display_text(text, color = (204,204,0,255),
-                                 x=10, y=self._image_dims[1]-80)
+        # self.viewer.draw_circle(radius=scale_x * 1,
+        #                         pos_x=scale_x * current_point[0],
+        #                         pos_y=scale_y * current_point[1],
+        #                         color=(0.0, 0.0, 1.0, 1.0))
+        # # draw a box around the agent - what the network sees ROI
+        # self.viewer.draw_rect(scale_x*self.rectangle.xmin, scale_y*self.rectangle.ymin,
+        #                       scale_x*self.rectangle.xmax, scale_y*self.rectangle.ymax)
+        # self.viewer.display_text('Agent ', color=(204, 204, 0, 255),
+        #                          x=self.rectangle.xmin - 15,
+        #                          y=self.rectangle.ymin)
+        # # display info
+        # text = 'Spacing ' + str(self.xscale)
+        # self.viewer.display_text(text, color = (204,204,0,255),
+        #                          x=10, y=self._image_dims[1]-80)
 
         # ---------------------------------------------------------------------
 
@@ -677,7 +677,7 @@ class MedicalPlayer(gym.Env):
         # ---------------------------------------------------------------------
 
         # render and wait (viz) time between frames
-        self.viewer.render()
+        # self.viewer.render()
 ### TO HERE ###
         # time.sleep(self.viz)
         # save gif

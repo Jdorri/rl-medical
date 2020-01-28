@@ -9,6 +9,7 @@ import io
 import PySimpleGUI as sg
 from PIL import Image, ImageTk
 import tkinter as tk
+import cv2 as cv
 import numpy as np
 try:
     import pyglet
@@ -44,28 +45,28 @@ class SimpleImageViewer(object):
         #                                    # fullscreen=True # ruins screen resolution
         #                                    )
         ## set location
-        screen_width = self.window.display.get_default_screen().width
-        screen_height = self.window.display.get_default_screen().height
+        # screen_width = self.window.display.get_default_screen().width
+        # screen_height = self.window.display.get_default_screen().height
         # self.location_x = screen_width / 2 - 2*width
         # self.location_y = screen_height / 2 - 2*height
-        self.location_x = screen_width / 2 - width
-        self.location_y = screen_height / 2 - height
-        self.window.set_location((int)(self.location_x), (int)(self.location_y))
+        # self.location_x = screen_width / 2 - width
+        # self.location_y = screen_height / 2 - height
+        # self.window.set_location((int)(self.location_x), (int)(self.location_y))
 
-        ## scale window size
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glScalef(scale_x, scale_y, 1.0)
+        # ## scale window size
+        # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        # glScalef(scale_x, scale_y, 1.0)
 
-        self.img_width = width
-        self.img_height = height
-        self.isopen = True
+        # self.img_width = width
+        # self.img_height = height
+        # self.isopen = True
 
-        self.window_width, self.window_height = self.window.get_size()
+        # self.window_width, self.window_height = self.window.get_size()
 
-        # turn on transparency
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        # # turn on transparency
+        # glEnable(GL_BLEND)
+        # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def create_window(self, img, path):
         def get_img_data(f, maxsize=(1200, 850), first=False):
@@ -83,26 +84,32 @@ class SimpleImageViewer(object):
         # Display first image
         # image_elem = sg.Image(data=get_img_data(path, first=True))
         # print(img.shape)
-        root = tk.Tk()
-        img = img.astype(np.uint8)
+        img_array = img.astype(np.uint8)
         print('Done\n'*10)
-        img = Image.fromarray(img)
-        print('Done\n'*10)
-        print(img)
-        image = ImageTk.PhotoImage(image=img)
-        print('Done\n'*10)
+        
+        # 1======= try with tkinter - works
+        # root = tk.Tk()
+        # img = Image.fromarray(img_array)
+        # image = ImageTk.PhotoImage(image=img)
+        # image_elem = sg.Image(data=img)
+        # lbl = tk.Label(root, image=image)
+        # lbl.pack()
+        # root.mainloop()        
+
+        # 2======= try with pysimplegui
         # image_elem = ImageTk.Image(data=image)
-        image_elem = sg.Image(data=image)
-        print('Done\n'*10)
+        imgbytes = cv.imencode('.png', img)[1].tobytes()
+        image_elem = sg.Image(data=imgbytes)
         col = [[image_elem]]
         # col_files = [[sg.Listbox(values=fnames, change_submits=True, size=(60, 30), key='listbox')],
         #              [sg.Button('Next', size=(8, 2)), sg.Button('Prev', size=(8, 2))]]
         col_buttons = [[sg.Button('Next', size=(8,2)),sg.Button('Prev', size=(8, 2))]]
         layout = [[sg.Column(col_buttons), sg.Column(col)]]
-
+        # layout = [[sg.Column(col_buttons)]]
         window = sg.Window('Image Browser', layout, return_keyboard_events=True,
                            location=(0, 0), use_default_focus=False)
         window.read()
+
         return window
 
     def draw_image(self, arr):
