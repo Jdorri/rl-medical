@@ -79,7 +79,7 @@ class SimpleImageViewer(object):
 
         # 2======= try with pysimplegui
         # image_elem = ImageTk.Image(data=image)
-        #added for pysimplegui format
+        # added for pysimplegui format
         imgbytes = cv2.imencode('.png', img)[1].tobytes()
         self.image_elem = sg.Image(data=imgbytes)
         col = [[self.image_elem]]
