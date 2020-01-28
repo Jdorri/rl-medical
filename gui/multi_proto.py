@@ -17,7 +17,8 @@ image_elem = sg.Image(data=imgbytes)
 col = [[image_elem]]
 col_buttons = [[sg.Button('Next', size=(4,2)),sg.Button('Prev', size=(4,2))]]
 layout = [
-    [sg.Column(col_buttons),sg.Column(col)],
+    [sg.Column(col), sg.Column(col), sg.Column(col_buttons), ],
+    [sg.Column(col), sg.Column(col)]
     ]
 window = sg.Window('Image Browser', layout, return_keyboard_events=True,
                    location=(0, 0), use_default_focus=False)
