@@ -9,7 +9,7 @@ import io
 import PySimpleGUI as sg
 from PIL import Image, ImageTk
 import tkinter as tk
-import cv2 as cv
+import cv2
 import numpy as np
 try:
     import pyglet
@@ -35,7 +35,6 @@ class SimpleImageViewer(object):
 
         path = 'disp_imgs/image.png'
         self.window = self.create_window(arr, path)
-        print('Done\n'*10)
 
         # self.window = pyglet.window.Window(width=scale_x*width,
         #                                    height=scale_y*height,
@@ -69,24 +68,7 @@ class SimpleImageViewer(object):
         # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     def create_window(self, img, path):
-        def get_img_data(f, maxsize=(1200, 850), first=False):
-            """Generate image data using PIL
-            """
-            img = Image.open(f)
-            img.thumbnail(maxsize)
-            if first:                     # tkinter is inactive the first time
-                bio = io.BytesIO()
-                img.save(bio, format="PNG")
-                del img
-                return bio.getvalue()
-            return ImageTk.PhotoImage(img)
-
-        # Display first image
-        # image_elem = sg.Image(data=get_img_data(path, first=True))
-        # print(img.shape)
-        img_array = img.astype(np.uint8)
-        print('Done\n'*10)
-        
+      
         # 1======= try with tkinter - works
         # root = tk.Tk()
         # img = Image.fromarray(img_array)
@@ -98,14 +80,12 @@ class SimpleImageViewer(object):
 
         # 2======= try with pysimplegui
         # image_elem = ImageTk.Image(data=image)
-        imgbytes = cv.imencode('.png', img)[1].tobytes()
-        image_elem = sg.Image(data=imgbytes)
-        col = [[image_elem]]
-        # col_files = [[sg.Listbox(values=fnames, change_submits=True, size=(60, 30), key='listbox')],
-        #              [sg.Button('Next', size=(8, 2)), sg.Button('Prev', size=(8, 2))]]
+        #added for pysimplegui format
+        imgbytes = cv2.imencode('.png', img)[1].tobytes()        
+        self.image_elem = sg.Image(data=imgbytes)
+        col = [[self.image_elem]]
         col_buttons = [[sg.Button('Next', size=(8,2)),sg.Button('Prev', size=(8, 2))]]
         layout = [[sg.Column(col_buttons), sg.Column(col)]]
-        # layout = [[sg.Column(col_buttons)]]
         window = sg.Window('Image Browser', layout, return_keyboard_events=True,
                            location=(0, 0), use_default_focus=False)
         window.read()
@@ -114,14 +94,17 @@ class SimpleImageViewer(object):
 
     def draw_image(self, arr):
         # convert data typoe to GLubyte
-        rawData = (GLubyte * arr.size)(*list(arr.ravel().astype('int')))
-        image = pyglet.image.ImageData(self.img_width, self.img_height, 'RGB',
-                                       rawData, #arr.tostring(),
-                                       pitch=self.img_width * -3)
-        self.window.clear()
-        self.window.switch_to()
-        self.window.dispatch_events()
-        image.blit(0,0)
+        # rawData = (GLubyte * arr.size)(*list(arr.ravel().astype('int')))
+        # # image = pyglet.image.ImageData(self.img_width, self.img_height, 'RGB',
+        # #                                rawData, #arr.tostring(),
+        # #                                pitch=self.img_width * -3)
+        # self.window.clear()
+        # self.window.switch_to()
+        # self.window.dispatch_events()
+        # image.blit(0,0)
+        imgbytes = cv2.imencode('.png', arr)[1].tobytes()        
+        self.image_elem.update(data=imgbytes)
+        self.window.read()
 
 
     def draw_point(self,x=0.0,y=0.0,z=0.0):

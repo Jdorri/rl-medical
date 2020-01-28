@@ -625,6 +625,7 @@ class MedicalPlayer(gym.Env):
                          interpolation=cv2.INTER_LINEAR)
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)  # congvert to rgb
 
+
 ### FROM HERE ###
         # cv2.imwrite("disp_imgs/image.png", img)
         # return
@@ -637,7 +638,7 @@ class MedicalPlayer(gym.Env):
                                             filepath=self.filename)
             self.gif_buffer = []
         # display image
-        # self.viewer.draw_image(img)
+        self.viewer.draw_image(img)
         # draw current point
         # self.viewer.draw_circle(radius=scale_x * 1,
         #                         pos_x=scale_x * current_point[0],
