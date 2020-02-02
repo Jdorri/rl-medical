@@ -46,6 +46,8 @@ from tensorpack.utils.stats import StatCounter
 from IPython.core.debugger import set_trace
 from dataReader import *
 
+from PyQt5.QtWidgets import QApplication
+
 _ALE_LOCK = threading.Lock()
 
 Rectangle = namedtuple('Rectangle', ['xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax'])
@@ -632,13 +634,20 @@ class MedicalPlayer(gym.Env):
         # skip if there is a viewer open
         if (not self.viewer) and self.viz:
             from viewer import SimpleImageViewer
-            self.viewer = SimpleImageViewer(arr=img,
+            self.app = QApplication(sys.argv)
+
+            self.viewer = SimpleImageViewer(self.app, arr=img,
                                             scale_x=1,
                                             scale_y=1,
                                             filepath=self.filename)
             self.gif_buffer = []
+            self.app.exec_()
+
+            # sys.exit(app.exec_())
         # display image
-        self.viewer.draw_image(img)
+        print("before image---")
+        self.viewer.draw_image(self.app, img)
+        self.app.exec_()
         # draw current point
         # self.viewer.draw_circle(radius=scale_x * 1,
         #                         pos_x=scale_x * current_point[0],
