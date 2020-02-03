@@ -36,8 +36,9 @@ class App(QWidget):
         # create painter instance with pixmap
         self.painterInstance = QPainter(self.im)
 
-        self.draw_rects(error, spacing)
+        self.painterInstance.save()
         self.draw_circles(rect_centre, target, depth)
+        self.draw_rects(error, spacing)
 
         # put images on labels
         self.label.setPixmap(self.im)
@@ -63,10 +64,7 @@ class App(QWidget):
 
         self.setGeometry(10,10,320,300)
         self.setWindowTitle("PyQT show image")
-        self.label.QPixmap.fromImage(im)
-        self.show()
         self.painterInstance.end()
-
         self.show()
 
     def initUI(self):
@@ -89,6 +87,9 @@ class App(QWidget):
         self.label4.setText(text)
 
     def draw_circles(self, centre, target, depth):
+        # create painter instance with pixmap
+        # self.painterInstance = QPainter(self.im)
+
         # draw circle at current agent location
         self.penCentre = QtGui.QPen(QtCore.Qt.blue)
         self.penCentre.setWidth(3)
@@ -113,7 +114,13 @@ class App(QWidget):
         radx = rady = depth * 30
         self.painterInstance.drawEllipse(centre, radx, rady)
 
+        # self.painterInstance.end()
+
     def draw_rects(self, error, spacing):
+        self.painterInstance.restore()
+        # create painter instance with pixmap
+        # self.painterInstance = QPainter(self.im)
+
         # Coordinates for overlayed rectangle
         xPos = self.rect_x - self.rect_w//2
         yPos = self.rect_y - self.rect_h//2
@@ -140,7 +147,7 @@ class App(QWidget):
         self.painterInstance.setFont(QFont('Decorative', self.height//15))
         self.painterInstance.drawText(self.width*1//2, self.height*17//20, f'Spacing {spacing}')
 
-
+        # self.painterInstance.end()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

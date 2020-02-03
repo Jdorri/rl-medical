@@ -13,10 +13,10 @@ import cv2
 import numpy as np
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QGridLayout, QWidget, QPushButton
 from PyQt5.QtGui import QPixmap, QPainter,QColor, QFont, QImage
-from PyQt5 import QtGui 
-from PyQt5 import QtCore 
+from PyQt5 import QtGui
+from PyQt5 import QtCore
 import sys
- 
+
 
 try:
     import pyglet
@@ -28,7 +28,7 @@ class SimpleImageViewer(QWidget):
     ''' Simple image viewer class for rendering images using pyglet'''
 
     def __init__(self, app, arr, scale_x=1, scale_y=1, filepath=None, display=None):
-        
+
         super().__init__()
 
         self.isopen = False
@@ -53,11 +53,11 @@ class SimpleImageViewer(QWidget):
         # image
         self.im = QPixmap(qImg)
         self.label = QLabel()
-        
+
         xPos, yPos,xLen,yLen = (100, 100, 100, 100)
         # create painter instance with pixmap
         self.painterInstance = QPainter(self.im)
-        
+
         # set rectangle color and thickness
         self.penRectangle = QtGui.QPen(QtCore.Qt.red)
         self.penRectangle.setWidth(3)
@@ -67,14 +67,14 @@ class SimpleImageViewer(QWidget):
         # draw text
         self.painterInstance.setPen(QColor(168, 34, 3))
         self.painterInstance.setFont(QFont('Decorative', 10))
-        self.painterInstance.drawText( 90,90, "Target")        
-        
+        self.painterInstance.drawText(90, 90, "Target")        
+
         # put images on labels
         self.label.setPixmap(self.im)
         self.label2 = QLabel()
         self.label2.setPixmap(self.im)
         self.label3 = QLabel()
-        self.label3.setPixmap(self.im)           
+        self.label3.setPixmap(self.im)
 
         self.grid = QGridLayout()
         self.grid.addWidget(self.label,1,2)
@@ -87,8 +87,8 @@ class SimpleImageViewer(QWidget):
 
         self.setGeometry(10,10,320,200)
         self.setWindowTitle("PyQT show image")
-        self.show()       
-        self.painterInstance.end() 
+        self.show()
+        self.painterInstance.end()
 
         # self.window = pyglet.window.Window(width=scale_x*width,
         #                                    height=scale_y*height,
@@ -165,7 +165,7 @@ class SimpleImageViewer(QWidget):
         self.im = QPixmap(qImg)
         # imgbytes = cv2.imencode('.png', arr)[1].tobytes()
         self.label.setPixmap(self.im)
-        self.show()       
+        self.show()
 
         # self.image_elem.update(data=imgbytes)
         # self.window.read()
