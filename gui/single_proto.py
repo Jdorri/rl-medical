@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QGridLayout, QWidget, QPushButton
 from PyQt5.QtGui import QPixmap, QPainter,QColor, QFont, QImage, QIcon
 from PyQt5 import QtGui, QtCore
+import PyQt5 as Qt
 import cv2
 
 class App(QWidget):
@@ -40,10 +41,10 @@ class App(QWidget):
 
         # put images on labels
         self.label.setPixmap(self.im)
-        self.label2 = QLabel()
-        self.label2.setPixmap(self.im)
-        self.label3 = QLabel()
-        self.label3.setPixmap(self.im)
+        # self.label2 = QLabel()
+        # self.label2.setPixmap(self.im)
+        # self.label3 = QLabel()
+        # self.label3.setPixmap(self.im)
 
         self.grid = QGridLayout()
         self.grid.addWidget(self.label,1,2)
@@ -52,15 +53,21 @@ class App(QWidget):
         self.grid.addWidget(QPushButton('Up'),1,1)
         self.grid.addWidget(QPushButton('Down'),2,1)
 
+        x = y = 0
+        self.text = "x: {0},  y: {1}".format(x, y)
+        self.label4 = QLabel(self.text, self)
+        self.grid.addWidget(self.label4, 0, 2)
+        # self.im.mousePressEvent = self.getPos
+
         self.setLayout(self.grid)
 
-        self.setGeometry(10,10,320,200)
+        self.setGeometry(10,10,320,300)
         self.setWindowTitle("PyQT show image")
+        self.label.QPixmap.fromImage(im)
         self.show()
         self.painterInstance.end()
 
         self.show()
-
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -71,6 +78,15 @@ class App(QWidget):
         pixmap = QPixmap('images/test.png')
         label.setPixmap(pixmap)
         self.resize(pixmap.width(),pixmap.height())
+
+        self.setMouseTracking(True)
+
+    def mouseMoveEvent(self, e):
+        '''Stops tracking when the mouse moves over the image. Need to fix.'''
+        x = e.x()
+        y = e.y()
+        text = "x: {0},  y: {1}".format(x, y)
+        self.label4.setText(text)
 
     def draw_circles(self, centre, target, depth):
         # draw circle at current agent location
@@ -127,6 +143,6 @@ class App(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication([])
+    app = QApplication(sys.argv)
     ex = App(rect_centre=(150, 200), target=(300,300), spacing=2, error='2.34', depth=3)
     sys.exit(app.exec_())
