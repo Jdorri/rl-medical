@@ -558,6 +558,12 @@ class MedicalPlayer(gym.Env):
     def get_plane(self, z=0):
         return self._image.data[:, :, z]
 
+    def get_plane_x(self, x=0):
+        return self._image.data[x, :, :]
+
+    def get_plane_y(self, y=0):
+        return self._image.data[:, y, :]
+
     def _calc_reward(self, current_loc, next_loc):
         """ Calculate the new reward based on the decrease in euclidean distance to the target location
         """
@@ -617,15 +623,27 @@ class MedicalPlayer(gym.Env):
         target_point = self._target_loc
         # get image and convert it to pyglet
         plane = self.get_plane(current_point[2])  # z-plane
+        plane_x = self.get_plane_x(current_point[0])  # x-plane
+        plane_y= self.get_plane_y(current_point[1])  # y-plane
+        
         # plane = np.squeeze(self._current_state()[:,:,13])
         # rescale image
         # INTER_NEAREST, INTER_LINEAR, INTER_AREA, INTER_CUBIC, INTER_LANCZOS4
         scale_x = 3
         scale_y = 3
+        scale_z = 3
         img = cv2.resize(plane,
                          (int(scale_x*plane.shape[1]),int(scale_y*plane.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
+        img_x = cv2.resize(plane_x,
+                         (int(scale_x*plane_x.shape[1]),int(scale_y*plane_x.shape[2])),
+                         interpolation=cv2.INTER_LINEAR)
+        img_y = cv2.resize(plane_x,
+                         (int(scale_y*plane_x.shape[0]),int(scale_y*plane_y.shape[2])),
+                         interpolation=cv2.INTER_LINEAR)
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)  # congvert to rgb
+        img_x = cv2.cvtColor(img_x, cv2.COLOR_GRAY2RGB)  # congvert to rgb
+        img_y = cv2.cvtColor(img_y, cv2.COLOR_GRAY2RGB)  # congvert to rgb
 
 
 ### FROM HERE ###
@@ -636,7 +654,7 @@ class MedicalPlayer(gym.Env):
             from viewer import SimpleImageViewer
             self.app = QApplication(sys.argv)
 
-            self.viewer = SimpleImageViewer(self.app, arr=img,
+            self.viewer = SimpleImageViewer(self.app, arr=img, arr_x = img_x, arr_y = img_y
                                             scale_x=1,
                                             scale_y=1,
                                             filepath=self.filename)
