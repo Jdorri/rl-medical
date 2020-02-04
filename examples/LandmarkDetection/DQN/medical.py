@@ -617,7 +617,6 @@ class MedicalPlayer(gym.Env):
         self.num_success = StatCounter()
 
     def display(self, return_rgb_array=False):
-        # pass
         # get dimensions
         current_point = self._location
         target_point = self._target_loc
@@ -632,13 +631,18 @@ class MedicalPlayer(gym.Env):
         scale_x = 2
         scale_y = 2
         scale_z = 2
+        current_point = (current_point[0]*scale_x, current_point[1]*scale_y,
+                        current_point[2]*scale_z)
+        self.rectangle = (self.rectangle[0]*scale_x, self.rectangle[1]*scale_x,
+                            self.rectangle[2]*scale_y, self.rectangle[3]*scale_y,
+                            self.rectangle[4]*scale_z, self.rectangle[5]*scale_z)
         img = cv2.resize(plane,
                          (int(scale_x*plane.shape[1]),int(scale_y*plane.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
         img_x = cv2.resize(plane_x,
                          (int(scale_x*plane_x.shape[1]),int(scale_y*plane_x.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
-        img_y = cv2.resize(plane_x,
+        img_y = cv2.resize(plane_y,
                          (int(scale_y*plane_x.shape[1]),int(scale_y*plane_y.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)  # congvert to rgb
@@ -672,9 +676,10 @@ class MedicalPlayer(gym.Env):
         print(current_point)
         self.viewer.draw_image(
             self.app,
-            img,
-            # agent_loc = current_point,
+            arrs = (img, img_x, img_y),
+            agent_loc = current_point,
             target = self._target_loc,
+            text = 'Error ' + str(round(self.cur_dist,3)) + 'mm',
             spacing = 3,
             rect = self.rectangle
         )

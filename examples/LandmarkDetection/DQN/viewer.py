@@ -11,7 +11,7 @@ from PIL import Image, ImageTk
 import tkinter as tk
 import cv2
 import numpy as np
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QGridLayout, QWidget, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QGridLayout, QWidget, QPushButton, QGraphicsScene
 from PyQt5.QtGui import QPixmap, QPainter, QColor, QFont, QImage
 from PyQt5 import QtGui, QtCore
 import sys
@@ -113,7 +113,7 @@ class SimpleImageViewer(QWidget):
         # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 
-    def draw_image(self, app, arr, agent_loc=(300,300,300), target=(200,200), depth=1, error="T.B.C", spacing=1, rect=None):
+    def draw_image(self, app, arrs, agent_loc, target=(200,200), depth=1, text=None, spacing=1, rect=None):
         # convert data typoe to GLubyte
         # rawData = (GLubyte * arr.size)(*list(arr.ravel().astype('int')))
         # # image = pyglet.image.ImageData(self.img_width, self.img_height, 'RGB',
@@ -125,28 +125,44 @@ class SimpleImageViewer(QWidget):
         # image.blit(0,0)
 
         # Convert image to format
-        cvImg = arr.astype(np.uint8)
+        cvImg = arrs[0].astype(np.uint8)
         self.height, self.width, self.channel = cvImg.shape
         bytesPerLine = 3 * self.width
         qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
         self.im = QPixmap(qImg)
 
+        cvImg_x = arrs[1].astype(np.uint8)
+        self.height_x, self.width_x, self.channel_x = cvImg_x.shape
+        bytesPerLine = 3 * self.width_x
+        qImg = QImage(cvImg_x.data, self.width_x, self.height_x, bytesPerLine, QImage.Format_RGB888)
+        self.img_x = QPixmap(qImg)
+
+        cvImg_y = arrs[2].astype(np.uint8)
+        self.height_y, self.width_y, self.channel_y = cvImg_y.shape
+        bytesPerLine = 3 * self.width_y
+        qImg = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
+        self.img_y = QPixmap(qImg)
+
         self.painterInstance = QPainter(self.im)
-        self.draw_rects(error, spacing, agent_loc, rect[:4])
-        self.draw_circles((agent_loc[0], agent_loc[1]), target, depth)
+        _agent_loc = (agent_loc[0], agent_loc[1])
+        self.draw_rects(text, spacing, _agent_loc, rect[:4])
+        self.draw_circles(_agent_loc, target, depth)
         self.label.setPixmap(self.im)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.im_x)
-        self.draw_circles((agent_loc[1], agent_loc[2]), target, depth)
+        _agent_loc = (agent_loc[1], agent_loc[2])
+        self.draw_rects(text, spacing, _agent_loc, rect[2:])
+        self.draw_circles(_agent_loc, target, depth)
         self.label2.setPixmap(self.im_x)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.im_y)
-        self.draw_circles((agent_loc[0], agent_loc[2]), target, depth)
+        _agent_loc = (agent_loc[0], agent_loc[2])
+        self.draw_rects(text, spacing, _agent_loc, rect[:2]+rect[4:])
+        self.draw_circles(_agent_loc, target, depth)
         self.label3.setPixmap(self.im_y)
         self.painterInstance.end()
-
 
         self.show()
 
@@ -178,27 +194,15 @@ class SimpleImageViewer(QWidget):
             radx = rady = depth * 30
             self.painterInstance.drawEllipse(centre, radx, rady)
 
-    def draw_rects(self, error, spacing, agent_loc, rect):
+    def draw_rects(self, text, spacing, agent_loc, rect):
         # self.painterInstance.restore()
         # create painter instance with pixmap
 
-        # Set location and dimensions of overlay rectangle
-        self.rect_w = 75 * spacing
-        self.rect_h = 75 * spacing
-        self.rect_x, self.rect_y = agent_loc[0], agent_loc[1]
-
         # Coordinates for overlayed rectangle
-        # xPos = self.rect_x - self.rect_w//2
-        # yPos = self.rect_y - self.rect_h//2
-        # xLen = self.rect_w
-        # yLen = self.rect_h
-
-        # # Coordinates for overlayed rectangle
-        # print(rect)
-        # xPos = rect[0]
-        # yPos = rect[2]
-        # xLen = rect[1] - xPos
-        # yLen = rect[3] - yPos
+        xPos = rect[0]
+        yPos = rect[2]
+        xLen = rect[1] - xPos
+        yLen = rect[3] - yPos
 
         # set rectangle color and thickness
         self.penRectangle = QtGui.QPen(QtCore.Qt.cyan)
@@ -209,12 +213,12 @@ class SimpleImageViewer(QWidget):
 
         # Annotate rectangle
         self.painterInstance.setPen(QtCore.Qt.cyan)
-        self.painterInstance.setFont(QFont('Decorative', yLen//5))
+        self.painterInstance.setFont(QFont('Decorative', yLen//7))
         self.painterInstance.drawText(xPos, yPos-8, "Agent")
         # Add error message
         self.painterInstance.setPen(QtCore.Qt.darkGreen)
         self.painterInstance.setFont(QFont('Decorative', self.height//15))
-        self.painterInstance.drawText(self.width//10, self.height*17//20, f"Error {error}mm")
+        self.painterInstance.drawText(self.width//10, self.height*17//20, text)
         # Add spacing message
         self.painterInstance.setPen(QtCore.Qt.darkGreen)
         self.painterInstance.setFont(QFont('Decorative', self.height//15))
