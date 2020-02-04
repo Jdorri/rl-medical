@@ -67,6 +67,16 @@ class SimpleImageViewer(QWidget):
         self.label3 = QLabel()
         self.label3.setPixmap(self.im_y)
 
+        # Set background color for images to Black
+        self.label.setAutoFillBackground(True)
+        self.label2.setAutoFillBackground(True)
+        self.label3.setAutoFillBackground(True)
+        p = self.palette()
+        p.setColor(self.backgroundRole(), QtCore.Qt.black)
+        self.label.setPalette(p)
+        self.label2.setPalette(p)
+        self.label3.setPalette(p)
+
         # Initiliase Grid
         self.grid = QGridLayout()
         self.grid.addWidget(self.label,1,2)
@@ -78,6 +88,7 @@ class SimpleImageViewer(QWidget):
         # Set Layout of GUI
         self.setLayout(self.grid)
         self.setGeometry(10,10,320,200)
+
         self.setWindowTitle("Landmark Detection Agent")
         self.show()
 
@@ -129,7 +140,7 @@ class SimpleImageViewer(QWidget):
         self.height, self.width, self.channel = cvImg.shape
         bytesPerLine = 3 * self.width
         qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
-        self.im = QPixmap(qImg)
+        self.im = QPixmap(qImg) # can use this to scale the image: .scaled(450, 350, QtCore.Qt.KeepAspectRatio)
 
         cvImg_x = arrs[1].astype(np.uint8)
         self.height_x, self.width_x, self.channel_x = cvImg_x.shape
