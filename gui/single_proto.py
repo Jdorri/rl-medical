@@ -15,15 +15,11 @@ class App(QWidget):
         self.width = 640
         self.height = 480
 
-        # Set location and dimensions of overlay rectangle
-        self.rect_w = 75 * spacing
-        self.rect_h = 75 * spacing
-        self.rect_x, self.rect_y = rect_centre
-
         self.initUI()
 
         # cvImg = np.random.randint(255, size=(200,200,3),dtype=np.uint8)
         arr = cv2.imread('images/test.png')
+        print(arr.shape, arr.dtype)
         cvImg = arr
         height, width, channel = cvImg.shape
         bytesPerLine = 3 * width
@@ -86,7 +82,7 @@ class App(QWidget):
         text = "x: {0},  y: {1}".format(x, y)
         self.label4.setText(text)
 
-    def draw_circles(self, centre, target, depth):
+    def draw_circles(self, centre=(300,300), target=(200,200), depth=3):
         # create painter instance with pixmap
         # self.painterInstance = QPainter(self.im)
 
@@ -116,10 +112,15 @@ class App(QWidget):
 
         # self.painterInstance.end()
 
-    def draw_rects(self, error, spacing):
+    def draw_rects(self, error="1.43", spacing=1):
         self.painterInstance.restore()
         # create painter instance with pixmap
         # self.painterInstance = QPainter(self.im)
+
+        # Set location and dimensions of overlay rectangle
+        self.rect_w = 75 * spacing
+        self.rect_h = 75 * spacing
+        self.rect_x, self.rect_y = rect_centre
 
         # Coordinates for overlayed rectangle
         xPos = self.rect_x - self.rect_w//2
