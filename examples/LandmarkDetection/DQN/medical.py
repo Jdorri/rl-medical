@@ -646,7 +646,11 @@ class MedicalPlayer(gym.Env):
             # sys.exit(app.exec_())
         # display image
         print("before image---")
-        self.viewer.draw_image(self.app, img)
+        print(target_point)
+        self.viewer.draw_image(
+            self.app,
+            img,
+        )
         self.app.exec_()
         # draw current point
         # self.viewer.draw_circle(radius=scale_x * 1,
@@ -666,23 +670,23 @@ class MedicalPlayer(gym.Env):
 
         # ---------------------------------------------------------------------
 
-        if (self.task != 'play'):
-            # draw a transparent circle around target point with variable radius
-            # based on the difference z-direction
-            diff_z = scale_x * abs(current_point[2]-target_point[2])
-            self.viewer.draw_circle(radius = diff_z,
-                                    pos_x = scale_x*target_point[0],
-                                    pos_y = scale_y*target_point[1],
-                                    color = (1.0,0.0,0.0,0.2))
-            # draw target point
-            self.viewer.draw_circle(radius = scale_x * 1,
-                                    pos_x = scale_x*target_point[0],
-                                    pos_y = scale_y*target_point[1],
-                                    color = (1.0,0.0,0.0,1.0))
-            # display info
-            color = (0,204,0,255) if self.reward>0 else (204,0,0,255)
-            text = 'Error ' + str(round(self.cur_dist,3)) + 'mm'
-            self.viewer.display_text(text, color=color, x=10, y=20)
+        # if (self.task != 'play'):
+        #     # draw a transparent circle around target point with variable radius
+        #     # based on the difference z-direction
+        #     diff_z = scale_x * abs(current_point[2]-target_point[2])
+        #     self.viewer.draw_circle(radius = diff_z,
+        #                             pos_x = scale_x*target_point[0],
+        #                             pos_y = scale_y*target_point[1],
+        #                             color = (1.0,0.0,0.0,0.2))
+        #     # draw target point
+        #     self.viewer.draw_circle(radius = scale_x * 1,
+        #                             pos_x = scale_x*target_point[0],
+        #                             pos_y = scale_y*target_point[1],
+        #                             color = (1.0,0.0,0.0,1.0))
+        #     # display info
+        #     color = (0,204,0,255) if self.reward>0 else (204,0,0,255)
+        #     text = 'Error ' + str(round(self.cur_dist,3)) + 'mm'
+        #     self.viewer.display_text(text, color=color, x=10, y=20)
 
         # ---------------------------------------------------------------------
 

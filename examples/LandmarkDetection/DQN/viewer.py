@@ -102,7 +102,7 @@ class SimpleImageViewer(QWidget):
         # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 
-    def draw_image(self, app, arr, centre=(300,300), target=(200,200), depth=3, error="1.44", spacing=1):
+    def draw_image(self, app, arr, agent_loc=(300,300), target=(200,200), depth=3, error="1.44", spacing=1):
         # convert data typoe to GLubyte
         # rawData = (GLubyte * arr.size)(*list(arr.ravel().astype('int')))
         # # image = pyglet.image.ImageData(self.img_width, self.img_height, 'RGB',
@@ -120,14 +120,14 @@ class SimpleImageViewer(QWidget):
         qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
         self.im = QPixmap(qImg)
         self.painterInstance = QPainter(self.im)
-        self.draw_rects(error, spacing, centre)
-        self.draw_circles(centre, target, depth)
+        self.draw_rects(error, spacing, agent_loc)
+        self.draw_circles(agent_loc, target, depth)
         self.label.setPixmap(self.im)
         self.show()
         self.painterInstance.end()
 
 
-    def draw_circles(self, centre, target, depth):
+    def draw_circles(self, agent_loc, target, depth):
         # create painter instance with pixmap
         # self.painterInstance = QPainter(self.im)
 
@@ -157,7 +157,7 @@ class SimpleImageViewer(QWidget):
 
         # self.painterInstance.end()
 
-    def draw_rects(self, error, spacing, centre):
+    def draw_rects(self, error, spacing, agent_loc):
         self.painterInstance.restore()
         # create painter instance with pixmap
         # self.painterInstance = QPainter(self.im)
@@ -165,7 +165,7 @@ class SimpleImageViewer(QWidget):
         # Set location and dimensions of overlay rectangle
         self.rect_w = 75 * spacing
         self.rect_h = 75 * spacing
-        self.rect_x, self.rect_y = centre
+        self.rect_x, self.rect_y = agent_loc
 
         # Coordinates for overlayed rectangle
         xPos = self.rect_x - self.rect_w//2
