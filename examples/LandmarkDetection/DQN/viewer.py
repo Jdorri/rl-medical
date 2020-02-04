@@ -38,44 +38,27 @@ class SimpleImageViewer(QWidget):
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
 
-        # initialize window with the input image
-        height, width, channels = arr.shape
-        assert arr.shape == (height, width, 3), "You passed in an image with the wrong number shape"
-
-
-
-        # cvImg = np.random.randint(255, size=(200,200,3),dtype=np.uint8)
-        cvImg = arr
+        cvImg = arr.astype(np.uint8)
         height, width, channel = cvImg.shape
+
+        # initialize window with the input image
+        assert arr.shape == (height, width, 3), "You passed in an image with the wrong number shape"
+        
+        # Convert image to correct format
         bytesPerLine = 3 * width
+        height, width, channel = cvImg.shape
         qImg = QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)
 
-        # image
+        # Initialise images with labels
         self.im = QPixmap(qImg)
-        self.label = QLabel()
-
-        xPos, yPos,xLen,yLen = (100, 100, 100, 100)
-        # create painter instance with pixmap
-        self.painterInstance = QPainter(self.im)
-
-        # set rectangle color and thickness
-        self.penRectangle = QtGui.QPen(QtCore.Qt.red)
-        self.penRectangle.setWidth(3)
-        # draw rectangle on painter
-        self.painterInstance.setPen(self.penRectangle)
-        self.painterInstance.drawRect(xPos,yPos,xLen,yLen)
-        # draw text
-        self.painterInstance.setPen(QColor(168, 34, 3))
-        self.painterInstance.setFont(QFont('Decorative', 10))
-        self.painterInstance.drawText(90, 90, "Target")        
-
-        # put images on labels
+        self.label = QLabel() 
         self.label.setPixmap(self.im)
         self.label2 = QLabel()
         self.label2.setPixmap(self.im)
         self.label3 = QLabel()
         self.label3.setPixmap(self.im)
 
+        # Initiliase Grid
         self.grid = QGridLayout()
         self.grid.addWidget(self.label,1,2)
         self.grid.addWidget(self.label2,1,3)
@@ -83,12 +66,11 @@ class SimpleImageViewer(QWidget):
         self.grid.addWidget(QPushButton('Up'),1,1)
         self.grid.addWidget(QPushButton('Down'),2,1)
 
+        # Set Layout of GUI
         self.setLayout(self.grid)
-
         self.setGeometry(10,10,320,200)
-        self.setWindowTitle("PyQT show image")
+        self.setWindowTitle("Landmark Detection Agent")
         self.show()
-        self.painterInstance.end()
 
         # self.window = pyglet.window.Window(width=scale_x*width,
         #                                    height=scale_y*height,
@@ -121,33 +103,6 @@ class SimpleImageViewer(QWidget):
         # glEnable(GL_BLEND)
         # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-    def create_window(self, img):
-
-        # 1======= try with tkinter - works
-        # root = tk.Tk()
-        # img = Image.fromarray(img_array)
-        # image = ImageTk.PhotoImage(image=img)
-        # image_elem = sg.Image(data=img)
-        # lbl = tk.Label(root, image=image)
-        # lbl.pack()
-        # root.mainloop()
-
-        # 2======= try with pysimplegui
-        # image_elem = ImageTk.Image(data=image)
-        # added for pysimplegui format
-        imgbytes = cv2.imencode('.png', img)[1].tobytes()
-        self.image_elem = sg.Image(data=imgbytes)
-        col = [[self.image_elem]]
-        col_buttons = [[sg.Button('Next', size=(8,2)),sg.Button('Prev', size=(8, 2))]]
-        layout = [
-            [sg.Column(col), sg.Column(col), sg.Column(col_buttons)],
-            [sg.Column(col), sg.Column(col)]
-            ]
-        window = sg.Window('Image Browser', layout, return_keyboard_events=True,
-                           location=(0, 0), use_default_focus=False)
-        window.read()
-
-        return window
 
     def draw_image(self, app, arr):
         # convert data typoe to GLubyte
@@ -159,16 +114,15 @@ class SimpleImageViewer(QWidget):
         # self.window.switch_to()
         # self.window.dispatch_events()
         # image.blit(0,0)
-        height, width, channel = arr.shape
+        
+        # Convert image to format
+        cvImg = arr.astype(np.uint8)
+        height, width, channel = cvImg.shape
         bytesPerLine = 3 * width
-        qImg = QImage(arr.data, width, height, bytesPerLine, QImage.Format_RGB888)
+        qImg = QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888)
         self.im = QPixmap(qImg)
-        # imgbytes = cv2.imencode('.png', arr)[1].tobytes()
         self.label.setPixmap(self.im)
         self.show()
-
-        # self.image_elem.update(data=imgbytes)
-        # self.window.read()
 
 
     def draw_point(self,x=0.0,y=0.0,z=0.0):
