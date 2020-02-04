@@ -629,9 +629,9 @@ class MedicalPlayer(gym.Env):
         # plane = np.squeeze(self._current_state()[:,:,13])
         # rescale image
         # INTER_NEAREST, INTER_LINEAR, INTER_AREA, INTER_CUBIC, INTER_LANCZOS4
-        scale_x = 3
-        scale_y = 3
-        scale_z = 3
+        scale_x = 2
+        scale_y = 2
+        scale_z = 2
         img = cv2.resize(plane,
                          (int(scale_x*plane.shape[1]),int(scale_y*plane.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
@@ -654,20 +654,28 @@ class MedicalPlayer(gym.Env):
             from viewer import SimpleImageViewer
             self.app = QApplication(sys.argv)
 
-            self.viewer = SimpleImageViewer(self.app, arr=img, arr_x = img_x, arr_y = img_y,
-                                            scale_x=1,
-                                            scale_y=1,
-                                            filepath=self.filename)
+            self.viewer = SimpleImageViewer(
+                self.app,
+                arr = img,
+                arr_x = img_x,
+                arr_y = img_y,
+                scale_x=1,
+                scale_y=1,
+                filepath=self.filename
+            )
             self.gif_buffer = []
             self.app.exec_()
 
             # sys.exit(app.exec_())
         # display image
         print("before image---")
-        print(target_point)
+        print(current_point)
         self.viewer.draw_image(
             self.app,
             img,
+            # agent_loc = current_point,
+            target = self._target_loc,
+            spacing = 3,
         )
         self.app.exec_()
         # draw current point

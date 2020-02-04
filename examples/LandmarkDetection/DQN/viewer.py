@@ -113,7 +113,7 @@ class SimpleImageViewer(QWidget):
         # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 
-    def draw_image(self, app, arr, agent_loc=(300,300), target=(200,200), depth=3, error="1.44", spacing=1):
+    def draw_image(self, app, arr, agent_loc=(300,300,300), target=(200,200), depth=1, error="T.B.C", spacing=1):
         # convert data typoe to GLubyte
         # rawData = (GLubyte * arr.size)(*list(arr.ravel().astype('int')))
         # # image = pyglet.image.ImageData(self.img_width, self.img_height, 'RGB',
@@ -130,53 +130,64 @@ class SimpleImageViewer(QWidget):
         bytesPerLine = 3 * self.width
         qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
         self.im = QPixmap(qImg)
+
         self.painterInstance = QPainter(self.im)
         self.draw_rects(error, spacing, agent_loc)
-        self.draw_circles(agent_loc, target, depth)
+        self.draw_circles((agent_loc[0], agent_loc[1]), target, depth)
         self.label.setPixmap(self.im)
-        self.show()
+        self.painterInstance.end()
+
+        self.painterInstance = QPainter(self.im_x)
+        self.draw_rects(error, spacing, agent_loc)
+        self.draw_circles((agent_loc[1], agent_loc[2]), target, depth)
+        self.label2.setPixmap(self.im_x)
+        self.painterInstance.end()
+
+        self.painterInstance = QPainter(self.im_y)
+        self.draw_rects(error, spacing, agent_loc)
+        self.draw_circles((agent_loc[0], agent_loc[2]), target, depth)
+        self.label3.setPixmap(self.im_y)
         self.painterInstance.end()
 
 
+        self.show()
+
     def draw_circles(self, agent_loc, target, depth):
         # create painter instance with pixmap
-        # self.painterInstance = QPainter(self.im)
 
-        # draw circle at current agent location
+        # draw current agent location
         self.penCentre = QtGui.QPen(QtCore.Qt.blue)
         self.penCentre.setWidth(3)
         self.painterInstance.setPen(self.penCentre)
-        centre = QtCore.QPoint(self.rect_x, self.rect_y)
+        centre = QtCore.QPoint(*agent_loc)
         self.painterInstance.drawEllipse(centre, 2, 2)
 
         # draw circle at target location
-        self.penCentre = QtGui.QPen(QtCore.Qt.red)
-        self.penCentre.setWidth(3)
-        self.painterInstance.setPen(self.penCentre)
-        centre = QtCore.QPoint(*target)
-        self.painterInstance.drawEllipse(centre, 2, 2)
+        if target is not None:
+            self.penCentre = QtGui.QPen(QtCore.Qt.red)
+            self.penCentre.setWidth(3)
+            self.painterInstance.setPen(self.penCentre)
+            centre = QtCore.QPoint(*target)
+            self.painterInstance.drawEllipse(centre, 2, 2)
 
-        # draw circle surrounding target
-        self.penCirlce = QtGui.QPen(QColor(255,0,0,0))
-        self.penCirlce.setWidth(3)
-        self.painterInstance.setPen(self.penCirlce)
-        self.painterInstance.setBrush(QtCore.Qt.red)
-        self.painterInstance.setOpacity(0.2)
-        centre = QtCore.QPoint(*target)
-        radx = rady = depth * 30
-        self.painterInstance.drawEllipse(centre, radx, rady)
-
-        # self.painterInstance.end()
+            # draw circle surrounding target
+            self.penCirlce = QtGui.QPen(QColor(255,0,0,0))
+            self.penCirlce.setWidth(3)
+            self.painterInstance.setPen(self.penCirlce)
+            self.painterInstance.setBrush(QtCore.Qt.red)
+            self.painterInstance.setOpacity(0.2)
+            centre = QtCore.QPoint(*target)
+            radx = rady = depth * 30
+            self.painterInstance.drawEllipse(centre, radx, rady)
 
     def draw_rects(self, error, spacing, agent_loc):
-        self.painterInstance.restore()
+        # self.painterInstance.restore()
         # create painter instance with pixmap
-        # self.painterInstance = QPainter(self.im)
 
         # Set location and dimensions of overlay rectangle
         self.rect_w = 75 * spacing
         self.rect_h = 75 * spacing
-        self.rect_x, self.rect_y = agent_loc
+        self.rect_x, self.rect_y = agent_loc[0], agent_loc[1]
 
         # Coordinates for overlayed rectangle
         xPos = self.rect_x - self.rect_w//2
@@ -203,8 +214,6 @@ class SimpleImageViewer(QWidget):
         self.painterInstance.setPen(QtCore.Qt.darkGreen)
         self.painterInstance.setFont(QFont('Decorative', self.height//15))
         self.painterInstance.drawText(self.width*1//2, self.height*17//20, f'Spacing {spacing}')
-
-        # self.painterInstance.end()
 
 
     # def draw_point(self,x=0.0,y=0.0,z=0.0):
