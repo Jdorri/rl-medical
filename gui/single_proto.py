@@ -33,8 +33,10 @@ class App(QWidget):
         self.painterInstance = QPainter(self.im)
 
         self.painterInstance.save()
-        self.draw_circles(rect_centre, target, depth)
-        self.draw_rects(error, spacing)
+        # self.draw_circles(rect_centre, target, depth)
+        # self.draw_rects(error, spacing)
+        self.draw_rects()
+        self.draw_circles()
 
         # put images on labels
         self.label.setPixmap(self.im)
@@ -112,7 +114,7 @@ class App(QWidget):
 
         # self.painterInstance.end()
 
-    def draw_rects(self, error="1.43", spacing=1):
+    def draw_rects(self, error="1.44", spacing=1, rect_centre=(150,150)):
         self.painterInstance.restore()
         # create painter instance with pixmap
         # self.painterInstance = QPainter(self.im)
