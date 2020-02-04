@@ -625,7 +625,7 @@ class MedicalPlayer(gym.Env):
         plane = self.get_plane(current_point[2])  # z-plane
         plane_x = self.get_plane_x(current_point[0])  # x-plane
         plane_y= self.get_plane_y(current_point[1])  # y-plane
-        
+
         # plane = np.squeeze(self._current_state()[:,:,13])
         # rescale image
         # INTER_NEAREST, INTER_LINEAR, INTER_AREA, INTER_CUBIC, INTER_LANCZOS4
