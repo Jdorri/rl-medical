@@ -659,9 +659,9 @@ class MedicalPlayer(gym.Env):
                 arr = img,
                 arr_x = img_x,
                 arr_y = img_y,
-                scale_x=1,
-                scale_y=1,
-                filepath=self.filename
+                scale_x = 1,
+                scale_y = 1,
+                filepath = self.filename,
             )
             self.gif_buffer = []
             self.app.exec_()
@@ -676,6 +676,7 @@ class MedicalPlayer(gym.Env):
             # agent_loc = current_point,
             target = self._target_loc,
             spacing = 3,
+            rect = self.rectangle
         )
         self.app.exec_()
         # draw current point

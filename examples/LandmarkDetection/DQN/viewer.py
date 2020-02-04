@@ -113,7 +113,7 @@ class SimpleImageViewer(QWidget):
         # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 
-    def draw_image(self, app, arr, agent_loc=(300,300,300), target=(200,200), depth=1, error="T.B.C", spacing=1):
+    def draw_image(self, app, arr, agent_loc=(300,300,300), target=(200,200), depth=1, error="T.B.C", spacing=1, rect=None):
         # convert data typoe to GLubyte
         # rawData = (GLubyte * arr.size)(*list(arr.ravel().astype('int')))
         # # image = pyglet.image.ImageData(self.img_width, self.img_height, 'RGB',
@@ -132,19 +132,17 @@ class SimpleImageViewer(QWidget):
         self.im = QPixmap(qImg)
 
         self.painterInstance = QPainter(self.im)
-        self.draw_rects(error, spacing, agent_loc)
+        self.draw_rects(error, spacing, agent_loc, rect[:4])
         self.draw_circles((agent_loc[0], agent_loc[1]), target, depth)
         self.label.setPixmap(self.im)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.im_x)
-        self.draw_rects(error, spacing, agent_loc)
         self.draw_circles((agent_loc[1], agent_loc[2]), target, depth)
         self.label2.setPixmap(self.im_x)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.im_y)
-        self.draw_rects(error, spacing, agent_loc)
         self.draw_circles((agent_loc[0], agent_loc[2]), target, depth)
         self.label3.setPixmap(self.im_y)
         self.painterInstance.end()
@@ -180,7 +178,7 @@ class SimpleImageViewer(QWidget):
             radx = rady = depth * 30
             self.painterInstance.drawEllipse(centre, radx, rady)
 
-    def draw_rects(self, error, spacing, agent_loc):
+    def draw_rects(self, error, spacing, agent_loc, rect):
         # self.painterInstance.restore()
         # create painter instance with pixmap
 
@@ -190,10 +188,17 @@ class SimpleImageViewer(QWidget):
         self.rect_x, self.rect_y = agent_loc[0], agent_loc[1]
 
         # Coordinates for overlayed rectangle
-        xPos = self.rect_x - self.rect_w//2
-        yPos = self.rect_y - self.rect_h//2
-        xLen = self.rect_w
-        yLen = self.rect_h
+        # xPos = self.rect_x - self.rect_w//2
+        # yPos = self.rect_y - self.rect_h//2
+        # xLen = self.rect_w
+        # yLen = self.rect_h
+
+        # # Coordinates for overlayed rectangle
+        # print(rect)
+        # xPos = rect[0]
+        # yPos = rect[2]
+        # xLen = rect[1] - xPos
+        # yLen = rect[3] - yPos
 
         # set rectangle color and thickness
         self.penRectangle = QtGui.QPen(QtCore.Qt.cyan)
