@@ -24,6 +24,7 @@ class App(QWidget):
 
         # cvImg = np.random.randint(255, size=(200,200,3),dtype=np.uint8)
         arr = cv2.imread('images/test.png')
+        print(arr.shape, arr.dtype)
         cvImg = arr
         height, width, channel = cvImg.shape
         bytesPerLine = 3 * width
