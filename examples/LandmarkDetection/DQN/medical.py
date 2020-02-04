@@ -636,10 +636,10 @@ class MedicalPlayer(gym.Env):
                          (int(scale_x*plane.shape[1]),int(scale_y*plane.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
         img_x = cv2.resize(plane_x,
-                         (int(scale_x*plane_x.shape[1]),int(scale_y*plane_x.shape[2])),
+                         (int(scale_x*plane_x.shape[1]),int(scale_y*plane_x.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
         img_y = cv2.resize(plane_x,
-                         (int(scale_y*plane_x.shape[0]),int(scale_y*plane_y.shape[2])),
+                         (int(scale_y*plane_x.shape[1]),int(scale_y*plane_y.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)  # congvert to rgb
         img_x = cv2.cvtColor(img_x, cv2.COLOR_GRAY2RGB)  # congvert to rgb
@@ -654,7 +654,7 @@ class MedicalPlayer(gym.Env):
             from viewer import SimpleImageViewer
             self.app = QApplication(sys.argv)
 
-            self.viewer = SimpleImageViewer(self.app, arr=img, arr_x = img_x, arr_y = img_y
+            self.viewer = SimpleImageViewer(self.app, arr=img, arr_x = img_x, arr_y = img_y,
                                             scale_x=1,
                                             scale_y=1,
                                             filepath=self.filename)

@@ -26,7 +26,7 @@ except ImportError as e:
 class SimpleImageViewer(QWidget):
     ''' Simple image viewer class for rendering images using pyglet'''
 
-    def __init__(self, app, arr, scale_x=1, scale_y=1, filepath=None, display=None):
+    def __init__(self, app, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
 
         super().__init__()
 
@@ -37,8 +37,13 @@ class SimpleImageViewer(QWidget):
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
 
+        # Set image formatting and get shape
         cvImg = arr.astype(np.uint8)
         self.height, self.width, self.channel = cvImg.shape
+        cvImg_x = arr_x.astype(np.uint8)
+        self.height_x, self.width_x, self.channel_x = cvImg_x.shape
+        cvImg_y = arr_y.astype(np.uint8)
+        self.height_y, self.width_y, self.channel_y = cvImg_y.shape
 
         # initialize window with the input image
         assert arr.shape == (self.height, self.width, 3), "You passed in an image with the wrong number shape"
@@ -46,15 +51,21 @@ class SimpleImageViewer(QWidget):
         # Convert image to correct format
         bytesPerLine = 3 * self.width
         qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
+        bytesPerLine = 3 * self.width_x
+        qImg_x = QImage(cvImg_x.data, self.width_x, self.height_x, bytesPerLine, QImage.Format_RGB888)
+        bytesPerLine = 3 * self.width_y
+        qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
 
         # Initialise images with labels
         self.im = QPixmap(qImg)
+        self.im_x = QPixmap(qImg_x)
+        self.im_y = QPixmap(qImg_y)
         self.label = QLabel()
         self.label.setPixmap(self.im)
         self.label2 = QLabel()
-        self.label2.setPixmap(self.im)
+        self.label2.setPixmap(self.im_x)
         self.label3 = QLabel()
-        self.label3.setPixmap(self.im)
+        self.label3.setPixmap(self.im_y)
 
         # Initiliase Grid
         self.grid = QGridLayout()
