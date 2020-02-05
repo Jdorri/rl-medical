@@ -140,40 +140,41 @@ class SimpleImageViewer(QWidget):
         self.height, self.width, self.channel = cvImg.shape
         bytesPerLine = 3 * self.width
         qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
-        self.im = QPixmap(qImg) # can use this to scale the image: .scaled(450, 350, QtCore.Qt.KeepAspectRatio)
+        self.img = QPixmap(qImg) # can use this to scale the image: .scaled(450, 350, QtCore.Qt.KeepAspectRatio)
 
         cvImg_x = arrs[1].astype(np.uint8)
         self.height_x, self.width_x, self.channel_x = cvImg_x.shape
         bytesPerLine = 3 * self.width_x
-        qImg = QImage(cvImg_x.data, self.width_x, self.height_x, bytesPerLine, QImage.Format_RGB888)
-        self.img_x = QPixmap(qImg)
+        qImg_x = QImage(cvImg_x.data, self.width_x, self.height_x, bytesPerLine, QImage.Format_RGB888)
+        self.img_x = QPixmap(qImg_x)
 
         cvImg_y = arrs[2].astype(np.uint8)
         self.height_y, self.width_y, self.channel_y = cvImg_y.shape
         bytesPerLine = 3 * self.width_y
-        qImg = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
-        self.img_y = QPixmap(qImg)
+        qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
+        self.img_y = QPixmap(qImg_y)
 
-        self.painterInstance = QPainter(self.im)
+        self.painterInstance = QPainter(self.img)
         _agent_loc = (agent_loc[0], agent_loc[1])
         self.draw_rects(text, spacing, _agent_loc, rect[:4])
         self.draw_circles(_agent_loc, target, depth)
-        self.label.setPixmap(self.im)
         self.painterInstance.end()
 
-        self.painterInstance = QPainter(self.im_x)
+        self.painterInstance = QPainter(self.img_x)
         _agent_loc = (agent_loc[1], agent_loc[2])
         self.draw_rects(text, spacing, _agent_loc, rect[2:])
         self.draw_circles(_agent_loc, target, depth)
-        self.label2.setPixmap(self.im_x)
         self.painterInstance.end()
 
-        self.painterInstance = QPainter(self.im_y)
+        self.painterInstance = QPainter(self.img_y)
         _agent_loc = (agent_loc[0], agent_loc[2])
         self.draw_rects(text, spacing, _agent_loc, rect[:2]+rect[4:])
         self.draw_circles(_agent_loc, target, depth)
-        self.label3.setPixmap(self.im_y)
         self.painterInstance.end()
+
+        self.label.setPixmap(self.img)
+        self.label2.setPixmap(self.img_x)
+        self.label3.setPixmap(self.img_y)
 
         self.show()
 

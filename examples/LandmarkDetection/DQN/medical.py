@@ -673,10 +673,9 @@ class MedicalPlayer(gym.Env):
             # sys.exit(app.exec_())
         # display image
         print("before image---")
-        print(current_point)
         self.viewer.draw_image(
             self.app,
-            arrs = (img, img_x, img_y),
+            arrs = (img, img_x, img_x),
             agent_loc = current_point,
             target = self._target_loc,
             text = 'Error ' + str(round(self.cur_dist,3)) + 'mm',
