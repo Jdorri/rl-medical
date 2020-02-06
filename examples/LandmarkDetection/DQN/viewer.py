@@ -155,20 +155,23 @@ class SimpleImageViewer(QWidget):
         self.img_y = QPixmap(qImg_y)
 
         self.painterInstance = QPainter(self.img)
-        _agent_loc = (agent_loc[0], agent_loc[1])
+        _agent_loc = (agent_loc[1], agent_loc[0])
         self.draw_rects(text, spacing, _agent_loc, rect[:4])
         self.draw_circles(_agent_loc, target, depth)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_x)
-        _agent_loc = (agent_loc[1], agent_loc[2])
+        _agent_loc = (agent_loc[2], agent_loc[1])
         self.draw_rects(text, spacing, _agent_loc, rect[2:])
         self.draw_circles(_agent_loc, target, depth)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_y)
-        _agent_loc = (agent_loc[0], agent_loc[2])
-        self.draw_rects(text, spacing, _agent_loc, rect[:2]+rect[4:])
+        _agent_loc = (agent_loc[0], self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
+        # _agent_loc = (agent_loc[2], agent_loc[0])       # Rotate 90 degrees ccw
+        rect = rect[:2] + rect[4:]
+        # rect = (self.height_y-rect[4], self.height_y-rect[5]) + rect[:2]
+        self.draw_rects(text, spacing, agent_loc, rect)
         self.draw_circles(_agent_loc, target, depth)
         self.painterInstance.end()
 
@@ -210,11 +213,12 @@ class SimpleImageViewer(QWidget):
         # self.painterInstance.restore()
         # create painter instance with pixmap
 
-        # Coordinates for overlayed rectangle
-        xPos = rect[0]
-        yPos = rect[2]
-        xLen = rect[1] - xPos
-        yLen = rect[3] - yPos
+        # Coordinates for overlayed rectangle (ROI)
+        xPos = rect[2]
+        yPos = rect[0]
+        xLen = rect[3] - xPos
+        yLen = rect[1] - yPos
+        print(xLen, yLen)
 
         # set rectangle color and thickness
         self.penRectangle = QtGui.QPen(QtCore.Qt.cyan)
@@ -225,16 +229,17 @@ class SimpleImageViewer(QWidget):
 
         # Annotate rectangle
         self.painterInstance.setPen(QtCore.Qt.cyan)
-        self.painterInstance.setFont(QFont('Decorative', yLen//7))
+        self.painterInstance.setFont(QFont('Decorative', min(abs(yLen)//12, 15)))
         self.painterInstance.drawText(xPos, yPos-8, "Agent")
-        # Add error message
-        self.painterInstance.setPen(QtCore.Qt.darkGreen)
-        self.painterInstance.setFont(QFont('Decorative', self.height//15))
-        self.painterInstance.drawText(self.width//10, self.height*17//20, text)
-        # Add spacing message
-        self.painterInstance.setPen(QtCore.Qt.darkGreen)
-        self.painterInstance.setFont(QFont('Decorative', self.height//15))
-        self.painterInstance.drawText(self.width*1//2, self.height*17//20, f'Spacing {spacing}')
+
+        # # Add error message
+        # self.painterInstance.setPen(QtCore.Qt.darkGreen)
+        # self.painterInstance.setFont(QFont('Decorative', self.height//15))
+        # self.painterInstance.drawText(self.width//10, self.height*17//20, text)
+        # # Add spacing message
+        # self.painterInstance.setPen(QtCore.Qt.darkGreen)
+        # self.painterInstance.setFont(QFont('Decorative', self.height//15))
+        # self.painterInstance.drawText(self.width*1//2, self.height*17//20, f'Spacing {spacing}')
 
 
     # def draw_point(self,x=0.0,y=0.0,z=0.0):
