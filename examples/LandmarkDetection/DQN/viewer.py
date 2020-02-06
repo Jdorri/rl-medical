@@ -169,8 +169,8 @@ class SimpleImageViewer(QWidget):
         self.painterInstance = QPainter(self.img_y)
         _agent_loc = (agent_loc[0], self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
         # _agent_loc = (agent_loc[2], agent_loc[0])       # Rotate 90 degrees ccw
-        rect = rect[:2] + rect[4:]
-        # rect = (self.height_y-rect[4], self.height_y-rect[5]) + rect[:2]
+        # rect = rect[:2] + rect[4:]
+        rect = (self.height_y-rect[4], self.height_y-rect[5]) + rect[:2]
         self.draw_rects(text, spacing, agent_loc, rect)
         self.draw_circles(_agent_loc, target, depth)
         self.painterInstance.end()
@@ -218,7 +218,6 @@ class SimpleImageViewer(QWidget):
         yPos = rect[0]
         xLen = rect[3] - xPos
         yLen = rect[1] - yPos
-        print(xLen, yLen)
 
         # set rectangle color and thickness
         self.penRectangle = QtGui.QPen(QtCore.Qt.cyan)
