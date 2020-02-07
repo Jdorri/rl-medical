@@ -28,31 +28,31 @@ import sys
 #         self.show()        
 
 ## QLineEdit
-# class Example(QWidget):
+class Example(QWidget):
     
-#     def __init__(self):
-#         super().__init__()
+    def __init__(self):
+        super().__init__()
         
-#         self.initUI()
+        self.initUI()
         
         
-#     def initUI(self):      
+    def initUI(self):      
 
-#         self.lbl = QLabel(self)
-#         qle = QLineEdit(self)
+        self.lbl = QLabel(self)
+        qle = QLineEdit(self)
         
-#         qle.move(60, 100)
-#         self.lbl.move(60, 40)
+        qle.move(60, 100)
+        self.lbl.move(60, 40)
 
-#         qle.textChanged[str].connect(self.onChange)
+        qle.textChanged[str].connect(self.onChange)
         
-#         self.setGeometry(300, 300, 280, 170)
-#         self.setWindowTitle('QLineEdit')
-#         self.show()
+        self.setGeometry(300, 300, 280, 170)
+        self.setWindowTitle('QLineEdit')
+        self.show()
         
-#     def onChange(self, text):
-#         self.lbl.setText(text)
-#         self.lbl.adjustSize()   
+    def onChange(self, text):
+        self.lbl.setText(text)
+        self.lbl.adjustSize()   
 
 ## QSplitter    
 # class Example(QWidget):
@@ -94,41 +94,41 @@ import sys
 #         self.show()
 
 ## QComboBox
-class Example(QMainWindow):
+# class Example(QMainWindow):
     
-    def __init__(self):
-        super().__init__()
+#     def __init__(self):
+#         super().__init__()
         
-        self.initUI()
+#         self.initUI()
         
         
-    def initUI(self):      
+#     def initUI(self):      
 
-        self.lbl = QLabel("Ubuntu", self)
+#         self.lbl = QLabel("Ubuntu", self)
 
-        combo = QComboBox(self)
-        combo.addItem("Ubuntu")
-        combo.addItem("Mandriva")
-        combo.addItem("Fedora")
-        combo.addItem("Arch")
-        combo.addItem("Gentoo")
+#         combo = QComboBox(self)
+#         combo.addItem("Ubuntu")
+#         combo.addItem("Mandriva")
+#         combo.addItem("Fedora")
+#         combo.addItem("Arch")
+#         combo.addItem("Gentoo")
 
-        combo.move(50, 50)
-        self.lbl.move(50, 150)
+#         combo.move(50, 50)
+#         self.lbl.move(50, 150)
 
-        combo.activated[str].connect(self.onActivated)        
+#         combo.activated[str].connect(self.onActivated)        
          
-        self.setGeometry(300, 300, 300, 200)
-        self.setWindowTitle('QComboBox')
-        self.statusBar().showMessage("Ready")
+#         self.setGeometry(300, 300, 300, 200)
+#         self.setWindowTitle('QComboBox')
+#         self.statusBar().showMessage("Ready")
         
-        self.show()
+#         self.show()
         
         
-    def onActivated(self, text):
+#     def onActivated(self, text):
       
-        self.lbl.setText(text)
-        self.lbl.adjustSize()  
+#         self.lbl.setText(text)
+#         self.lbl.adjustSize()  
 
         
         
