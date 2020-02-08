@@ -38,41 +38,40 @@ import sys
 #         if not ok:
 #             self.le.setText("Cancel")
 
-## Color Dialog
-# class Example(QWidget):
+# Color Dialog
+class Example(QWidget):
     
-#     def __init__(self):
-#         super().__init__()
+    def __init__(self):
+        super().__init__()
         
-#         self.initUI()
+        self.initUI()
         
         
-#     def initUI(self):      
+    def initUI(self):      
 
-#         col = QColor(0, 0, 0) 
+        col = QColor(0, 0, 0) 
 
-#         self.btn = QPushButton('Dialog', self)
-#         self.btn.move(20, 20)
+        self.btn = QPushButton('Dialog', self)
+        self.btn.move(20, 20)
 
-#         self.btn.clicked.connect(self.showDialog)
+        self.btn.clicked.connect(self.showDialog)
 
-#         self.frm = QFrame(self)
-#         self.frm.setStyleSheet("QWidget { background-color: %s }" 
-#             % col.name())
-#         self.frm.setGeometry(130, 22, 100, 100)            
+        self.frm = QFrame(self)
+        self.frm.setStyleSheet("QWidget { background-color: %s }" 
+            % col.name())
+        self.frm.setGeometry(130, 22, 100, 100)            
         
-#         self.setGeometry(300, 300, 250, 180)
-#         self.setWindowTitle('Color dialog')
-#         self.show()
+        self.setGeometry(300, 300, 250, 180)
+        self.setWindowTitle('Color dialog')
+        self.show()
         
         
-#     def showDialog(self):
-      
-#         col = QColorDialog.getColor()
+    def showDialog(self):
+        col = QColorDialog.getColor()
 
-#         if col.isValid():
-#             self.frm.setStyleSheet("QWidget { background-color: %s }"
-#                 % col.name())
+        if col.isValid():
+            self.frm.setStyleSheet("QWidget { background-color: %s }"
+                % col.name())
 
 ## Font Dialog
 # class Example(QWidget):
@@ -114,45 +113,45 @@ import sys
 #         if ok:
 #             self.lbl.setFont(font)
 
-## QFile Dialog
-class Example(QMainWindow):
+# ## QFile Dialog
+# class Example(QMainWindow):
     
-    def __init__(self):
-        super().__init__()
+#     def __init__(self):
+#         super().__init__()
         
-        self.initUI()
-        
-        
-    def initUI(self):      
-
-        self.textEdit = QTextEdit()
-        self.setCentralWidget(self.textEdit)
-        self.statusBar()
-
-        openFile = QAction(QIcon('open.png'), 'Open', self)
-        openFile.setShortcut('Ctrl+O')
-        openFile.setStatusTip('Open new File')
-        openFile.triggered.connect(self.showDialog)
-
-        menubar = self.menuBar()
-        fileMenu = menubar.addMenu('&File')
-        fileMenu.addAction(openFile)       
-        
-        self.setGeometry(300, 300, 350, 300)
-        self.setWindowTitle('File dialog')
-        self.show()
+#         self.initUI()
         
         
-    def showDialog(self):
+#     def initUI(self):      
 
-        fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
+#         self.textEdit = QTextEdit()
+#         self.setCentralWidget(self.textEdit)
+#         self.statusBar()
 
-        if fname[0]:
-            f = open(fname[0], 'r')
+#         openFile = QAction(QIcon('open.png'), 'Open', self)
+#         openFile.setShortcut('Ctrl+O')
+#         openFile.setStatusTip('Open new File')
+#         openFile.triggered.connect(self.showDialog)
 
-            with f:
-                data = f.read()
-                self.textEdit.setText(data)
+#         menubar = self.menuBar()
+#         fileMenu = menubar.addMenu('&File')
+#         fileMenu.addAction(openFile)       
+        
+#         self.setGeometry(300, 300, 350, 300)
+#         self.setWindowTitle('File dialog')
+#         self.show()
+        
+        
+#     def showDialog(self, s):
+#         pass
+        # fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
+
+        # if fname[0]:
+            # f = open(fname[0], 'r')
+
+            # with f:
+                # data = f.read()
+                # self.textEdit.setText(data)
 
 
 if __name__ == '__main__':
