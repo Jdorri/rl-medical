@@ -562,7 +562,7 @@ class MedicalPlayer(gym.Env):
         return self._image.data[x, :, :]
 
     def get_plane_y(self, y=0):
-        return self._image.data[:, y, :]
+        return np.rot90(self._image.data[:, y, :], 1)
 
     def _calc_reward(self, current_loc, next_loc):
         """ Calculate the new reward based on the decrease in euclidean distance to the target location
@@ -672,10 +672,10 @@ class MedicalPlayer(gym.Env):
 
             # sys.exit(app.exec_())
         # display image
-        print("before image---")
+        # print("before image---")
         self.viewer.draw_image(
             self.app,
-            arrs = (img, img_x, img_x),
+            arrs = (img, img_x, img_y),
             agent_loc = current_point,
             target = self._target_loc,
             text = 'Error ' + str(round(self.cur_dist,3)) + 'mm',
