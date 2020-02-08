@@ -8,6 +8,7 @@ def warn(*args, **kwargs):
 import warnings
 warnings.warn = warn
 warnings.simplefilter("ignore", category=PendingDeprecationWarning)
+warnings.simplefilter("ignore", category=FutureWarning)
 
 import numpy as np
 
