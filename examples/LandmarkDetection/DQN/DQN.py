@@ -236,14 +236,14 @@ if __name__ == '__main__':
             output_names=['Qvalue']))
         # demo pretrained model one episode at a time
         if args.task == 'play':
-            play_n_episodes(get_player(files_list=args.files, viz=0.01,
+            play_n_episodes(get_player(files_list=args.files, viz=0,
                                        saveGif=args.saveGif,
                                        saveVideo=args.saveVideo,
                                        task='play'),
                             pred, num_files)
         # run episodes in parallel and evaluate pretrained model
         elif args.task == 'eval':
-            play_n_episodes(get_player(files_list=args.files, viz=0.01,
+            play_n_episodes(get_player(files_list=args.files, viz=0,
                                        saveGif=args.saveGif,
                                        saveVideo=args.saveVideo,
                                        task='eval'),
