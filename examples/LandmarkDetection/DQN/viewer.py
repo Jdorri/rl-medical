@@ -318,18 +318,18 @@ class SimpleImageViewer(QWidget):
     @QtCore.pyqtSlot(dict)
     def signal_handler(self, value):
         print("receive signal")
-        # self.draw_image(
-        #     app=value["app"],
-        #     arrs=value["arrs"],
-        #     agent_loc=value["agent_loc"],
-        #     target=value["target"],
-        #     text=value["text"],
-        #     spacing=value["spacing"],
-        #     rect=value["rect"]
-        # )
-        self.label.setText(str(value["agent_loc"]))
-        self.label.setStyleSheet("QLabel {background-color: white }")
-        print(value["agent_loc"])
+        self.draw_image(
+            app=value["app"],
+            arrs=value["arrs"],
+            agent_loc=value["agent_loc"],
+            target=value["target"],
+            text=value["text"],
+            spacing=value["spacing"],
+            rect=value["rect"]
+        )
+        # self.label.setText(str(value["agent_loc"]))
+        # self.label.setStyleSheet("QLabel {background-color: white }")
+        # print(value["agent_loc"])
     
     def render(self):
         self.window.flip()

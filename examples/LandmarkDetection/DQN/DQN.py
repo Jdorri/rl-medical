@@ -36,6 +36,8 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
 from PyQt5.QtWidgets import QApplication
 import threading
 from dummy_viewer import BasicViewer
+from viewer import SimpleImageViewer
+import pickle
 
 
 
@@ -232,9 +234,13 @@ if __name__ == '__main__':
     num_files = init_player.files.num_files
 
     if args.task != 'train':
+        with open("default_data.pickle", "rb") as f:
+            viewer_param = pickle.load(f)
         app = QApplication(sys.argv)
         # Define viewer
-        viewer = BasicViewer()
+        viewer = SimpleImageViewer(app=app, arr=viewer_param["arrs"][0],
+                                arr_x=viewer_param["arrs"][1],arr_y=viewer_param["arrs"][2],
+                                filepath=viewer_param["filepath"])
         def main():
             assert args.load is not None
             pred = OfflinePredictor(PredictConfig(

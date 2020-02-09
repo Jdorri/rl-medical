@@ -58,4 +58,4 @@ class BasicViewer(QWidget):
         # )
         self.label.setText(str(value["agent_loc"]))
         # self.label.setStyleSheet("QLabel {background-color: white }")
-        print(value["agent_loc"])
+        print(value)

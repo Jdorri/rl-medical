@@ -35,6 +35,7 @@ import shutil
 
 import gym
 from gym import spaces
+import pickle
 
 try:
     import pyglet
