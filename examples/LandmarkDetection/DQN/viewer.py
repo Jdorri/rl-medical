@@ -10,6 +10,7 @@ import numpy as np
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtCore import pyqtSignal
 from PyQt5 import QtGui, QtCore
 import sys
 
@@ -22,6 +23,7 @@ except ImportError as e:
 
 class SimpleImageViewer(QWidget):
     ''' Simple image viewer class for rendering images using pyglet'''
+    signal = pyqtSignal(dict)
 
     def __init__(self, app, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
 
@@ -58,7 +60,7 @@ class SimpleImageViewer(QWidget):
         self.im_x = QPixmap(qImg_x)
         self.im_y = QPixmap(qImg_y)
         self.label = QLabel()
-        self.label.setPixmap(self.im)
+        # self.label.setPixmap(self.im)
         self.label2 = QLabel()
         self.label2.setPixmap(self.im_x)
         self.label3 = QLabel()
@@ -79,8 +81,10 @@ class SimpleImageViewer(QWidget):
         self.grid.addWidget(self.label,1,2)
         self.grid.addWidget(self.label2,1,3)
         self.grid.addWidget(self.label3,2,2)
-        self.grid.addWidget(QPushButton('Up'),1,1)
+        self.button_up = QPushButton("Up")
+        self.grid.addWidget(self.button_up,1,1)
         self.grid.addWidget(QPushButton('Down'),2,1)
+        self.signal.connect(self.signal_handler)
 
         # Set Layout of GUI
         self.setLayout(self.grid)
@@ -165,8 +169,6 @@ class SimpleImageViewer(QWidget):
 
         self.painterInstance = QPainter(self.img_y)
         _agent_loc = (agent_loc[0], self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
-        # _agent_loc = (agent_loc[2], agent_loc[0])       # Rotate 90 degrees ccw
-        # rect = rect[:2] + rect[4:]
         rect = (self.height_y-rect[4], self.height_y-rect[5]) + rect[:2]
         self.draw_rects(text, spacing, agent_loc, rect)
         self.draw_circles(_agent_loc, target, depth)
@@ -312,8 +314,23 @@ class SimpleImageViewer(QWidget):
     #                               x=y, y=x,
     #                               anchor_x=anchor_x, anchor_y=anchor_y)
     #     label.draw()
-
-
+    ## SIGNAL HANDLER
+    @QtCore.pyqtSlot(dict)
+    def signal_handler(self, value):
+        print("receive signal")
+        # self.draw_image(
+        #     app=value["app"],
+        #     arrs=value["arrs"],
+        #     agent_loc=value["agent_loc"],
+        #     target=value["target"],
+        #     text=value["text"],
+        #     spacing=value["spacing"],
+        #     rect=value["rect"]
+        # )
+        self.label.setText(str(value["agent_loc"]))
+        self.label.setStyleSheet("QLabel {background-color: white }")
+        print(value["agent_loc"])
+    
     def render(self):
         self.window.flip()
 

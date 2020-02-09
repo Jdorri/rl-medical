@@ -53,7 +53,6 @@ _ALE_LOCK = threading.Lock()
 
 Rectangle = namedtuple('Rectangle', ['xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax'])
 
-
 # ===================================================================
 # =================== 3d medical environment ========================
 # ===================================================================
@@ -63,6 +62,7 @@ class MedicalPlayer(gym.Env):
     This is just an implementation of the classic "agent-environment loop".
     Each time-step, the agent chooses an action, and the environment returns
     an observation and a reward."""
+    # application = None
 
     def __init__(self, directory=None, viz=False, task=False, files_list=None,
                  screen_dims=(27,27,27), history_length=20, multiscale=True,
@@ -318,7 +318,12 @@ class MedicalPlayer(gym.Env):
         current_loc = self._location
         self.terminal = False
         go_out = False
+        # if MedicalPlayer.application is None:
         self.app = app
+            # MedicalPlayer.application = app
+            # print("setting application")
+        # else:
+            # self.app = MedicalPlayer.application
 
         # UP Z+ -----------------------------------------------------------
         if (act == 0):
@@ -657,36 +662,41 @@ class MedicalPlayer(gym.Env):
         # cv2.imwrite("disp_imgs/image.png", img)
         # return
         # skip if there is a viewer open
-        if (not self.viewer) and self.viz:
+        # if (not self.viewer) and self.viz:
+        if not self.viewer and self.viz:
             from viewer import SimpleImageViewer
-            def main():
                 # self.app = QApplication(sys.argv)
-                print("here")
+            print("here")
 
-                self.viewer = SimpleImageViewer(
-                    self.app,
-                    arr = img,
-                    arr_x = img_x,
-                    arr_y = img_y,
-                    scale_x = 1,
-                    scale_y = 1,
-                    filepath = self.filename,
-                )
-                self.gif_buffer = []
-                # thread = threading.Thread(target=self.app.exec_)
-                # thread.start()
-                # self.app.exec_()
-            
-            # t = threading.Thread(target=main)
-            # t.daemon=True
-            # t.start()
-            main()
+            self.viewer = SimpleImageViewer(
+                self.app,
+                arr = img,
+                arr_x = img_x,
+                arr_y = img_y,
+                scale_x = 1,
+                scale_y = 1,
+                filepath = self.filename,
+            )
+            self.gif_buffer = []
+                # self.app.exec_()            
 
             # sys.exit(app.exec_())
         # display image
         # print("before image---")
-        print(current_point)
-        # Need to emit
+        # print(current_point)
+        # print(app)
+        # Need to emit signal here
+        self.viewer.signal.emit({
+            "app": self.app,
+            "arrs": (img, img_x, img_y),
+            "agent_loc": current_point,
+            "target": self._target_loc,
+            "text": "Error " + str(round(self.cur_dist,3)) + "mm",
+            "spacing": 3,
+            "rect": self.rectangle 
+        })
+        time.sleep(2)
+        
         # self.viewer.draw_image(
             # self.app,
             # arrs = (img, img_x, img_y),
@@ -696,6 +706,7 @@ class MedicalPlayer(gym.Env):
             # spacing = 3,
             # rect = self.rectangle
         # )
+        # QApplication.processEvents()
         # print("here2")
         # self.app.exec_()
         # draw current point
