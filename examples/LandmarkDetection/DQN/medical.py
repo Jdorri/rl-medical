@@ -289,7 +289,7 @@ class MedicalPlayer(gym.Env):
         points2 = spacing * np.array(points2)
         return np.linalg.norm(points1 - points2)
 
-    def step(self, act, qvalues, app):
+    def step(self, act, qvalues, app, viewer):
         """The environment's step function returns exactly what we need.
         Args:
           act:
@@ -320,6 +320,8 @@ class MedicalPlayer(gym.Env):
         go_out = False
         # if MedicalPlayer.application is None:
         self.app = app
+        print("ENTER STEP")
+        self.viewer = viewer
             # MedicalPlayer.application = app
             # print("setting application")
         # else:
@@ -663,27 +665,26 @@ class MedicalPlayer(gym.Env):
         # return
         # skip if there is a viewer open
         # if (not self.viewer) and self.viz:
-        if not self.viewer and self.viz:
-            from viewer import SimpleImageViewer
+        # if not self.viewer and self.viz:
+            # from viewer import SimpleImageViewer
                 # self.app = QApplication(sys.argv)
-            print("here")
+            # print("here")
 
-            self.viewer = SimpleImageViewer(
-                self.app,
-                arr = img,
-                arr_x = img_x,
-                arr_y = img_y,
-                scale_x = 1,
-                scale_y = 1,
-                filepath = self.filename,
-            )
-            self.gif_buffer = []
+            # self.viewer = SimpleImageViewer(
+                # self.app,
+                # arr = img,
+                # arr_x = img_x,
+                # arr_y = img_y,
+                # scale_x = 1,
+                # scale_y = 1,
+                # filepath = self.filename,
+            # )
+            # self.gif_buffer = []
                 # self.app.exec_()            
 
             # sys.exit(app.exec_())
         # display image
         # print("before image---")
-        # print(current_point)
         # print(app)
         # Need to emit signal here
         self.viewer.signal.emit({
@@ -812,8 +813,8 @@ class FrameStack(gym.Wrapper):
         self.frames.append(ob)
         return self._observation()
 
-    def step(self, action, q_values, app):
-        ob, reward, done, info = self.env.step(action, q_values, app)
+    def step(self, action, q_values, app, viewer):
+        ob, reward, done, info = self.env.step(action, q_values, app, viewer)
         self.frames.append(ob)
         return self._observation(), reward, done, info
 

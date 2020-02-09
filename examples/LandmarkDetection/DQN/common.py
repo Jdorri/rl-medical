@@ -26,7 +26,7 @@ import traceback
 
 ###############################################################################
 
-def play_one_episode(env, func, render=False, app=None):
+def play_one_episode(env, func, render=False, app=None, viewer=None):
     def predict(s):
         """
         Run a full episode, mapping observation to action, WITHOUT 0.001 greedy.
@@ -46,7 +46,7 @@ def play_one_episode(env, func, render=False, app=None):
     sum_r = 0
     while True:
         act, q_values = predict(ob)
-        ob, r, isOver, info = env.step(act, q_values, app=app)
+        ob, r, isOver, info = env.step(act, q_values, app=app, viewer=viewer)
         if render:
             env.render()
         sum_r += r
@@ -56,10 +56,13 @@ def play_one_episode(env, func, render=False, app=None):
 
 ###############################################################################
 
-def play_n_episodes(player, predfunc, nr, render=False, app=None):
+def play_n_episodes(player, predfunc, nr, render=False, app=None, viewer=None):
     """wraps play_one_episode, playing a single episode at a time and logs results
     used when playing demos."""
     logger.info("Start Playing ... ")
+    # print(app)
+    # print(viewer)
+    # exit()
     # TODO
     nr=1 # dlete this
     for k in range(nr):
@@ -67,7 +70,7 @@ def play_n_episodes(player, predfunc, nr, render=False, app=None):
         #     player.restart_episode()
         score, filename, ditance_error, q_values = play_one_episode(player,
                                                                     predfunc,
-                                                                    render=False, app=app)
+                                                                    render=False, app=app, viewer=viewer)
         logger.info(
             "{}/{} - {} - score {} - distError {} - q_values {}".format(k + 1, nr, filename, score, ditance_error,
                                                                         q_values))

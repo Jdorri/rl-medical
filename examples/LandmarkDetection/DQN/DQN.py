@@ -35,6 +35,7 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
 
 from PyQt5.QtWidgets import QApplication
 import threading
+from dummy_viewer import BasicViewer
 
 
 
@@ -232,7 +233,8 @@ if __name__ == '__main__':
 
     if args.task != 'train':
         app = QApplication(sys.argv)
-        
+        # Define viewer
+        viewer = BasicViewer()
         def main():
             assert args.load is not None
             pred = OfflinePredictor(PredictConfig(
@@ -242,18 +244,21 @@ if __name__ == '__main__':
                 output_names=['Qvalue']))
             # demo pretrained model one episode at a time
             if args.task == 'play':
+                # print(viewer)
+                # print(app)
+                # print("success")
                 play_n_episodes(get_player(files_list=args.files, viz=0.01,
                                            saveGif=args.saveGif,
                                            saveVideo=args.saveVideo,
                                            task='play'),
-                                pred, num_files, app)
+                                pred, num_files, app=app, viewer=viewer)
             # run episodes in parallel and evaluate pretrained model
             elif args.task == 'eval':
                 play_n_episodes(get_player(files_list=args.files, viz=0.01,
                                            saveGif=args.saveGif,
                                            saveVideo=args.saveVideo,
                                            task='eval'),
-                                pred, num_files, app)
+                                pred, num_files, app=app, viewer=viewer)
         thread = threading.Thread(target=main)
         thread.start()
         app.exec_()
