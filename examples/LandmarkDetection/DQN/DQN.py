@@ -33,6 +33,10 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         FullyConnected, PReLU, SimpleTrainer,
                         launch_train_with_config)
 
+from PyQt5.QtWidgets import QApplication
+import threading
+
+
 
 ###############################################################################
 # BATCH SIZE USED IN NATURE PAPER IS 32 - MEDICAL IS 256
@@ -227,26 +231,32 @@ if __name__ == '__main__':
     num_files = init_player.files.num_files
 
     if args.task != 'train':
-        assert args.load is not None
-        pred = OfflinePredictor(PredictConfig(
-            model=Model(),
-            session_init=get_model_loader(args.load),
-            input_names=['state'],
-            output_names=['Qvalue']))
-        # demo pretrained model one episode at a time
-        if args.task == 'play':
-            play_n_episodes(get_player(files_list=args.files, viz=0.01,
-                                       saveGif=args.saveGif,
-                                       saveVideo=args.saveVideo,
-                                       task='play'),
-                            pred, num_files)
-        # run episodes in parallel and evaluate pretrained model
-        elif args.task == 'eval':
-            play_n_episodes(get_player(files_list=args.files, viz=0.01,
-                                       saveGif=args.saveGif,
-                                       saveVideo=args.saveVideo,
-                                       task='eval'),
-                            pred, num_files)
+        app = QApplication(sys.argv)
+        
+        def main():
+            assert args.load is not None
+            pred = OfflinePredictor(PredictConfig(
+                model=Model(),
+                session_init=get_model_loader(args.load),
+                input_names=['state'],
+                output_names=['Qvalue']))
+            # demo pretrained model one episode at a time
+            if args.task == 'play':
+                play_n_episodes(get_player(files_list=args.files, viz=0.01,
+                                           saveGif=args.saveGif,
+                                           saveVideo=args.saveVideo,
+                                           task='play'),
+                                pred, num_files, app)
+            # run episodes in parallel and evaluate pretrained model
+            elif args.task == 'eval':
+                play_n_episodes(get_player(files_list=args.files, viz=0.01,
+                                           saveGif=args.saveGif,
+                                           saveVideo=args.saveVideo,
+                                           task='eval'),
+                                pred, num_files, app)
+        thread = threading.Thread(target=main)
+        thread.start()
+        app.exec_()
     else:  # train model
         logger_dir = os.path.join(args.logDir, args.name)
         logger.set_logger_dir(logger_dir)

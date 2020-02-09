@@ -1,18 +1,15 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# File: viewer.py
-# Author: Alex Gaskell <alex.gaskell10@gmail.com>
 
 import os
 import math
 import io
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
 from PIL import Image, ImageTk
 import tkinter as tk
 import cv2
 import numpy as np
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QGridLayout, QWidget, QPushButton, QGraphicsScene
-from PyQt5.QtGui import QPixmap, QPainter, QColor, QFont, QImage
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from PyQt5 import QtGui, QtCore
 import sys
 

@@ -24,6 +24,7 @@ import threading
 import numpy as np
 from tensorpack import logger
 from collections import (Counter, defaultdict, deque, namedtuple)
+import multiprocessing
 
 import cv2
 import math
@@ -288,7 +289,7 @@ class MedicalPlayer(gym.Env):
         points2 = spacing * np.array(points2)
         return np.linalg.norm(points1 - points2)
 
-    def step(self, act, qvalues):
+    def step(self, act, qvalues, app):
         """The environment's step function returns exactly what we need.
         Args:
           act:
@@ -317,6 +318,7 @@ class MedicalPlayer(gym.Env):
         current_loc = self._location
         self.terminal = False
         go_out = False
+        self.app = app
 
         # UP Z+ -----------------------------------------------------------
         if (act == 0):
@@ -617,6 +619,7 @@ class MedicalPlayer(gym.Env):
         self.num_success = StatCounter()
 
     def display(self, return_rgb_array=False):
+        print("inside display")
         # get dimensions
         current_point = self._location
         target_point = self._target_loc
@@ -656,33 +659,45 @@ class MedicalPlayer(gym.Env):
         # skip if there is a viewer open
         if (not self.viewer) and self.viz:
             from viewer import SimpleImageViewer
-            self.app = QApplication(sys.argv)
+            def main():
+                # self.app = QApplication(sys.argv)
+                print("here")
 
-            self.viewer = SimpleImageViewer(
-                self.app,
-                arr = img,
-                arr_x = img_x,
-                arr_y = img_y,
-                scale_x = 1,
-                scale_y = 1,
-                filepath = self.filename,
-            )
-            self.gif_buffer = []
-            self.app.exec_()
+                self.viewer = SimpleImageViewer(
+                    self.app,
+                    arr = img,
+                    arr_x = img_x,
+                    arr_y = img_y,
+                    scale_x = 1,
+                    scale_y = 1,
+                    filepath = self.filename,
+                )
+                self.gif_buffer = []
+                # thread = threading.Thread(target=self.app.exec_)
+                # thread.start()
+                # self.app.exec_()
+            
+            # t = threading.Thread(target=main)
+            # t.daemon=True
+            # t.start()
+            main()
 
             # sys.exit(app.exec_())
         # display image
         # print("before image---")
-        self.viewer.draw_image(
-            self.app,
-            arrs = (img, img_x, img_y),
-            agent_loc = current_point,
-            target = self._target_loc,
-            text = 'Error ' + str(round(self.cur_dist,3)) + 'mm',
-            spacing = 3,
-            rect = self.rectangle
-        )
-        self.app.exec_()
+        # print(current_point)
+        # Need to emit
+        # self.viewer.draw_image(
+            # self.app,
+            # arrs = (img, img_x, img_y),
+            # agent_loc = current_point,
+            # target = self._target_loc,
+            # text = 'Error ' + str(round(self.cur_dist,3)) + 'mm',
+            # spacing = 3,
+            # rect = self.rectangle
+        # )
+        # print("here2")
+        # self.app.exec_()
         # draw current point
         # self.viewer.draw_circle(radius=scale_x * 1,
         #                         pos_x=scale_x * current_point[0],
@@ -786,8 +801,8 @@ class FrameStack(gym.Wrapper):
         self.frames.append(ob)
         return self._observation()
 
-    def step(self, action, q_values):
-        ob, reward, done, info = self.env.step(action, q_values)
+    def step(self, action, q_values, app):
+        ob, reward, done, info = self.env.step(action, q_values, app)
         self.frames.append(ob)
         return self._observation(), reward, done, info
 
