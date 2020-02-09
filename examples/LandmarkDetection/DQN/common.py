@@ -64,7 +64,7 @@ def play_n_episodes(player, predfunc, nr, render=False, app=None, viewer=None):
     # print(viewer)
     # exit()
     # TODO
-    nr=1 # dlete this
+    # nr=1 # dlete this
     for k in range(nr):
         # if k != 0:
         #     player.restart_episode()

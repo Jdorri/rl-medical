@@ -697,7 +697,7 @@ class MedicalPlayer(gym.Env):
             "spacing": 3,
             "rect": self.rectangle 
         })
-        time.sleep(2)
+        # time.sleep(2)
         
         # self.viewer.draw_image(
             # self.app,
