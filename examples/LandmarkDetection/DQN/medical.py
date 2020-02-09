@@ -685,7 +685,7 @@ class MedicalPlayer(gym.Env):
             # sys.exit(app.exec_())
         # display image
         # print("before image---")
-        # print(current_point)
+        print(current_point)
         # Need to emit
         # self.viewer.draw_image(
             # self.app,
