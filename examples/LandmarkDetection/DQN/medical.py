@@ -154,10 +154,18 @@ class MedicalPlayer(gym.Env):
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
         if self.task == 'play':
-            self.files = filesListBrainMRLandmark(files_list,
+            # self.files = filesListBrainMRLandmark(files_list,
+            #                                       returnLandmarks=False)
+            # self.files = filesListCardioLandmark(files_list,
+            #                                       returnLandmarks=False)
+            self.files = filesListFetalUSLandmark(files_list,
                                                   returnLandmarks=False)
         else:
-            self.files = filesListBrainMRLandmark(files_list,
+            # self.files = filesListBrainMRLandmark(files_list,
+            #                                       returnLandmarks=True)
+            # self.files = filesListCardioLandmark(files_list,
+            #                                       returnLandmarks=True)
+            self.files = filesListFetalUSLandmark(files_list,
                                                   returnLandmarks=True)
 
 
@@ -386,12 +394,15 @@ class MedicalPlayer(gym.Env):
         # terminate if the distance is less than 1 during trainig
         if (self.task == 'train'):
             if self.cur_dist <= 1:
+                print('Terminal Condition DISTANCE')
                 self.terminal = True
                 self.num_success.feed(1)
 
         # terminate if maximum number of steps is reached
         self.cnt += 1
-        if self.cnt >= self.max_num_frames: self.terminal = True
+        if self.cnt >= self.max_num_frames: 
+            print('Terminal Condition NUMBER OF FRAMES')
+            self.terminal = True
 
         # update history buffer with new location and qvalues
         if (self.task != 'play'):
@@ -420,9 +431,11 @@ class MedicalPlayer(gym.Env):
                 # terminate if scale is less than 1
                 else:
                     self.terminal = True
+                    print("TERMINAL OCCILATE")
                     if self.cur_dist <= 1: self.num_success.feed(1)
             else:
                 self.terminal = True
+                print("TERMINAL OCCILATE")
                 if self.cur_dist <= 1: self.num_success.feed(1)
 
         # render screen if viz is on
@@ -434,9 +447,21 @@ class MedicalPlayer(gym.Env):
 
         distance_error = self.cur_dist
         self.current_episode_score.feed(self.reward)
+        # print(self.reward) this is every step of the agent
 
         info = {'score': self.current_episode_score.sum, 'gameOver': self.terminal,
                 'distError': distance_error, 'filename': self.filename}
+
+ 
+        if self.terminal:
+            directory = logger.get_logger_dir()
+            self.csvfile = 'Reward_and_Q_log.csv'
+            path = os.path.join(directory, self.csvfile)
+            with open(path, 'a') as outcsv:
+                fields= [info['score']]
+                writer = csv.writer(outcsv)
+                writer.writerow(map(lambda x: x, fields))
+
 
         # #######################################################################
         # ## generate evaluation results from 19 different points
