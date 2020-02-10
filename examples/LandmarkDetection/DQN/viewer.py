@@ -23,17 +23,16 @@ class Window(QMainWindow):
         self.initUI(viewer_param)
 
     def initUI(self, viewer_param):
-        exitAct = QAction(QIcon('exit24.png'), 'Exit', self)
-        exitAct.setShortcut('Ctrl+Q')
-        exitAct.setStatusTip('Exit application')
-        exitAct.triggered.connect(self.close)
+        """
+        Main UI init element
+        """
+        # Status Bar
+        self.statusBar().showMessage("Running")
 
-        self.statusBar().showMessage("Ready")
-
-        menubar = self.menuBar()
-        fileMenu = menubar.addMenu('&File')
-        fileMenu.addAction(exitAct)
-
+        # Menu Bar
+        self.initMenu()
+        
+        # Image widget
         self.widget = SimpleImageViewer(arr=viewer_param["arrs"][0],
                                    arr_x=viewer_param["arrs"][1],
                                    arr_y=viewer_param["arrs"][2],
@@ -44,20 +43,57 @@ class Window(QMainWindow):
         self.center()
         self.setWindowTitle('Reinforcement Learning - Medical')
         self.show()
+    
+    def initMenu(self):
+        # Menubar
+        self.menubar = self.menuBar()
+        
+        # File menu
+        file_menu = self.menubar.addMenu('&File')
+        # Exit action in a file
+        exitAct = QAction('Exit', self)
+        exitAct.setShortcut('Ctrl+Q')
+        exitAct.setStatusTip('Exit application')
+        exitAct.triggered.connect(self.close)
+        file_menu.addAction(exitAct)
+
+        # Terminal menu
+        terminal_menu = self.menubar.addMenu("&Terminal")
+        
+        # View menu
+        view_menu = self.menubar.addMenu("&View")
+
+        # Help menu
+        help_menu = self.menubar.addMenu("&Help")
 
     def center(self):
+        """
+        Used to center the window automatically
+        """
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
         centerPoint = QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
+    
+    def closeEvent(self, event):
+        """
+        Used to override close event and provide warning when closing application
+        """        
+        reply = QMessageBox.question(self, 'Message',
+            "Are you sure to quit?", QMessageBox.Yes | 
+            QMessageBox.No, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()  
 
 class SimpleImageViewer(QWidget):
     ''' Simple image viewer class for rendering images using pyglet'''
     agent_signal = pyqtSignal(dict)
 
     def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
-
         super().__init__()
 
         self.isopen = False
@@ -93,27 +129,27 @@ class SimpleImageViewer(QWidget):
         self.im = QPixmap(qImg)
         self.im_x = QPixmap(qImg_x)
         self.im_y = QPixmap(qImg_y)
-        self.label = QLabel()
-        self.label2 = QLabel()
-        self.label2.setPixmap(self.im_x)
-        self.label3 = QLabel()
-        self.label3.setPixmap(self.im_y)
+        self.label_im = QLabel()
+        self.label_im_x = QLabel()
+        self.label_im_x.setPixmap(self.im_x)
+        self.label_im_y = QLabel()
+        self.label_im_y.setPixmap(self.im_y)
 
         # Set background color for images to Black
-        self.label.setAutoFillBackground(True)
-        self.label2.setAutoFillBackground(True)
-        self.label3.setAutoFillBackground(True)
+        self.label_im.setAutoFillBackground(True)
+        self.label_im_x.setAutoFillBackground(True)
+        self.label_im_y.setAutoFillBackground(True)
         p = self.palette()
         p.setColor(self.backgroundRole(), Qt.black)
-        self.label.setPalette(p)
-        self.label2.setPalette(p)
-        self.label3.setPalette(p)
+        self.label_im.setPalette(p)
+        self.label_im_x.setPalette(p)
+        self.label_im_y.setPalette(p)
 
         # Initiliase Grid
         self.grid = QGridLayout()
-        self.grid.addWidget(self.label,1,2)
-        self.grid.addWidget(self.label2,1,3)
-        self.grid.addWidget(self.label3,2,2)
+        self.grid.addWidget(self.label_im,1,2)
+        self.grid.addWidget(self.label_im_x,1,3)
+        self.grid.addWidget(self.label_im_y,2,2)
         self.button_up = QPushButton("Up")
         self.grid.addWidget(self.button_up,1,1)
         self.grid.addWidget(QPushButton('Down'),2,1)
@@ -121,7 +157,7 @@ class SimpleImageViewer(QWidget):
 
         # Set Layout of GUI
         self.setLayout(self.grid)
-        self.setGeometry(10,10,320,200)
+        self.setGeometry(10,10,120,100)
 
         self.setWindowTitle("Landmark Detection Agent")
         self.show()
@@ -176,9 +212,9 @@ class SimpleImageViewer(QWidget):
         self.draw_circles(_agent_loc, target, depth)
         self.painterInstance.end()
 
-        self.label.setPixmap(self.img)
-        self.label2.setPixmap(self.img_x)
-        self.label3.setPixmap(self.img_y)
+        self.label_im.setPixmap(self.img)
+        self.label_im_x.setPixmap(self.img_x)
+        self.label_im_y.setPixmap(self.img_y)
 
         self.show()
 
