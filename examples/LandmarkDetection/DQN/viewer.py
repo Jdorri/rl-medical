@@ -17,6 +17,9 @@ except ImportError as e:
     reraise(suffix="HINT: you can install pyglet directly via 'pip install pyglet'. But if you really just want to install all Gym dependencies and not have to think about it, 'pip install -e .[all]' or 'pip install gym[all]' will do it.")
 
 class Window(QMainWindow):
+    """
+    Window used as the main window for the application which integrate different widgets
+    """
     def __init__(self, viewer_param):
         super().__init__()
 
@@ -27,8 +30,9 @@ class Window(QMainWindow):
         Main UI init element
         """
         # Status Bar
-        self.statusBar().showMessage("Running")
-
+        self.statusbar = self.statusBar()
+        self.statusbar.showMessage("Running")
+        
         # Menu Bar
         self.initMenu()
         
@@ -37,11 +41,26 @@ class Window(QMainWindow):
                                    arr_x=viewer_param["arrs"][1],
                                    arr_y=viewer_param["arrs"][2],
                                    filepath=viewer_param["filepath"])
-        self.setCentralWidget(self.widget)
+        
+        self.left_widget = Example()
+        self.left_widget.setFrameShape(QFrame.StyledPanel)
 
+        # Manage layout
+        self.grid = QGridLayout()
+        self.grid.addWidget(self.left_widget, 0, 0)
+        self.grid.addWidget(self.widget, 0, 1)
+        # self.grid.addWidget(QWidget(), 0, 2) # Jamie's code
+
+        self.layout_widget = QWidget()
+        self.layout_widget.setLayout(self.grid)
+        self.setCentralWidget(self.layout_widget)
+
+        # Geometric window position and general setting
         self.resize(1000, 800)
         self.center()
         self.setWindowTitle('Reinforcement Learning - Medical')
+        self.menubar.setStyleSheet("background:#D2D4DC; color:black")
+        self.statusbar.setStyleSheet("background:#D2D4DC; color:black")
         self.show()
     
     def initMenu(self):
@@ -89,8 +108,47 @@ class Window(QMainWindow):
         else:
             event.ignore()  
 
+class Example(QFrame):
+    
+    def __init__(self):
+        super().__init__()
+        
+        self.initUI()
+        
+        
+    def initUI(self):
+        
+        title = QLabel('Title')
+        author = QLabel('Author')
+        review = QLabel('Review')
+
+        titleEdit = QLineEdit()
+        authorEdit = QLineEdit()
+        reviewEdit = QTextEdit()
+
+        grid = QGridLayout()
+        grid.setSpacing(10) # Vertical spacing
+
+        grid.addWidget(title, 1, 0)
+        grid.addWidget(titleEdit, 1, 1)
+
+        grid.addWidget(author, 2, 0)
+        grid.addWidget(authorEdit, 2, 1)
+
+        grid.addWidget(review, 3, 0)
+        # Span 5 rows and 1 column
+        grid.addWidget(reviewEdit, 3, 1, 50, 1)
+        
+        self.setLayout(grid) 
+        
+        self.setGeometry(300, 300, 1350, 800)
+        self.setWindowTitle('Review')    
+        self.show()
+
 class SimpleImageViewer(QWidget):
-    ''' Simple image viewer class for rendering images using pyglet'''
+    """
+    Simple image viewer class for rendering images using pyglet and pyqt
+    """
     agent_signal = pyqtSignal(dict)
 
     def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
@@ -126,41 +184,44 @@ class SimpleImageViewer(QWidget):
         qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
 
         # Initialise images with labels
-        self.im = QPixmap(qImg)
-        self.im_x = QPixmap(qImg_x)
-        self.im_y = QPixmap(qImg_y)
-        self.label_im = QLabel()
-        self.label_im_x = QLabel()
-        self.label_im_x.setPixmap(self.im_x)
-        self.label_im_y = QLabel()
-        self.label_im_y.setPixmap(self.im_y)
+        self.img = QPixmap(qImg)
+        self.img = self.img.scaledToWidth(350)
+        self.img_x = QPixmap(qImg_x)
+        self.img_x = self.img_x.scaledToWidth(350)
+        self.img_y = QPixmap(qImg_y)
+        self.img_y = self.img_y.scaledToWidth(350)
+
+        self.label_img = QLabel()
+        self.label_img_x = QLabel()
+        self.label_img_x.setPixmap(self.img_x)
+        self.label_img_y = QLabel()
+        self.label_img_y.setPixmap(self.img_y)
 
         # Set background color for images to Black
-        self.label_im.setAutoFillBackground(True)
-        self.label_im_x.setAutoFillBackground(True)
-        self.label_im_y.setAutoFillBackground(True)
+        self.label_img.setAutoFillBackground(True)
+        self.label_img_x.setAutoFillBackground(True)
+        self.label_img_y.setAutoFillBackground(True)
         p = self.palette()
         p.setColor(self.backgroundRole(), Qt.black)
-        self.label_im.setPalette(p)
-        self.label_im_x.setPalette(p)
-        self.label_im_y.setPalette(p)
+        self.label_img.setPalette(p)
+        self.label_img_x.setPalette(p)
+        self.label_img_y.setPalette(p)
 
         # Initiliase Grid
         self.grid = QGridLayout()
-        self.grid.addWidget(self.label_im,1,2)
-        self.grid.addWidget(self.label_im_x,1,3)
-        self.grid.addWidget(self.label_im_y,2,2)
-        self.button_up = QPushButton("Up")
-        self.grid.addWidget(self.button_up,1,1)
-        self.grid.addWidget(QPushButton('Down'),2,1)
+        self.grid.addWidget(self.label_img, 0, 0)
+        self.grid.addWidget(self.label_img_x, 0, 1)
+        self.grid.addWidget(self.label_img_y, 1, 0)
         self.agent_signal.connect(self.agent_signal_handler)
 
         # Set Layout of GUI
         self.setLayout(self.grid)
-        self.setGeometry(10,10,120,100)
-
         self.setWindowTitle("Landmark Detection Agent")
-        self.show()
+        
+        # Stylesheet
+        self.label_img.setStyleSheet("background: black; border:3px solid rgb(255, 0, 0); ")
+        self.label_img_x.setStyleSheet("background: black; border:3px solid green; ")
+        self.label_img_y.setStyleSheet("background: black; border:3px solid blue; ")
 
         ########################################################################
 
@@ -212,16 +273,17 @@ class SimpleImageViewer(QWidget):
         self.draw_circles(_agent_loc, target, depth)
         self.painterInstance.end()
 
-        self.label_im.setPixmap(self.img)
-        self.label_im_x.setPixmap(self.img_x)
-        self.label_im_y.setPixmap(self.img_y)
-
-        self.show()
+        self.img = self.img.scaledToWidth(350)
+        self.img_x = self.img_x.scaledToWidth(350)
+        self.img_y = self.img_y.scaledToWidth(350)
+        self.label_img.setPixmap(self.img)
+        self.label_img_x.setPixmap(self.img_x)
+        self.label_img_y.setPixmap(self.img_y)
 
     def draw_circles(self, agent_loc, target, depth):
         # Draw current agent location
-        self.penCentre = QPen(Qt.blue)
-        self.penCentre.setWidth(3)
+        self.penCentre = QPen(Qt.cyan)
+        self.penCentre.setWidth(4)
         self.painterInstance.setPen(self.penCentre)
         centre = QPoint(*agent_loc)
         self.painterInstance.drawEllipse(centre, 2, 2)

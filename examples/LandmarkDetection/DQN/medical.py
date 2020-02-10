@@ -652,7 +652,7 @@ class MedicalPlayer(gym.Env):
         self.viewer.widget.agent_signal.emit({
             "arrs": (img, img_x, img_y),
             "agent_loc": current_point,
-            "target": self._target_loc,
+            "target": target_point,
             "text": "Error " + str(round(self.cur_dist,3)) + "mm",
             "spacing": 3,
             "rect": self.rectangle
