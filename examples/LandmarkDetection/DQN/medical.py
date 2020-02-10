@@ -154,19 +154,19 @@ class MedicalPlayer(gym.Env):
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
         if self.task == 'play':
-            # self.files = filesListBrainMRLandmark(files_list,
-            #                                       returnLandmarks=False)
-            # self.files = filesListCardioLandmark(files_list,
-            #                                       returnLandmarks=False)
-            self.files = filesListFetalUSLandmark(files_list,
+            self.files = filesListBrainMRLandmark(files_list,
                                                   returnLandmarks=False)
+            # self.files = filesListCardioLandmark(files_list,
+            #                                       returnLandmarks=False)
+            # self.files = filesListFetalUSLandmark(files_list,
+            #                                       returnLandmarks=False)
         else:
-            # self.files = filesListBrainMRLandmark(files_list,
-            #                                       returnLandmarks=True)
+            self.files = filesListBrainMRLandmark(files_list,
+                                                  returnLandmarks=True)
             # self.files = filesListCardioLandmark(files_list,
             #                                       returnLandmarks=True)
-            self.files = filesListFetalUSLandmark(files_list,
-                                                  returnLandmarks=True)
+            # self.files = filesListFetalUSLandmark(files_list,
+            #                                       returnLandmarks=True)
 
 
         # prepare file sampler
@@ -453,14 +453,14 @@ class MedicalPlayer(gym.Env):
                 'distError': distance_error, 'filename': self.filename}
 
  
-        if self.terminal:
-            directory = logger.get_logger_dir()
-            self.csvfile = 'Reward_and_Q_log.csv'
-            path = os.path.join(directory, self.csvfile)
-            with open(path, 'a') as outcsv:
-                fields= [info['score']]
-                writer = csv.writer(outcsv)
-                writer.writerow(map(lambda x: x, fields))
+        # if self.terminal:
+        #     directory = logger.get_logger_dir()
+        #     self.csvfile = 'Reward_and_Q_log.csv'
+        #     path = os.path.join(directory, self.csvfile)
+        #     with open(path, 'a') as outcsv:
+        #         fields= [info['score']]
+        #         writer = csv.writer(outcsv)
+        #         writer.writerow(map(lambda x: x, fields))
 
 
         # #######################################################################

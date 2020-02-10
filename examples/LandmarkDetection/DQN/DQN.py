@@ -228,6 +228,7 @@ if __name__ == '__main__':
     num_files = init_player.files.num_files
 
     if args.task != 'train':
+
         assert args.load is not None
         pred = OfflinePredictor(PredictConfig(
             model=Model(),
@@ -236,7 +237,7 @@ if __name__ == '__main__':
             output_names=['Qvalue']))
         # demo pretrained model one episode at a time
         if args.task == 'play':
-            play_n_episodes(get_player(files_list=args.files, viz=0,
+            play_n_episodes(get_player(files_list=args.files, viz=0.01,
                                        saveGif=args.saveGif,
                                        saveVideo=args.saveVideo,
                                        task='play'),
@@ -253,5 +254,15 @@ if __name__ == '__main__':
         logger.set_logger_dir(logger_dir)
         config = get_config(args.files)
         if args.load:  # resume training from a saved checkpoint
-            config.session_init = get_model_loader(args.load)
+            #remove some layers
+            session_init = get_model_loader(args.load)
+            reader, variables = session_init._read_checkpoint_vars(args.load)
+            print(session_init.ignore)
+            #ignore fc layers
+            ignore = (variable for variable in variables if "fc" in variable)
+            session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
+            print(session_init.ignore)
+            #remove some layers
+       
+            config.session_init = session_init
         launch_train_with_config(config, SimpleTrainer())
