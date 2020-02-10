@@ -42,7 +42,7 @@ class Window(QMainWindow):
                                    arr_y=viewer_param["arrs"][2],
                                    filepath=viewer_param["filepath"])
         
-        self.left_widget = Example()
+        self.left_widget = SimpleImageViewerSettings()
         self.left_widget.setFrameShape(QFrame.StyledPanel)
 
         # Manage layout
@@ -108,42 +108,64 @@ class Window(QMainWindow):
         else:
             event.ignore()  
 
-class Example(QFrame):
-    
+
+class SimpleImageViewerSettings(QFrame):
+    """
+    Left widget controlling GUI elements settings.
+    """    
     def __init__(self):
         super().__init__()
-        
-        self.initUI()
-        
-        
-    def initUI(self):
-        
-        title = QLabel('Title')
-        author = QLabel('Author')
-        review = QLabel('Review')
 
-        titleEdit = QLineEdit()
-        authorEdit = QLineEdit()
-        reviewEdit = QTextEdit()
+        # Widgets
+        label_settings = QLabel("<b>SETTINGS</b>")
+        label_run = QLabel("Run Agent")
+        self.run_button = QPushButton("Run")
+        self.run_button.clicked.connect(self.buttonClicked)
+        self.speed_slider = QSlider(Qt.Horizontal, self)
+        self.speed_slider.setFocusPolicy(Qt.StrongFocus)
+        self.speed_slider.setTickPosition(QSlider.TicksBelow)
+        self.speed_slider.setTickInterval(10)
+        self.speed_slider.setSingleStep(1)
 
-        grid = QGridLayout()
-        grid.setSpacing(10) # Vertical spacing
-
-        grid.addWidget(title, 1, 0)
-        grid.addWidget(titleEdit, 1, 1)
-
-        grid.addWidget(author, 2, 0)
-        grid.addWidget(authorEdit, 2, 1)
-
-        grid.addWidget(review, 3, 0)
-        # Span 5 rows and 1 column
-        grid.addWidget(reviewEdit, 3, 1, 50, 1)
+        hr = QLabel("<hr />")
+        hr.setStyleSheet("margin: 10px 0")
+        hr2 = QLabel("<hr />")
+        hr2.setStyleSheet("margin: 10px 0")
         
-        self.setLayout(grid) 
+        label_speed = QLabel("Agent Speed")
+        self.setStyleSheet("font-family: sans-serif")
+        label_run.setStyleSheet("margin-top: 10px")
+
+        self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+
+        # Layout
+        vbox = QVBoxLayout()
+        vbox.addWidget(label_settings)
+        vbox.addWidget(label_run)
+        vbox.addWidget(self.run_button)
         
-        self.setGeometry(300, 300, 1350, 800)
-        self.setWindowTitle('Review')    
-        self.show()
+        vbox.addWidget(hr)
+        
+        vbox.addWidget(label_speed)
+        vbox.addWidget(self.speed_slider)
+
+        vbox.addWidget(hr2)
+
+        vbox.addStretch()
+
+        self.setLayout(vbox)
+
+    def buttonClicked(self):
+        """
+        Event handler (slot) for when the button is clicked
+        """
+        if self.run_button.text() == "Run":
+            self.run_button.setText("Pause")
+            self.run_button.setStyleSheet("background-color:#f44336; color:white")
+        else:
+            self.run_button.setText("Run")
+            self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+
 
 class SimpleImageViewer(QWidget):
     """
