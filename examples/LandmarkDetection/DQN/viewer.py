@@ -1,8 +1,6 @@
-
 import os
 import math
 import io
-# import PySimpleGUI as sg
 from PIL import Image, ImageTk
 import tkinter as tk
 import cv2
@@ -10,10 +8,7 @@ import numpy as np
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from PyQt5.QtCore import pyqtSignal
-from PyQt5 import QtGui, QtCore
 import sys
-
 
 try:
     import pyglet
@@ -71,7 +66,7 @@ class SimpleImageViewer(QWidget):
         self.label2.setAutoFillBackground(True)
         self.label3.setAutoFillBackground(True)
         p = self.palette()
-        p.setColor(self.backgroundRole(), QtCore.Qt.black)
+        p.setColor(self.backgroundRole(), Qt.black)
         self.label.setPalette(p)
         self.label2.setPalette(p)
         self.label3.setPalette(p)
@@ -184,27 +179,27 @@ class SimpleImageViewer(QWidget):
         # create painter instance with pixmap
 
         # draw current agent location
-        self.penCentre = QtGui.QPen(QtCore.Qt.blue)
+        self.penCentre = QPen(Qt.blue)
         self.penCentre.setWidth(3)
         self.painterInstance.setPen(self.penCentre)
-        centre = QtCore.QPoint(*agent_loc)
+        centre = QPoint(*agent_loc)
         self.painterInstance.drawEllipse(centre, 2, 2)
 
         # draw circle at target location
         if target is not None:
-            self.penCentre = QtGui.QPen(QtCore.Qt.red)
+            self.penCentre = QPen(Qt.red)
             self.penCentre.setWidth(3)
             self.painterInstance.setPen(self.penCentre)
-            centre = QtCore.QPoint(*target)
+            centre = QPoint(*target)
             self.painterInstance.drawEllipse(centre, 2, 2)
 
             # draw circle surrounding target
-            self.penCirlce = QtGui.QPen(QColor(255,0,0,0))
+            self.penCirlce = QPen(QColor(255,0,0,0))
             self.penCirlce.setWidth(3)
             self.painterInstance.setPen(self.penCirlce)
-            self.painterInstance.setBrush(QtCore.Qt.red)
+            self.painterInstance.setBrush(Qt.red)
             self.painterInstance.setOpacity(0.2)
-            centre = QtCore.QPoint(*target)
+            centre = QPoint(*target)
             radx = rady = depth * 30
             self.painterInstance.drawEllipse(centre, radx, rady)
 
@@ -219,14 +214,14 @@ class SimpleImageViewer(QWidget):
         yLen = rect[1] - yPos
 
         # set rectangle color and thickness
-        self.penRectangle = QtGui.QPen(QtCore.Qt.cyan)
+        self.penRectangle = QPen(Qt.cyan)
         self.penRectangle.setWidth(3)
         # draw rectangle on painter
         self.painterInstance.setPen(self.penRectangle)
         self.painterInstance.drawRect(xPos,yPos,xLen,yLen)
 
         # Annotate rectangle
-        self.painterInstance.setPen(QtCore.Qt.cyan)
+        self.painterInstance.setPen(Qt.cyan)
         self.painterInstance.setFont(QFont('Decorative', min(abs(yLen)//12, 15)))
         self.painterInstance.drawText(xPos, yPos-8, "Agent")
 
@@ -315,7 +310,7 @@ class SimpleImageViewer(QWidget):
     #                               anchor_x=anchor_x, anchor_y=anchor_y)
     #     label.draw()
     ## SIGNAL HANDLER
-    @QtCore.pyqtSlot(dict)
+    @pyqtSlot(dict)
     def signal_handler(self, value):
         print("receive signal")
         self.draw_image(

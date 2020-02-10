@@ -174,6 +174,8 @@ def get_config(files_list):
 
 def get_viewer_data():
     """Used to get viewer initialisation data"""
+    ########################################################################
+    # PyQt GUI Code Section
     with open("default_data.pickle", "rb") as f:
         viewer_param = pickle.load(f)
 
@@ -230,6 +232,8 @@ if __name__ == '__main__':
     num_files = init_player.files.num_files
 
     if args.task != 'train':
+        ########################################################################
+        # PyQt GUI Code Section
         # Define application and viewer to run on the main thread
         app = QApplication(sys.argv)
         viewer_param = get_viewer_data()
@@ -248,9 +252,6 @@ if __name__ == '__main__':
                 output_names=['Qvalue']))
             # demo pretrained model one episode at a time
             if args.task == 'play':
-                # print(viewer)
-                # print(app)
-                # print("success")
                 play_n_episodes(get_player(files_list=args.files, viz=0.01,
                                            saveGif=args.saveGif,
                                            saveVideo=args.saveVideo,
@@ -268,6 +269,8 @@ if __name__ == '__main__':
         thread.start()
         app.exec_()
 
+        ########################################################################
+    
     else:  # train model
         logger_dir = os.path.join(args.logDir, args.name)
         logger.set_logger_dir(logger_dir)

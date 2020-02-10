@@ -1,15 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# File: medical.py
-# Author: Amir Alansary <amiralansary@gmail.com>
-
 import csv
 import itertools
 
-
 def warn(*args, **kwargs):
     pass
-
 
 import warnings
 
@@ -35,7 +28,6 @@ import shutil
 
 import gym
 from gym import spaces
-import pickle
 
 try:
     import pyglet
@@ -47,8 +39,6 @@ from tensorpack.utils.stats import StatCounter
 
 from IPython.core.debugger import set_trace
 from dataReader import *
-
-from PyQt5.QtWidgets import QApplication
 
 _ALE_LOCK = threading.Lock()
 
@@ -63,7 +53,6 @@ class MedicalPlayer(gym.Env):
     This is just an implementation of the classic "agent-environment loop".
     Each time-step, the agent chooses an action, and the environment returns
     an observation and a reward."""
-    # application = None
 
     def __init__(self, directory=None, viz=False, task=False, files_list=None,
                  screen_dims=(27,27,27), history_length=20, multiscale=True,
@@ -653,33 +642,8 @@ class MedicalPlayer(gym.Env):
         img_x = cv2.cvtColor(img_x, cv2.COLOR_GRAY2RGB)  # congvert to rgb
         img_y = cv2.cvtColor(img_y, cv2.COLOR_GRAY2RGB)  # congvert to rgb
 
-
-### FROM HERE ###
-        # cv2.imwrite("disp_imgs/image.png", img)
-        # return
-        # skip if there is a viewer open
-        # if (not self.viewer) and self.viz:
-        # if not self.viewer and self.viz:
-            # from viewer import SimpleImageViewer
-                # self.app = QApplication(sys.argv)
-            # print("here")
-
-            # self.viewer = SimpleImageViewer(
-                # self.app,
-                # arr = img,
-                # arr_x = img_x,
-                # arr_y = img_y,
-                # scale_x = 1,
-                # scale_y = 1,
-                # filepath = self.filename,
-            # )
-            # self.gif_buffer = []
-                # self.app.exec_()            
-
-            # sys.exit(app.exec_())
-        # display image
-        # print("before image---")
-        # print(app)
+        ########################################################################
+        # PyQt GUI Code Section
         # Need to emit signal here
         self.viewer.signal.emit({
             "arrs": (img, img_x, img_y),
@@ -689,62 +653,9 @@ class MedicalPlayer(gym.Env):
             "spacing": 3,
             "rect": self.rectangle 
         })
-        # time.sleep(2)
-        
-        # self.viewer.draw_image(
-            # self.app,
-            # arrs = (img, img_x, img_y),
-            # agent_loc = current_point,
-            # target = self._target_loc,
-            # text = 'Error ' + str(round(self.cur_dist,3)) + 'mm',
-            # spacing = 3,
-            # rect = self.rectangle
-        # )
-        # QApplication.processEvents()
-        # print("here2")
-        # self.app.exec_()
-        # draw current point
-        # self.viewer.draw_circle(radius=scale_x * 1,
-        #                         pos_x=scale_x * current_point[0],
-        #                         pos_y=scale_y * current_point[1],
-        #                         color=(0.0, 0.0, 1.0, 1.0))
-        # # draw a box around the agent - what the network sees ROI
-        # self.viewer.draw_rect(scale_x*self.rectangle.xmin, scale_y*self.rectangle.ymin,
-        #                       scale_x*self.rectangle.xmax, scale_y*self.rectangle.ymax)
-        # self.viewer.display_text('Agent ', color=(204, 204, 0, 255),
-        #                          x=self.rectangle.xmin - 15,
-        #                          y=self.rectangle.ymin)
-        # # display info
-        # text = 'Spacing ' + str(self.xscale)
-        # self.viewer.display_text(text, color = (204,204,0,255),
-        #                          x=10, y=self._image_dims[1]-80)
 
-        # ---------------------------------------------------------------------
-
-        # if (self.task != 'play'):
-        #     # draw a transparent circle around target point with variable radius
-        #     # based on the difference z-direction
-        #     diff_z = scale_x * abs(current_point[2]-target_point[2])
-        #     self.viewer.draw_circle(radius = diff_z,
-        #                             pos_x = scale_x*target_point[0],
-        #                             pos_y = scale_y*target_point[1],
-        #                             color = (1.0,0.0,0.0,0.2))
-        #     # draw target point
-        #     self.viewer.draw_circle(radius = scale_x * 1,
-        #                             pos_x = scale_x*target_point[0],
-        #                             pos_y = scale_y*target_point[1],
-        #                             color = (1.0,0.0,0.0,1.0))
-        #     # display info
-        #     color = (0,204,0,255) if self.reward>0 else (204,0,0,255)
-        #     text = 'Error ' + str(round(self.cur_dist,3)) + 'mm'
-        #     self.viewer.display_text(text, color=color, x=10, y=20)
-
-        # ---------------------------------------------------------------------
-
-        # render and wait (viz) time between frames
-        # self.viewer.render()
-### TO HERE ###
-        # time.sleep(self.viz)
+        ########################################################################
+                
         # save gif
         if self.saveGif:
             image_data = pyglet.image.get_buffer_manager().get_color_buffer().get_image_data()
