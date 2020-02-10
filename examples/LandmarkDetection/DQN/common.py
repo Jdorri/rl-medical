@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# File: common.py
-# Author: Yuxin Wu <ppwwyyxxc@gmail.com>
-# Modified: Amir Alansary <amiralansary@gmail.com>
-
 import random
 import time
 import threading
@@ -30,7 +24,7 @@ def play_one_episode(env, func, render=False, viewer=None):
     def predict(s):
         """
         Run a full episode, mapping observation to action, WITHOUT 0.001 greedy.
-    :returns sum of rewards
+        :returns sum of rewards
         """
         # pick action with best predicted Q-value
         q_values = func(s[None, :, :, :])[0][0]
@@ -60,18 +54,18 @@ def play_n_episodes(player, predfunc, nr, render=False, viewer=None):
     """wraps play_one_episode, playing a single episode at a time and logs results
     used when playing demos."""
     logger.info("Start Playing ... ")
-    # print(app)
-    # print(viewer)
     for k in range(nr):
-        # if k != 0:
-        #     player.restart_episode()
-        score, filename, ditance_error, q_values = play_one_episode(player,
+        score, filename, distance_error, q_values = play_one_episode(player,
                                                                     predfunc,
-                                                                    render=False, viewer=viewer)
+                                                                    render=False, 
+                                                                    viewer=viewer)
         logger.info(
-            "{}/{} - {} - score {} - distError {} - q_values {}".format(k + 1, nr, filename, score, ditance_error,
+            "{}/{} - {} - score {} - distError {} - q_values {}".format(k + 1,
+                                                                        nr, 
+                                                                        filename, 
+                                                                        score, 
+                                                                        distance_error,
                                                                         q_values))
-
 
 ###############################################################################
 
@@ -143,7 +137,6 @@ def eval_with_funcs(predictors, nr_eval, get_player_fn, files_list=None):
     if stat.count > 0:
         return (stat.average, stat.max, dist_stat.average, dist_stat.max)
     return (0, 0, 0, 0)
-
 
 ###############################################################################
 
