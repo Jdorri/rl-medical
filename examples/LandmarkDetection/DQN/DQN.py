@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# File: DQN.py
-# Author: Amir Alansary <amiralansary@gmail.com>
-
 def warn(*args, **kwargs):
     pass
 import warnings
@@ -10,7 +5,6 @@ warnings.warn = warn
 warnings.simplefilter("ignore", category=PendingDeprecationWarning)
 
 import numpy as np
-
 import os
 import sys
 import time
@@ -33,13 +27,12 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         FullyConnected, PReLU, SimpleTrainer,
                         launch_train_with_config)
 
-from PyQt5.QtWidgets import QApplication
+
 import threading
-from dummy_viewer import BasicViewer
 from viewer import SimpleImageViewer
 import pickle
 
-
+from PyQt5.QtWidgets import QApplication
 
 ###############################################################################
 # BATCH SIZE USED IN NATURE PAPER IS 32 - MEDICAL IS 256
@@ -134,7 +127,6 @@ class Model(DQNModel):
 
         return tf.identity(Q, name='Qvalue')
 
-
 ###############################################################################
 
 def get_config(files_list):
@@ -180,7 +172,12 @@ def get_config(files_list):
         max_epoch=1000,
     )
 
+def get_viewer_data():
+    """Used to get viewer initialisation data"""
+    with open("default_data.pickle", "rb") as f:
+        viewer_param = pickle.load(f)
 
+    return viewer_param
 
 ###############################################################################
 ###############################################################################
@@ -210,7 +207,6 @@ if __name__ == '__main__':
     parser.add_argument('--name', help='name of current experiment for logs',
                         default='experiment_1')
 
-
     args = parser.parse_args()
 
     if args.gpu:
@@ -234,14 +230,16 @@ if __name__ == '__main__':
     num_files = init_player.files.num_files
 
     if args.task != 'train':
-        with open("default_data.pickle", "rb") as f:
-            viewer_param = pickle.load(f)
+        # Define application and viewer to run on the main thread
         app = QApplication(sys.argv)
-        # Define viewer
-        viewer = SimpleImageViewer(app=app, arr=viewer_param["arrs"][0],
-                                arr_x=viewer_param["arrs"][1],arr_y=viewer_param["arrs"][2],
-                                filepath=viewer_param["filepath"])
-        def main():
+        viewer_param = get_viewer_data()
+        viewer = SimpleImageViewer(arr=viewer_param["arrs"][0],
+                                   arr_x=viewer_param["arrs"][1],
+                                   arr_y=viewer_param["arrs"][2],
+                                   filepath=viewer_param["filepath"])
+        
+        def thread_function():
+            """Run on secondary thread"""
             assert args.load is not None
             pred = OfflinePredictor(PredictConfig(
                 model=Model(),
@@ -257,17 +255,19 @@ if __name__ == '__main__':
                                            saveGif=args.saveGif,
                                            saveVideo=args.saveVideo,
                                            task='play'),
-                                pred, num_files, app=app, viewer=viewer)
+                                pred, num_files, viewer=viewer)
             # run episodes in parallel and evaluate pretrained model
             elif args.task == 'eval':
                 play_n_episodes(get_player(files_list=args.files, viz=0.01,
                                            saveGif=args.saveGif,
                                            saveVideo=args.saveVideo,
                                            task='eval'),
-                                pred, num_files, app=app, viewer=viewer)
-        thread = threading.Thread(target=main)
+                                pred, num_files, viewer=viewer)
+        # Create a thread to run background task
+        thread = threading.Thread(target=thread_function, daemon=True)
         thread.start()
         app.exec_()
+
     else:  # train model
         logger_dir = os.path.join(args.logDir, args.name)
         logger.set_logger_dir(logger_dir)

@@ -290,7 +290,7 @@ class MedicalPlayer(gym.Env):
         points2 = spacing * np.array(points2)
         return np.linalg.norm(points1 - points2)
 
-    def step(self, act, qvalues, app, viewer):
+    def step(self, act, qvalues, viewer):
         """The environment's step function returns exactly what we need.
         Args:
           act:
@@ -319,14 +319,7 @@ class MedicalPlayer(gym.Env):
         current_loc = self._location
         self.terminal = False
         go_out = False
-        # if MedicalPlayer.application is None:
-        self.app = app
-        print("ENTER STEP")
         self.viewer = viewer
-            # MedicalPlayer.application = app
-            # print("setting application")
-        # else:
-            # self.app = MedicalPlayer.application
 
         # UP Z+ -----------------------------------------------------------
         if (act == 0):
@@ -689,7 +682,6 @@ class MedicalPlayer(gym.Env):
         # print(app)
         # Need to emit signal here
         self.viewer.signal.emit({
-            "app": self.app,
             "arrs": (img, img_x, img_y),
             "agent_loc": current_point,
             "target": self._target_loc,
@@ -814,8 +806,8 @@ class FrameStack(gym.Wrapper):
         self.frames.append(ob)
         return self._observation()
 
-    def step(self, action, q_values, app, viewer):
-        ob, reward, done, info = self.env.step(action, q_values, app, viewer)
+    def step(self, action, q_values, viewer):
+        ob, reward, done, info = self.env.step(action, q_values, viewer)
         self.frames.append(ob)
         return self._observation(), reward, done, info
 

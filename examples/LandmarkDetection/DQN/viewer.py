@@ -25,7 +25,7 @@ class SimpleImageViewer(QWidget):
     ''' Simple image viewer class for rendering images using pyglet'''
     signal = pyqtSignal(dict)
 
-    def __init__(self, app, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
+    def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
 
         super().__init__()
 
@@ -125,7 +125,7 @@ class SimpleImageViewer(QWidget):
         # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 
-    def draw_image(self, app, arrs, agent_loc, target=(200,200), depth=1, text=None, spacing=1, rect=None):
+    def draw_image(self, arrs, agent_loc, target=(200,200), depth=1, text=None, spacing=1, rect=None):
         # convert data typoe to GLubyte
         # rawData = (GLubyte * arr.size)(*list(arr.ravel().astype('int')))
         # # image = pyglet.image.ImageData(self.img_width, self.img_height, 'RGB',
@@ -319,7 +319,6 @@ class SimpleImageViewer(QWidget):
     def signal_handler(self, value):
         print("receive signal")
         self.draw_image(
-            app=value["app"],
             arrs=value["arrs"],
             agent_loc=value["agent_loc"],
             target=value["target"],
