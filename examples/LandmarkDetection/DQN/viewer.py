@@ -16,6 +16,42 @@ try:
 except ImportError as e:
     reraise(suffix="HINT: you can install pyglet directly via 'pip install pyglet'. But if you really just want to install all Gym dependencies and not have to think about it, 'pip install -e .[all]' or 'pip install gym[all]' will do it.")
 
+class Window(QMainWindow):
+    def __init__(self, viewer_param):
+        super().__init__()
+        
+        self.initUI(viewer_param)
+        
+    def initUI(self, viewer_param):               
+        exitAct = QAction(QIcon('exit24.png'), 'Exit', self)
+        exitAct.setShortcut('Ctrl+Q')
+        exitAct.setStatusTip('Exit application')
+        exitAct.triggered.connect(self.close)
+
+        self.statusBar().showMessage("Ready")
+
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(exitAct)
+
+        self.widget = SimpleImageViewer(arr=viewer_param["arrs"][0],
+                                   arr_x=viewer_param["arrs"][1],
+                                   arr_y=viewer_param["arrs"][2],
+                                   filepath=viewer_param["filepath"])
+        self.setCentralWidget(self.widget) 
+
+        self.resize(1000, 800)
+        self.center()
+        self.setWindowTitle('Reinforcement Learning - Medical')    
+        self.show()
+    
+    def center(self):
+        frameGm = self.frameGeometry()
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
+
 class SimpleImageViewer(QWidget):
     ''' Simple image viewer class for rendering images using pyglet'''
     agent_signal = pyqtSignal(dict)
@@ -58,7 +94,6 @@ class SimpleImageViewer(QWidget):
         self.im_x = QPixmap(qImg_x)
         self.im_y = QPixmap(qImg_y)
         self.label = QLabel()
-        # self.label.setPixmap(self.im)
         self.label2 = QLabel()
         self.label2.setPixmap(self.im_x)
         self.label3 = QLabel()

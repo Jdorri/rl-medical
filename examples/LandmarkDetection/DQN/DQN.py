@@ -29,7 +29,7 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
 
 
 import threading
-from viewer import SimpleImageViewer
+from viewer import SimpleImageViewer, Window
 import pickle
 
 from PyQt5.QtWidgets import QApplication
@@ -237,10 +237,7 @@ if __name__ == '__main__':
         # Define application and viewer to run on the main thread
         app = QApplication(sys.argv)
         viewer_param = get_viewer_data()
-        viewer = SimpleImageViewer(arr=viewer_param["arrs"][0],
-                                   arr_x=viewer_param["arrs"][1],
-                                   arr_y=viewer_param["arrs"][2],
-                                   filepath=viewer_param["filepath"])
+        window = Window(viewer_param)
         
         def thread_function():
             """Run on secondary thread"""
@@ -256,14 +253,14 @@ if __name__ == '__main__':
                                            saveGif=args.saveGif,
                                            saveVideo=args.saveVideo,
                                            task='play'),
-                                pred, num_files, viewer=viewer)
+                                pred, num_files, viewer=window)
             # run episodes in parallel and evaluate pretrained model
             elif args.task == 'eval':
                 play_n_episodes(get_player(files_list=args.files, viz=0.01,
                                            saveGif=args.saveGif,
                                            saveVideo=args.saveVideo,
                                            task='eval'),
-                                pred, num_files, viewer=viewer)
+                                pred, num_files, viewer=window)
         # Create a thread to run background task
         thread = threading.Thread(target=thread_function, daemon=True)
         thread.start()

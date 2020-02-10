@@ -644,7 +644,7 @@ class MedicalPlayer(gym.Env):
         ########################################################################
         # PyQt GUI Code Section
         # Need to emit signal here
-        self.viewer.agent_signal.emit({
+        self.viewer.widget.agent_signal.emit({
             "arrs": (img, img_x, img_y),
             "agent_loc": current_point,
             "target": self._target_loc,
