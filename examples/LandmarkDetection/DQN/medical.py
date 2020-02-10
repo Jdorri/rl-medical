@@ -551,10 +551,15 @@ class MedicalPlayer(gym.Env):
         return self._image.data[:, :, z]
 
     def get_plane_x(self, x=0):
-        return self._image.data[x, :, :]
+        im = self._image.data[x, :, :]
+        im = np.rot90(im, 1)                # Rotate 90 degrees ccw
+        # im = np.flip(im, axis=1)            # Mirror horizontally
+        return im
 
     def get_plane_y(self, y=0):
-        return np.rot90(self._image.data[:, y, :], 1)
+        im = self._image.data[:, y, :]
+        im = np.rot90(im, 1)
+        return im
 
     def _calc_reward(self, current_loc, next_loc):
         """ Calculate the new reward based on the decrease in euclidean distance to the target location
@@ -650,11 +655,11 @@ class MedicalPlayer(gym.Env):
             "target": self._target_loc,
             "text": "Error " + str(round(self.cur_dist,3)) + "mm",
             "spacing": 3,
-            "rect": self.rectangle 
+            "rect": self.rectangle
         })
 
         ########################################################################
-                
+
         # save gif
         if self.saveGif:
             image_data = pyglet.image.get_buffer_manager().get_color_buffer().get_image_data()

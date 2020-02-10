@@ -19,10 +19,10 @@ except ImportError as e:
 class Window(QMainWindow):
     def __init__(self, viewer_param):
         super().__init__()
-        
+
         self.initUI(viewer_param)
-        
-    def initUI(self, viewer_param):               
+
+    def initUI(self, viewer_param):
         exitAct = QAction(QIcon('exit24.png'), 'Exit', self)
         exitAct.setShortcut('Ctrl+Q')
         exitAct.setStatusTip('Exit application')
@@ -38,13 +38,13 @@ class Window(QMainWindow):
                                    arr_x=viewer_param["arrs"][1],
                                    arr_y=viewer_param["arrs"][2],
                                    filepath=viewer_param["filepath"])
-        self.setCentralWidget(self.widget) 
+        self.setCentralWidget(self.widget)
 
         self.resize(1000, 800)
         self.center()
-        self.setWindowTitle('Reinforcement Learning - Medical')    
+        self.setWindowTitle('Reinforcement Learning - Medical')
         self.show()
-    
+
     def center(self):
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
@@ -77,7 +77,7 @@ class SimpleImageViewer(QWidget):
 
         # initialize window with the input image
         assert arr.shape == (self.height, self.width, 3), "You passed in an image with the wrong number shape"
-        
+
         ########################################################################
         ## PyQt GUI Code Section
 
@@ -162,15 +162,17 @@ class SimpleImageViewer(QWidget):
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_x)
-        _agent_loc = (agent_loc[2], agent_loc[1])
-        self.draw_rects(text, spacing, _agent_loc, rect[2:])
+        _agent_loc = (agent_loc[1], self.height_x-agent_loc[2])
+        rect_ = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
+        self.draw_rects(text, spacing, _agent_loc, rect_)
         self.draw_circles(_agent_loc, target, depth)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_y)
-        _agent_loc = (agent_loc[0], self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
-        rect = (self.height_y-rect[4], self.height_y-rect[5]) + rect[:2]
-        self.draw_rects(text, spacing, agent_loc, rect)
+        _agent_loc = (agent_loc[0]*self.width_y//self.height_y, self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
+        rect_ = (self.height_y-rect[4], self.height_y-rect[5]) + \
+            (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
+        self.draw_rects(text, spacing, agent_loc, rect_)
         self.draw_circles(_agent_loc, target, depth)
         self.painterInstance.end()
 
@@ -222,7 +224,7 @@ class SimpleImageViewer(QWidget):
 
         # Annotate rectangle
         self.painterInstance.setPen(Qt.cyan)
-        self.painterInstance.setFont(QFont('Decorative', min(abs(yLen)//12, 15)))
+        self.painterInstance.setFont(QFont('Decorative', max(abs(yLen)//12, 15)))
         self.painterInstance.drawText(xPos, yPos-8, "Agent")
 
     @pyqtSlot(dict)
@@ -240,7 +242,7 @@ class SimpleImageViewer(QWidget):
         )
 
     ########################################################################
-    
+
     def render(self):
         self.window.flip()
 
