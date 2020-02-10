@@ -609,7 +609,6 @@ class MedicalPlayer(gym.Env):
         self.num_success = StatCounter()
 
     def display(self, return_rgb_array=False):
-        print("inside display")
         # get dimensions
         current_point = self._location
         target_point = self._target_loc
@@ -645,7 +644,7 @@ class MedicalPlayer(gym.Env):
         ########################################################################
         # PyQt GUI Code Section
         # Need to emit signal here
-        self.viewer.signal.emit({
+        self.viewer.agent_signal.emit({
             "arrs": (img, img_x, img_y),
             "agent_loc": current_point,
             "target": self._target_loc,

@@ -18,7 +18,7 @@ except ImportError as e:
 
 class SimpleImageViewer(QWidget):
     ''' Simple image viewer class for rendering images using pyglet'''
-    signal = pyqtSignal(dict)
+    agent_signal = pyqtSignal(dict)
 
     def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
 
@@ -41,6 +41,9 @@ class SimpleImageViewer(QWidget):
 
         # initialize window with the input image
         assert arr.shape == (self.height, self.width, 3), "You passed in an image with the wrong number shape"
+        
+        ########################################################################
+        ## PyQt GUI Code Section
 
         # Convert image to correct format
         bytesPerLine = 3 * self.width
@@ -79,7 +82,7 @@ class SimpleImageViewer(QWidget):
         self.button_up = QPushButton("Up")
         self.grid.addWidget(self.button_up,1,1)
         self.grid.addWidget(QPushButton('Down'),2,1)
-        self.signal.connect(self.signal_handler)
+        self.agent_signal.connect(self.agent_signal_handler)
 
         # Set Layout of GUI
         self.setLayout(self.grid)
@@ -88,50 +91,16 @@ class SimpleImageViewer(QWidget):
         self.setWindowTitle("Landmark Detection Agent")
         self.show()
 
-        # self.window = pyglet.window.Window(width=scale_x*width,
-        #                                    height=scale_y*height,
-        #                                    caption=self.filename,
-        #                                    display=self.display,
-        #                                    resizable=True,
-        #                                    # fullscreen=True # ruins screen resolution
-        #                                    )
-        ## set location
-        # screen_width = self.window.display.get_default_screen().width
-        # screen_height = self.window.display.get_default_screen().height
-        # self.location_x = screen_width / 2 - 2*width
-        # self.location_y = screen_height / 2 - 2*height
-        # self.location_x = screen_width / 2 - width
-        # self.location_y = screen_height / 2 - height
-        # self.window.set_location((int)(self.location_x), (int)(self.location_y))
+        ########################################################################
 
-        # ## scale window size
-        # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        # glScalef(scale_x, scale_y, 1.0)
-
-        # self.img_width = width
-        # self.img_height = height
-        # self.isopen = True
-
-        # self.window_width, self.window_height = self.window.get_size()
-
-        # # turn on transparency
-        # glEnable(GL_BLEND)
-        # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
+    ########################################################################
+    ## PyQt GUI Code Section
 
     def draw_image(self, arrs, agent_loc, target=(200,200), depth=1, text=None, spacing=1, rect=None):
-        # convert data typoe to GLubyte
-        # rawData = (GLubyte * arr.size)(*list(arr.ravel().astype('int')))
-        # # image = pyglet.image.ImageData(self.img_width, self.img_height, 'RGB',
-        # #                                rawData, #arr.tostring(),
-        # #                                pitch=self.img_width * -3)
-        # self.window.clear()
-        # self.window.switch_to()
-        # self.window.dispatch_events()
-        # image.blit(0,0)
-
-        # Convert image to format
+        """
+        Main image drawer function
+        """
+        # Draw background image (brain)
         cvImg = arrs[0].astype(np.uint8)
         self.height, self.width, self.channel = cvImg.shape
         bytesPerLine = 3 * self.width
@@ -150,6 +119,7 @@ class SimpleImageViewer(QWidget):
         qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
         self.img_y = QPixmap(qImg_y)
 
+        # Draw some rectangle and agent (overlay)
         self.painterInstance = QPainter(self.img)
         _agent_loc = (agent_loc[1], agent_loc[0])
         self.draw_rects(text, spacing, _agent_loc, rect[:4])
@@ -176,16 +146,14 @@ class SimpleImageViewer(QWidget):
         self.show()
 
     def draw_circles(self, agent_loc, target, depth):
-        # create painter instance with pixmap
-
-        # draw current agent location
+        # Draw current agent location
         self.penCentre = QPen(Qt.blue)
         self.penCentre.setWidth(3)
         self.painterInstance.setPen(self.penCentre)
         centre = QPoint(*agent_loc)
         self.painterInstance.drawEllipse(centre, 2, 2)
 
-        # draw circle at target location
+        # Draw circle at target location
         if target is not None:
             self.penCentre = QPen(Qt.red)
             self.penCentre.setWidth(3)
@@ -204,9 +172,6 @@ class SimpleImageViewer(QWidget):
             self.painterInstance.drawEllipse(centre, radx, rady)
 
     def draw_rects(self, text, spacing, agent_loc, rect):
-        # self.painterInstance.restore()
-        # create painter instance with pixmap
-
         # Coordinates for overlayed rectangle (ROI)
         xPos = rect[2]
         yPos = rect[0]
@@ -225,94 +190,11 @@ class SimpleImageViewer(QWidget):
         self.painterInstance.setFont(QFont('Decorative', min(abs(yLen)//12, 15)))
         self.painterInstance.drawText(xPos, yPos-8, "Agent")
 
-        # # Add error message
-        # self.painterInstance.setPen(QtCore.Qt.darkGreen)
-        # self.painterInstance.setFont(QFont('Decorative', self.height//15))
-        # self.painterInstance.drawText(self.width//10, self.height*17//20, text)
-        # # Add spacing message
-        # self.painterInstance.setPen(QtCore.Qt.darkGreen)
-        # self.painterInstance.setFont(QFont('Decorative', self.height//15))
-        # self.painterInstance.drawText(self.width*1//2, self.height*17//20, f'Spacing {spacing}')
-
-
-    # def draw_point(self,x=0.0,y=0.0,z=0.0):
-    #     x = self.img_height - x
-    #     y = y
-    #     # pyglet.graphics.draw(1, GL_POINTS,
-    #     #     ('v2i', (x_new, y_new)),
-    #     #     ('c3B', (255, 0, 0))
-    #     # )
-    #     glBegin(GL_POINTS) # draw point
-    #     glVertex3f(x, y, z)
-    #     glEnd()
-
-
-    # def draw_circle(self, radius=10, res=30, pos_x=0, pos_y=0,
-    #                 color=(1.0,1.0,1.0,1.0),**attrs):
-    #
-    #     points = []
-    #     # window start indexing from bottom left
-    #     x = self.img_height - pos_x
-    #     y = pos_y
-    #
-    #     for i in range(res):
-    #         ang = 2*math.pi*i / res
-    #         points.append((math.cos(ang)*radius + y ,
-    #                        math.sin(ang)*radius + x))
-    #
-    #     # draw filled polygon
-    #     if   len(points) == 4 : glBegin(GL_QUADS)
-    #     elif len(points)  > 4 : glBegin(GL_POLYGON)
-    #     else: glBegin(GL_TRIANGLES)
-    #     for p in points:
-    #         # choose color
-    #         glColor4f(color[0],color[1],color[2],color[3]);
-    #         glVertex3f(p[0], p[1],0)  # draw each vertex
-    #     glEnd()
-    #     # reset color
-    #     glColor4f(1.0, 1.0, 1.0, 1.0);
-    #
-    #
-    # def draw_rect(self, x_min_init, y_min, x_max_init, y_max):
-    #     main_batch = pyglet.graphics.Batch()
-    #     # fix location
-    #     x_max = self.img_height - x_max_init
-    #     x_min = self.img_height - x_min_init
-    #     # draw lines
-    #     glColor4f(0.8, 0.8, 0.0, 1.0)
-    #     main_batch.add(2, gl.GL_LINES, None,
-    #                    ('v2f', (y_min, x_min, y_max, x_min)))
-    #                    # ('c3B', (204, 204, 0, 0, 255, 0)))
-    #     main_batch.add(2, gl.GL_LINES, None,
-    #                    ('v2f', (y_min, x_min, y_min, x_max)))
-    #                    # ('c3B', (204, 204, 0, 0, 255, 0)))
-    #     main_batch.add(2, gl.GL_LINES, None,
-    #                    ('v2f', (y_max, x_max, y_min, x_max)))
-    #                    # ('c3B', (204, 204, 0, 0, 255, 0)))
-    #     main_batch.add(2, gl.GL_LINES, None,
-    #                    ('v2f', (y_max, x_max, y_max, x_min)))
-    #                    # ('c3B', (204, 204, 0, 0, 255, 0)))
-    #
-    #     main_batch.draw()
-    #     # reset color
-    #     glColor4f(1.0, 1.0, 1.0, 1.0);
-    #
-    #
-    #
-    # def display_text(self, text, x, y, color=(0,0,204,255), #RGBA
-    #                  anchor_x='left', anchor_y='top'):
-    #     x = int(self.img_height - x)
-    #     y = int(y)
-    #     label = pyglet.text.Label(text,
-    #                               font_name='Ariel', color=color,
-    #                               font_size=8, bold=True,
-    #                               x=y, y=x,
-    #                               anchor_x=anchor_x, anchor_y=anchor_y)
-    #     label.draw()
-    ## SIGNAL HANDLER
     @pyqtSlot(dict)
-    def signal_handler(self, value):
-        print("receive signal")
+    def agent_signal_handler(self, value):
+        """
+        Used to handle agent signal when it moves.
+        """
         self.draw_image(
             arrs=value["arrs"],
             agent_loc=value["agent_loc"],
@@ -321,9 +203,8 @@ class SimpleImageViewer(QWidget):
             spacing=value["spacing"],
             rect=value["rect"]
         )
-        # self.label.setText(str(value["agent_loc"]))
-        # self.label.setStyleSheet("QLabel {background-color: white }")
-        # print(value["agent_loc"])
+
+    ########################################################################
     
     def render(self):
         self.window.flip()
@@ -338,5 +219,6 @@ class SimpleImageViewer(QWidget):
         if self.isopen:
             self.window.close()
             self.isopen = False
+
     def __del__(self):
         self.close()
