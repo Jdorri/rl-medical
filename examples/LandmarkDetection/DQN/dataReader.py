@@ -22,7 +22,19 @@ def getLandmarksFromTXTFile(file):
     with open(file) as fp:
         landmarks = []
         for i, line in enumerate(fp):
-            landmarks.append([float(k) for k in line.split(',')])
+            landmarks.append([float(k) for k in line.split(',')]) 
+        landmarks = np.asarray(landmarks).reshape((-1, 3))
+        return landmarks
+
+
+def getLandmarksFromTXTFileUS(file):
+    """
+    Extract each landmark point line by line from a text file, and return vector containing all landmarks.
+    """
+    with open(file) as fp:
+        landmarks = []
+        for i, line in enumerate(fp):
+            landmarks.append([float(k) for k in line.split()]) 
         landmarks = np.asarray(landmarks).reshape((-1, 3))
         return landmarks
 
@@ -99,16 +111,22 @@ class filesListBrainMRLandmark(object):
                     ## transform landmarks to image space if they are in physical space
                     landmark_file = self.landmark_files[idx]
                     all_landmarks = getLandmarksFromTXTFile(landmark_file)
-                    # landmark = all_landmarks[14] # landmark index is 13 for ac-point and 14 pc-point
+                    landmark = all_landmarks[14] # landmark index is 13 for ac-point and 14 pc-point
                     # transform landmark from physical to image space if required
                     # landmarks = sitk_image.TransformPhysicalPointToContinuousIndex(landmark)
-                    landmarks = [np.round(all_landmarks[(i + 14) % 15]) for i in range(self.agents)]
+                    # landmarks = [np.round(all_landmarks[(i + 14) % 15]) for i in range(self.agents)]
+                    landmark = np.round(landmark).astype('int')
                 else:
-                    landmarks = None
+                    landmark = None
                 # extract filename from path, remove .nii.gz extension
                 image_filename = self.image_files[idx][:-7]
+<<<<<<< HEAD
                 images = [image] * self.agents
                 yield images, landmarks, image_filename[0], sitk_image.GetSpacing()
+=======
+                # images = [image] * self.agents
+                yield image, landmark, image_filename, sitk_image.GetSpacing()
+>>>>>>> master
 ###############################################################################
 
 
@@ -156,17 +174,19 @@ class filesListCardioLandmark(object):
                                      for point in all_landmarks]
                     # Indexes: 0-2 RV insert points, 1 -> RV lateral wall turning point, 3 -> LV lateral wall mid-point,
                     # 4 -> apex, 5-> center of the mitral valve
-                    landmarks = [np.round(all_landmarks[(i + 4) % 6]) for i in range(self.agents)]  # Apex + MV
+                    landmark = all_landmarks[4] 
+                    # landmarks = [np.round(all_landmarks[(i + 4) % 6]) for i in range(self.agents)]  # Apex + MV
                     # landmarks = [np.round(all_landmarks[(i + 3) % 6]) for i in range(self.agents)]  # LV + Apex
                     # landmarks = [np.round(all_landmarks[((i + 1) + 3) % 6]) for i in range(self.agents)] # LV + MV
+                    landmark = np.round(landmark).astype('int')
                 else:
-                    landmarks = None
+                    landmark = None
 
                 # extract filename from path, remove .nii.gz extension
-                image_filenames = [self.image_files[idx][:-7]] * self.agents
-                images = [image] * self.agents
+                image_filename = self.image_files[idx][:-7]
+                # images = [image] * self.agents
 
-                yield images, landmarks, image_filenames, sitk_image.GetSpacing()
+                yield image, landmark, image_filename, sitk_image.GetSpacing()
 ###############################################################################
 
 
@@ -208,18 +228,21 @@ class filesListFetalUSLandmark(object):
                 sitk_image, image = NiftiImage().decode(self.image_files[idx])
                 if self.returnLandmarks:
                     landmark_file = self.landmark_files[idx]
-                    all_landmarks = getLandmarksFromVTKFile(landmark_file)
+                    all_landmarks = getLandmarksFromTXTFileUS(landmark_file)
                     # landmark point 12 csp - 11 leftCerebellar - 10 rightCerebellar
+                    landmark = all_landmarks[12]
+                    print(landmark)
                     # landmarks = [np.round(all_landmarks[(i*2 + 10) % 13]) for i in range(self.agents)]
-                    landmarks = [np.round(all_landmarks[(i + 10) % 13]) for i in range(self.agents)]  # Apex + MV
+                    # landmark = [np.round(all_landmarks[(i + 10) % 13]) for i in range(self.agents)]  # Apex + MV
+                    landmark = np.round(landmark).astype('int')
                 else:
-                    landmarks = None
+                    landmark = None
 
                 # extract filename from path, remove .nii.gz extension
-                image_filenames = [self.image_files[idx][:-7]] * self.agents
-                images = [image] * self.agents
+                image_filename = self.image_files[idx][:-7]
+                # images = [image] * self.agents
 
-                yield images, landmarks, image_filenames, sitk_image.GetSpacing()
+                yield image, landmark, image_filename, sitk_image.GetSpacing()
 ###############################################################################
 
 
