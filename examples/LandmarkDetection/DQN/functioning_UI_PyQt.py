@@ -206,7 +206,7 @@ class MainWindow(QWidget):
 
           if self.task_value != 'Train':
               pred = OfflinePredictor(PredictConfig(
-                  model=Model(),
+                  model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA ),
                   session_init=get_model_loader(self.fname_model),
                   input_names=['state'],
                   output_names=['Qvalue']))

@@ -65,7 +65,7 @@ def get_player(directory=None, files_list= None, viz=False,
     # in atari paper, max_num_frames = 30000
     env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
                         viz=viz, saveGif=saveGif, saveVideo=saveVideo,
-                        task=task, files_list=files_list, max_num_frames=1500)
+                        task=task, files_list=files_list, max_num_frames=1500, GUI=True)
     if (task != 'train'):
         # in training, env will be decorated by ExpReplay, and history
         # is taken care of in expreplay buffer
@@ -76,7 +76,7 @@ def get_player(directory=None, files_list= None, viz=False,
 ###############################################################################
 
 class Model(DQNModel):
-    def __init__(self):
+    def __init__(self,IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA):
         super(Model, self).__init__(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA)
 
     def _get_DQN_prediction(self, image):

@@ -22,7 +22,7 @@ def getLandmarksFromTXTFile(file):
     with open(file) as fp:
         landmarks = []
         for i, line in enumerate(fp):
-            landmarks.append([float(k) for k in line.split(',')]) 
+            landmarks.append([float(k) for k in line.split(',')])
         landmarks = np.asarray(landmarks).reshape((-1, 3))
         return landmarks
 
@@ -34,7 +34,7 @@ def getLandmarksFromTXTFileUS(file):
     with open(file) as fp:
         landmarks = []
         for i, line in enumerate(fp):
-            landmarks.append([float(k) for k in line.split()]) 
+            landmarks.append([float(k) for k in line.split()])
         landmarks = np.asarray(landmarks).reshape((-1, 3))
         return landmarks
 
@@ -120,13 +120,9 @@ class filesListBrainMRLandmark(object):
                     landmark = None
                 # extract filename from path, remove .nii.gz extension
                 image_filename = self.image_files[idx][:-7]
-<<<<<<< HEAD
-                images = [image] * self.agents
-                yield images, landmarks, image_filename[0], sitk_image.GetSpacing()
-=======
+
                 # images = [image] * self.agents
                 yield image, landmark, image_filename, sitk_image.GetSpacing()
->>>>>>> master
 ###############################################################################
 
 
@@ -174,7 +170,7 @@ class filesListCardioLandmark(object):
                                      for point in all_landmarks]
                     # Indexes: 0-2 RV insert points, 1 -> RV lateral wall turning point, 3 -> LV lateral wall mid-point,
                     # 4 -> apex, 5-> center of the mitral valve
-                    landmark = all_landmarks[4] 
+                    landmark = all_landmarks[4]
                     # landmarks = [np.round(all_landmarks[(i + 4) % 6]) for i in range(self.agents)]  # Apex + MV
                     # landmarks = [np.round(all_landmarks[(i + 3) % 6]) for i in range(self.agents)]  # LV + Apex
                     # landmarks = [np.round(all_landmarks[((i + 1) + 3) % 6]) for i in range(self.agents)] # LV + MV
