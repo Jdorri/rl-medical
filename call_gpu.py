@@ -49,9 +49,10 @@ mkdir_p(output_path, 'output')#create case output folder
 #Make submission file
 
 job_file = os.path.join(input_path, f"{case_number}.sh")
-# files = "'/vol/biomedic/users/aa16914/shared/data/RL_data/brain_train_files_new_paths.txt' '/vol/biomedic/users/aa16914/shared/data/RL_data/brain_train_landmarks_new_paths.txt'"
+files = "'/vol/biomedic/users/aa16914/shared/data/RL_data/brain_train_files_new_paths.txt' '/vol/biomedic/users/aa16914/shared/data/RL_data/brain_train_landmarks_new_paths.txt'"
 # files = "'/vol/biomedic/users/aa16914/shared/data/RL_data/cardiac_train_files_new_paths.txt' '/vol/biomedic/users/aa16914/shared/data/RL_data/cardiac_train_landmarks_new_paths.txt'"
-files = "'/vol/biomedic/users/aa16914/shared/data/RL_data/fetalUS_train_files_new_paths.txt' '/vol/biomedic/users/aa16914/shared/data/RL_data/fetalUS_train_landmarks_new_paths.txt'"
+# files = "'/vol/biomedic/users/aa16914/shared/data/RL_data/fetalUS_train_files_new_paths.txt' '/vol/biomedic/users/aa16914/shared/data/RL_data/fetalUS_train_landmarks_new_paths.txt'"
+model = "'/vol/project/2019/545/g1954503/oen19/LandmarkDetection/003/output/003/model-600000'"
 with open(job_file, 'w') as fh:
 
 
@@ -73,6 +74,7 @@ with open(job_file, 'w') as fh:
                                                             f"--task {task} " 
                                                             f"--algo {algo} "
                                                             f"--gpu 0 " 
+                                                            f"--load {model} "
                                                             f"--files {files} " 
                                                             f"--logDir {output_path} "
                                                             f"--name {case_number}")

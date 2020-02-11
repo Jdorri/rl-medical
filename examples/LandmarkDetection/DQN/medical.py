@@ -237,7 +237,7 @@ class MedicalPlayer(gym.Env):
         # multiscale (e.g. start with 3 -> 2 -> 1)
         # scale can be thought of as sampling stride
         if self.multiscale:
-            ## brain
+            # brain
             self.action_step = 9
             self.xscale = 3
             self.yscale = 3
@@ -453,14 +453,14 @@ class MedicalPlayer(gym.Env):
                 'distError': distance_error, 'filename': self.filename}
 
  
-        # if self.terminal:
-        #     directory = logger.get_logger_dir()
-        #     self.csvfile = 'Reward_and_Q_log.csv'
-        #     path = os.path.join(directory, self.csvfile)
-        #     with open(path, 'a') as outcsv:
-        #         fields= [info['score']]
-        #         writer = csv.writer(outcsv)
-        #         writer.writerow(map(lambda x: x, fields))
+        if self.terminal:
+            directory = logger.get_logger_dir()
+            self.csvfile = 'Reward_and_Q_log.csv'
+            path = os.path.join(directory, self.csvfile)
+            with open(path, 'a') as outcsv:
+                fields= [info['score']]
+                writer = csv.writer(outcsv)
+                writer.writerow(map(lambda x: x, fields))
 
 
         # #######################################################################

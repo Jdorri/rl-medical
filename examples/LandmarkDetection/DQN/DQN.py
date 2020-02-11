@@ -257,11 +257,17 @@ if __name__ == '__main__':
             #remove some layers
             session_init = get_model_loader(args.load)
             reader, variables = session_init._read_checkpoint_vars(args.load)
-            print(session_init.ignore)
+            # print(reader.get_tensor("EMA/SummaryGradient/conv0/b/rms/local_step:0"))
+            # print(variables)
+            # print(session_init.ignore)
             #ignore fc layers
-            ignore = (variable for variable in variables if "fc" in variable)
+            ignore = (variable for variable in variables if "Adam" in variable or "fc" in variable)
+            #ignore conv layers
+            # ignore = (variable for variable in variables if "Adam" in variable or "conv" in variable)
+            #ignore none
+            # ignore = (variable for variable in variables if "Adam" in variable)
             session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
-            print(session_init.ignore)
+            # print(session_init.ignore)
             #remove some layers
        
             config.session_init = session_init
