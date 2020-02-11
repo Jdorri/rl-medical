@@ -648,6 +648,10 @@ class MedicalPlayer(gym.Env):
 
         ########################################################################
         # PyQt GUI Code Section
+        # Sleep until resume
+        while self.viewer.left_widget.thread.pause:
+            time.sleep(1)
+        
         # Need to emit signal here
         self.viewer.widget.agent_signal.emit({
             "arrs": (img, img_x, img_y),

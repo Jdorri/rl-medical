@@ -13,6 +13,7 @@ class WorkerThread(Thread):
     def __init__(self, target_function):
         super().__init__(daemon=True)
         self.target_function = target_function
+        self.pause = False
 
     def run(self):
         self.target_function()

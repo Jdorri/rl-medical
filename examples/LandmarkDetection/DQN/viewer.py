@@ -178,9 +178,11 @@ class SimpleImageViewerSettings(QFrame):
             self.run_button.setText("Pause")
             self.run_button.setStyleSheet("background-color:#f44336; color:white")
         elif self.run_button.text() == "Run":
+            self.thread.pause = False
             self.run_button.setText("Pause")
             self.run_button.setStyleSheet("background-color:#f44336; color:white")
         else:
+            self.thread.pause = True
             self.run_button.setText("Run")
             self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
 
