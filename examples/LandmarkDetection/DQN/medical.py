@@ -63,7 +63,7 @@ class MedicalPlayer(gym.Env):
 
     def __init__(self, directory=None, viz=False, task=False, files_list=None,
                  screen_dims=(27,27,27), history_length=20, multiscale=True,
-                 max_num_frames=0, saveGif=False, saveVideo=False, GUI=False):
+                 max_num_frames=0, saveGif=False, saveVideo=False):
         """
         :param train_directory: environment or game name
         :param viz: visualization
@@ -155,10 +155,10 @@ class MedicalPlayer(gym.Env):
         # add your data loader here
         if self.task == 'play':
             self.files = filesListBrainMRLandmark(files_list,
-                                                  returnLandmarks=False, GUI=GUI)
+                                                  returnLandmarks=False,)
         else:
             self.files = filesListBrainMRLandmark(files_list,
-                                                  returnLandmarks=True, GUI=GUI)
+                                                  returnLandmarks=True)
 
 
 
@@ -448,13 +448,13 @@ class MedicalPlayer(gym.Env):
 
 
         if self.terminal:
-            directory = logger.get_logger_dir()
+            # directory = logger.get_logger_dir()
             self.csvfile = 'Reward_and_Q_log.csv'
-            path = os.path.join(directory, self.csvfile)
-            with open(path, 'a') as outcsv:
-                fields= [info['score']]
-                writer = csv.writer(outcsv)
-                writer.writerow(map(lambda x: x, fields))
+            # path = os.path.join(directory, self.csvfile)
+            # with open(path, 'a') as outcsv:
+            #     fields= [info['score']]
+            #     writer = csv.writer(outcsv)
+            #     writer.writerow(map(lambda x: x, fields))
 
 
         # #######################################################################

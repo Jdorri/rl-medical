@@ -101,8 +101,12 @@ class MainWindow(QWidget):
 
         # temporary default file paths
         self.fname_images = "/homes/jd3114/Documents/Group Project/rl-medical/examples/LandmarkDetection/DQN/data/filenames/image_files.txt"
+        # self.fname_images = "/Users/phaedonmit/Documents/Python/rl-medical/examples/LandmarkDetection/DQN/data/filenames/image_files.txt"
         # self.fname_images = './data/filenames/image_files.txt'
         self.fname_model = "/homes/jd3114/Documents/Group Project/rl-medical/examples/LandmarkDetection/DQN/data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+        # self.fname_model = "/Users/phaedonmit/Documents/Python/rl-medical/examples/LandmarkDetection/DQN/data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+
+        self.fname_logs_dir = "/homes/jd3114/Documents/Group Project/rl-medical/examples/LandmarkDetection/DQN/data"
 
         # initialise grid/set spacing
         grid = QGridLayout()
@@ -200,7 +204,7 @@ class MainWindow(QWidget):
           # load files into env to set num_actions, num_validation_files
           init_player = MedicalPlayer(files_list=selected_list,
                                       screen_dims=IMAGE_SIZE,
-                                      task='play', GUI=True)
+                                      task='play')
           NUM_ACTIONS = init_player.action_space.n
           num_files = init_player.files.num_files
 

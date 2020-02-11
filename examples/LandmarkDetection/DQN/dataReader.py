@@ -71,24 +71,17 @@ class filesListBrainMRLandmark(object):
         returnLandmarks: Return landmarks if task is train or eval (default: True)
     """
 
-    def __init__(self, files_list=None, returnLandmarks=True, agents=1, GUI=False):
+    def __init__(self, files_list=None, returnLandmarks=True, agents=1):
         # check if files_list exists
         assert files_list, 'There is no file give'
         # read image filenames
-        if GUI:
-            print(files_list)
             # self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
-            self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
-        else:
-            self.image_files = [line.split('\n')[0] for line in open(files_list[0].name)]
+        self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
         # read landmark filenames if task is train or eval
         self.returnLandmarks = returnLandmarks
         self.agents = agents
         if self.returnLandmarks:
-            if GUI:
-                self.landmark_files = [line.split('\n')[0] for line in open(files_list[1])]
-            else:
-                self.landmark_files = [line.split('\n')[0] for line in open(files_list[1].name)]
+            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1])]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
 
