@@ -1,7 +1,6 @@
 ################################################################################
 ## PyQt thread files containing codes for Thread
 # Author: Maleakhi, Alex, Faidon, Jamie
-# Credit: Code adapted from Amir Alansary viewer.py file
 ################################################################################
 
 from threading import Thread

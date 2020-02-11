@@ -99,6 +99,12 @@ class Window(QMainWindow):
         # View menu
         view_menu = self.menubar.addMenu("&View")
 
+        # Night mode action
+        nightModeAct = QAction("Night mode", self, checkable=True)
+        nightModeAct.setStatusTip("Change layout to night mode")
+        nightModeAct.triggered.connect(self.toggleMenu)
+        view_menu.addAction(nightModeAct)
+
         # Help menu
         help_menu = self.menubar.addMenu("&Help")
 
@@ -124,6 +130,25 @@ class Window(QMainWindow):
             event.accept()
         else:
             event.ignore()  
+    
+    def nightMode(self):
+        "CSS Styling for night mode app version"
+        # Overwrite widgets color
+        self.setStyleSheet("background-color:black; color:white")
+        self.left_widget.setStyleSheet("background-color:#1c1c1c")
+    
+    def dayMode(self):
+        "CSS Styling for day mode app version"
+        # Overwrite widgets color
+        self.setStyleSheet("background-color:white; color:black")
+        self.left_widget.setStyleSheet("background-color:white")
+
+    def toggleMenu(self, state):
+        "Event handler for toggle menu"
+        if state:
+            self.nightMode()
+        else:
+            self.dayMode()
 
 
 ################################################################################
