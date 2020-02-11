@@ -651,14 +651,16 @@ class MedicalPlayer(gym.Env):
 
         ########################################################################
         # PyQt GUI Code Section
+
         # Section of code to get initial value to be stored in a pickle object
-        viewer_param = {
-            "arrs": (img, img_x, img_y),
-            "filepath": self.filename
-        }
-        with open("default_data.pickle", "wb") as f:
-            viewer_param = pickle.dump(viewer_param, f)
-            exit()
+        # (Uncomment if you wish to modify default_data.pickle)
+        # viewer_param = {
+        #     "arrs": (img, img_x, img_y),
+        #     "filepath": self.filename
+        # }
+        # with open("default_data.pickle", "wb") as f:
+        #     viewer_param = pickle.dump(viewer_param, f)
+        #     exit()
 
         # Sleep until resume
         while self.viewer.left_widget.thread.pause:
