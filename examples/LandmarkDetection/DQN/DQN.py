@@ -27,8 +27,7 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         FullyConnected, PReLU, SimpleTrainer,
                         launch_train_with_config)
 
-
-import threading
+from thread import WorkerThread
 from viewer import SimpleImageViewer, Window
 import pickle
 
@@ -261,9 +260,10 @@ if __name__ == '__main__':
                                            saveVideo=args.saveVideo,
                                            task='eval'),
                                 pred, num_files, viewer=window)
+        
         # Create a thread to run background task
-        thread = threading.Thread(target=thread_function, daemon=True)
-        thread.start()
+        thread = WorkerThread(target_function=thread_function)
+        window.left_widget.thread = thread
         app.exec_()
 
         ########################################################################

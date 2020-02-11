@@ -1,3 +1,8 @@
+################################################################################
+## PyQt GUI files containing codes for Windows and Widgets
+# Author: Maleakhi, Alex, Faidon, Jamie
+# Credit: Code adapted from Amir Alansary viewer.py file
+################################################################################
 import os
 import math
 import io
@@ -16,9 +21,13 @@ try:
 except ImportError as e:
     reraise(suffix="HINT: you can install pyglet directly via 'pip install pyglet'. But if you really just want to install all Gym dependencies and not have to think about it, 'pip install -e .[all]' or 'pip install gym[all]' will do it.")
 
+
+################################################################################
+## QMainWindow
+
 class Window(QMainWindow):
     """
-    Window used as the main window for the application which integrate different widgets
+    Window used as the main window for the application which integrate different widgets.
     """
     def __init__(self, viewer_param):
         super().__init__()
@@ -111,17 +120,21 @@ class Window(QMainWindow):
             event.ignore()  
 
 
+################################################################################
+## Left Widget
+
 class SimpleImageViewerSettings(QFrame):
     """
     Left widget controlling GUI elements settings.
     """    
     def __init__(self):
         super().__init__()
+        self.thread = None # Store thread to allow pause and run functionality
 
         # Widgets
         label_settings = QLabel("<b>SETTINGS</b>")
         label_run = QLabel("Run Agent")
-        self.run_button = QPushButton("Run")
+        self.run_button = QPushButton("Start")
         self.run_button.clicked.connect(self.buttonClicked)
         self.speed_slider = QSlider(Qt.Horizontal, self)
         self.speed_slider.setFocusPolicy(Qt.StrongFocus)
@@ -160,7 +173,11 @@ class SimpleImageViewerSettings(QFrame):
         """
         Event handler (slot) for when the button is clicked
         """
-        if self.run_button.text() == "Run":
+        if self.run_button.text() == "Start":
+            self.thread.start()
+            self.run_button.setText("Pause")
+            self.run_button.setStyleSheet("background-color:#f44336; color:white")
+        elif self.run_button.text() == "Run":
             self.run_button.setText("Pause")
             self.run_button.setStyleSheet("background-color:#f44336; color:white")
         else:
@@ -168,11 +185,14 @@ class SimpleImageViewerSettings(QFrame):
             self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
 
 
+################################################################################
+## Main Widget
+
 class SimpleImageViewer(QWidget):
     """
     Simple image viewer class for rendering images using pyglet and pyqt
     """
-    agent_signal = pyqtSignal(dict)
+    agent_signal = pyqtSignal(dict) # Signaling agent move (current location, status)
 
     def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
         super().__init__()
@@ -194,9 +214,6 @@ class SimpleImageViewer(QWidget):
 
         # initialize window with the input image
         assert arr.shape == (self.height, self.width, 3), "You passed in an image with the wrong number shape"
-
-        ########################################################################
-        ## PyQt GUI Code Section
 
         # Convert image to correct format
         bytesPerLine = 3 * self.width
@@ -245,11 +262,6 @@ class SimpleImageViewer(QWidget):
         self.label_img.setStyleSheet("background: black; border:3px solid rgb(255, 0, 0); ")
         self.label_img_x.setStyleSheet("background: black; border:3px solid green; ")
         self.label_img_y.setStyleSheet("background: black; border:3px solid blue; ")
-
-        ########################################################################
-
-    ########################################################################
-    ## PyQt GUI Code Section
 
     def draw_image(self, arrs, agent_loc, target=(200,200), depth=1, text=None, spacing=1, rect=None):
         """
@@ -362,8 +374,6 @@ class SimpleImageViewer(QWidget):
             rect=value["rect"]
         )
 
-    ########################################################################
-
     def render(self):
         self.window.flip()
 
@@ -380,3 +390,5 @@ class SimpleImageViewer(QWidget):
 
     def __del__(self):
         self.close()
+
+################################################################################
