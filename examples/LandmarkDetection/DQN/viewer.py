@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys
+from thread import WorkerThread
 
 try:
     import pyglet
@@ -51,7 +52,7 @@ class Window(QMainWindow):
                                    arr_y=viewer_param["arrs"][2],
                                    filepath=viewer_param["filepath"])
         
-        self.left_widget = SimpleImageViewerSettings()
+        self.left_widget = SimpleImageViewerSettings(self)
         self.left_widget.setFrameShape(QFrame.StyledPanel)
 
         # Manage layout
@@ -127,9 +128,10 @@ class SimpleImageViewerSettings(QFrame):
     """
     Left widget controlling GUI elements settings.
     """    
-    def __init__(self):
+    def __init__(self, window):
         super().__init__()
-        self.thread = None # Store thread to allow pause and run functionality
+        self.thread = WorkerThread(None) # Store thread to allow pause and run functionality
+        self.window = window
 
         # Widgets
         label_settings = QLabel("<b>SETTINGS</b>")
@@ -140,7 +142,8 @@ class SimpleImageViewerSettings(QFrame):
         self.speed_slider.setFocusPolicy(Qt.StrongFocus)
         self.speed_slider.setMinimum(0)
         self.speed_slider.setMaximum(5)
-
+        self.speed_slider.valueChanged[int].connect(self.changeValue)
+        self.speed_slider.setValue(5)
         hr = QLabel("<hr />")
         hr.setStyleSheet("margin: 10px 0")
         hr2 = QLabel("<hr />")
@@ -176,16 +179,29 @@ class SimpleImageViewerSettings(QFrame):
         if self.run_button.text() == "Start":
             self.thread.start()
             self.run_button.setText("Pause")
+            self.window.statusbar.showMessage("Run")
             self.run_button.setStyleSheet("background-color:#f44336; color:white")
         elif self.run_button.text() == "Run":
             self.thread.pause = False
             self.run_button.setText("Pause")
             self.run_button.setStyleSheet("background-color:#f44336; color:white")
+            self.window.statusbar.showMessage("Run")
         else:
             self.thread.pause = True
             self.run_button.setText("Run")
             self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-
+            self.window.statusbar.showMessage("Pause")
+    
+    def changeValue(self, value):
+        """
+        Event handler for slider (adjusting agent speed)
+        """
+        if value >= 4:
+            self.thread.speed = WorkerThread.FAST
+        elif value >= 2:
+            self.thread.speed = WorkerThread.MEDIUM
+        else:
+            self.thread.speed = WorkerThread.SLOW
 
 ################################################################################
 ## Main Widget

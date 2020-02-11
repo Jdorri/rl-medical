@@ -29,6 +29,9 @@ import shutil
 import gym
 from gym import spaces
 
+from thread import WorkerThread
+import pickle
+
 try:
     import pyglet
 except ImportError as e:
@@ -648,6 +651,15 @@ class MedicalPlayer(gym.Env):
 
         ########################################################################
         # PyQt GUI Code Section
+        # Section of code to get initial value to be stored in a pickle object
+        viewer_param = {
+            "arrs": (img, img_x, img_y),
+            "filepath": self.filename
+        }
+        with open("default_data.pickle", "wb") as f:
+            viewer_param = pickle.dump(viewer_param, f)
+            exit()
+
         # Sleep until resume
         while self.viewer.left_widget.thread.pause:
             time.sleep(1)
@@ -661,6 +673,14 @@ class MedicalPlayer(gym.Env):
             "spacing": 3,
             "rect": self.rectangle
         })
+
+        # Control agent speed
+        if self.viewer.left_widget.thread.speed == WorkerThread.FAST:
+            time.sleep(0)
+        elif self.viewer.left_widget.thread.speed == WorkerThread.MEDIUM:
+            time.sleep(0.5)
+        else:
+            time.sleep(1.5)
 
         ########################################################################
 
