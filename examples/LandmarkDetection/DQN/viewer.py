@@ -124,7 +124,7 @@ class Window(QMainWindow):
         """        
         reply = QMessageBox.question(self, 'Message',
             "Are you sure to quit?", QMessageBox.Yes | 
-            QMessageBox.No, QMessageBox.No)
+            QMessageBox.No, QMessageBox.Yes)
 
         if reply == QMessageBox.Yes:
             event.accept()
