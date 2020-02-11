@@ -100,13 +100,13 @@ class MainWindow(QWidget):
         self.algorithm_edit.addItems(['DQN', 'Double', 'Dueling', 'Dueling Double'])
 
         # temporary default file paths
-        self.fname_images = "/homes/jd3114/Documents/Group Project/rl-medical/examples/LandmarkDetection/DQN/data/filenames/image_files.txt"
+        self.fname_images = "./data/filenames/image_files.txt"
         # self.fname_images = "/Users/phaedonmit/Documents/Python/rl-medical/examples/LandmarkDetection/DQN/data/filenames/image_files.txt"
         # self.fname_images = './data/filenames/image_files.txt'
-        self.fname_model = "/homes/jd3114/Documents/Group Project/rl-medical/examples/LandmarkDetection/DQN/data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+        self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
         # self.fname_model = "/Users/phaedonmit/Documents/Python/rl-medical/examples/LandmarkDetection/DQN/data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
 
-        self.fname_logs_dir = "/homes/jd3114/Documents/Group Project/rl-medical/examples/LandmarkDetection/DQN/data"
+        self.fname_logs_dir = "./data"
 
         # initialise grid/set spacing
         grid = QGridLayout()
