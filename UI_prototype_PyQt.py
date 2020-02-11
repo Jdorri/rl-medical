@@ -15,8 +15,8 @@ class MainWindow(QWidget):
         self.load = QLabel('Load Model', self)
         self.task = QLabel('Task', self)
         self.algorithm = QLabel('Algorithm', self)
-        self.file1 = QLabel('File 1: Images', self)
-        self.file2 = QLabel('File 2: Landmarks', self)
+        self.img_file = QLabel('File 1: Images', self)
+        self.landmark_file = QLabel('File 2: Landmarks', self)
         self.GIF = QLabel('Save GIF', self)
         self.video = QLabel('Save Video', self)
         self.log_dir = QLabel('Store Logs', self)
@@ -27,8 +27,8 @@ class MainWindow(QWidget):
         self.load_edit = QPushButton('Browse', self)
         self.task_edit = QComboBox()
         self.algorithm_edit = QComboBox()
-        self.file1_edit = QPushButton('Browse', self)
-        self.file2_edit = QPushButton('Browse', self)
+        self.img_file_edit = QPushButton('Browse', self)
+        self.landmark_file_edit = QPushButton('Browse', self)
         self.GIF_edit =  QCheckBox()
         self.video_edit = QCheckBox()
         self.log_dir_edit = QPushButton('Browse', self)
@@ -57,11 +57,11 @@ class MainWindow(QWidget):
         grid.addWidget(self.GPU, 4, 0)
         grid.addWidget(self.GPU_edit, 4, 1)
 
-        grid.addWidget(self.file1, 5, 0)
-        grid.addWidget(self.file1_edit, 5, 1)
+        grid.addWidget(self.img_file, 5, 0)
+        grid.addWidget(self.img_file_edit, 5, 1)
 
-        grid.addWidget(self.file2, 6, 0)
-        grid.addWidget(self.file2_edit, 6, 1)
+        grid.addWidget(self.landmark_file, 6, 0)
+        grid.addWidget(self.landmark_file_edit, 6, 1)
 
         grid.addWidget(self.GIF, 7, 0)
         grid.addWidget(self.GIF_edit, 7, 1)
@@ -82,10 +82,10 @@ class MainWindow(QWidget):
         self.setGeometry(100, 100, 350, 400)
 
         # connections
-        self.load_edit.clicked.connect(self.on_clicking_browse1)
-        self.file1_edit.clicked.connect(self.on_clicking_browse2)
-        self.file2_edit.clicked.connect(self.on_clicking_browse3)
-        self.log_dir_edit.clicked.connect(self.on_clicking_browse4)
+        self.load_edit.clicked.connect(self.on_clicking_browse_model)
+        self.img_file_edit.clicked.connect(self.on_clicking_browse_images)
+        self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
+        self.log_dir_edit.clicked.connect(self.on_clicking_browse_logs_dir)
         self.run.clicked.connect(self.on_clicking_run)
         self.exit.clicked.connect(self.close_it)
 
@@ -93,29 +93,28 @@ class MainWindow(QWidget):
 
     @pyqtSlot()
     def on_clicking_run(self):
-        GPU_value = self.GPU_edit.text()
-        DQN_variant_value = self.algorithm_edit.currentText()
-        task_value = self.task_edit.currentText()
-        GIF_value = self.GIF_edit.isChecked()
-        video_value = self.video_edit.isChecked()
-        load_value = self.load_edit.isChecked()
-        name_value = self.name_edit.text()
+        self.GPU_value = self.GPU_edit.text()
+        self.DQN_variant_value = self.algorithm_edit.currentText()
+        self.task_value = self.task_edit.currentText()
+        self.GIF_value = self.GIF_edit.isChecked()
+        self.video_value = self.video_edit.isChecked()
+        self.name_value = self.name_edit.text()
 
     @pyqtSlot()
-    def on_clicking_browse1(self):
-        file_name1 = QFileDialog.getOpenFileName()
+    def on_clicking_browse_model(self):
+        self.fname_model = QFileDialog.getOpenFileName()
 
     @pyqtSlot()
-    def on_clicking_browse2(self):
-        file_name2 = QFileDialog.getOpenFileName()
+    def on_clicking_browse_images(self):
+        self.fname_images = QFileDialog.getOpenFileName()
 
     @pyqtSlot()
-    def on_clicking_browse3(self):
-        file_name3 = QFileDialog.getOpenFileName()
+    def on_clicking_browse_landmarks(self):
+        self.fname_landmarks = QFileDialog.getOpenFileName()
 
     @pyqtSlot()
-    def on_clicking_browse4(self):
-        file_name4 = QFileDialog.getOpenFileName()
+    def on_clicking_browse_logs_dir(self):
+        self.fname_logs_dir = QFileDialog.getOpenFileName()
 
     @pyqtSlot()
     def close_it(self):

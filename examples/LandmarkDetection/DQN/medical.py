@@ -63,7 +63,7 @@ class MedicalPlayer(gym.Env):
 
     def __init__(self, directory=None, viz=False, task=False, files_list=None,
                  screen_dims=(27,27,27), history_length=20, multiscale=True,
-                 max_num_frames=0, saveGif=False, saveVideo=False):
+                 max_num_frames=0, saveGif=False, saveVideo=False, GUI=False):
         """
         :param train_directory: environment or game name
         :param viz: visualization
@@ -155,10 +155,10 @@ class MedicalPlayer(gym.Env):
         # add your data loader here
         if self.task == 'play':
             self.files = filesListBrainMRLandmark(files_list,
-                                                  returnLandmarks=False)
+                                                  returnLandmarks=False, GUI=GUI)
         else:
             self.files = filesListBrainMRLandmark(files_list,
-                                                  returnLandmarks=True)
+                                                  returnLandmarks=True, GUI=GUI)
 
 
         # prepare file sampler
@@ -224,6 +224,7 @@ class MedicalPlayer(gym.Env):
 
         # # sample a new image
         self._image, self._target_loc, self.filepath, self.spacing = next(self.sampled_files)
+        print("print this: ",self.filepath)
         self.filename = os.path.basename(self.filepath)
 
         # multiscale (e.g. start with 3 -> 2 -> 1)

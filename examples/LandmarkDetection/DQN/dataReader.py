@@ -59,16 +59,24 @@ class filesListBrainMRLandmark(object):
         returnLandmarks: Return landmarks if task is train or eval (default: True)
     """
 
-    def __init__(self, files_list=None, returnLandmarks=True, agents=1):
+    def __init__(self, files_list=None, returnLandmarks=True, agents=1, GUI=False):
         # check if files_list exists
         assert files_list, 'There is no file give'
         # read image filenames
-        self.image_files = [line.split('\n')[0] for line in open(files_list[0].name)]
+        if GUI:
+            print(files_list)
+            # self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
+            self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
+        else:
+            self.image_files = [line.split('\n')[0] for line in open(files_list[0].name)]
         # read landmark filenames if task is train or eval
         self.returnLandmarks = returnLandmarks
         self.agents = agents
         if self.returnLandmarks:
-            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1].name)]
+            if GUI:
+                self.landmark_files = [line.split('\n')[0] for line in open(files_list[1])]
+            else:
+                self.landmark_files = [line.split('\n')[0] for line in open(files_list[1].name)]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
 
@@ -98,9 +106,9 @@ class filesListBrainMRLandmark(object):
                 else:
                     landmarks = None
                 # extract filename from path, remove .nii.gz extension
-                image_filenames = [self.image_files[idx][:-7]] * self.agents
+                image_filename = self.image_files[idx][:-7]
                 images = [image] * self.agents
-                yield images, landmarks, image_filename, sitk_image.GetSpacing()
+                yield images, landmarks, image_filename[0], sitk_image.GetSpacing()
 ###############################################################################
 
 
