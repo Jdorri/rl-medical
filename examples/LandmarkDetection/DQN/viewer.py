@@ -31,7 +31,7 @@ class Window(QMainWindow):
         """
         # Status Bar
         self.statusbar = self.statusBar()
-        self.statusbar.showMessage("Running")
+        self.statusbar.showMessage("Start")
         
         # Menu Bar
         self.initMenu()
@@ -49,6 +49,8 @@ class Window(QMainWindow):
         self.grid = QGridLayout()
         self.grid.addWidget(self.left_widget, 0, 0)
         self.grid.addWidget(self.widget, 0, 1)
+        self.grid.setColumnStretch(1, 2) # default (later there will be event to change this when screen size change)
+        self.grid.setColumnStretch(0, 1) # default
         # self.grid.addWidget(QWidget(), 0, 2) # Jamie's code
 
         self.layout_widget = QWidget()
@@ -123,9 +125,8 @@ class SimpleImageViewerSettings(QFrame):
         self.run_button.clicked.connect(self.buttonClicked)
         self.speed_slider = QSlider(Qt.Horizontal, self)
         self.speed_slider.setFocusPolicy(Qt.StrongFocus)
-        self.speed_slider.setTickPosition(QSlider.TicksBelow)
-        self.speed_slider.setTickInterval(10)
-        self.speed_slider.setSingleStep(1)
+        self.speed_slider.setMinimum(0)
+        self.speed_slider.setMaximum(5)
 
         hr = QLabel("<hr />")
         hr.setStyleSheet("margin: 10px 0")
