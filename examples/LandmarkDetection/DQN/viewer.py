@@ -37,7 +37,7 @@ class Window(QMainWindow):
 
     def initUI(self, viewer_param):
         """
-        Main UI init element
+        Main UI init element.
         """
         # Status Bar
         self.statusbar = self.statusBar()
@@ -52,6 +52,7 @@ class Window(QMainWindow):
                                    arr_y=viewer_param["arrs"][2],
                                    filepath=viewer_param["filepath"])
         
+        # Left Settings widget
         self.left_widget = SimpleImageViewerSettings(self)
         self.left_widget.setFrameShape(QFrame.StyledPanel)
 
@@ -61,7 +62,7 @@ class Window(QMainWindow):
         self.grid.addWidget(self.widget, 0, 1)
         self.grid.setColumnStretch(1, 2) # default (later there will be event to change this when screen size change)
         self.grid.setColumnStretch(0, 1) # default
-        # self.grid.addWidget(QWidget(), 0, 2) # Jamie's code
+        # self.grid.addWidget(QWidget(), 0, 2) # for integration with Jamie's code
 
         self.layout_widget = QWidget()
         self.layout_widget.setLayout(self.grid)
@@ -76,6 +77,9 @@ class Window(QMainWindow):
         self.show()
     
     def initMenu(self):
+        """
+        Used to initialise components related to menu bar.
+        """
         # Menubar
         self.menubar = self.menuBar()
         
@@ -88,6 +92,7 @@ class Window(QMainWindow):
         exitAct.triggered.connect(self.close)
         file_menu.addAction(exitAct)
 
+        # TODO: Add additional functionalities to menu bar
         # Terminal menu
         terminal_menu = self.menubar.addMenu("&Terminal")
         
@@ -134,40 +139,44 @@ class SimpleImageViewerSettings(QFrame):
         self.window = window
 
         # Widgets
+        # Label settings
         label_settings = QLabel("<b>SETTINGS</b>")
         label_run = QLabel("Run Agent")
-        self.run_button = QPushButton("Start")
-        self.run_button.clicked.connect(self.buttonClicked)
-        self.speed_slider = QSlider(Qt.Horizontal, self)
-        self.speed_slider.setFocusPolicy(Qt.StrongFocus)
-        self.speed_slider.setMinimum(0)
-        self.speed_slider.setMaximum(5)
-        self.speed_slider.valueChanged[int].connect(self.changeValue)
-        self.speed_slider.setValue(5)
         hr = QLabel("<hr />")
         hr.setStyleSheet("margin: 10px 0")
         hr2 = QLabel("<hr />")
         hr2.setStyleSheet("margin: 10px 0")
-        
         label_speed = QLabel("Agent Speed")
         self.setStyleSheet("font-family: sans-serif")
         label_run.setStyleSheet("margin-top: 10px")
 
+        # Button settings
+        self.run_button = QPushButton("Start")
+        self.run_button.clicked.connect(self.buttonClicked)
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+        
+        # Slider settings
+        self.speed_slider = QSlider(Qt.Horizontal, self)
+        self.speed_slider.setFocusPolicy(Qt.StrongFocus)
+        self.speed_slider.setMinimum(0)
+        self.speed_slider.setMaximum(5)
+        self.speed_slider.setValue(5)
+        self.speed_slider.valueChanged[int].connect(self.changeValue)
 
-        # Layout
+        # Manage layout
         vbox = QVBoxLayout()
+        # First section
         vbox.addWidget(label_settings)
         vbox.addWidget(label_run)
         vbox.addWidget(self.run_button)
-        
         vbox.addWidget(hr)
         
+        # Second section
         vbox.addWidget(label_speed)
         vbox.addWidget(self.speed_slider)
-
         vbox.addWidget(hr2)
 
+        # Third section
         vbox.addStretch()
 
         self.setLayout(vbox)
@@ -202,6 +211,7 @@ class SimpleImageViewerSettings(QFrame):
             self.thread.speed = WorkerThread.MEDIUM
         else:
             self.thread.speed = WorkerThread.SLOW
+
 
 ################################################################################
 ## Main Widget
@@ -242,6 +252,7 @@ class SimpleImageViewer(QWidget):
         qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
 
         # Initialise images with labels
+        # TODO: resolve scaled to width later during final iteration (responsive)
         self.img = QPixmap(qImg)
         self.img = self.img.scaledToWidth(350)
         self.img_x = QPixmap(qImg_x)
@@ -326,6 +337,7 @@ class SimpleImageViewer(QWidget):
         self.draw_circles(_agent_loc, target, depth)
         self.painterInstance.end()
 
+        # TODO: resolve scaled to width later during final iteration (responsive)
         self.img = self.img.scaledToWidth(350)
         self.img_x = self.img_x.scaledToWidth(350)
         self.img_y = self.img_y.scaledToWidth(350)

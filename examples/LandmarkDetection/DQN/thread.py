@@ -1,5 +1,5 @@
 ################################################################################
-## PyQt thread files containing codes for QThread
+## PyQt thread files containing codes for Thread
 # Author: Maleakhi, Alex, Faidon, Jamie
 # Credit: Code adapted from Amir Alansary viewer.py file
 ################################################################################
