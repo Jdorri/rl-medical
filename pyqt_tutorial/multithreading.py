@@ -4,6 +4,7 @@ from PyQt5.QtGui import *
 import sys
 import time
 
+<<<<<<< HEAD
 def hello_world():
     print("hello world")
 
@@ -15,6 +16,12 @@ class MyThread(QThread):
 
     def run(self):
         self.func()
+=======
+class MyThread(QThread):
+    change_value = pyqtSignal(int)
+
+    def run(self):
+>>>>>>> UI_for_running_algorithm_and_option_selection
         count = 0
         while count < 100:
             count += 1
@@ -32,7 +39,10 @@ class Window(QDialog):
         self.top = 200
         self.width = 300
         self.height = 100
+<<<<<<< HEAD
         self.thread = None
+=======
+>>>>>>> UI_for_running_algorithm_and_option_selection
 
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)

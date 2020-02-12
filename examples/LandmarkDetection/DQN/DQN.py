@@ -3,6 +3,7 @@ def warn(*args, **kwargs):
 import warnings
 warnings.warn = warn
 warnings.simplefilter("ignore", category=PendingDeprecationWarning)
+warnings.simplefilter("ignore", category=FutureWarning)
 
 import numpy as np
 import os
@@ -74,7 +75,7 @@ def get_player(directory=None, files_list= None, viz=False,
 ###############################################################################
 
 class Model(DQNModel):
-    def __init__(self):
+    def __init__(self,IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA):
         super(Model, self).__init__(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA)
 
     def _get_DQN_prediction(self, image):
@@ -242,7 +243,7 @@ if __name__ == '__main__':
             """Run on secondary thread"""
             assert args.load is not None
             pred = OfflinePredictor(PredictConfig(
-                model=Model(),
+                model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA ),
                 session_init=get_model_loader(args.load),
                 input_names=['state'],
                 output_names=['Qvalue']))

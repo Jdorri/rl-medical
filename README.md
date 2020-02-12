@@ -23,7 +23,7 @@ tensorpack-medical requires:
 + [SimpleITK](https://pypi.org/project/SimpleITK/)
 
 
-### Install the libraries in the environment by launching the following command:
+### Install the libraries in the environment by launching the following command (note: Uninstall relevant libraries if downgrade required):
 ```shell script
 pip3 install -r requirements.txt
 ```
