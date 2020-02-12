@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import*
 from PyQt5.QtCore import Qt, pyqtSlot
 # from DQN import Model, get_player
 
-# from DQN import get_player, Model, get_config
+from DQN import get_player, Model, get_config, get_viewer_data
 
 def warn(*args, **kwargs):
     pass
@@ -35,6 +35,9 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         FullyConnected, PReLU, SimpleTrainer,
                         launch_train_with_config)
 
+from viewer import SimpleImageViewer, Window
+import pickle
+from thread import WorkerThread
 
 ###############################################################################
 # BATCH SIZE USED IN NATURE PAPER IS 32 - MEDICAL IS 256
@@ -167,9 +170,9 @@ class AppSettings(QFrame):
         self.GIF_value = self.GIF_edit.isChecked()
         self.video_value = self.video_edit.isChecked()
         self.name_value = self.name_edit.text()
-        #self.run_DQN()
+        self.run_DQN()
         print(self.task_value)
-        self.close()
+        # self.close()
 
     @pyqtSlot()
     def on_clicking_browse_model(self):
@@ -195,51 +198,50 @@ class AppSettings(QFrame):
 
         # check input files
         if self.task_value == 'Play':
-            selected_list = [self.fname_images]
+            self.selected_list = [self.fname_images]
         else:
-            selected_list = [self.fname_images, self.fname_landmarks]
+            self.selected_list = [self.fname_images, self.fname_landmarks]
 
 
-        METHOD = self.DQN_variant_value
+        self.METHOD = self.DQN_variant_value
         # load files into env to set num_actions, num_validation_files
-        init_player = MedicalPlayer(files_list=selected_list,
+        init_player = MedicalPlayer(files_list=self.selected_list,
                                     screen_dims=IMAGE_SIZE,
                                     task='play')
-        NUM_ACTIONS = init_player.action_space.n
-        num_files = init_player.files.num_files
-
+        self.NUM_ACTIONS = init_player.action_space.n
+        self.num_files = init_player.files.num_files
         # Create a thread to run background task
-        thread = WorkerThread(target_function=thread_function)
-            
+        self.thread = WorkerThread(target_function=self.thread_function)
+        self.thread.start()
 
     @pyqtSlot()
     def close_it(self):
         self.close()
 
 
-    def thread_function():
+    def thread_function(self):
         """Run on secondary thread"""
 
         pred = OfflinePredictor(PredictConfig(
-            model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA),
+            model=Model(IMAGE_SIZE, FRAME_HISTORY, self.METHOD, self.NUM_ACTIONS, GAMMA),
             session_init=get_model_loader(self.fname_model),
             input_names=['state'],
             output_names=['Qvalue']))
 
         # demo pretrained model one episode at a time
         if self.task_value == 'Play':
-            play_n_episodes(get_player(files_list=selected_list, viz=0.01,
+            play_n_episodes(get_player(files_list=self.selected_list, viz=0.01,
                                         saveGif=self.GIF_value,
                                         saveVideo=self.video_value,
                                         task='play'),
-                            pred, num_files, viewer=window)
+                            pred, self.num_files, viewer=window)
         # run episodes in parallel and evaluate pretrained model
         elif self.task_value == 'Evaluation':
-            play_n_episodes(get_player(files_list=selected_list, viz=0.01,
+            play_n_episodes(get_player(files_list=self.selected_list, viz=0.01,
                                              saveGif=self.GIF_value,
                                              saveVideo=self.video_value,
                                              task='eval'),
-                                  pred, num_files, viewer=window)
+                                  pred, self.num_files, viewer=window)
 
 
 if __name__ == "__main__":
@@ -249,11 +251,12 @@ if __name__ == "__main__":
     # Define application and viewer to run on the main thread
     app = QApplication(sys.argv)
     viewer_param = get_viewer_data()
-    window = Window(viewer_param)
+    app_settings = AppSettings()
+    window = Window(viewer_param, app_settings)
     
     
     
-    window.left_widget.thread = thread
+    # window.left_widget.thread = thread
     
     app.exec_()
 

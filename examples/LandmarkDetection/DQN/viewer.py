@@ -15,7 +15,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys
 from thread import WorkerThread
-from functioning_UI_PyQt import AppSettings
+# from functioning_UI_PyQt import AppSettings
 
 try:
     import pyglet
@@ -31,12 +31,12 @@ class Window(QMainWindow):
     """
     Window used as the main window for the application which integrate different widgets.
     """
-    def __init__(self, viewer_param):
+    def __init__(self, viewer_param, app_settings):
         super().__init__()
 
-        self.initUI(viewer_param)
+        self.initUI(viewer_param, app_settings)
 
-    def initUI(self, viewer_param):
+    def initUI(self, viewer_param, app_settings):
         """
         Main UI init element.
         """
@@ -58,8 +58,9 @@ class Window(QMainWindow):
         self.left_widget.setFrameShape(QFrame.StyledPanel)
 
         # Right Settings widget
-        self.right_widget = AppSettings()
+        self.right_widget = app_settings
         self.right_widget.setFrameShape(QFrame.StyledPanel)
+        # self.left_widget.thread = self.right_widget.thread
 
         # Manage layout
         self.grid = QGridLayout()
