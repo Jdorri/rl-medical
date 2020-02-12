@@ -570,12 +570,13 @@ class MedicalPlayer(gym.Env):
         return screen
 
     def get_plane(self, z=0):
-        return self._image.data[:, :, z]
+        im = self._image.data[:, :, z]
+        im = np.rot90(im, 1)
+        return im
 
     def get_plane_x(self, x=0):
         im = self._image.data[x, :, :]
         im = np.rot90(im, 1)                # Rotate 90 degrees ccw
-        # im = np.flip(im, axis=1)            # Mirror horizontally
         return im
 
     def get_plane_y(self, y=0):
@@ -684,7 +685,7 @@ class MedicalPlayer(gym.Env):
         # Sleep until resume
         while self.viewer.left_widget.thread.pause:
             time.sleep(1)
-        
+
         # Need to emit signal here
         self.viewer.widget.agent_signal.emit({
             "arrs": (img, img_x, img_y),

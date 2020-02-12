@@ -43,16 +43,16 @@ class Window(QMainWindow):
         # Status Bar
         self.statusbar = self.statusBar()
         self.statusbar.showMessage("Start")
-        
+
         # Menu Bar
         self.initMenu()
-        
+
         # Image widget
         self.widget = SimpleImageViewer(arr=viewer_param["arrs"][0],
                                    arr_x=viewer_param["arrs"][1],
                                    arr_y=viewer_param["arrs"][2],
                                    filepath=viewer_param["filepath"])
-        
+
         # Left Settings widget
         self.left_widget = SimpleImageViewerSettings(self)
         self.left_widget.setFrameShape(QFrame.StyledPanel)
@@ -80,14 +80,14 @@ class Window(QMainWindow):
         self.menubar.setStyleSheet("background:#D2D4DC; color:black")
         self.statusbar.setStyleSheet("background:#D2D4DC; color:black")
         self.show()
-    
+
     def initMenu(self):
         """
         Used to initialise components related to menu bar.
         """
         # Menubar
         self.menubar = self.menuBar()
-        
+
         # File menu
         file_menu = self.menubar.addMenu('&File')
         # Exit action in a file
@@ -100,7 +100,7 @@ class Window(QMainWindow):
         # TODO: Add additional functionalities to menu bar
         # Terminal menu
         terminal_menu = self.menubar.addMenu("&Terminal")
-        
+
         # View menu
         view_menu = self.menubar.addMenu("&View")
 
@@ -122,26 +122,26 @@ class Window(QMainWindow):
         centerPoint = QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
-    
+
     def closeEvent(self, event):
         """
         Used to override close event and provide warning when closing application
-        """        
+        """
         reply = QMessageBox.question(self, 'Message',
-            "Are you sure to quit?", QMessageBox.Yes | 
+            "Are you sure to quit?", QMessageBox.Yes |
             QMessageBox.No, QMessageBox.Yes)
 
         if reply == QMessageBox.Yes:
             event.accept()
         else:
-            event.ignore()  
-    
+            event.ignore()
+
     def nightMode(self):
         "CSS Styling for night mode app version"
         # Overwrite widgets color
         self.setStyleSheet("background-color:black; color:white")
         self.left_widget.setStyleSheet("background-color:#1c1c1c")
-    
+
     def dayMode(self):
         "CSS Styling for day mode app version"
         # Overwrite widgets color
@@ -162,7 +162,7 @@ class Window(QMainWindow):
 class SimpleImageViewerSettings(QFrame):
     """
     Left widget controlling GUI elements settings.
-    """    
+    """
     def __init__(self, window):
         super().__init__()
         self.thread = WorkerThread(None) # Store thread to allow pause and run functionality
@@ -184,7 +184,7 @@ class SimpleImageViewerSettings(QFrame):
         self.run_button = QPushButton("Start")
         self.run_button.clicked.connect(self.buttonClicked)
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-        
+
         # Slider settings
         self.speed_slider = QSlider(Qt.Horizontal, self)
         self.speed_slider.setFocusPolicy(Qt.StrongFocus)
@@ -200,7 +200,7 @@ class SimpleImageViewerSettings(QFrame):
         vbox.addWidget(label_run)
         vbox.addWidget(self.run_button)
         vbox.addWidget(hr)
-        
+
         # Second section
         vbox.addWidget(label_speed)
         vbox.addWidget(self.speed_slider)
@@ -230,7 +230,7 @@ class SimpleImageViewerSettings(QFrame):
             self.run_button.setText("Run")
             self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
             self.window.statusbar.showMessage("Pause")
-    
+
     def changeValue(self, value):
         """
         Event handler for slider (adjusting agent speed)
@@ -316,7 +316,7 @@ class SimpleImageViewer(QWidget):
         # Set Layout of GUI
         self.setLayout(self.grid)
         self.setWindowTitle("Landmark Detection Agent")
-        
+
         # Stylesheet
         self.label_img.setStyleSheet("background: black; border:3px solid rgb(255, 0, 0); ")
         self.label_img_x.setStyleSheet("background: black; border:3px solid green; ")
@@ -347,8 +347,9 @@ class SimpleImageViewer(QWidget):
 
         # Draw some rectangle and agent (overlay)
         self.painterInstance = QPainter(self.img)
-        _agent_loc = (agent_loc[1], agent_loc[0])
-        self.draw_rects(text, spacing, _agent_loc, rect[:4])
+        _agent_loc = (agent_loc[0], self.height-agent_loc[1])
+        rect_ = (self.height-rect[2], self.height-rect[3]) + rect[:2]
+        self.draw_rects(text, spacing, _agent_loc, rect_)
         self.draw_circles(_agent_loc, target, depth)
         self.painterInstance.end()
 
