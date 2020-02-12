@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import*
 from PyQt5.QtCore import Qt, pyqtSlot
 # from DQN import Model, get_player
 
-from DQN import get_player, Model, get_config
+# from DQN import get_player, Model, get_config
 
 def warn(*args, **kwargs):
     pass
@@ -62,9 +62,9 @@ EVAL_EPISODE = 50
 ###############################################################################
 
 # custom class
-class MainWindow(QWidget):
+class AppSettings(QFrame):
     def __init__(self, *args, **kwargs):
-        super(MainWindow, self).__init__(*args, **kwargs)
+        super(AppSettings, self).__init__(*args, **kwargs)
 
         # window title
         self.setWindowTitle('Anatomical Landmark Detection')
@@ -241,11 +241,11 @@ class MainWindow(QWidget):
         self.close()
 
 # QApplication instance
-app = QApplication(sys.argv)
+# app = QApplication(sys.argv)
 
-# custom class instance
-window = MainWindow()
+# # custom class instance
+# window = MainWindow()
 
-app.exec_()
+# app.exec_()
 
-window.run_DQN()
+# window.run_DQN()

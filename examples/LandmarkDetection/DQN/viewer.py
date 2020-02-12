@@ -15,6 +15,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys
 from thread import WorkerThread
+from functioning_UI_PyQt import AppSettings
 
 try:
     import pyglet
@@ -56,20 +57,24 @@ class Window(QMainWindow):
         self.left_widget = SimpleImageViewerSettings(self)
         self.left_widget.setFrameShape(QFrame.StyledPanel)
 
+        # Right Settings widget
+        self.right_widget = AppSettings()
+        self.right_widget.setFrameShape(QFrame.StyledPanel)
+
         # Manage layout
         self.grid = QGridLayout()
         self.grid.addWidget(self.left_widget, 0, 0)
         self.grid.addWidget(self.widget, 0, 1)
-        self.grid.setColumnStretch(1, 2) # default (later there will be event to change this when screen size change)
-        self.grid.setColumnStretch(0, 1) # default
-        # self.grid.addWidget(QWidget(), 0, 2) # for integration with Jamie's code
+        # self.grid.setColumnStretch(1, 2) # default (later there will be event to change this when screen size change)
+        # self.grid.setColumnStretch(0, 1) # default
+        self.grid.addWidget(self.right_widget, 0, 2) # for integration with Jamie's code
 
         self.layout_widget = QWidget()
         self.layout_widget.setLayout(self.grid)
         self.setCentralWidget(self.layout_widget)
 
         # Geometric window position and general setting
-        self.resize(1000, 800)
+        self.resize(1400, 800)
         self.center()
         self.setWindowTitle('Reinforcement Learning - Medical')
         self.menubar.setStyleSheet("background:#D2D4DC; color:black")
