@@ -112,7 +112,7 @@ class AppSettings(QFrame):
         grid = QGridLayout()
         grid.setSpacing(10)
 
-        # add widgets to grid
+        # Add widgets to grid
         grid.addWidget(self.task, 1, 0)
         grid.addWidget(self.task_edit, 1, 1)
 
