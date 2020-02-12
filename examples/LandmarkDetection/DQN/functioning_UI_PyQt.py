@@ -190,62 +190,71 @@ class AppSettings(QFrame):
         self.fname_logs_dir, _ = QFileDialog.getOpenFileName()
 
     def run_DQN(self):
-          if self.GPU_value:
-              os.environ['CUDA_VISIBLE_DEVICES'] = self.GPU_value
+        if self.GPU_value:
+            os.environ['CUDA_VISIBLE_DEVICES'] = self.GPU_value
 
-          # check input files
-          if self.task_value == 'Play':
-              selected_list = [self.fname_images]
-          else:
-              selected_list = [self.fname_images, self.fname_landmarks]
+        # check input files
+        if self.task_value == 'Play':
+            selected_list = [self.fname_images]
+        else:
+            selected_list = [self.fname_images, self.fname_landmarks]
 
 
-          METHOD = self.DQN_variant_value
-          # load files into env to set num_actions, num_validation_files
-          init_player = MedicalPlayer(files_list=selected_list,
-                                      screen_dims=IMAGE_SIZE,
-                                      task='play')
-          NUM_ACTIONS = init_player.action_space.n
-          num_files = init_player.files.num_files
+        METHOD = self.DQN_variant_value
+        # load files into env to set num_actions, num_validation_files
+        init_player = MedicalPlayer(files_list=selected_list,
+                                    screen_dims=IMAGE_SIZE,
+                                    task='play')
+        NUM_ACTIONS = init_player.action_space.n
+        num_files = init_player.files.num_files
 
-          if self.task_value != 'Train':
-              pred = OfflinePredictor(PredictConfig(
-                  model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA ),
-                  session_init=get_model_loader(self.fname_model),
-                  input_names=['state'],
-                  output_names=['Qvalue']))
-              # demo pretrained model one episode at a time
-              if self.task_value == 'Play':
-                  play_n_episodes(get_player(files_list=selected_list, viz=0.01,
-                                             saveGif=self.GIF_value,
-                                             saveVideo=self.video_value,
-                                             task='play'),
-                                  pred, num_files)
-              # run episodes in parallel and evaluate pretrained model
-          elif self.task_value == 'Evaluation':
-                  play_n_episodes(get_player(files_list=selected_list, viz=0.01,
-                                             saveGif=self.GIF_value,
-                                             saveVideo=self.video_value,
-                                             task='eval'),
-                                  pred, num_files)
-          else:  # train model
-              logger_dir = os.path.join(self.fname_logs_dir, self.name_value)
-              logger.set_logger_dir(logger_dir)
-              config = get_config(selected_list)
-              if self.load_value:  # resume training from a saved checkpoint
-                  config.session_init = get_model_loader(self.load_value)
-              launch_train_with_config(config, SimpleTrainer())
+        # Create a thread to run background task
+        thread = WorkerThread(target_function=thread_function)
+            
 
     @pyqtSlot()
     def close_it(self):
         self.close()
 
-# QApplication instance
-# app = QApplication(sys.argv)
 
-# # custom class instance
-# window = MainWindow()
+    def thread_function():
+        """Run on secondary thread"""
 
-# app.exec_()
+        pred = OfflinePredictor(PredictConfig(
+            model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA),
+            session_init=get_model_loader(self.fname_model),
+            input_names=['state'],
+            output_names=['Qvalue']))
 
-# window.run_DQN()
+        # demo pretrained model one episode at a time
+        if self.task_value == 'Play':
+            play_n_episodes(get_player(files_list=selected_list, viz=0.01,
+                                        saveGif=self.GIF_value,
+                                        saveVideo=self.video_value,
+                                        task='play'),
+                            pred, num_files, viewer=window)
+        # run episodes in parallel and evaluate pretrained model
+        elif self.task_value == 'Evaluation':
+            play_n_episodes(get_player(files_list=selected_list, viz=0.01,
+                                             saveGif=self.GIF_value,
+                                             saveVideo=self.video_value,
+                                             task='eval'),
+                                  pred, num_files, viewer=window)
+
+
+if __name__ == "__main__":
+    
+    ########################################################################
+    # PyQt GUI Code Section
+    # Define application and viewer to run on the main thread
+    app = QApplication(sys.argv)
+    viewer_param = get_viewer_data()
+    window = Window(viewer_param)
+    
+    
+    
+    window.left_widget.thread = thread
+    
+    app.exec_()
+
+    ########################################################################
