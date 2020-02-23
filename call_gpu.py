@@ -17,7 +17,9 @@ to_Transfer = "CNN DQN"
 discription = """TL case traning on CardiacMRI data starting from BrainMRI full model(CNN + DQN) weights transfered"""
 
 home = os.environ['HOME']
-local_branch_path = os.path.join(home, 'Documents/rl-medical/')#path to where the code is
+# local_branch_path = os.path.join(home, 'Documents/rl-medical/')#path to where the code is
+local_branch_path = os.path.join(home, '/vol/project/2019/545/g1954503/oen19/rl-medical/')#path to where the code is
+
 data_path = os.path.join(home, '/vol/biomedic/users/aa16914/shared/data/RL_data')#path to where the raw data is
 output_path = os.path.join(home, '/vol/project/2019/545/g1954503/')#path to where to store the results 
 venv_path = os.path.join(home, '/vol/bitbucket/oen19/rl-medical/')#path to where the virural environment is 
