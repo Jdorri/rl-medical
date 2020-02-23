@@ -63,7 +63,7 @@ class MedicalPlayer(gym.Env):
 
     def __init__(self, directory=None, viz=False, task=False, files_list=None,
                  screen_dims=(27,27,27), history_length=20, multiscale=True,
-                 max_num_frames=0, saveGif=False, saveVideo=False):
+                 max_num_frames=0, saveGif=False, saveVideo=False, data_type=None):
         """
         :param train_directory: environment or game name
         :param viz: visualization
@@ -153,21 +153,19 @@ class MedicalPlayer(gym.Env):
         # initialize rectangle limits from input image coordinates
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
+        if data_type == 'BrainMRI':
+            self.data_loader = filesListBrainMRLandmark
+        elif data_type == 'CardiacMRI':
+            self.data_loader = filesListCardioLandmark
+        elif data_type == 'FetalUS':
+            self.data_loader = filesListFetalUSLandmark
+  
         if self.task == 'play':
-            self.files = filesListBrainMRLandmark(files_list,
-                                                  returnLandmarks=False)
-            # self.files = filesListCardioLandmark(files_list,
-            #                                       returnLandmarks=False)
-            # self.files = filesListFetalUSLandmark(files_list,
-            #                                       returnLandmarks=False)
+            self.files = self.data_loader(files_list,
+                                          returnLandmarks=False)
         else:
-            self.files = filesListBrainMRLandmark(files_list,
-                                                  returnLandmarks=True)
-            # self.files = filesListCardioLandmark(files_list,
-            #                                       returnLandmarks=True)
-            # self.files = filesListFetalUSLandmark(files_list,
-            #                                       returnLandmarks=True)
-
+            self.files = self.data_loader(files_list,
+                                         returnLandmarks=True)
 
         # prepare file sampler
         self.filepath = None
@@ -453,14 +451,15 @@ class MedicalPlayer(gym.Env):
                 'distError': distance_error, 'filename': self.filename}
 
  
-        if self.terminal:
-            directory = logger.get_logger_dir()
-            self.csvfile = 'Reward_and_Q_log.csv'
-            path = os.path.join(directory, self.csvfile)
-            with open(path, 'a') as outcsv:
-                fields= [info['score']]
-                writer = csv.writer(outcsv)
-                writer.writerow(map(lambda x: x, fields))
+        # if self.terminal:
+        #     directory = logger.get_logger_dir()
+        #     print(directory)
+        #     self.csvfile = 'Reward_and_Q_log.csv'
+        #     path = os.path.join(directory, self.csvfile)
+        #     with open(path, 'a') as outcsv:
+        #         fields= [info['score']]
+        #         writer = csv.writer(outcsv)
+        #         writer.writerow(map(lambda x: x, fields))
 
 
         # #######################################################################
