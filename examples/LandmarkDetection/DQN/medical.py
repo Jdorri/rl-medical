@@ -119,6 +119,8 @@ class MedicalPlayer(gym.Env):
         self.dims = len(self.screen_dims)
         # multi-scale agent
         self.multiscale = multiscale
+        #Type of data
+        self.data_type = data_type
 
         # init env dimensions
         if self.dims == 2:
@@ -153,11 +155,11 @@ class MedicalPlayer(gym.Env):
         # initialize rectangle limits from input image coordinates
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
-        if data_type == 'BrainMRI':
+        if self.data_type == 'BrainMRI':
             self.data_loader = filesListBrainMRLandmark
-        elif data_type == 'CardiacMRI':
+        elif self.data_type == 'CardiacMRI':
             self.data_loader = filesListCardioLandmark
-        elif data_type == 'FetalUS':
+        elif self.data_type == 'FetalUS':
             self.data_loader = filesListFetalUSLandmark
   
         if self.task == 'play':
@@ -235,16 +237,19 @@ class MedicalPlayer(gym.Env):
         # multiscale (e.g. start with 3 -> 2 -> 1)
         # scale can be thought of as sampling stride
         if self.multiscale:
-            # brain
-            self.action_step = 9
-            self.xscale = 3
-            self.yscale = 3
-            self.zscale = 3
-            ## cardiac
-            # self.action_step = 6
-            # self.xscale = 2
-            # self.yscale = 2
-            # self.zscale = 2
+            #cardiac
+            if self.data_type == 'CardiacMRI':
+                self.action_step = 6
+                self.xscale = 2
+                self.yscale = 2
+                self.zscale = 2
+            #brain or fetal
+            else:
+                self.action_step = 9
+                self.xscale = 3
+                self.yscale = 3
+                self.zscale = 3
+        
         else:
             self.action_step = 1
             self.xscale = 1
@@ -451,15 +456,15 @@ class MedicalPlayer(gym.Env):
                 'distError': distance_error, 'filename': self.filename}
 
  
-        # if self.terminal:
-        #     directory = logger.get_logger_dir()
-        #     print(directory)
-        #     self.csvfile = 'Reward_and_Q_log.csv'
-        #     path = os.path.join(directory, self.csvfile)
-        #     with open(path, 'a') as outcsv:
-        #         fields= [info['score']]
-        #         writer = csv.writer(outcsv)
-        #         writer.writerow(map(lambda x: x, fields))
+        if self.terminal:
+            directory = logger.get_logger_dir()
+            print(directory)
+            self.csvfile = 'Reward_and_Q_log.csv'
+            path = os.path.join(directory, self.csvfile)
+            with open(path, 'a') as outcsv:
+                fields= [info['score']]
+                writer = csv.writer(outcsv)
+                writer.writerow(map(lambda x: x, fields))
 
 
         # #######################################################################

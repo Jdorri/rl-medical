@@ -232,15 +232,7 @@ if __name__ == '__main__':
     NUM_ACTIONS = init_player.action_space.n
     num_files = init_player.files.num_files
 
-    session_init = get_model_loader(args.transferModel[0])
-    reader, variables = session_init._read_checkpoint_vars(args.transferModel[0])
-    for var in variables:
-        tensor = reader.get_tensor(var)
-        print(var) 
-        print(tensor.shape)
 
-    exit()
-    # print(variables)
     if args.task != 'train':
 
         assert args.load is not None
@@ -274,21 +266,36 @@ if __name__ == '__main__':
         if args.load:  # resume training from a saved checkpoint
             session_init = get_model_loader(args.load)
         elif args.transferModel[0]:
-            # session_init = get_model_loader(transferModel[0])
-            reader, variables = session_init._read_checkpoint_vars(transferModel[0])
-            print("hi")
-            # print(reader.get_tensor("EMA/SummaryGradient/conv0/b/rms/local_step:0"))
-            # print(variables)
-            # print(session_init.ignore)
-            #ignore fc layers
-            ignore = (variable for variable in variables if "Adam" in variable or "fc" in variable)
-            #ignore conv layers
-            # ignore = (variable for variable in variables if "Adam" in variable or "conv" in variable)
-            #ignore none
-            # ignore = (variable for variable in variables if "Adam" in variable)
+            ignore_list = ["Adam",
+                           "alpha",
+                           "huber_loss",
+                           "beta1_power",
+                           "beta2_power",
+                           "predict_reward",
+                           "learning_rate",
+                           "local_step",
+                           "QueueInput",
+                           "global_step",
+                           "SummaryGradient",
+                        ]#always ignore these
+
+            if not bool(args.transferModel[1:]):#transfer all layers of none specified
+                pass
+            else:
+                if 'CNN' not in args.transferModel[1:]:#ignore CNN part
+                    ignore_list.append("conv")
+                if 'DQN' not in args.transferModel[1:]:#ignore DQN
+                    ignore_list.append("fc")
+
+            session_init = get_model_loader(args.transferModel[0])
+            reader, variables = session_init._read_checkpoint_vars(args.transferModel[0])
+
+            #var = tf.stop_gradient(var) #use this to freeze layers later
+            #tensor = reader.get_tensor(var)
+            #tf.get_variable()
+
+            ignore = [var for var in variables if any([i in var for i in ignore_list])]
+            not_ignore = (list(set(variables) - set(ignore)))#not ignored
             session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
-            # print(session_init.ignore)
-            #remove some layers
-       
             config.session_init = session_init
         launch_train_with_config(config, SimpleTrainer())
