@@ -31,7 +31,7 @@ class Window(QMainWindow):
     """
     Window used as the main window for the application which integrate different widgets.
     """
-    def __init__(self, viewer_param, app_settings):
+    def __init__(self, viewer_param, app_settings=None):
         super().__init__()
 
         self.initUI(viewer_param, app_settings)
@@ -58,8 +58,9 @@ class Window(QMainWindow):
         self.left_widget.setFrameShape(QFrame.StyledPanel)
 
         # Right Settings widget
-        self.right_widget = app_settings
-        self.right_widget.setFrameShape(QFrame.StyledPanel)
+        if app_settings:
+            self.right_widget = app_settings
+            self.right_widget.setFrameShape(QFrame.StyledPanel)
         # self.left_widget.thread = self.right_widget.thread
 
         # Manage layout
@@ -68,7 +69,8 @@ class Window(QMainWindow):
         self.grid.addWidget(self.widget, 0, 1)
         # self.grid.setColumnStretch(1, 2) # default (later there will be event to change this when screen size change)
         # self.grid.setColumnStretch(0, 1) # default
-        self.grid.addWidget(self.right_widget, 0, 2) # for integration with Jamie's code
+        if app_settings:
+            self.grid.addWidget(self.right_widget, 0, 2) # for integration with Jamie's code
 
         self.layout_widget = QWidget()
         self.layout_widget.setLayout(self.grid)

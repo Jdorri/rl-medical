@@ -237,7 +237,6 @@ if __name__ == '__main__':
         # Define application and viewer to run on the main thread
         app = QApplication(sys.argv)
         viewer_param = get_viewer_data()
-        app_settings = AppSettings()
         window = Window(viewer_param)
         
         def thread_function():
