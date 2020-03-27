@@ -104,10 +104,9 @@ class AppSettings(QFrame):
 
         # temporary default file paths
         self.fname_images = "./data/filenames/image_files.txt"
-        # self.fname_images = "/Users/phaedonmit/Documents/Python/rl-medical/examples/LandmarkDetection/DQN/data/filenames/image_files.txt"
-        # self.fname_images = './data/filenames/image_files.txt'
         self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-        # self.fname_model = "/Users/phaedonmit/Documents/Python/rl-medical/examples/LandmarkDetection/DQN/data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+        self.fname_landmarks = "./data/filenames/landmark_files.txt"
+
 
         self.fname_logs_dir = "./data"
 
@@ -245,7 +244,7 @@ class AppSettings(QFrame):
 
 
 if __name__ == "__main__":
-    
+
     ########################################################################
     # PyQt GUI Code Section
     # Define application and viewer to run on the main thread
@@ -253,11 +252,11 @@ if __name__ == "__main__":
     viewer_param = get_viewer_data()
     app_settings = AppSettings()
     window = Window(viewer_param, app_settings)
-    
-    
-    
+
+
+
     # window.left_widget.thread = thread
-    
+
     app.exec_()
 
     ########################################################################
