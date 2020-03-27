@@ -64,6 +64,10 @@ EVAL_EPISODE = 50
 
 ###############################################################################
 
+class filenames_GUI:
+    def __init__(self):
+        self.name = ""
+
 # custom class
 class AppSettings(QFrame):
     def __init__(self, *args, **kwargs):
@@ -104,7 +108,8 @@ class AppSettings(QFrame):
         self.algorithm_edit.addItems(['DQN', 'Double', 'Dueling', 'Dueling Double'])
 
         # temporary default file paths
-        self.fname_images = "./data/filenames/image_files.txt"
+        self.fname_images = filenames_GUI()
+        self.fname_images.name = "./data/filenames/image_files.txt"
         # self.fname_images = "/Users/phaedonmit/Documents/Python/rl-medical/examples/LandmarkDetection/DQN/data/filenames/image_files.txt"
         # self.fname_images = './data/filenames/image_files.txt'
         self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
@@ -182,8 +187,8 @@ class AppSettings(QFrame):
 
     @pyqtSlot()
     def on_clicking_browse_images(self):
-        self.fname_images, _ = QFileDialog.getOpenFileName()
-        print(self.fname_images)
+        self.fname_images.name, _ = QFileDialog.getOpenFileName()
+        print(self.fname_images.name)
 
     @pyqtSlot()
     def on_clicking_browse_landmarks(self):

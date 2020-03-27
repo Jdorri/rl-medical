@@ -76,12 +76,12 @@ class filesListBrainMRLandmark(object):
         assert files_list, 'There is no file give'
         # read image filenames
             # self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
-        self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
+        self.image_files = [line.split('\n')[0] for line in open(files_list[0].name)]
         # read landmark filenames if task is train or eval
         self.returnLandmarks = returnLandmarks
         self.agents = agents
         if self.returnLandmarks:
-            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1])]
+            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1]).name]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
 
