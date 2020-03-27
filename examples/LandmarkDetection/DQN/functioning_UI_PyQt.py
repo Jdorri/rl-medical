@@ -71,6 +71,7 @@ class AppSettings(QFrame):
 
         # window title
         self.setWindowTitle('Anatomical Landmark Detection')
+        self.window = None
 
         # initialise labels
         self.GPU = QLabel('GPU', self)
@@ -234,30 +235,45 @@ class AppSettings(QFrame):
                                         saveGif=self.GIF_value,
                                         saveVideo=self.video_value,
                                         task='play'),
-                            pred, self.num_files, viewer=window)
+                            pred, self.num_files, viewer=self.window)
         # run episodes in parallel and evaluate pretrained model
         elif self.task_value == 'Evaluation':
             play_n_episodes(get_player(files_list=self.selected_list, viz=0.01,
                                              saveGif=self.GIF_value,
                                              saveVideo=self.video_value,
                                              task='eval'),
-                                  pred, self.num_files, viewer=window)
+                                  pred, self.num_files, viewer=self.window)
+
+        @property
+        def window(self):
+            return self._window
+
+        @window.setter
+        def window(self, window):
+            self._window = window
 
 
-if __name__ == "__main__":
-    
-    ########################################################################
-    # PyQt GUI Code Section
-    # Define application and viewer to run on the main thread
+def run():
     app = QApplication(sys.argv)
     viewer_param = get_viewer_data()
     app_settings = AppSettings()
-    window = Window(viewer_param, app_settings)
-    
-    
-    
-    # window.left_widget.thread = thread
-    
+    w = Window(viewer_param, app_settings)
+    app_settings.window = w
+    return app
+
+if __name__ == "__main__":
+
+    ########################################################################
+    # PyQt GUI Code Section
+    # Define application and viewer to run on the main thread
+    # app = QApplication(sys.argv)
+    # viewer_param = get_viewer_data()
+    # app_settings = AppSettings()
+    # window = Window(viewer_param, app_settings)
+    #
+    # # window.left_widget.thread = thread
+
+    app = run()
     app.exec_()
 
     ########################################################################
