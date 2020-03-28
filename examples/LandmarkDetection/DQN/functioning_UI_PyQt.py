@@ -196,21 +196,33 @@ class AppSettings(QFrame):
 
     @pyqtSlot()
     def on_clicking_browse_model(self):
-        self.fname_model, _ = QFileDialog.getOpenFileName()
-        print(self.fname_model)
+        if self.test_mode:
+            self.test_click = True
+        else:
+            self.fname_model, _ = QFileDialog.getOpenFileName()
+            print(self.fname_model)
 
     @pyqtSlot()
     def on_clicking_browse_images(self):
-        self.fname_images.name, _ = QFileDialog.getOpenFileName()
-        print(self.fname_images.name)
+        if self.test_mode:
+            self.test_click = True
+        else:
+            self.fname_images.name, _ = QFileDialog.getOpenFileName()
+            print(self.fname_images.name)
 
     @pyqtSlot()
     def on_clicking_browse_landmarks(self):
-        self.fname_landmarks, _ = QFileDialog.getOpenFileName()
+        if self.test_mode:
+            self.test_click = True
+        else:
+            self.fname_landmarks, _ = QFileDialog.getOpenFileName()
 
     @pyqtSlot()
     def on_clicking_browse_logs_dir(self):
-        self.fname_logs_dir, _ = QFileDialog.getOpenFileName()
+        if self.test_mode:
+            self.test_click = True
+        else:
+            self.fname_logs_dir, _ = QFileDialog.getOpenFileName()
 
     def run_DQN(self):
         if self.GPU_value:
