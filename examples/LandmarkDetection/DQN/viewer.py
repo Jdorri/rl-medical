@@ -214,11 +214,18 @@ class SimpleImageViewerSettings(QFrame):
 
         self.setLayout(vbox)
 
+        # Flags for testing
+        self.test_mode = False
+        self.test_click = None
+
+
     def buttonClicked(self):
         """
         Event handler (slot) for when the button is clicked
         """
-        if self.run_button.text() == "Start":
+        if self.test_mode:
+            self.test_click = True
+        elif self.run_button.text() == "Start":
             self.thread.start()
             self.run_button.setText("Pause")
             self.window.statusbar.showMessage("Run")

@@ -77,10 +77,6 @@ class AppSettings(QFrame):
         self.setWindowTitle('Anatomical Landmark Detection')
         self.window = None
 
-        # Flags for testing
-        self.test_mode = False
-        self.test_click = None
-
         # initialise labels
         self.GPU = QLabel('GPU', self)
         self.load = QLabel('Load Model', self)
@@ -172,6 +168,10 @@ class AppSettings(QFrame):
 
         self.show()
 
+        # Flags for testing
+        self.test_mode = False
+        self.test_click = None
+
     @pyqtSlot()
     def on_clicking_run(self):
         if self.test_mode:
@@ -222,8 +222,6 @@ class AppSettings(QFrame):
         else:
             self.selected_list = [self.fname_images, self.fname_landmarks]
 
-
-        print('RUNNING *****************')
         self.METHOD = self.DQN_variant_value
         # load files into env to set num_actions, num_validation_files
         init_player = MedicalPlayer(files_list=self.selected_list,
@@ -238,7 +236,6 @@ class AppSettings(QFrame):
     @pyqtSlot()
     def close_it(self):
         self.close()
-
 
     def thread_function(self):
         """Run on secondary thread"""
