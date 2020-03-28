@@ -4,7 +4,13 @@ from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from functioning_UI_PyQt import run
 
-class ViewerTester(unittest.TestCase):
+class GUILauncherTester(unittest.TestCase):
+    '''
+    Class to perform unit tests on the buttons within the GUI Launcher.
+    * NOTE * These are tests only for functionality of the GUI. They do not
+    test the event signal causes the correct action.
+    '''
+
     def setUp(self):
         '''
         Method run before every test. Use this to init the testing
@@ -31,13 +37,11 @@ class ViewerTester(unittest.TestCase):
         QTest.mouseClick(self.window.right_widget.run, Qt.LeftButton)
         self.assertEqual(True, self.window.right_widget.test_click)
 
+    def test_runButton(self):
+        self.window.right_widget.test_mode = True
+        QTest.mouseClick(self.window.right_widget.run, Qt.LeftButton)
+        self.assertEqual(True, self.window.right_widget.test_click)
+
 
 if __name__ == '__main__':
     unittest.main()
-
-
-### NOTES ###
-'''
-- Initially just test the 'Run' button in bottom rh corner
-- This is within app settings (self.run)
-'''
