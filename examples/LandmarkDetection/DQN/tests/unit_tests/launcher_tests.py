@@ -67,13 +67,12 @@ class RightWidgetTester(unittest.TestCase):
 
     def test_browseLogsButton(self):
         QTest.mouseClick(self.w.log_dir_edit, Qt.LeftButton)
-        self.assertTrue(self.w.isChecked())
-        # QTest.mouseClick(self.w.log_dir_edit, Qt.LeftButton)
-        # self.assertTrue(self.w.test_click)
+        self.assertTrue(self.w.test_click)
 
     # def test_GIFCheckBox(self):
     #     QTest.mouseClick(self.w.GIF_edit, Qt.LeftButton)
-    #     self.assertTrue(self.w.test_click)
+    #     self.assertTrue(self.w.GIF_edit.isChecked(),
+    #         pos=QtCore.QPoint(2,self.w.GIF_edit.height()/2))
     #
     # def test_videoCheckBox(self):
     #     QTest.mouseClick(self.w.video_edit, Qt.LeftButton)
