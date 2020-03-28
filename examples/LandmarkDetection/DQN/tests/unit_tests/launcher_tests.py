@@ -9,6 +9,10 @@ class GUILauncherTester(unittest.TestCase):
     Class to perform unit tests on the buttons within the GUI Launcher.
     * NOTE * These are tests only for functionality of the GUI. They do not
     test the event signal causes the correct action.
+
+    To run these tests run the following command from the command line
+    when in the DQN folder:
+    - python -m tests.unit_tests.launcher_tests
     '''
 
     def setUp(self):
