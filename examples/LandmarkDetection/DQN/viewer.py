@@ -126,18 +126,18 @@ class Window(QMainWindow):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
-    def closeEvent(self, event):
-        """
-        Used to override close event and provide warning when closing application
-        """
-        reply = QMessageBox.question(self, 'Message',
-            "Are you sure to quit?", QMessageBox.Yes |
-            QMessageBox.No, QMessageBox.Yes)
-
-        if reply == QMessageBox.Yes:
-            event.accept()
-        else:
-            event.ignore()
+    # def closeEvent(self, event):
+    #     """
+    #     Used to override close event and provide warning when closing application
+    #     """
+    #     reply = QMessageBox.question(self, 'Message',
+    #         "Are you sure to quit?", QMessageBox.Yes |
+    #         QMessageBox.No, QMessageBox.Yes)
+    #
+    #     if reply == QMessageBox.Yes:
+    #         event.accept()
+    #     else:
+    #         event.ignore()
 
     def nightMode(self):
         "CSS Styling for night mode app version"

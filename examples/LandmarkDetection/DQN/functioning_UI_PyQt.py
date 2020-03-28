@@ -77,6 +77,10 @@ class AppSettings(QFrame):
         self.setWindowTitle('Anatomical Landmark Detection')
         self.window = None
 
+        # Flags for testing
+        self.test_mode = False
+        self.test_click = None
+
         # initialise labels
         self.GPU = QLabel('GPU', self)
         self.load = QLabel('Load Model', self)
@@ -164,21 +168,31 @@ class AppSettings(QFrame):
         self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
         self.log_dir_edit.clicked.connect(self.on_clicking_browse_logs_dir)
         self.run.clicked.connect(self.on_clicking_run)
-        self.exit.clicked.connect(self.close_it)
+        self.exit.clicked.connect(self.on_clicking_exit)
 
         self.show()
 
     @pyqtSlot()
     def on_clicking_run(self):
-        self.GPU_value = self.GPU_edit.text()
-        self.DQN_variant_value = self.algorithm_edit.currentText()
-        self.task_value = self.task_edit.currentText()
-        self.GIF_value = self.GIF_edit.isChecked()
-        self.video_value = self.video_edit.isChecked()
-        self.name_value = self.name_edit.text()
-        self.run_DQN()
-        print(self.task_value)
-        # self.close()
+        if self.test_mode:
+            self.test_click = True
+        else:
+            self.GPU_value = self.GPU_edit.text()
+            self.DQN_variant_value = self.algorithm_edit.currentText()
+            self.task_value = self.task_edit.currentText()
+            self.GIF_value = self.GIF_edit.isChecked()
+            self.video_value = self.video_edit.isChecked()
+            self.name_value = self.name_edit.text()
+            self.run_DQN()
+            # print(self.task_value)
+            # self.close()
+
+    @pyqtSlot()
+    def on_clicking_exit(self):
+        if self.test_mode:
+            self.test_click = True
+        else:
+            self.close_it
 
     @pyqtSlot()
     def on_clicking_browse_model(self):
@@ -209,6 +223,7 @@ class AppSettings(QFrame):
             self.selected_list = [self.fname_images, self.fname_landmarks]
 
 
+        print('RUNNING *****************')
         self.METHOD = self.DQN_variant_value
         # load files into env to set num_actions, num_validation_files
         init_player = MedicalPlayer(files_list=self.selected_list,
@@ -264,7 +279,7 @@ def run():
     app_settings = AppSettings()
     w = Window(viewer_param, app_settings)
     app_settings.window = w
-    return app
+    return app, w
 
 if __name__ == "__main__":
 
@@ -278,7 +293,7 @@ if __name__ == "__main__":
     #
     # # window.left_widget.thread = thread
 
-    app = run()
+    app, w = run()
     app.exec_()
 
     ########################################################################
