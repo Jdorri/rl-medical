@@ -124,5 +124,5 @@ class LeftWidgetTester(unittest.TestCase):
             self.assertEqual(self.w.thread.speed, WorkerThread.MEDIUM)
 
 
-# if __name__ == '__main__':
-#     unittest.main()
+if __name__ == '__main__':
+    unittest.main()
