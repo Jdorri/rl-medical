@@ -166,6 +166,7 @@ def get_config(files_list, data_type):
             PeriodicTrigger(
                 Evaluator(nr_eval=EVAL_EPISODE, input_names=['state'],
                           output_names=['Qvalue'], files_list=files_list,
+                          data_type=data_type,
                           get_player_fn=get_player),
                 every_k_epochs=EPOCHS_PER_EVAL),
             HumanHyperParamSetter('learning_rate'),

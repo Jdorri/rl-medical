@@ -73,7 +73,7 @@ def play_n_episodes(player, predfunc, nr, render=False):
 
 ###############################################################################
 
-def eval_with_funcs(predictors, nr_eval, get_player_fn, files_list=None):
+def eval_with_funcs(predictors, nr_eval, get_player_fn, files_list=None, data_type=None):
     """
     Args:
         predictors ([PredictorBase])
@@ -96,7 +96,8 @@ def eval_with_funcs(predictors, nr_eval, get_player_fn, files_list=None):
         def run(self):
             with self.default_sess():
                 player = get_player_fn(task=False,
-                                       files_list=files_list)
+                                       files_list=files_list,
+                                       data_type=data_type)
                 while not self.stopped():
                     try:
                         score, filename, ditance_error, q_values = play_one_episode(player, self.func)
@@ -163,12 +164,13 @@ def eval_model_multithread(pred, nr_eval, get_player_fn, files_list):
 class Evaluator(Callback):
 
     def __init__(self, nr_eval, input_names, output_names,
-                 get_player_fn, files_list=None):
+                 get_player_fn, files_list=None, data_type=None):
         self.files_list = files_list
         self.eval_episode = nr_eval
         self.input_names = input_names
         self.output_names = output_names
         self.get_player_fn = get_player_fn
+        self.data_type = data_type
 
     def _setup_graph(self):
         NR_PROC = min(multiprocessing.cpu_count() // 2, 20)
@@ -179,7 +181,7 @@ class Evaluator(Callback):
         """triggered by Trainer"""
         t = time.time()
         mean_score, max_score, mean_dist, max_dist = eval_with_funcs(
-            self.pred_funcs, self.eval_episode, self.get_player_fn, self.files_list)
+            self.pred_funcs, self.eval_episode, self.get_player_fn, self.files_list, self.data_type)
         t = time.time() - t
         if t > 10 * 60:  # eval takes too long
             self.eval_episode = int(self.eval_episode * 0.94)

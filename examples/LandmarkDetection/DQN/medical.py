@@ -458,7 +458,6 @@ class MedicalPlayer(gym.Env):
  
         if self.terminal:
             directory = logger.get_logger_dir()
-            print(directory)
             self.csvfile = 'Reward_and_Q_log.csv'
             path = os.path.join(directory, self.csvfile)
             with open(path, 'a') as outcsv:
