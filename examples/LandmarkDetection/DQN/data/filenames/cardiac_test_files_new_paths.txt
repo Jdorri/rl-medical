@@ -1,0 +1,3 @@
+./data/images/14SZ03090.nii.gz
+./data/images/14TA03133.nii.gz
+./data/images/14TB03188.nii.gz
