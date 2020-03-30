@@ -176,7 +176,7 @@ def get_viewer_data():
     """Used to get viewer initialisation data"""
     ########################################################################
     # PyQt GUI Code Section
-    with open("default_data.pickle", "rb") as f:
+    with open("data/default_data/default_data.pickle", "rb") as f:
         viewer_param = pickle.load(f)
 
     return viewer_param

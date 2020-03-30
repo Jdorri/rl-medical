@@ -281,7 +281,6 @@ class AppSettings(QFrame):
             self._window = window
 
 
-# custom class
 class AppSettingsBrowseMode(QFrame):
 
     SWITCH_WINDOW = pyqtSignal()
