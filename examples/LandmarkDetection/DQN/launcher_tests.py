@@ -65,9 +65,9 @@ class RightWidgetTester(unittest.TestCase):
         QTest.mouseClick(self.w.landmark_file_edit, Qt.LeftButton)
         self.assertTrue(self.w.test_click)
 
-    def test_browseLogsButton(self):
-        QTest.mouseClick(self.w.log_dir_edit, Qt.LeftButton)
-        self.assertTrue(self.w.test_click)
+    # def test_browseLogsButton(self):
+    #     QTest.mouseClick(self.w.log_dir_edit, Qt.LeftButton)
+    #     self.assertTrue(self.w.test_click)
 
     # def test_GIFCheckBox(self):
     #     QTest.mouseClick(self.w.GIF_edit, Qt.LeftButton)
