@@ -48,9 +48,9 @@ class Window(QMainWindow):
         self.initMenu()
 
         # Image widget
-        self.widget = SimpleImageViewer(arr=viewer_param["arrs"][0],
-                                   arr_x=viewer_param["arrs"][1],
-                                   arr_y=viewer_param["arrs"][2],
+        self.widget = SimpleImageViewer(arr=np.zeros(viewer_param["arrs"][0].shape),
+                                   arr_x=np.zeros(viewer_param["arrs"][1].shape),
+                                   arr_y=np.zeros(viewer_param["arrs"][2].shape),
                                    filepath=viewer_param["filepath"])
 
         # Left Settings widget

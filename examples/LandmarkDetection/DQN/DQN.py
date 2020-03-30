@@ -238,7 +238,7 @@ if __name__ == '__main__':
         app = QApplication(sys.argv)
         viewer_param = get_viewer_data()
         window = Window(viewer_param)
-        
+
         def thread_function():
             """Run on secondary thread"""
             assert args.load is not None
@@ -261,14 +261,14 @@ if __name__ == '__main__':
                                            saveVideo=args.saveVideo,
                                            task='eval'),
                                 pred, num_files, viewer=window)
-        
+
         # Create a thread to run background task
         thread = WorkerThread(target_function=thread_function)
         window.left_widget.thread = thread
         app.exec_()
 
         ########################################################################
-    
+
     else:  # train model
         logger_dir = os.path.join(args.logDir, args.name)
         logger.set_logger_dir(logger_dir)
