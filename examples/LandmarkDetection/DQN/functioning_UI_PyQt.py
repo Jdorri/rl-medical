@@ -173,9 +173,6 @@ class AppSettings(QFrame):
         self.test_mode = False
         self.test_click = None
 
-    def switch(self):
-        self.SWITCH_WINDOW.emit()
-
     @pyqtSlot()
     def on_clicking_run(self):
         if self.test_mode:
@@ -213,7 +210,7 @@ class AppSettings(QFrame):
         # else:
         #     self.fname_images.name, _ = QFileDialog.getOpenFileName()
         #     print(self.fname_images.name)
-        self.switch()
+        self.SWITCH_WINDOW.emit()
 
     @pyqtSlot()
     def on_clicking_browse_landmarks(self):
@@ -353,16 +350,8 @@ class AppSettingsBrowseMode(QFrame):
         # grid.addWidget(self.load, 3, 0)
         # grid.addWidget(self.load_edit, 3, 1)
 
-        if self.b_mode:
-            grid.addWidget(self.GPU, 4, 0)
-            grid.addWidget(self.GPU_edit, 4, 1)
-
-            grid.addWidget(self.img_file, 5, 0)
-            grid.addWidget(self.img_file_edit, 5, 1)
-
-        else:
-            grid.addWidget(self.img_file, 5, 0)
-            grid.addWidget(self.img_file_edit, 5, 1)
+        grid.addWidget(self.img_file, 5, 0)
+        grid.addWidget(self.img_file_edit, 5, 1)
 
         # grid.addWidget(self.landmark_file, 6, 0)
         # grid.addWidget(self.landmark_file_edit, 6, 1)
@@ -398,10 +387,6 @@ class AppSettingsBrowseMode(QFrame):
         # Flags for testing
         self.test_mode = False
         self.test_click = None
-
-    def switch(self):
-        self.SWITCH_WINDOW.emit()
-
 
     @pyqtSlot()
     def on_clicking_run(self):
@@ -440,7 +425,8 @@ class AppSettingsBrowseMode(QFrame):
         # else:
         #     self.fname_images.name, _ = QFileDialog.getOpenFileName()
         #     print(self.fname_images.name)
-        self.switch()
+        self.SWITCH_WINDOW.emit()
+
 
     @pyqtSlot()
     def on_clicking_browse_landmarks(self):
@@ -515,19 +501,25 @@ class AppSettingsBrowseMode(QFrame):
 
 
 class Controller:
-    def show_default():
+    def __init__(self):
+        self.app = QApplication(sys.argv)
+        self.viewer_param = get_viewer_data()
+        self.show_default()
+        self.window.show()
+
+    def show_default(self):
         app_settings = AppSettings()
+        self.window = Window(self.viewer_param, app_settings)
+        app_settings.window = self.window
 
-    def show_browseMode():
+        self.window.right_widget.SWITCH_WINDOW.connect(self.show_browseMode)
+
+    def show_browseMode(self):
         app_settings = AppSettingsBrowseMode()
+        self.window = Window(self.viewer_param, app_settings)
+        app_settings.window = self.window
 
-def run():
-    app = QApplication(sys.argv)
-    viewer_param = get_viewer_data()
-    app_settings = AppSettings()
-    w = Window(viewer_param, app_settings)
-    app_settings.window = w
-    return app, w
+        self.window.right_widget.SWITCH_WINDOW.connect(self.show_default)
 
 if __name__ == "__main__":
 
@@ -540,9 +532,9 @@ if __name__ == "__main__":
     # window = Window(viewer_param, app_settings)
     #
     # # window.left_widget.thread = thread
-
-    app, w = run()
-    app.exec_()
+    controller = Controller()
+    controller.show_default()
+    sys.exit(controller.app.exec_())
 
     ########################################################################
 
