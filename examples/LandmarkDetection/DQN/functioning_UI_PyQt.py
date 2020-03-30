@@ -81,16 +81,16 @@ class AppSettings(QFrame):
         self.window = None
 
         # initialise labels
-        self.GPU = QLabel('GPU', self)
+        #self.GPU = QLabel('GPU', self)
         self.load = QLabel('Load Model', self)
         self.task = QLabel('Task', self)
         self.algorithm = QLabel('Algorithm', self)
         self.img_file = QLabel('File 1: Images', self)
         self.landmark_file = QLabel('File 2: Landmarks', self)
-        self.GIF = QLabel('Save GIF', self)
-        self.video = QLabel('Save Video', self)
-        self.log_dir = QLabel('Store Logs', self)
-        self.name = QLabel('Experiment Name', self)
+        #self.GIF = QLabel('Save GIF', self)
+        #self.video = QLabel('Save Video', self)
+        #self.log_dir = QLabel('Store Logs', self)
+        #self.name = QLabel('Experiment Name', self)
 
         # initialise widgets
         self.GPU_edit = QLineEdit()
@@ -101,7 +101,7 @@ class AppSettings(QFrame):
         self.landmark_file_edit = QPushButton('Browse', self)
         self.GIF_edit =  QCheckBox()
         self.video_edit = QCheckBox()
-        self.log_dir_edit = QPushButton('Browse', self)
+        #self.log_dir_edit = QPushButton('Browse', self)
         self.name_edit = QLineEdit()
         self.run = QPushButton('Run', self)
         self.exit = QPushButton('Exit', self)
@@ -113,11 +113,9 @@ class AppSettings(QFrame):
         # temporary default file paths
         self.fname_images = filenames_GUI()
         self.fname_images.name = "./data/filenames/image_files.txt"
-        # self.fname_images = "/Users/phaedonmit/Documents/Python/rl-medical/examples/LandmarkDetection/DQN/data/filenames/image_files.txt"
-        # self.fname_images = './data/filenames/image_files.txt'
         self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-        # self.fname_model = "/Users/phaedonmit/Documents/Python/rl-medical/examples/LandmarkDetection/DQN/data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-
+        self.fname_landmarks = filenames_GUI()
+        self.fname_landmarks.name = "./data/filenames/landmark_files.txt"
         self.fname_logs_dir = "./data"
 
         # initialise grid/set spacing
@@ -134,8 +132,8 @@ class AppSettings(QFrame):
         grid.addWidget(self.load, 3, 0)
         grid.addWidget(self.load_edit, 3, 1)
 
-        grid.addWidget(self.GPU, 4, 0)
-        grid.addWidget(self.GPU_edit, 4, 1)
+        #grid.addWidget(self.GPU, 4, 0)
+        #grid.addWidget(self.GPU_edit, 4, 1)
 
         grid.addWidget(self.img_file, 5, 0)
         grid.addWidget(self.img_file_edit, 5, 1)
@@ -143,17 +141,17 @@ class AppSettings(QFrame):
         grid.addWidget(self.landmark_file, 6, 0)
         grid.addWidget(self.landmark_file_edit, 6, 1)
 
-        grid.addWidget(self.GIF, 7, 0)
-        grid.addWidget(self.GIF_edit, 7, 1)
+        #grid.addWidget(self.GIF, 7, 0)
+        #grid.addWidget(self.GIF_edit, 7, 1)
 
-        grid.addWidget(self.video, 8, 0)
-        grid.addWidget(self.video_edit, 8, 1)
+        #grid.addWidget(self.video, 8, 0)
+        #grid.addWidget(self.video_edit, 8, 1)
 
-        grid.addWidget(self.log_dir, 9, 0)
-        grid.addWidget(self.log_dir_edit, 9, 1)
+        #grid.addWidget(self.log_dir, 9, 0)
+        #grid.addWidget(self.log_dir_edit, 9, 1)
 
-        grid.addWidget(self.name, 10, 0)
-        grid.addWidget(self.name_edit, 10, 1)
+        #grid.addWidget(self.name, 10, 0)
+        #grid.addWidget(self.name_edit, 10, 1)
 
         grid.addWidget(self.run, 11, 0)
         grid.addWidget(self.exit, 12, 0)
@@ -165,7 +163,7 @@ class AppSettings(QFrame):
         self.load_edit.clicked.connect(self.on_clicking_browse_model)
         self.img_file_edit.clicked.connect(self.on_clicking_browse_images)
         self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
-        self.log_dir_edit.clicked.connect(self.on_clicking_browse_logs_dir)
+        #self.log_dir_edit.clicked.connect(self.on_clicking_browse_logs_dir)
         self.run.clicked.connect(self.on_clicking_run)
         self.exit.clicked.connect(self.on_clicking_exit)
 
@@ -224,12 +222,12 @@ class AppSettings(QFrame):
         else:
             self.fname_landmarks, _ = QFileDialog.getOpenFileName()
 
-    @pyqtSlot()
-    def on_clicking_browse_logs_dir(self):
-        if self.test_mode:
-            self.test_click = True
-        else:
-            self.fname_logs_dir, _ = QFileDialog.getOpenFileName()
+    # @pyqtSlot()
+    # def on_clicking_browse_logs_dir(self):
+    #     if self.test_mode:
+    #         self.test_click = True
+    #     else:
+    #         self.fname_logs_dir, _ = QFileDialog.getOpenFileName()
 
     def run_DQN(self):
         if self.GPU_value:
