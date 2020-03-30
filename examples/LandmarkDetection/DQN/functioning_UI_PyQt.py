@@ -200,7 +200,8 @@ class AppSettings(QFrame):
         if self.test_mode:
             self.test_click = True
         else:
-            self.fname_model, _ = QFileDialog.getOpenFileName()
+            self.fname_model, _ = QFileDialog.getOpenFileName(None, None,
+                "./data/models", filter="*.data-*")
             print(self.fname_model)
 
     @pyqtSlot()
@@ -212,7 +213,8 @@ class AppSettings(QFrame):
         if self.test_mode:
             self.test_click = True
         else:
-            self.fname_landmarks, _ = QFileDialog.getOpenFileName()
+            self.fname_landmarks, _ = QFileDialog.getOpenFileName(None, None,
+                "./data/landmarks", filter="txt files (*.txt)")
 
     # @pyqtSlot()
     # def on_clicking_browse_logs_dir(self):
@@ -292,7 +294,7 @@ class AppSettingsBrowseMode(QFrame):
         self.window = None
 
         # initialise labels
-        self.img_file = QLabel('File 1: Images', self)
+        self.img_file = QLabel('Image file', self)
         self.mode = QLabel('Mode', self)
 
         # initialise widgets
@@ -303,23 +305,18 @@ class AppSettingsBrowseMode(QFrame):
         # temporary default file paths
         self.fname_images = filenames_GUI()
         self.fname_images.name = "./data/filenames/image_files.txt"
-        # self.fname_images = "/Users/phaedonmit/Documents/Python/rl-medical/examples/LandmarkDetection/DQN/data/filenames/image_files.txt"
-        # self.fname_images = './data/filenames/image_files.txt'
         self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-        # self.fname_model = "/Users/phaedonmit/Documents/Python/rl-medical/examples/LandmarkDetection/DQN/data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-
-        self.fname_logs_dir = "./data"
 
         # initialise grid/set spacing
         grid = QGridLayout()
         grid.setSpacing(10)
 
         # # Add widgets to grid
-        grid.addWidget(self.mode, 3, 0)
-        grid.addWidget(self.mode_edit, 3, 1)
+        grid.addWidget(self.img_file, 3, 0)
+        grid.addWidget(self.img_file_edit, 3, 1)
 
-        grid.addWidget(self.img_file, 5, 0)
-        grid.addWidget(self.img_file_edit, 5, 1)
+        grid.addWidget(self.mode, 5, 0)
+        grid.addWidget(self.mode_edit, 5, 1)
 
         grid.addWidget(self.exit, 12, 0)
 
@@ -353,7 +350,8 @@ class AppSettingsBrowseMode(QFrame):
         if self.test_mode:
             self.test_click = True
         else:
-            self.fname_images.name, _ = QFileDialog.getOpenFileName()
+            self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
+                "./data/filenames", filter="txt files (*.txt)")
             print(self.fname_images.name)
 
     @pyqtSlot()
