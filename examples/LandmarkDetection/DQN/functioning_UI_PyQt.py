@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import*
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal
 # from DQN import Model, get_player
 
 from DQN import get_player, Model, get_config, get_viewer_data
@@ -70,6 +70,9 @@ class filenames_GUI:
 
 # custom class
 class AppSettings(QFrame):
+
+    SWITCH_WINDOW = pyqtSignal()
+
     def __init__(self, *args, **kwargs):
         super(AppSettings, self).__init__(*args, **kwargs)
 
@@ -172,6 +175,9 @@ class AppSettings(QFrame):
         self.test_mode = False
         self.test_click = None
 
+    def switch(self):
+        self.SWITCH_WINDOW.emit()
+
     @pyqtSlot()
     def on_clicking_run(self):
         if self.test_mode:
@@ -204,11 +210,12 @@ class AppSettings(QFrame):
 
     @pyqtSlot()
     def on_clicking_browse_images(self):
-        if self.test_mode:
-            self.test_click = True
-        else:
-            self.fname_images.name, _ = QFileDialog.getOpenFileName()
-            print(self.fname_images.name)
+        # if self.test_mode:
+        #     self.test_click = True
+        # else:
+        #     self.fname_images.name, _ = QFileDialog.getOpenFileName()
+        #     print(self.fname_images.name)
+        self.switch()
 
     @pyqtSlot()
     def on_clicking_browse_landmarks(self):
@@ -284,6 +291,9 @@ class AppSettings(QFrame):
 
 # custom class
 class AppSettingsBrowseMode(QFrame):
+
+    SWITCH_WINDOW = pyqtSignal()
+
     def __init__(self, *args, **kwargs):
         super(AppSettingsBrowseMode, self).__init__(*args, **kwargs)
 
@@ -344,13 +354,18 @@ class AppSettingsBrowseMode(QFrame):
         #
         # grid.addWidget(self.load, 3, 0)
         # grid.addWidget(self.load_edit, 3, 1)
-        #
-        # grid.addWidget(self.GPU, 4, 0)
-        # grid.addWidget(self.GPU_edit, 4, 1)
-        #
-        grid.addWidget(self.img_file, 5, 0)
-        grid.addWidget(self.img_file_edit, 5, 1)
-        #
+
+        if self.b_mode:
+            grid.addWidget(self.GPU, 4, 0)
+            grid.addWidget(self.GPU_edit, 4, 1)
+
+            grid.addWidget(self.img_file, 5, 0)
+            grid.addWidget(self.img_file_edit, 5, 1)
+
+        else:
+            grid.addWidget(self.img_file, 5, 0)
+            grid.addWidget(self.img_file_edit, 5, 1)
+
         # grid.addWidget(self.landmark_file, 6, 0)
         # grid.addWidget(self.landmark_file_edit, 6, 1)
         #
@@ -386,6 +401,10 @@ class AppSettingsBrowseMode(QFrame):
         self.test_mode = False
         self.test_click = None
 
+    def switch(self):
+        self.SWITCH_WINDOW.emit()
+
+
     @pyqtSlot()
     def on_clicking_run(self):
         if self.test_mode:
@@ -418,11 +437,12 @@ class AppSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_browse_images(self):
-        if self.test_mode:
-            self.test_click = True
-        else:
-            self.fname_images.name, _ = QFileDialog.getOpenFileName()
-            print(self.fname_images.name)
+        # if self.test_mode:
+        #     self.test_click = True
+        # else:
+        #     self.fname_images.name, _ = QFileDialog.getOpenFileName()
+        #     print(self.fname_images.name)
+        self.switch()
 
     @pyqtSlot()
     def on_clicking_browse_landmarks(self):
@@ -496,13 +516,17 @@ class AppSettingsBrowseMode(QFrame):
             self._window = window
 
 
-def run(browse_mode=False):
+class Controller:
+    def show_default():
+        app_settings = AppSettings()
+
+    def show_browseMode():
+        app_settings = AppSettingsBrowseMode()
+
+def run():
     app = QApplication(sys.argv)
     viewer_param = get_viewer_data()
-    if browse_mode:
-        app_settings = AppSettingsBrowseMode()
-    else:
-        app_settings = AppSettings()
+    app_settings = AppSettings()
     w = Window(viewer_param, app_settings)
     app_settings.window = w
     return app, w
@@ -519,7 +543,14 @@ if __name__ == "__main__":
     #
     # # window.left_widget.thread = thread
 
-    app, w = run(browse_mode=False)
+    app, w = run()
     app.exec_()
 
     ########################################################################
+
+'''
+- Controller class oversees the interation
+- Need QtSignal for each class
+- Clicking the button needs to emit the signal
+- This signal is connected to the other window using the controller class
+'''
