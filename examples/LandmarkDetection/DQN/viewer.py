@@ -174,7 +174,7 @@ class SimpleImageViewerSettings(QFrame):
         # Widgets
         # Label settings
         label_settings = QLabel("<b>SETTINGS</b>")
-        label_run = QLabel("Run Agent")
+        label_run = QLabel("Pause Agent")
         hr = QLabel("<hr />")
         hr.setStyleSheet("margin: 10px 0")
         hr2 = QLabel("<hr />")
@@ -184,9 +184,9 @@ class SimpleImageViewerSettings(QFrame):
         label_run.setStyleSheet("margin-top: 10px")
 
         # Button settings
-        self.run_button = QPushButton("Start")
+        self.run_button = QPushButton("Pause")
         self.run_button.clicked.connect(self.buttonClicked)
-        self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+        self.run_button.setStyleSheet("background-color:#f44336; color:white")
 
         # Slider settings
         self.speed_slider = QSlider(Qt.Horizontal, self)
