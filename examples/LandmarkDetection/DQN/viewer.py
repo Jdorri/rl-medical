@@ -230,16 +230,16 @@ class SimpleImageViewerSettings(QFrame):
             self.run_button.setText("Pause")
             self.window.statusbar.showMessage("Run")
             self.run_button.setStyleSheet("background-color:#f44336; color:white")
-        elif self.run_button.text() == "Run":
+        elif self.run_button.text() == "Resume":
             self.thread.pause = False
             self.run_button.setText("Pause")
             self.run_button.setStyleSheet("background-color:#f44336; color:white")
-            self.window.statusbar.showMessage("Run")
+            self.window.statusbar.showMessage("Running")
         else:
             self.thread.pause = True
-            self.run_button.setText("Run")
+            self.run_button.setText("Resume")
             self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-            self.window.statusbar.showMessage("Pause")
+            self.window.statusbar.showMessage("Paused")
 
     def changeValue(self, value):
         """
