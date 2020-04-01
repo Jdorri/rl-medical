@@ -53,7 +53,7 @@ UPDATE_FREQ = 4
 # DISCOUNT FACTOR - NATURE (0.99) - MEDICAL (0.9)
 GAMMA = 0.9 #0.99
 # REPLAY MEMORY SIZE - NATURE (1e6) - MEDICAL (1e5 view-patches)
-MEMORY_SIZE = 1e5#6
+MEMORY_SIZE = 1e5 #6
 # consume at least 1e6 * 27 * 27 * 27 bytes
 INIT_MEMORY_SIZE = MEMORY_SIZE // 20 #5e4
 # each epoch is 100k played frames
@@ -329,6 +329,18 @@ class AppSettingsBrowseMode(QFrame):
         font.setBold(True)
         self.outButton.setFont(font)
 
+        self.zoomInButton = QToolButton(self)
+        self.zoomInButton.setText('I')
+        font = self.zoomInButton.font()
+        font.setBold(True)
+        self.zoomInButton.setFont(font)
+
+        self.zoomOutButton = QToolButton(self)
+        self.zoomOutButton.setText('O')
+        font = self.zoomOutButton.font()
+        font.setBold(True)
+        self.zoomOutButton.setFont(font)
+
         # temporary default file paths
         self.fname_images = filenames_GUI()
         self.fname_images.name = "./data/filenames/image_files.txt"
@@ -344,8 +356,8 @@ class AppSettingsBrowseMode(QFrame):
         gridArrows.addWidget(self.rightButton, 1, 2)
         gridArrows.addWidget(self.inButton, 0, 3)
         gridArrows.addWidget(self.outButton, 2, 3)
-
-        # self.setLayout(gridArrows)
+        gridArrows.addWidget(self.zoomInButton, 0, 4)
+        gridArrows.addWidget(self.zoomOutButton, 2, 4)
 
         # initialise grid/set spacing
         grid = QGridLayout()
@@ -375,6 +387,8 @@ class AppSettingsBrowseMode(QFrame):
         self.rightButton.clicked.connect(self.on_clicking_right)
         self.inButton.clicked.connect(self.on_clicking_in)
         self.outButton.clicked.connect(self.on_clicking_out)
+        self.zoomInButton.clicked.connect(self.on_clicking_zoomIn)
+        self.zoomOutButton.clicked.connect(self.on_clicking_zoomOut)
 
         self.show()
 
@@ -433,6 +447,22 @@ class AppSettingsBrowseMode(QFrame):
             self.move_img(action)
 
     @pyqtSlot()
+    def on_clicking_zoomIn(self):
+        if self.test_mode:
+            self.test_click = True
+        elif self.env:
+            if self.env.xscale > 1:
+                self.env.adjustMultiScale(higherRes=True)
+
+    @pyqtSlot()
+    def on_clicking_zoomOut(self):
+        if self.test_mode:
+            self.test_click = True
+        elif self.env:
+            if self.env.xscale < 3:
+                self.env.adjustMultiScale(higherRes=False)
+
+    @pyqtSlot()
     def on_clicking_mode(self):
         self.SWITCH_WINDOW.emit()
 
@@ -448,9 +478,8 @@ class AppSettingsBrowseMode(QFrame):
         if self.test_mode:
             self.test_click = True
         else:
-            # self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
-            #     "./data/filenames", filter="txt files (*.txt)")
-            self.fname_images.name = './data/filenames/image_files.txt'
+            self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
+                "./data/filenames", filter="txt files (*.txt)")
             self.load_img()
 
     @pyqtSlot()
@@ -501,7 +530,8 @@ class Controller:
         app_settings = AppSettingsBrowseMode()
         self.window2 = Window(self.viewer_param, app_settings)
         app_settings.window = self.window2
-        # self.window2.setChildrenFocusPolicy(Qt.NoFocus)
+        app_settings.fname_images.name = './data/filenames/image_files.txt'
+        app_settings.load_img()
 
         # Close previous window
         self.window1.hide()

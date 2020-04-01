@@ -415,20 +415,18 @@ class MedicalPlayer(gym.Env):
             # multi-scale steps
             if self.multiscale:
                 if self.xscale > 1:
-                    self.xscale -= 1
-                    self.yscale -= 1
-                    self.zscale -= 1
-                    self.action_step = int(self.action_step / 3)
-                    self._clear_history()
+                    self.adjustMultiScale()
                 # terminate if scale is less than 1
                 else:
                     self.terminal = True
                     print("TERMINAL OCCILATE")
-                    if self.cur_dist <= 1: self.num_success.feed(1)
+                    if self.cur_dist <= 1:
+                        self.num_success.feed(1)
             else:
                 self.terminal = True
                 print("TERMINAL OCCILATE")
-                if self.cur_dist <= 1: self.num_success.feed(1)
+                if self.cur_dist <= 1:
+                    self.num_success.feed(1)
 
         # render screen if viz is on
         with _ALE_LOCK:
@@ -566,6 +564,21 @@ class MedicalPlayer(gym.Env):
         best_location = last_loc_history[best_idx]
 
         return best_location
+
+    def adjustMultiScale(self, higherRes=True):
+        '''Adjusts the agent's step size'''
+        if higherRes:
+            self.xscale -= 1
+            self.yscale -= 1
+            self.zscale -= 1
+            self.action_step = int(self.action_step / 3)
+        else:
+            self.xscale += 1
+            self.yscale += 1
+            self.zscale += 1
+            self.action_step = int(self.action_step * 3)
+
+        self._clear_history()
 
     def _clear_history(self):
         ''' clear history buffer with current state

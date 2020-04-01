@@ -169,6 +169,10 @@ class Window(QMainWindow):
                 self.right_widget.on_clicking_left()
             elif event.key() == Qt.Key_Right:
                 self.right_widget.on_clicking_right()
+            elif event.key() == Qt.Key_X:
+                self.right_widget.on_clicking_zoomIn()
+            elif event.key() == Qt.Key_Z:
+                self.right_widget.on_clicking_zoomOut()
 
     # def closeEvent(self, event):
     #     """
