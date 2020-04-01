@@ -476,8 +476,8 @@ class Controller:
 
     def show_default(self):
         # Init the window
-        app_settings = AppSettingsBrowseMode()
-        # app_settings = AppSettings()
+        # app_settings = AppSettingsBrowseMode()
+        app_settings = AppSettings()
         self.window1 = Window(self.viewer_param, app_settings)
         app_settings.window = self.window1
 
@@ -493,6 +493,7 @@ class Controller:
         app_settings = AppSettingsBrowseMode()
         self.window2 = Window(self.viewer_param, app_settings)
         app_settings.window = self.window2
+        # self.window2.setChildrenFocusPolicy(Qt.NoFocus)
 
         # Close previous window
         self.window1.hide()

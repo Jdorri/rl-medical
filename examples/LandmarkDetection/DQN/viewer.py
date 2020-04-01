@@ -16,7 +16,6 @@ from PyQt5.QtCore import *
 import sys
 from thread import WorkerThread
 from functools import partial
-# from functioning_UI_PyQt import AppSettingsBrowseMode
 
 try:
     import pyglet
@@ -35,7 +34,7 @@ class Window(QMainWindow):
         super().__init__()
         self.initUI(viewer_param, app_settings)
         self.KEY_PRESSED.connect(self.on_key)
-        self.setChildrenFocusPolicy(Qt.NoFocus)
+        # self.setChildrenFocusPolicy(Qt.NoFocus)
 
     def initUI(self, viewer_param, app_settings):
         """
@@ -182,13 +181,13 @@ class Window(QMainWindow):
             elif event.key() == Qt.Key_Right:
                 self.right_widget.on_clicking_right()
 
-    def setChildrenFocusPolicy(self, policy):
-        '''Method to allow arrow keys to be caught in keyPressEvent()'''
-        def recursiveSetChildFocusPolicy(parentQWidget):
-            for childQWidget in parentQWidget.findChildren(QWidget):
-                childQWidget.setFocusPolicy(policy)
-                recursiveSetChildFocusPolicy(childQWidget)
-        recursiveSetChildFocusPolicy(self)
+    # def setChildrenFocusPolicy(self, policy):
+    #     '''Method to allow arrow keys to be caught in keyPressEvent()'''
+    #     def recursiveSetChildFocusPolicy(parentQWidget):
+    #         for childQWidget in parentQWidget.findChildren(QWidget):
+    #             childQWidget.setFocusPolicy(policy)
+    #             recursiveSetChildFocusPolicy(childQWidget)
+    #     recursiveSetChildFocusPolicy(self)
 
 
 
@@ -225,11 +224,9 @@ class SimpleImageViewerSettings(QFrame):
             self.run_button.clicked.connect(self.buttonClicked)
             self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
 
-
-
         # Slider settings
         self.speed_slider = QSlider(Qt.Horizontal, self)
-        self.speed_slider.setFocusPolicy(Qt.StrongFocus)
+        # self.speed_slider.setFocusPolicy(Qt.StrongFocus)
         self.speed_slider.setMinimum(0)
         self.speed_slider.setMaximum(5)
         self.speed_slider.setValue(5)
