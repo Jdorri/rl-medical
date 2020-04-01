@@ -453,6 +453,7 @@ class AppSettingsBrowseMode(QFrame):
         elif self.env:
             if self.env.xscale > 1:
                 self.env.adjustMultiScale(higherRes=True)
+                self.move_img(-1)
 
     @pyqtSlot()
     def on_clicking_zoomOut(self):
@@ -461,6 +462,7 @@ class AppSettingsBrowseMode(QFrame):
         elif self.env:
             if self.env.xscale < 3:
                 self.env.adjustMultiScale(higherRes=False)
+                self.move_img(-1)
 
     @pyqtSlot()
     def on_clicking_mode(self):
@@ -495,10 +497,10 @@ class AppSettingsBrowseMode(QFrame):
                         saveGif=False, saveVideo=False, task='browse')
         # self.env.viewer = self.window
         self.env.stepManual(act=-1, viewer=self.window)
-        self.env.display_browseMode()
+        self.env.display(browseMode=True)
 
     def move_img(self, action):
-        self.env.stepManual(act=action, viewer=self.window)
+        self.env.stepManual(action, self.window)
         QApplication.processEvents()
         self.window.update()
 
@@ -517,6 +519,9 @@ class Controller:
         app_settings = AppSettings()
         self.window1 = Window(self.viewer_param, app_settings)
         app_settings.window = self.window1
+
+        # app_settings.fname_images.name = './data/filenames/image_files.txt'
+        # app_settings.load_img()
 
         # Close previous window
         if self.window2:

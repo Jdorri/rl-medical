@@ -373,7 +373,11 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setStyleSheet("background: black; border:3px solid green; ")
         self.label_img_y.setStyleSheet("background: black; border:3px solid blue; ")
 
-    def draw_image(self, arrs, agent_loc, target=(0,0), depth=1, text=None, spacing=1, rect=None):
+        # Style settings
+        self.color = QColor(111, 230, 158)
+        self.line_width = 2
+
+    def draw_image(self, arrs, agent_loc, target=(0,0), depth=1, text=None, rect=None):
         """
         Main image drawer function
         """
@@ -400,23 +404,20 @@ class SimpleImageViewer(QWidget):
         self.painterInstance = QPainter(self.img)
         _agent_loc = (agent_loc[0], self.height-agent_loc[1])
         rect_ = (self.height-rect[2], self.height-rect[3]) + rect[:2]
-        self.draw_rects(text, spacing, _agent_loc, rect_)
-        self.draw_circles(_agent_loc, target, depth)
+        self.drawer(text, _agent_loc, rect_, depth)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_x)
         _agent_loc = (agent_loc[1], self.height_x-agent_loc[2])
         rect_ = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
-        self.draw_rects(text, spacing, _agent_loc, rect_)
-        self.draw_circles(_agent_loc, target, depth)
+        self.drawer(text, _agent_loc, rect_, depth)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_y)
         _agent_loc = (agent_loc[0]*self.width_y//self.height_y, self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
         rect_ = (self.height_y-rect[4], self.height_y-rect[5]) + \
             (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
-        self.draw_rects(text, spacing, agent_loc, rect_)
-        self.draw_circles(_agent_loc, target, depth)
+        self.drawer(text, _agent_loc, rect_, depth)
         self.painterInstance.end()
 
         # TODO: resolve scaled to width later during final iteration (responsive)
@@ -426,6 +427,22 @@ class SimpleImageViewer(QWidget):
         self.label_img.setPixmap(self.img)
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
+
+    def drawer(self, text, agent_loc, rect, depth):
+        xPos = rect[2]
+        yPos = rect[0]
+        xLen = rect[3] - xPos
+        yLen = rect[1] - yPos
+
+        rect_dims = [xPos,yPos,xLen,yLen,]
+        hw_ratio = yLen / -xLen
+
+        if self.browseMode:
+            self.draw_crosshairs(agent_loc, hw_ratio)
+            self.draw_agent(agent_loc)
+        else:
+            self.draw_rects(rect_dims)
+            self.draw_agent(agent_loc)
 
     def draw_circles(self, agent_loc, target, depth):
         # Draw current agent location
@@ -453,36 +470,98 @@ class SimpleImageViewer(QWidget):
             radx = rady = depth * 30
             self.painterInstance.drawEllipse(centre, radx, rady)
 
-    def draw_rects(self, text, spacing, agent_loc, rect):
-        # Coordinates for overlayed rectangle (ROI)
-        xPos = rect[2]
-        yPos = rect[0]
-        xLen = rect[3] - xPos
-        yLen = rect[1] - yPos
+    def draw_agent(self, agent_loc):
+        pen = QPen(self.color)
+        pen.setWidth(7)
+        self.painterInstance.setPen(pen)
+        self.painterInstance.drawPoint(QPoint(*agent_loc))
 
-        # set rectangle color and thickness
-        self.penRectangle = QPen(Qt.cyan)
-        self.penRectangle.setWidth(3)
-        # draw rectangle on painter
-        self.painterInstance.setPen(self.penRectangle)
-        self.painterInstance.drawRect(xPos,yPos,xLen,yLen)
+    def draw_crosshairs(self, agent_loc, hw_ratio):
+        cross_len = 100
+        hair_len = 3
+        centre_space = 10
+        c = QPoint(*agent_loc)
 
-        # Annotate rectangle
-        self.painterInstance.setPen(Qt.cyan)
-        self.painterInstance.setFont(QFont('Decorative', max(abs(yLen)//12, 15)))
-        self.painterInstance.drawText(xPos, yPos-8, "Agent")
+        pen = QPen(self.color)
+        pen.setWidth(self.line_width)
+        self.painterInstance.setPen(pen)
+
+        for i in self.units():
+            hw_ratio = hw_ratio if i[0] == 0 else 1
+
+            vec = QPoint(*i)
+            cross_s = c + centre_space * vec
+            cross_s.setY(cross_s.y() * hw_ratio)
+            cross_f = cross_s + cross_len * vec
+            cross_f.setY(cross_f.y() * hw_ratio)
+            self.painterInstance.drawLine(cross_s, cross_f)
+
+            # Draw hairs
+            for j in range(1,4):
+                loc = cross_s + j * (cross_f - cross_s) / 4
+
+                # Make crosshair thicker for correct resolution
+                if self.scale == j:
+                    pen.setWidth(3)
+                    self.painterInstance.setPen(pen)
+
+                if i[0] == 0:
+                    hair_s = loc + pen.width() * hair_len * QPoint(-1,0)
+                    hair_f = loc + pen.width() * hair_len * QPoint(+1,0)
+                else:
+                    hair_s = loc + pen.width() * hair_len * QPoint(0,-1)
+                    hair_f = loc + pen.width() * hair_len * QPoint(0,+1)
+
+                self.painterInstance.drawLine(hair_s, hair_f)
+
+                # Reset pen width
+                pen.setWidth(self.line_width)
+                self.painterInstance.setPen(pen)
+
+    def draw_rects(self, rect):
+        corner_len = 25
+        xPos, yPos, xLen, yLen = rect
+
+        bL = QPoint(xPos, yPos)
+        tL = QPoint(xPos, yPos + yLen)
+        bR = QPoint(xPos + xLen, yPos)
+        tR = QPoint(xPos + xLen, yPos + yLen)
+
+        vecs = self.units()
+
+        corners = {
+            'bL': {'loc': bL, 'd1': QPoint(*vecs[0]), 'd2': QPoint(*vecs[1])},
+            'tL': {'loc': tL, 'd1': QPoint(*vecs[0]), 'd2': QPoint(*vecs[3])},
+            'bR': {'loc': bR, 'd1': QPoint(*vecs[2]), 'd2': QPoint(*vecs[1])},
+            'tR': {'loc': tR, 'd1': QPoint(*vecs[2]), 'd2': QPoint(*vecs[3])},
+        }
+
+        pen = QPen(self.color)
+        pen.setWidth(self.line_width)
+        self.painterInstance.setPen(pen)
+        for k in corners.values():
+            self.painterInstance.drawLine(k['loc'], k['loc'] + corner_len * k['d1'])
+            self.painterInstance.drawLine(k['loc'], k['loc'] + corner_len * k['d2'])
+
+        # # Annotate rectangle
+        # self.painterInstance.setFont(QFont('Decorative', max(abs(yLen)//12, 15)))
+        # self.painterInstance.drawText(xPos, yPos-8, "Agent ROI")
+
+    def units(self):
+        return [[1,0],[0,-1],[-1,0],[0,1]]
 
     @pyqtSlot(dict)
     def agent_signal_handler(self, value):
         """
         Used to handle agent signal when it moves.
         """
+        self.scale = value["scale"]
+        self.browseMode = value["browseMode"]
         self.draw_image(
             arrs=value["arrs"],
             agent_loc=value["agent_loc"],
             target=value["target"],
             text=value["text"],
-            spacing=value["spacing"],
             rect=value["rect"]
         )
 
