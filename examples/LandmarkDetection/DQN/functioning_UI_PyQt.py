@@ -335,6 +335,19 @@ class AppSettingsBrowseMode(QFrame):
         self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
 
         # initialise grid/set spacing
+        gridArrows = QGridLayout()
+        gridArrows.setSpacing(5)
+
+        gridArrows.addWidget(self.upButton, 0, 1)
+        gridArrows.addWidget(self.downButton, 2, 1)
+        gridArrows.addWidget(self.leftButton, 1, 0)
+        gridArrows.addWidget(self.rightButton, 1, 2)
+        gridArrows.addWidget(self.inButton, 0, 3)
+        gridArrows.addWidget(self.outButton, 2, 3)
+
+        # self.setLayout(gridArrows)
+
+        # initialise grid/set spacing
         grid = QGridLayout()
         grid.setSpacing(10)
 
@@ -345,12 +358,7 @@ class AppSettingsBrowseMode(QFrame):
         grid.addWidget(self.mode, 5, 0)
         grid.addWidget(self.mode_edit, 5, 1)
 
-        grid.addWidget(self.upButton, 8, 0)
-        grid.addWidget(self.downButton, 8, 1)
-        grid.addWidget(self.leftButton, 9, 0)
-        grid.addWidget(self.rightButton, 9, 1)
-        grid.addWidget(self.inButton, 10, 0)
-        grid.addWidget(self.outButton, 10, 1)
+        grid.addLayout(gridArrows, 7, 0)
 
         grid.addWidget(self.exit, 12, 0)
 
@@ -380,7 +388,7 @@ class AppSettingsBrowseMode(QFrame):
     def on_clicking_up(self):
         if self.test_mode:
             self.test_click = True
-        else:
+        elif self.env:
             action = 1
             self.move_img(action)
 
@@ -388,7 +396,7 @@ class AppSettingsBrowseMode(QFrame):
     def on_clicking_down(self):
         if self.test_mode:
             self.test_click = True
-        else:
+        elif self.env:
             action = 4
             self.move_img(action)
 
@@ -396,7 +404,7 @@ class AppSettingsBrowseMode(QFrame):
     def on_clicking_left(self):
         if self.test_mode:
             self.test_click = True
-        else:
+        elif self.env:
             action = 3
             self.move_img(action)
 
@@ -404,7 +412,7 @@ class AppSettingsBrowseMode(QFrame):
     def on_clicking_right(self):
         if self.test_mode:
             self.test_click = True
-        else:
+        elif self.env:
             action = 2
             self.move_img(action)
 
@@ -412,7 +420,7 @@ class AppSettingsBrowseMode(QFrame):
     def on_clicking_in(self):
         if self.test_mode:
             self.test_click = True
-        else:
+        elif self.env:
             action = 0
             self.move_img(action)
 
@@ -420,7 +428,7 @@ class AppSettingsBrowseMode(QFrame):
     def on_clicking_out(self):
         if self.test_mode:
             self.test_click = True
-        else:
+        elif self.env:
             action = 5
             self.move_img(action)
 

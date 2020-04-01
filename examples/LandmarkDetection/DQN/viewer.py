@@ -34,7 +34,6 @@ class Window(QMainWindow):
         super().__init__()
         self.initUI(viewer_param, app_settings)
         self.KEY_PRESSED.connect(self.on_key)
-        # self.setChildrenFocusPolicy(Qt.NoFocus)
 
     def initUI(self, viewer_param, app_settings):
         """
@@ -129,19 +128,6 @@ class Window(QMainWindow):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
-    # def closeEvent(self, event):
-    #     """
-    #     Used to override close event and provide warning when closing application
-    #     """
-    #     reply = QMessageBox.question(self, 'Message',
-    #         "Are you sure to quit?", QMessageBox.Yes |
-    #         QMessageBox.No, QMessageBox.Yes)
-    #
-    #     if reply == QMessageBox.Yes:
-    #         event.accept()
-    #     else:
-    #         event.ignore()
-
     def nightMode(self):
         "CSS Styling for night mode app version"
         # Overwrite widgets color
@@ -161,12 +147,15 @@ class Window(QMainWindow):
         else:
             self.dayMode()
 
+    @pyqtSlot(QEvent)
     def keyPressEvent(self, event):
         super().keyPressEvent(event)
         self.KEY_PRESSED.emit(event)
 
     def on_key(self, event):
-        # test for a specific key
+        ''' Different actions for different keyPressEvents.
+            Allows the user to move through the image by using arrow keys
+        '''
         if self.right_widget.MODE == 'BROWSE MODE' and self.right_widget.env:
             if event.key() == Qt.Key_S:
                 self.right_widget.on_clicking_in()
@@ -180,6 +169,19 @@ class Window(QMainWindow):
                 self.right_widget.on_clicking_left()
             elif event.key() == Qt.Key_Right:
                 self.right_widget.on_clicking_right()
+
+    # def closeEvent(self, event):
+    #     """
+    #     Used to override close event and provide warning when closing application
+    #     """
+    #     reply = QMessageBox.question(self, 'Message',
+    #         "Are you sure to quit?", QMessageBox.Yes |
+    #         QMessageBox.No, QMessageBox.Yes)
+    #
+    #     if reply == QMessageBox.Yes:
+    #         event.accept()
+    #     else:
+    #         event.ignore()
 
     # def setChildrenFocusPolicy(self, policy):
     #     '''Method to allow arrow keys to be caught in keyPressEvent()'''
