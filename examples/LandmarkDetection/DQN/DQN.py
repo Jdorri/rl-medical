@@ -65,7 +65,7 @@ def get_player(directory=None, files_list= None, viz=False,
     env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
                         viz=viz, saveGif=saveGif, saveVideo=saveVideo,
                         task=task, files_list=files_list, max_num_frames=1500)
-    if (task != 'train'):
+    if (task in ['play','eval']):
         # in training, env will be decorated by ExpReplay, and history
         # is taken care of in expreplay buffer
         # otherwise, FrameStack modifies self.step to save observations into a queue

@@ -41,8 +41,8 @@ def play_one_episode(env, func, render=False, viewer=None):
     while True:
         act, q_values = predict(ob)
         ob, r, isOver, info = env.step(act, q_values, viewer=viewer)
-        if render:
-            env.render()
+        # if render:
+        #     env.render()
         sum_r += r
         if isOver:
             return sum_r, info['filename'], info['distError'], q_values
@@ -57,13 +57,13 @@ def play_n_episodes(player, predfunc, nr, render=False, viewer=None):
     for k in range(nr):
         score, filename, distance_error, q_values = play_one_episode(player,
                                                                     predfunc,
-                                                                    render=False, 
+                                                                    render=False,
                                                                     viewer=viewer)
         logger.info(
             "{}/{} - {} - score {} - distError {} - q_values {}".format(k + 1,
-                                                                        nr, 
-                                                                        filename, 
-                                                                        score, 
+                                                                        nr,
+                                                                        filename,
+                                                                        score,
                                                                         distance_error,
                                                                         q_values))
 

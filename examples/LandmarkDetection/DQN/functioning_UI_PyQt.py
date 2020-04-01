@@ -1,6 +1,7 @@
 import sys
-from PyQt5.QtWidgets import*
-from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QEvent
+from dataReader import *
 # from DQN import Model, get_player
 
 from DQN import get_player, Model, get_config, get_viewer_data
@@ -72,6 +73,7 @@ class filenames_GUI:
 class AppSettings(QFrame):
 
     SWITCH_WINDOW = pyqtSignal()
+    MODE = 'DEFAULT MODE'
 
     def __init__(self, *args, **kwargs):
         super(AppSettings, self).__init__(*args, **kwargs)
@@ -284,6 +286,8 @@ class AppSettings(QFrame):
 class AppSettingsBrowseMode(QFrame):
 
     SWITCH_WINDOW = pyqtSignal()
+    KEY_PRESSED = pyqtSignal(QEvent)
+    MODE = 'BROWSE MODE'
 
     def __init__(self, *args, **kwargs):
         super(AppSettingsBrowseMode, self).__init__(*args, **kwargs)
@@ -301,6 +305,30 @@ class AppSettingsBrowseMode(QFrame):
         self.mode_edit = QPushButton('Test Mode', self)
         self.exit = QPushButton('Exit', self)
 
+        self.upButton = QToolButton(self)
+        self.upButton.setArrowType(Qt.UpArrow)
+
+        self.downButton = QToolButton(self)
+        self.downButton.setArrowType(Qt.DownArrow)
+
+        self.leftButton = QToolButton(self)
+        self.leftButton.setArrowType(Qt.LeftArrow)
+
+        self.rightButton = QToolButton(self)
+        self.rightButton.setArrowType(Qt.RightArrow)
+
+        self.inButton = QToolButton(self)
+        self.inButton.setText('+')
+        font = self.inButton.font()
+        font.setBold(True)
+        self.inButton.setFont(font)
+
+        self.outButton = QToolButton(self)
+        self.outButton.setText('-')
+        font = self.outButton.font()
+        font.setBold(True)
+        self.outButton.setFont(font)
+
         # temporary default file paths
         self.fname_images = filenames_GUI()
         self.fname_images.name = "./data/filenames/image_files.txt"
@@ -317,6 +345,13 @@ class AppSettingsBrowseMode(QFrame):
         grid.addWidget(self.mode, 5, 0)
         grid.addWidget(self.mode_edit, 5, 1)
 
+        grid.addWidget(self.upButton, 8, 0)
+        grid.addWidget(self.downButton, 8, 1)
+        grid.addWidget(self.leftButton, 9, 0)
+        grid.addWidget(self.rightButton, 9, 1)
+        grid.addWidget(self.inButton, 10, 0)
+        grid.addWidget(self.outButton, 10, 1)
+
         grid.addWidget(self.exit, 12, 0)
 
         self.setLayout(grid)
@@ -326,12 +361,68 @@ class AppSettingsBrowseMode(QFrame):
         self.mode_edit.clicked.connect(self.on_clicking_mode)
         self.img_file_edit.clicked.connect(self.on_clicking_browse_images)
         self.exit.clicked.connect(self.on_clicking_exit)
+        self.upButton.clicked.connect(self.on_clicking_up)
+        self.downButton.clicked.connect(self.on_clicking_down)
+        self.leftButton.clicked.connect(self.on_clicking_left)
+        self.rightButton.clicked.connect(self.on_clicking_right)
+        self.inButton.clicked.connect(self.on_clicking_in)
+        self.outButton.clicked.connect(self.on_clicking_out)
 
         self.show()
 
         # Flags for testing
         self.test_mode = False
         self.test_click = None
+
+        self.env = None
+
+    @pyqtSlot()
+    def on_clicking_up(self):
+        if self.test_mode:
+            self.test_click = True
+        else:
+            action = 1
+            self.move_img(action)
+
+    @pyqtSlot()
+    def on_clicking_down(self):
+        if self.test_mode:
+            self.test_click = True
+        else:
+            action = 4
+            self.move_img(action)
+
+    @pyqtSlot()
+    def on_clicking_left(self):
+        if self.test_mode:
+            self.test_click = True
+        else:
+            action = 3
+            self.move_img(action)
+
+    @pyqtSlot()
+    def on_clicking_right(self):
+        if self.test_mode:
+            self.test_click = True
+        else:
+            action = 2
+            self.move_img(action)
+
+    @pyqtSlot()
+    def on_clicking_in(self):
+        if self.test_mode:
+            self.test_click = True
+        else:
+            action = 0
+            self.move_img(action)
+
+    @pyqtSlot()
+    def on_clicking_out(self):
+        if self.test_mode:
+            self.test_click = True
+        else:
+            action = 5
+            self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_mode(self):
@@ -349,13 +440,30 @@ class AppSettingsBrowseMode(QFrame):
         if self.test_mode:
             self.test_click = True
         else:
-            self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
-                "./data/filenames", filter="txt files (*.txt)")
-            print(self.fname_images.name)
+            # self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
+            #     "./data/filenames", filter="txt files (*.txt)")
+            self.fname_images.name = '/Users/alexgaskell/rl-medical/examples/LandmarkDetection/DQN/data/filenames/image_files.txt'
+            self.load_img()
 
     @pyqtSlot()
     def close_it(self):
         self.close()
+
+    def load_img(self):
+        self.task_value = None
+        # self.selected_list = [self.fname_images, self.fname_landmarks]
+        self.selected_list = [self.fname_images]
+
+        self.env = get_player(files_list=self.selected_list, viz=0.01,
+                        saveGif=False, saveVideo=False, task='browse')
+        # self.env.viewer = self.window
+        self.env.stepManual(act=-1, viewer=self.window)
+        self.env.display_browseMode()
+
+    def move_img(self, action):
+        self.env.stepManual(act=action, viewer=self.window)
+        QApplication.processEvents()
+        self.window.update()
 
 
 class Controller:
@@ -366,10 +474,10 @@ class Controller:
         self.show_default()
         self.window1.show()
 
-
     def show_default(self):
         # Init the window
-        app_settings = AppSettings()
+        app_settings = AppSettingsBrowseMode()
+        # app_settings = AppSettings()
         self.window1 = Window(self.viewer_param, app_settings)
         app_settings.window = self.window1
 

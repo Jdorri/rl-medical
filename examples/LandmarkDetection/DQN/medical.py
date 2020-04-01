@@ -149,7 +149,8 @@ class MedicalPlayer(gym.Env):
         # initialize rectangle limits from input image coordinates
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
-        if self.task == 'play':
+
+        if self.task in ['play', 'browse']:
             self.files = filesListBrainMRLandmark(files_list,
                                                   returnLandmarks=False,)
         else:
@@ -270,7 +271,7 @@ class MedicalPlayer(gym.Env):
         self._qvalues = [0, ] * self.actions
         self._screen = self._current_state()
 
-        if self.task == 'play':
+        if self.task in ['play', 'browse']:
             self.cur_dist = 0
         else:
             self.cur_dist = self.calcDistance(self._location,
@@ -435,14 +436,12 @@ class MedicalPlayer(gym.Env):
                 if isinstance(self.viz, float):
                     self.display()
 
-
         distance_error = self.cur_dist
         self.current_episode_score.feed(self.reward)
         # print(self.reward) this is every step of the agent
 
         info = {'score': self.current_episode_score.sum, 'gameOver': self.terminal,
                 'distError': distance_error, 'filename': self.filename}
-
 
         if self.terminal:
             # directory = logger.get_logger_dir()
@@ -472,6 +471,88 @@ class MedicalPlayer(gym.Env):
         # #######################################################################
 
         return self._current_state(), self.reward, self.terminal, info
+
+    def stepManual(self, act, viewer):
+        """ Version of above for browse mode allowing the user to navigate
+            through an uploaded img
+        """
+        # self._qvalues = qvalues
+        current_loc = self._location
+        self.terminal = False
+        go_out = False
+        self.viewer = viewer
+
+        # -1 passed during init so skip updating current location
+        if act == -1:
+            pass
+        else:
+            # UP Z+ -----------------------------------------------------------
+            if (act == 0):
+                next_location = (current_loc[0],
+                                 current_loc[1],
+                                 round(current_loc[2] + self.action_step))
+                if (next_location[2] >= self._image_dims[2]):
+                    # print(' trying to go out the image Z+ ',)
+                    next_location = current_loc
+                    go_out = True
+
+            # FORWARD Y+ ---------------------------------------------------------
+            if (act == 1):
+                next_location = (current_loc[0],
+                                 round(current_loc[1] + self.action_step),
+                                 current_loc[2])
+                if (next_location[1] >= self._image_dims[1]):
+                    # print(' trying to go out the image Y+ ',)
+                    next_location = current_loc
+                    go_out = True
+            # RIGHT X+ -----------------------------------------------------------
+            if (act == 2):
+                next_location = (round(current_loc[0] + self.action_step),
+                                 current_loc[1],
+                                 current_loc[2])
+                if next_location[0] >= self._image_dims[0]:
+                    # print(' trying to go out the image X+ ',)
+                    next_location = current_loc
+                    go_out = True
+            # LEFT X- -----------------------------------------------------------
+            if act == 3:
+                next_location = (round(current_loc[0] - self.action_step),
+                                 current_loc[1],
+                                 current_loc[2])
+                if next_location[0] <= 0:
+                    # print(' trying to go out the image X- ',)
+                    next_location = current_loc
+                    go_out = True
+            # BACKWARD Y- ---------------------------------------------------------
+            if act == 4:
+                next_location = (current_loc[0],
+                                 round(current_loc[1] - self.action_step),
+                                 current_loc[2])
+                if next_location[1] <= 0:
+                    # print(' trying to go out the image Y- ',)
+                    next_location = current_loc
+                    go_out = True
+            # DOWN Z- -----------------------------------------------------------
+            if act == 5:
+                next_location = (current_loc[0],
+                                 current_loc[1],
+                                 round(current_loc[2] - self.action_step))
+                if next_location[2] <= 0:
+                    # print(' trying to go out the image Z- ',)
+                    next_location = current_loc
+                    go_out = True
+
+            self._location = next_location
+
+        self._screen = self._current_state()
+
+        # render screen if viz is on
+        with _ALE_LOCK:
+            if self.viz:
+                if isinstance(self.viz, float):
+                    self.display_browseMode()
+
+        return self._current_state()
 
     def getBestLocation(self):
         ''' get best location with best qvalue from last for locations
@@ -741,6 +822,57 @@ class MedicalPlayer(gym.Env):
                             '-vcodec', 'libx264', '-b:v', '2567k', self.filename + '.mp4']
                 subprocess.check_output(save_cmd)
                 shutil.rmtree(dirname, ignore_errors=True)
+
+    def display_browseMode(self, return_rgb_array=False):
+        # get dimensions
+        current_point = self._location
+        target_point = self._target_loc
+        # get image and convert it to pyglet
+        plane = self.get_plane(current_point[2])  # z-plane
+        plane_x = self.get_plane_x(current_point[0])  # x-plane
+        plane_y= self.get_plane_y(current_point[1])  # y-plane
+
+        # plane = np.squeeze(self._current_state()[:,:,13])
+        # rescale image
+        # INTER_NEAREST, INTER_LINEAR, INTER_AREA, INTER_CUBIC, INTER_LANCZOS4
+        scale_x = 2
+        scale_y = 2
+        scale_z = 2
+        current_point = (current_point[0]*scale_x, current_point[1]*scale_y,
+                        current_point[2]*scale_z)
+        self.rectangle = (self.rectangle[0]*scale_x, self.rectangle[1]*scale_x,
+                            self.rectangle[2]*scale_y, self.rectangle[3]*scale_y,
+                            self.rectangle[4]*scale_z, self.rectangle[5]*scale_z)
+        img = cv2.resize(plane,
+                         (int(scale_x*plane.shape[1]),int(scale_y*plane.shape[0])),
+                         interpolation=cv2.INTER_LINEAR)
+        img_x = cv2.resize(plane_x,
+                         (int(scale_x*plane_x.shape[1]),int(scale_y*plane_x.shape[0])),
+                         interpolation=cv2.INTER_LINEAR)
+        img_y = cv2.resize(plane_y,
+                         (int(scale_y*plane_x.shape[1]),int(scale_y*plane_y.shape[0])),
+                         interpolation=cv2.INTER_LINEAR)
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)  # congvert to rgb
+        img_x = cv2.cvtColor(img_x, cv2.COLOR_GRAY2RGB)  # congvert to rgb
+        img_y = cv2.cvtColor(img_y, cv2.COLOR_GRAY2RGB)  # congvert to rgb
+
+        ########################################################################
+
+        # Sleep until resume
+        while self.viewer.left_widget.thread.pause:
+            time.sleep(1)
+
+        # Need to emit signal here
+        self.viewer.widget.agent_signal.emit({
+            "arrs": (img, img_x, img_y),
+            "agent_loc": current_point,
+            "target": target_point,
+            "text": "Error " + str(round(self.cur_dist,3)) + "mm",
+            "spacing": 3,
+            "rect": self.rectangle
+        })
+
+        time.sleep(0)
 
 
 # =============================================================================

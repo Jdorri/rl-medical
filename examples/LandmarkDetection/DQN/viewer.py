@@ -15,7 +15,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys
 from thread import WorkerThread
-# from functioning_UI_PyQt import AppSettings
+from functools import partial
+# from functioning_UI_PyQt import AppSettingsBrowseMode
 
 try:
     import pyglet
@@ -23,18 +24,18 @@ try:
 except ImportError as e:
     reraise(suffix="HINT: you can install pyglet directly via 'pip install pyglet'. But if you really just want to install all Gym dependencies and not have to think about it, 'pip install -e .[all]' or 'pip install gym[all]' will do it.")
 
-
 ################################################################################
 ## QMainWindow
-
 class Window(QMainWindow):
     """
     Window used as the main window for the application which integrate different widgets.
     """
+    KEY_PRESSED = pyqtSignal(QEvent)
     def __init__(self, viewer_param, app_settings=None):
         super().__init__()
-
         self.initUI(viewer_param, app_settings)
+        self.KEY_PRESSED.connect(self.on_key)
+        self.setChildrenFocusPolicy(Qt.NoFocus)
 
     def initUI(self, viewer_param, app_settings):
         """
@@ -158,10 +159,38 @@ class Window(QMainWindow):
         else:
             self.dayMode()
 
+    def keyPressEvent(self, event):
+        super().keyPressEvent(event)
+        self.KEY_PRESSED.emit(event)
+
+    def on_key(self, event):
+        # test for a specific key
+        if self.right_widget.MODE == 'BROWSE MODE' and self.right_widget.env:
+            if event.key() == Qt.Key_S:
+                self.right_widget.on_clicking_in()
+            elif event.key() == Qt.Key_A:
+                self.right_widget.on_clicking_out()
+            elif event.key() == Qt.Key_Up:
+                self.right_widget.on_clicking_up()
+            elif event.key() == Qt.Key_Down:
+                self.right_widget.on_clicking_down()
+            elif event.key() == Qt.Key_Left:
+                self.right_widget.on_clicking_left()
+            elif event.key() == Qt.Key_Right:
+                self.right_widget.on_clicking_right()
+
+    def setChildrenFocusPolicy(self, policy):
+        '''Method to allow arrow keys to be caught in keyPressEvent()'''
+        def recursiveSetChildFocusPolicy(parentQWidget):
+            for childQWidget in parentQWidget.findChildren(QWidget):
+                childQWidget.setFocusPolicy(policy)
+                recursiveSetChildFocusPolicy(childQWidget)
+        recursiveSetChildFocusPolicy(self)
+
+
 
 ################################################################################
 ## Left Widget
-
 class SimpleImageViewerSettings(QFrame):
     """
     Left widget controlling GUI elements settings.
@@ -217,7 +246,6 @@ class SimpleImageViewerSettings(QFrame):
         # Flags for testing
         self.test_mode = False
         self.test_click = None
-
 
     def buttonClicked(self):
         """
@@ -332,7 +360,7 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setStyleSheet("background: black; border:3px solid green; ")
         self.label_img_y.setStyleSheet("background: black; border:3px solid blue; ")
 
-    def draw_image(self, arrs, agent_loc, target=(200,200), depth=1, text=None, spacing=1, rect=None):
+    def draw_image(self, arrs, agent_loc, target=(0,0), depth=1, text=None, spacing=1, rect=None):
         """
         Main image drawer function
         """
