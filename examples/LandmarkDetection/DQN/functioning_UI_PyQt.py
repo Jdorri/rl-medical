@@ -442,7 +442,7 @@ class AppSettingsBrowseMode(QFrame):
         else:
             # self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
             #     "./data/filenames", filter="txt files (*.txt)")
-            self.fname_images.name = '/Users/alexgaskell/rl-medical/examples/LandmarkDetection/DQN/data/filenames/image_files.txt'
+            self.fname_images.name = './data/filenames/image_files.txt'
             self.load_img()
 
     @pyqtSlot()
