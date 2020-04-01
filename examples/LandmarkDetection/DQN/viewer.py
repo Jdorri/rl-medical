@@ -55,7 +55,10 @@ class Window(QMainWindow):
                                    filepath=viewer_param["filepath"])
 
         # Left Settings widget
-        self.left_widget = SimpleImageViewerSettings(self)
+        if app_settings:
+            self.left_widget = SimpleImageViewerSettings(self, True)
+        else:
+            self.left_widget = SimpleImageViewerSettings(self, False)
         self.left_widget.setFrameShape(QFrame.StyledPanel)
 
         # Right Settings widget
@@ -195,7 +198,7 @@ class SimpleImageViewerSettings(QFrame):
     """
     Left widget controlling GUI elements settings.
     """
-    def __init__(self, window):
+    def __init__(self, window, gui_launcher=False):
         super().__init__()
         self.thread = WorkerThread(None) # Store thread to allow pause and run functionality
         self.window = window
@@ -213,9 +216,16 @@ class SimpleImageViewerSettings(QFrame):
         label_run.setStyleSheet("margin-top: 10px")
 
         # Button settings
-        self.run_button = QPushButton("Pause")
-        self.run_button.clicked.connect(self.buttonClicked)
-        self.run_button.setStyleSheet("background-color:#f44336; color:white")
+        if gui_launcher:
+            self.run_button = QPushButton("Pause")
+            self.run_button.clicked.connect(self.buttonClicked)
+            self.run_button.setStyleSheet("background-color:#f44336; color:white")
+        else:
+            self.run_button = QPushButton("Start")
+            self.run_button.clicked.connect(self.buttonClicked)
+            self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+
+
 
         # Slider settings
         self.speed_slider = QSlider(Qt.Horizontal, self)
@@ -258,16 +268,16 @@ class SimpleImageViewerSettings(QFrame):
             self.run_button.setText("Pause")
             self.window.statusbar.showMessage("Run")
             self.run_button.setStyleSheet("background-color:#f44336; color:white")
-        elif self.run_button.text() == "Run":
+        elif self.run_button.text() == "Resume":
             self.thread.pause = False
             self.run_button.setText("Pause")
             self.run_button.setStyleSheet("background-color:#f44336; color:white")
-            self.window.statusbar.showMessage("Run")
+            self.window.statusbar.showMessage("Running")
         else:
             self.thread.pause = True
-            self.run_button.setText("Run")
+            self.run_button.setText("Resume")
             self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-            self.window.statusbar.showMessage("Pause")
+            self.window.statusbar.showMessage("Paused")
 
     def changeValue(self, value):
         """
