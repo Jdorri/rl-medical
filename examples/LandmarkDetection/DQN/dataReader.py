@@ -76,12 +76,14 @@ class filesListBrainMRLandmark(object):
         assert files_list, 'There is no file give'
         # read image filenames
             # self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
-        self.image_files = [line.split('\n')[0] for line in open(files_list[0].name)]
+        with open(files_list[0].name) as f:
+            self.image_files = [line.split('\n')[0] for line in f]
         # read landmark filenames if task is train or eval
         self.returnLandmarks = returnLandmarks
         self.agents = agents
         if self.returnLandmarks:
-            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1].name)]
+            with open(files_list[1].name) as f:
+                self.landmark_files = [line.split('\n')[0] for line in f]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
 
@@ -131,12 +133,14 @@ class filesListCardioLandmark(object):
         # check if files_list exists
         assert files_list, 'There is no file given'
         # read image filenames
-        self.image_files = [line.split('\n')[0] for line in open(files_list[0].name)]
+        with open(files_list[0].name) as f:
+            self.image_files = [line.split('\n')[0] for line in f]
         # read landmark filenames if task is train or eval
         self.returnLandmarks = returnLandmarks
         self.agents = agents
         if self.returnLandmarks:
-            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1].name)]
+            with open(files_list[1].name) as f:
+                self.landmark_files = [line.split('\n')[0] for line in f]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
 
@@ -191,12 +195,14 @@ class filesListFetalUSLandmark(object):
         # check if files_list exists
         assert files_list, 'There is no file given'
         # read image filenames
-        self.image_files = [line.split('\n')[0] for line in open(files_list[0].name)]
+        with open(files_list[0].name) as f:
+            self.image_files = [line.split('\n')[0] for line in f]
         # read landmark filenames if task is train or eval
         self.returnLandmarks = returnLandmarks
         self.agents = agents
         if self.returnLandmarks:
-            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1].name)]
+            with open(files_list[1].name) as f:
+                self.landmark_files = [line.split('\n')[0] for line in f]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
 
