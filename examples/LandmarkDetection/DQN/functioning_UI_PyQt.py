@@ -109,12 +109,13 @@ class AppSettings(QFrame):
         self.exit = QPushButton('Exit', self)
 
         # add widget functionality
-        self.task_edit.addItems(['Play', 'Evaluation', 'Train'])
+        # self.task_edit.addItems(['Play', 'Evaluation', 'Train'])
+        self.task_edit.addItems(['Evaluation'])
         self.algorithm_edit.addItems(['DQN', 'Double', 'Dueling', 'Dueling Double'])
 
         # temporary default file paths
         self.fname_images = filenames_GUI()
-        self.fname_images.name = "./data/filenames/image_files.txt"
+        self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
         self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
         self.fname_landmarks = filenames_GUI()
         self.fname_landmarks.name = "./data/filenames/landmark_files.txt"
@@ -215,8 +216,8 @@ class AppSettings(QFrame):
         if self.test_mode:
             self.test_click = True
         else:
-            self.fname_landmarks, _ = QFileDialog.getOpenFileName(None, None,
-                "./data/landmarks", filter="txt files (*.txt)")
+            self.fname_landmarks.name, _ = QFileDialog.getOpenFileName(None, None,
+                "./data/filenames", filter="txt files (*landmark*.txt)")
 
     # @pyqtSlot()
     # def on_clicking_browse_logs_dir(self):
@@ -343,7 +344,9 @@ class AppSettingsBrowseMode(QFrame):
 
         # temporary default file paths
         self.fname_images = filenames_GUI()
-        self.fname_images.name = "./data/filenames/image_files.txt"
+        self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
+        self.fname_landmarks = filenames_GUI()
+        self.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
         self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
 
         # initialise grid/set spacing
@@ -481,7 +484,9 @@ class AppSettingsBrowseMode(QFrame):
             self.test_click = True
         else:
             self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
-                "./data/filenames", filter="txt files (*.txt)")
+                "./data/filenames", filter="txt files (*test_files*.txt)")
+            self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
+                "./data/filenames", filter="txt files (*landmarks*.txt)")
             self.load_img()
 
     @pyqtSlot()
@@ -490,12 +495,11 @@ class AppSettingsBrowseMode(QFrame):
 
     def load_img(self):
         self.task_value = None
-        # self.selected_list = [self.fname_images, self.fname_landmarks]
-        self.selected_list = [self.fname_images]
+        self.selected_list = [self.fname_images, self.fname_landmarks]
+        # self.selected_list = [self.fname_images]
 
         self.env = get_player(files_list=self.selected_list, viz=0.01,
                         saveGif=False, saveVideo=False, task='browse')
-        # self.env.viewer = self.window
         self.env.stepManual(act=-1, viewer=self.window)
         self.env.display(browseMode=True)
 
@@ -515,13 +519,11 @@ class Controller:
 
     def show_default(self):
         # Init the window
-        # app_settings = AppSettingsBrowseMode()
-        app_settings = AppSettings()
-        self.window1 = Window(self.viewer_param, app_settings)
-        app_settings.window = self.window1
-
-        # app_settings.fname_images.name = './data/filenames/image_files.txt'
-        # app_settings.load_img()
+        self.app_settings = AppSettingsBrowseMode()
+        # self.app_settings = AppSettings()
+        self.window1 = Window(self.viewer_param, self.app_settings)
+        self.app_settings.window = self.window1
+        self.load_defauls()
 
         # Close previous window
         if self.window2:
@@ -532,17 +534,21 @@ class Controller:
 
     def show_browseMode(self):
         # Init the window
-        app_settings = AppSettingsBrowseMode()
-        self.window2 = Window(self.viewer_param, app_settings)
-        app_settings.window = self.window2
-        app_settings.fname_images.name = './data/filenames/image_files.txt'
-        app_settings.load_img()
+        self.app_settings = AppSettingsBrowseMode()
+        self.window2 = Window(self.viewer_param, self.app_settings)
+        self.app_settings.window = self.window2
+        self.load_defauls()
 
         # Close previous window
         self.window1.hide()
 
         # Open new window with new app_settings
         self.window2.right_widget.SWITCH_WINDOW.connect(self.show_default)
+
+    def load_defauls(self):
+        self.app_settings.fname_images.name = './data/filenames/brain_test_files_new_paths.txt'
+        self.app_settings.fname_landmarks.name = './data/filenames/brain_test_landmarks_new_paths.txt'
+        self.app_settings.load_img()
 
 
 if __name__ == "__main__":

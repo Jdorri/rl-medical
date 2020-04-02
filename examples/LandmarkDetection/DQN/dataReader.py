@@ -81,7 +81,7 @@ class filesListBrainMRLandmark(object):
         self.returnLandmarks = returnLandmarks
         self.agents = agents
         if self.returnLandmarks:
-            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1]).name]
+            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1].name)]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
 

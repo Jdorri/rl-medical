@@ -150,7 +150,8 @@ class MedicalPlayer(gym.Env):
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
 
-        if self.task in ['play', 'browse']:
+        # if self.task in ['play', 'browse']:
+        if self.task == 'play':
             self.files = filesListBrainMRLandmark(files_list,
                                                   returnLandmarks=False,)
         else:
@@ -747,6 +748,9 @@ class MedicalPlayer(gym.Env):
         scale_z = 2
         current_point = (current_point[0]*scale_x, current_point[1]*scale_y,
                         current_point[2]*scale_z)
+        if target_point is not None:
+            target_point = (target_point[0]*scale_x, target_point[1]*scale_y,
+                            target_point[2]*scale_z)
         self.rectangle = (self.rectangle[0]*scale_x, self.rectangle[1]*scale_x,
                             self.rectangle[2]*scale_y, self.rectangle[3]*scale_y,
                             self.rectangle[4]*scale_z, self.rectangle[5]*scale_z)

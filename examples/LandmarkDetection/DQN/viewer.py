@@ -374,10 +374,11 @@ class SimpleImageViewer(QWidget):
         self.label_img_y.setStyleSheet("background: black; border:3px solid blue; ")
 
         # Style settings
-        self.color = QColor(111, 230, 158)
-        self.line_width = 2
+        self.color_a = QColor(111, 230, 158)
+        self.color_t = QColor(200, 100, 100)
+        self.line_width = 1
 
-    def draw_image(self, arrs, agent_loc, target=(0,0), depth=1, text=None, rect=None):
+    def draw_image(self, arrs, agent_loc, target=None, depth=1, text=None, rect=None):
         """
         Main image drawer function
         """
@@ -402,22 +403,18 @@ class SimpleImageViewer(QWidget):
 
         # Draw some rectangle and agent (overlay)
         self.painterInstance = QPainter(self.img)
-        _agent_loc = (agent_loc[0], self.height-agent_loc[1])
-        rect_ = (self.height-rect[2], self.height-rect[3]) + rect[:2]
-        self.drawer(text, _agent_loc, rect_, depth)
+        _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
+        self.drawer(text, _agent_loc, _rect, depth, _target)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_x)
-        _agent_loc = (agent_loc[1], self.height_x-agent_loc[2])
-        rect_ = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
-        self.drawer(text, _agent_loc, rect_, depth)
+        _agent_loc, _rect, _target = self.translate_x(agent_loc, rect, target)
+        self.drawer(text, _agent_loc, _rect, depth, _target)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_y)
-        _agent_loc = (agent_loc[0]*self.width_y//self.height_y, self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
-        rect_ = (self.height_y-rect[4], self.height_y-rect[5]) + \
-            (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
-        self.drawer(text, _agent_loc, rect_, depth)
+        _agent_loc, _rect, _target = self.translate_y(agent_loc, rect, target)
+        self.drawer(text, _agent_loc, _rect, depth, _target)
         self.painterInstance.end()
 
         # TODO: resolve scaled to width later during final iteration (responsive)
@@ -428,7 +425,7 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
 
-    def drawer(self, text, agent_loc, rect, depth):
+    def drawer(self, text, agent_loc, rect, depth, target):
         xPos = rect[2]
         yPos = rect[0]
         xLen = rect[3] - xPos
@@ -437,12 +434,34 @@ class SimpleImageViewer(QWidget):
         rect_dims = [xPos,yPos,xLen,yLen,]
         hw_ratio = yLen / -xLen
 
+        if target is not None:
+            self.draw_point(target, self.color_t, width=12)
+
+        self.draw_point(agent_loc, self.color_a)
+
         if self.browseMode:
             self.draw_crosshairs(agent_loc, hw_ratio)
-            self.draw_agent(agent_loc)
         else:
             self.draw_rects(rect_dims)
-            self.draw_agent(agent_loc)
+
+    def translate(self, agent_loc, rect, target):
+        _agent_loc = (agent_loc[0], self.height-agent_loc[1])
+        _target = (target[0], self.height-target[1])
+        _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
+        return _agent_loc, _rect, _target
+
+    def translate_x(self, agent_loc, rect, target):
+        _agent_loc = (agent_loc[1], self.height_x-agent_loc[2])
+        _target = (target[1], self.height_x-target[2])
+        _rect = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
+        return _agent_loc, _rect, _target
+
+    def translate_y(self, agent_loc, rect, target):
+        _agent_loc = (agent_loc[0]*self.width_y//self.height_y, self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
+        _target = (target[0]*self.width_y//self.height_y, self.height_y-target[2])                # Rotate 90 degrees ccw
+        _rect = (self.height_y-rect[4], self.height_y-rect[5]) + \
+            (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
+        return _agent_loc, _rect, _target
 
     def draw_circles(self, agent_loc, target, depth):
         # Draw current agent location
@@ -470,11 +489,10 @@ class SimpleImageViewer(QWidget):
             radx = rady = depth * 30
             self.painterInstance.drawEllipse(centre, radx, rady)
 
-    def draw_agent(self, agent_loc):
-        pen = QPen(self.color)
-        pen.setWidth(7)
+    def draw_point(self, point_loc, color, width=7):
+        pen = QPen(color, width, cap=Qt.RoundCap)
         self.painterInstance.setPen(pen)
-        self.painterInstance.drawPoint(QPoint(*agent_loc))
+        self.painterInstance.drawPoint(QPoint(*point_loc))
 
     def draw_crosshairs(self, agent_loc, hw_ratio):
         cross_len = 100
@@ -482,7 +500,7 @@ class SimpleImageViewer(QWidget):
         centre_space = 10
         c = QPoint(*agent_loc)
 
-        pen = QPen(self.color)
+        pen = QPen(self.color_a)
         pen.setWidth(self.line_width)
         self.painterInstance.setPen(pen)
 
@@ -536,8 +554,8 @@ class SimpleImageViewer(QWidget):
             'tR': {'loc': tR, 'd1': QPoint(*vecs[2]), 'd2': QPoint(*vecs[3])},
         }
 
-        pen = QPen(self.color)
-        pen.setWidth(self.line_width)
+        pen = QPen(self.color_a)
+        pen.setWidth(self.line_width * 2)
         self.painterInstance.setPen(pen)
         for k in corners.values():
             self.painterInstance.drawLine(k['loc'], k['loc'] + corner_len * k['d1'])
