@@ -150,15 +150,12 @@ class MedicalPlayer(gym.Env):
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
 
-        # if self.task in ['play', 'browse']:
         if self.task == 'play':
             self.files = filesListBrainMRLandmark(files_list,
                                                   returnLandmarks=False,)
         else:
             self.files = filesListBrainMRLandmark(files_list,
                                                   returnLandmarks=True)
-
-
 
         # prepare file sampler
         self.filepath = None
@@ -223,7 +220,6 @@ class MedicalPlayer(gym.Env):
 
         # # sample a new image
         self._image, self._target_loc, self.filepath, self.spacing = next(self.sampled_files)
-        print("print this: ",self.filepath)
         self.filename = os.path.basename(self.filepath)
 
         # multiscale (e.g. start with 3 -> 2 -> 1)
@@ -272,7 +268,7 @@ class MedicalPlayer(gym.Env):
         self._qvalues = [0, ] * self.actions
         self._screen = self._current_state()
 
-        if self.task in ['play', 'browse']:
+        if self.task == 'play':
             self.cur_dist = 0
         else:
             self.cur_dist = self.calcDistance(self._location,
@@ -409,7 +405,7 @@ class MedicalPlayer(gym.Env):
             self._location = self.getBestLocation()
             self._screen = self._current_state()
 
-            if (self.task != 'play'):
+            if self.task != 'play':
                 self.cur_dist = self.calcDistance(self._location,
                                                   self._target_loc,
                                                   self.spacing)
@@ -544,6 +540,11 @@ class MedicalPlayer(gym.Env):
             self._location = next_location
 
         self._screen = self._current_state()
+
+        if self.task != 'play':
+            self.cur_dist = self.calcDistance(self._location,
+                                              self._target_loc,
+                                              self.spacing)
 
         # render screen if viz is on
         with _ALE_LOCK:
@@ -789,7 +790,7 @@ class MedicalPlayer(gym.Env):
             "arrs": (img, img_x, img_y),
             "agent_loc": current_point,
             "target": target_point,
-            "text": "Error " + str(round(self.cur_dist,3)) + "mm",
+            "error": self.cur_dist,
             "scale": self.xscale,
             "rect": self.rectangle,
             "browseMode": browseMode,

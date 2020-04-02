@@ -87,8 +87,7 @@ class AppSettings(QFrame):
         self.load = QLabel('Load Model', self)
         self.task = QLabel('Task', self)
         self.algorithm = QLabel('Algorithm', self)
-        self.mode = QLabel('Mode', self)
-        self.landmark_file = QLabel('File 2: Landmarks', self)
+        self.landmark_file = QLabel('Landmarks', self)
         #self.GIF = QLabel('Save GIF', self)
         #self.video = QLabel('Save Video', self)
         #self.log_dir = QLabel('Store Logs', self)
@@ -99,7 +98,6 @@ class AppSettings(QFrame):
         self.load_edit = QPushButton('Browse', self)
         self.task_edit = QComboBox()
         self.algorithm_edit = QComboBox()
-        self.mode_edit = QPushButton('Browse Mode', self)
         self.landmark_file_edit = QPushButton('Browse', self)
         self.GIF_edit =  QCheckBox()
         self.video_edit = QCheckBox()
@@ -108,9 +106,13 @@ class AppSettings(QFrame):
         self.run = QPushButton('Run', self)
         self.exit = QPushButton('Exit', self)
 
+        self.testMode = QPushButton('Test Mode', self)
+        self.testMode.setCheckable(True)
+        self.testMode.setChecked(True)
+        self.browseMode = QPushButton('Browse Mode', self)
+
         # add widget functionality
-        # self.task_edit.addItems(['Play', 'Evaluation', 'Train'])
-        self.task_edit.addItems(['Evaluation'])
+        self.task_edit.addItems(['Play', 'Evaluation', 'Train'])
         self.algorithm_edit.addItems(['DQN', 'Double', 'Dueling', 'Dueling Double'])
 
         # temporary default file paths
@@ -122,6 +124,11 @@ class AppSettings(QFrame):
         self.fname_logs_dir = "./data"
 
         # initialise grid/set spacing
+        gridMode = QGridLayout()
+        gridMode.setSpacing(1)
+        gridMode.addWidget(self.testMode, 0, 0)
+        gridMode.addWidget(self.browseMode, 0, 1)
+
         grid = QGridLayout()
         grid.setSpacing(10)
 
@@ -138,8 +145,8 @@ class AppSettings(QFrame):
         #grid.addWidget(self.GPU, 4, 0)
         #grid.addWidget(self.GPU_edit, 4, 1)
 
-        grid.addWidget(self.mode, 5, 0)
-        grid.addWidget(self.mode_edit, 5, 1)
+        # grid.addWidget(self.mode, 5, 0)
+        # grid.addWidget(self.mode_edit, 5, 1)
 
         grid.addWidget(self.landmark_file, 6, 0)
         grid.addWidget(self.landmark_file_edit, 6, 1)
@@ -159,12 +166,19 @@ class AppSettings(QFrame):
         grid.addWidget(self.run, 11, 0)
         grid.addWidget(self.exit, 12, 0)
 
-        self.setLayout(grid)
+        gridNest = QGridLayout()
+        gridNest.addLayout(gridMode, 0, 0)
+        gridNest.addLayout(grid, 1, 0, 10, 0)
+
+        self.setLayout(gridNest)
         self.setGeometry(100, 100, 350, 400)
+
+        # self.setLayout(grid)
+        # self.setGeometry(100, 100, 350, 400)
 
         # connections
         self.load_edit.clicked.connect(self.on_clicking_browse_model)
-        self.mode_edit.clicked.connect(self.on_clicking_mode)
+        self.browseMode.clicked.connect(self.on_clicking_browseMode)
         self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
         #self.log_dir_edit.clicked.connect(self.on_clicking_browse_logs_dir)
         self.run.clicked.connect(self.on_clicking_run)
@@ -173,12 +187,12 @@ class AppSettings(QFrame):
         self.show()
 
         # Flags for testing
-        self.test_mode = False
+        self.testing = False
         self.test_click = None
 
     @pyqtSlot()
     def on_clicking_run(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         else:
             self.GPU_value = self.GPU_edit.text()
@@ -193,14 +207,14 @@ class AppSettings(QFrame):
 
     @pyqtSlot()
     def on_clicking_exit(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         else:
             self.close_it
 
     @pyqtSlot()
     def on_clicking_browse_model(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         else:
             self.fname_model, _ = QFileDialog.getOpenFileName(None, None,
@@ -208,12 +222,12 @@ class AppSettings(QFrame):
             print(self.fname_model)
 
     @pyqtSlot()
-    def on_clicking_mode(self):
+    def on_clicking_browseMode(self):
         self.SWITCH_WINDOW.emit()
 
     @pyqtSlot()
     def on_clicking_browse_landmarks(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         else:
             self.fname_landmarks.name, _ = QFileDialog.getOpenFileName(None, None,
@@ -221,7 +235,7 @@ class AppSettings(QFrame):
 
     # @pyqtSlot()
     # def on_clicking_browse_logs_dir(self):
-    #     if self.test_mode:
+    #     if self.testing:
     #         self.test_click = True
     #     else:
     #         self.fname_logs_dir, _ = QFileDialog.getOpenFileName()
@@ -275,13 +289,13 @@ class AppSettings(QFrame):
                                              task='eval'),
                                   pred, self.num_files, viewer=self.window)
 
-        @property
-        def window(self):
-            return self._window
+    @property
+    def window(self):
+        return self._window
 
-        @window.setter
-        def window(self, window):
-            self._window = window
+    @window.setter
+    def window(self, window):
+        self._window = window
 
 
 class AppSettingsBrowseMode(QFrame):
@@ -298,12 +312,16 @@ class AppSettingsBrowseMode(QFrame):
         self.window = None
 
         # initialise labels
-        self.img_file = QLabel('Image file', self)
-        self.mode = QLabel('Mode', self)
+        # self.img_file = QLabel('Image file', self)
+        # self.mode = QLabel('Mode', self)
 
         # initialise widgets
-        self.img_file_edit = QPushButton('Browse', self)
-        self.mode_edit = QPushButton('Test Mode', self)
+        self.testMode = QPushButton('Test Mode', self)
+        self.browseMode = QPushButton('Browse Mode', self)
+        self.browseMode.setCheckable(True)
+        self.browseMode.setChecked(True)
+
+        self.img_file_edit = QPushButton('Upload Images', self)
         self.exit = QPushButton('Exit', self)
 
         self.upButton = QToolButton(self)
@@ -350,6 +368,17 @@ class AppSettingsBrowseMode(QFrame):
         self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
 
         # initialise grid/set spacing
+        # hbox = QHBoxLayout()
+        # hbox.setSpacing(1)
+        # hbox.addStretch(0)
+        # hbox.addWidget(self.testMode)
+        # hbox.addWidget(self.browseMode)
+
+        gridMode = QGridLayout()
+        gridMode.setSpacing(1)
+        gridMode.addWidget(self.testMode, 0, 0)
+        gridMode.addWidget(self.browseMode, 0, 1)
+
         gridArrows = QGridLayout()
         gridArrows.setSpacing(5)
 
@@ -367,21 +396,24 @@ class AppSettingsBrowseMode(QFrame):
         grid.setSpacing(10)
 
         # # Add widgets to grid
-        grid.addWidget(self.img_file, 3, 0)
-        grid.addWidget(self.img_file_edit, 3, 1)
+        # grid.addLayout(hbox, 0, 0)
+        # grid.addLayout(gridMode, 0, 0)
 
-        grid.addWidget(self.mode, 5, 0)
-        grid.addWidget(self.mode_edit, 5, 1)
+        grid.addWidget(self.img_file_edit, 3, 0)
 
         grid.addLayout(gridArrows, 7, 0)
 
         grid.addWidget(self.exit, 12, 0)
 
-        self.setLayout(grid)
+        gridNest = QGridLayout()
+        gridNest.addLayout(gridMode, 0, 0)
+        gridNest.addLayout(grid, 1, 0, 10, 0)
+
+        self.setLayout(gridNest)
         self.setGeometry(100, 100, 350, 400)
 
         # connections
-        self.mode_edit.clicked.connect(self.on_clicking_mode)
+        self.testMode.clicked.connect(self.on_clicking_testMode)
         self.img_file_edit.clicked.connect(self.on_clicking_browse_images)
         self.exit.clicked.connect(self.on_clicking_exit)
         self.upButton.clicked.connect(self.on_clicking_up)
@@ -396,14 +428,14 @@ class AppSettingsBrowseMode(QFrame):
         self.show()
 
         # Flags for testing
-        self.test_mode = False
+        self.testing = False
         self.test_click = None
 
         self.env = None
 
     @pyqtSlot()
     def on_clicking_up(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         elif self.env:
             action = 1
@@ -411,7 +443,7 @@ class AppSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_down(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         elif self.env:
             action = 4
@@ -419,7 +451,7 @@ class AppSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_left(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         elif self.env:
             action = 3
@@ -427,7 +459,7 @@ class AppSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_right(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         elif self.env:
             action = 2
@@ -435,7 +467,7 @@ class AppSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_in(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         elif self.env:
             action = 0
@@ -443,7 +475,7 @@ class AppSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_out(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         elif self.env:
             action = 5
@@ -451,7 +483,7 @@ class AppSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_zoomIn(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         elif self.env:
             if self.env.xscale > 1:
@@ -460,7 +492,7 @@ class AppSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_zoomOut(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         elif self.env:
             if self.env.xscale < 3:
@@ -468,19 +500,19 @@ class AppSettingsBrowseMode(QFrame):
                 self.move_img(-1)
 
     @pyqtSlot()
-    def on_clicking_mode(self):
+    def on_clicking_testMode(self):
         self.SWITCH_WINDOW.emit()
 
     @pyqtSlot()
     def on_clicking_exit(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         else:
             self.close_it
 
     @pyqtSlot()
     def on_clicking_browse_images(self):
-        if self.test_mode:
+        if self.testing:
             self.test_click = True
         else:
             self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
@@ -496,7 +528,6 @@ class AppSettingsBrowseMode(QFrame):
     def load_img(self):
         self.task_value = None
         self.selected_list = [self.fname_images, self.fname_landmarks]
-        # self.selected_list = [self.fname_images]
 
         self.env = get_player(files_list=self.selected_list, viz=0.01,
                         saveGif=False, saveVideo=False, task='browse')
@@ -519,11 +550,10 @@ class Controller:
 
     def show_default(self):
         # Init the window
-        self.app_settings = AppSettingsBrowseMode()
-        # self.app_settings = AppSettings()
+        # self.app_settings = AppSettingsBrowseMode()
+        self.app_settings = AppSettings()
         self.window1 = Window(self.viewer_param, self.app_settings)
         self.app_settings.window = self.window1
-        self.load_defauls()
 
         # Close previous window
         if self.window2:

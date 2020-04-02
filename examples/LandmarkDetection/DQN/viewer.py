@@ -67,19 +67,20 @@ class Window(QMainWindow):
 
         # Manage layout
         self.grid = QGridLayout()
-        self.grid.addWidget(self.left_widget, 0, 0)
-        self.grid.addWidget(self.widget, 0, 1)
+        self.grid.addWidget(self.left_widget, 0, 0, 1, 1)
+        self.grid.addWidget(self.widget, 0, 1, 1, 10)
+        self.grid.addWidget(self.right_widget, 0, 11, 1, 1)
         # self.grid.setColumnStretch(1, 2) # default (later there will be event to change this when screen size change)
         # self.grid.setColumnStretch(0, 1) # default
-        if app_settings:
-            self.grid.addWidget(self.right_widget, 0, 2) # for integration with Jamie's code
+        # if app_settings:
+        #     self.grid.addWidget(self.right_widget, 0, 2) # for integration with Jamie's code
 
         self.layout_widget = QWidget()
         self.layout_widget.setLayout(self.grid)
         self.setCentralWidget(self.layout_widget)
 
         # Geometric window position and general setting
-        self.resize(1400, 800)
+        self.resize(1300, 800)
         self.center()
         self.setWindowTitle('Reinforcement Learning - Medical')
         self.menubar.setStyleSheet("background:#D2D4DC; color:black")
@@ -234,8 +235,8 @@ class SimpleImageViewerSettings(QFrame):
         self.speed_slider = QSlider(Qt.Horizontal, self)
         # self.speed_slider.setFocusPolicy(Qt.StrongFocus)
         self.speed_slider.setMinimum(0)
-        self.speed_slider.setMaximum(5)
-        self.speed_slider.setValue(5)
+        self.speed_slider.setMaximum(3)
+        self.speed_slider.setValue(3)
         self.speed_slider.valueChanged[int].connect(self.changeValue)
 
         # Manage layout
@@ -376,9 +377,11 @@ class SimpleImageViewer(QWidget):
         # Style settings
         self.color_a = QColor(111, 230, 158)
         self.color_t = QColor(200, 100, 100)
+        self.color_e = QColor(250, 250, 250)
+        self.size_e = 20
         self.line_width = 1
 
-    def draw_image(self, arrs, agent_loc, target=None, depth=1, text=None, rect=None):
+    def draw_image(self, arrs, agent_loc, target=None, rect=None):
         """
         Main image drawer function
         """
@@ -404,18 +407,20 @@ class SimpleImageViewer(QWidget):
         # Draw some rectangle and agent (overlay)
         self.painterInstance = QPainter(self.img)
         _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
-        self.drawer(text, _agent_loc, _rect, depth, _target)
+        self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_x)
         _agent_loc, _rect, _target = self.translate_x(agent_loc, rect, target)
-        self.drawer(text, _agent_loc, _rect, depth, _target)
+        self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_y)
         _agent_loc, _rect, _target = self.translate_y(agent_loc, rect, target)
-        self.drawer(text, _agent_loc, _rect, depth, _target)
+        self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
+
+        self.draw_error()
 
         # TODO: resolve scaled to width later during final iteration (responsive)
         self.img = self.img.scaledToWidth(350)
@@ -425,7 +430,17 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
 
-    def drawer(self, text, agent_loc, rect, depth, target):
+    def draw_error(self):
+        self.painterInstance = QPainter(self.img)
+        pen = QPen(self.color_e)
+        # pen.setWidth(self.line_width * 2)
+        self.painterInstance.setPen(pen)
+        self.painterInstance.setFont(QFont('Decorative', self.size_e))
+        self.painterInstance.drawText(30, 30, f"Error: {self.error:.2f} mm")
+        self.painterInstance.end()
+
+
+    def drawer(self, agent_loc, rect, target):
         xPos = rect[2]
         yPos = rect[0]
         xLen = rect[3] - xPos
@@ -446,48 +461,31 @@ class SimpleImageViewer(QWidget):
 
     def translate(self, agent_loc, rect, target):
         _agent_loc = (agent_loc[0], self.height-agent_loc[1])
-        _target = (target[0], self.height-target[1])
+        if target is not None:
+            _target = (target[0], self.height-target[1])
+        else:
+            _target = None
         _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
         return _agent_loc, _rect, _target
 
     def translate_x(self, agent_loc, rect, target):
         _agent_loc = (agent_loc[1], self.height_x-agent_loc[2])
-        _target = (target[1], self.height_x-target[2])
+        if target is not None:
+            _target = (target[1], self.height_x-target[2])
+        else:
+            _target = None
         _rect = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
         return _agent_loc, _rect, _target
 
     def translate_y(self, agent_loc, rect, target):
         _agent_loc = (agent_loc[0]*self.width_y//self.height_y, self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
-        _target = (target[0]*self.width_y//self.height_y, self.height_y-target[2])                # Rotate 90 degrees ccw
+        if target is not None:
+            _target = (target[0]*self.width_y//self.height_y, self.height_y-target[2])                # Rotate 90 degrees ccw
+        else:
+            _target = None
         _rect = (self.height_y-rect[4], self.height_y-rect[5]) + \
             (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
         return _agent_loc, _rect, _target
-
-    def draw_circles(self, agent_loc, target, depth):
-        # Draw current agent location
-        self.penCentre = QPen(Qt.cyan)
-        self.penCentre.setWidth(4)
-        self.painterInstance.setPen(self.penCentre)
-        centre = QPoint(*agent_loc)
-        self.painterInstance.drawEllipse(centre, 2, 2)
-
-        # Draw circle at target location
-        if target is not None:
-            self.penCentre = QPen(Qt.red)
-            self.penCentre.setWidth(3)
-            self.painterInstance.setPen(self.penCentre)
-            centre = QPoint(*target)
-            self.painterInstance.drawEllipse(centre, 2, 2)
-
-            # draw circle surrounding target
-            self.penCirlce = QPen(QColor(255,0,0,0))
-            self.penCirlce.setWidth(3)
-            self.painterInstance.setPen(self.penCirlce)
-            self.painterInstance.setBrush(Qt.red)
-            self.painterInstance.setOpacity(0.2)
-            centre = QPoint(*target)
-            radx = rady = depth * 30
-            self.painterInstance.drawEllipse(centre, radx, rady)
 
     def draw_point(self, point_loc, color, width=7):
         pen = QPen(color, width, cap=Qt.RoundCap)
@@ -575,12 +573,12 @@ class SimpleImageViewer(QWidget):
         """
         self.scale = value["scale"]
         self.browseMode = value["browseMode"]
+        self.error = value["error"]
         self.draw_image(
-            arrs=value["arrs"],
-            agent_loc=value["agent_loc"],
-            target=value["target"],
-            text=value["text"],
-            rect=value["rect"]
+            arrs = value["arrs"],
+            agent_loc = value["agent_loc"],
+            target = value["target"],
+            rect = value["rect"]
         )
 
     def render(self):
@@ -599,5 +597,32 @@ class SimpleImageViewer(QWidget):
 
     def __del__(self):
         self.close()
+
+    # def draw_circles(self, agent_loc, target, depth):
+    #     # Draw current agent location
+    #     self.penCentre = QPen(Qt.cyan)
+    #     self.penCentre.setWidth(4)
+    #     self.painterInstance.setPen(self.penCentre)
+    #     centre = QPoint(*agent_loc)
+    #     self.painterInstance.drawEllipse(centre, 2, 2)
+    #
+    #     # Draw circle at target location
+    #     if target is not None:
+    #         self.penCentre = QPen(Qt.red)
+    #         self.penCentre.setWidth(3)
+    #         self.painterInstance.setPen(self.penCentre)
+    #         centre = QPoint(*target)
+    #         self.painterInstance.drawEllipse(centre, 2, 2)
+    #
+    #         # draw circle surrounding target
+    #         self.penCirlce = QPen(QColor(255,0,0,0))
+    #         self.penCirlce.setWidth(3)
+    #         self.painterInstance.setPen(self.penCirlce)
+    #         self.painterInstance.setBrush(Qt.red)
+    #         self.painterInstance.setOpacity(0.2)
+    #         centre = QPoint(*target)
+    #         radx = rady = depth * 30
+    #         self.painterInstance.drawEllipse(centre, radx, rady)
+
 
 ################################################################################
