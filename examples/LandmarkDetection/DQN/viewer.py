@@ -218,7 +218,7 @@ class SimpleImageViewerSettings(QFrame):
         hr2 = QLabel("<hr />")
         hr2.setStyleSheet("margin: 10px 0")
         label_speed = QLabel("Agent Speed")
-        self.setStyleSheet("font-family: sans-serif")
+        # self.setStyleSheet("font-family: sans-serif")
         label_run.setStyleSheet("margin-top: 10px")
 
         # Button settings
@@ -235,8 +235,8 @@ class SimpleImageViewerSettings(QFrame):
         self.speed_slider = QSlider(Qt.Horizontal, self)
         # self.speed_slider.setFocusPolicy(Qt.StrongFocus)
         self.speed_slider.setMinimum(0)
-        self.speed_slider.setMaximum(3)
-        self.speed_slider.setValue(3)
+        self.speed_slider.setMaximum(5)
+        self.speed_slider.setValue(5)
         self.speed_slider.valueChanged[int].connect(self.changeValue)
 
         # Manage layout
@@ -258,16 +258,13 @@ class SimpleImageViewerSettings(QFrame):
         self.setLayout(vbox)
 
         # Flags for testing
-        self.test_mode = False
-        self.test_click = None
+        self.testing = False
 
     def buttonClicked(self):
         """
         Event handler (slot) for when the button is clicked
         """
-        if self.test_mode:
-            self.test_click = True
-        elif self.run_button.text() == "Start":
+        if self.run_button.text() == "Start":
             self.thread.start()
             self.run_button.setText("Pause")
             self.window.statusbar.showMessage("Run")

@@ -110,6 +110,7 @@ class AppSettings(QFrame):
         self.testMode.setCheckable(True)
         self.testMode.setChecked(True)
         self.browseMode = QPushButton('Browse Mode', self)
+        self.browseMode.setCheckable(True)
 
         # add widget functionality
         self.task_edit.addItems(['Play', 'Evaluation', 'Train'])
@@ -192,9 +193,7 @@ class AppSettings(QFrame):
 
     @pyqtSlot()
     def on_clicking_run(self):
-        if self.testing:
-            self.test_click = True
-        else:
+        if not self.testing:
             self.GPU_value = self.GPU_edit.text()
             self.DQN_variant_value = self.algorithm_edit.currentText()
             self.task_value = self.task_edit.currentText()
@@ -207,16 +206,11 @@ class AppSettings(QFrame):
 
     @pyqtSlot()
     def on_clicking_exit(self):
-        if self.testing:
-            self.test_click = True
-        else:
-            self.close_it
+        self.close_it
 
     @pyqtSlot()
     def on_clicking_browse_model(self):
-        if self.testing:
-            self.test_click = True
-        else:
+        if not self.testing:
             self.fname_model, _ = QFileDialog.getOpenFileName(None, None,
                 "./data/models", filter="*.data-*")
             print(self.fname_model)
@@ -227,9 +221,7 @@ class AppSettings(QFrame):
 
     @pyqtSlot()
     def on_clicking_browse_landmarks(self):
-        if self.testing:
-            self.test_click = True
-        else:
+        if not self.testing:
             self.fname_landmarks.name, _ = QFileDialog.getOpenFileName(None, None,
                 "./data/filenames", filter="txt files (*landmark*.txt)")
 
@@ -435,69 +427,51 @@ class AppSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_up(self):
-        if self.testing:
-            self.test_click = True
-        elif self.env:
+        if not self.testing and self.env:
             action = 1
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_down(self):
-        if self.testing:
-            self.test_click = True
-        elif self.env:
+        if not self.testing and self.env:
             action = 4
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_left(self):
-        if self.testing:
-            self.test_click = True
-        elif self.env:
+        if not self.testing and self.env:
             action = 3
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_right(self):
-        if self.testing:
-            self.test_click = True
-        elif self.env:
+        if not self.testing and self.env:
             action = 2
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_in(self):
-        if self.testing:
-            self.test_click = True
-        elif self.env:
+        if not self.testing and self.env:
             action = 0
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_out(self):
-        if self.testing:
-            self.test_click = True
-        elif self.env:
+        if not self.testing and self.env:
             action = 5
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_zoomIn(self):
-        if self.testing:
-            self.test_click = True
-        elif self.env:
-            if self.env.xscale > 1:
-                self.env.adjustMultiScale(higherRes=True)
-                self.move_img(-1)
+        if not self.testing and self.env and self.env.xscale > 1:
+            self.env.adjustMultiScale(higherRes=True)
+            self.move_img(-1)
 
     @pyqtSlot()
     def on_clicking_zoomOut(self):
-        if self.testing:
-            self.test_click = True
-        elif self.env:
-            if self.env.xscale < 3:
-                self.env.adjustMultiScale(higherRes=False)
-                self.move_img(-1)
+        if not self.testing and self.env and self.env.xscale < 3:
+            self.env.adjustMultiScale(higherRes=False)
+            self.move_img(-1)
 
     @pyqtSlot()
     def on_clicking_testMode(self):
@@ -505,16 +479,12 @@ class AppSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_exit(self):
-        if self.testing:
-            self.test_click = True
-        else:
+        if not self.testing:
             self.close_it
 
     @pyqtSlot()
     def on_clicking_browse_images(self):
-        if self.testing:
-            self.test_click = True
-        else:
+        if not self.testing:
             self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
                 "./data/filenames", filter="txt files (*test_files*.txt)")
             self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
@@ -541,16 +511,17 @@ class AppSettingsBrowseMode(QFrame):
 
 
 class Controller:
-    def __init__(self):
+    def __init__(self, display=True):
         self.window1, self.window2 = None, None
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
         self.show_default()
         self.window1.show()
+        # self.show_browseMode()
+        # self.window2.show()
 
     def show_default(self):
         # Init the window
-        # self.app_settings = AppSettingsBrowseMode()
         self.app_settings = AppSettings()
         self.window1 = Window(self.viewer_param, self.app_settings)
         self.app_settings.window = self.window1
@@ -570,7 +541,8 @@ class Controller:
         self.load_defauls()
 
         # Close previous window
-        self.window1.hide()
+        if self.window1:
+            self.window1.hide()
 
         # Open new window with new app_settings
         self.window2.right_widget.SWITCH_WINDOW.connect(self.show_default)
@@ -580,6 +552,29 @@ class Controller:
         self.app_settings.fname_landmarks.name = './data/filenames/brain_test_landmarks_new_paths.txt'
         self.app_settings.load_img()
 
+    @staticmethod
+    def allWidgets_setCheckable(parentQWidget):
+        ''' Set every widget to checkable for so the .isChecked() method
+            can by used in testing.
+        '''
+        for topLevel in QApplication.topLevelWidgets():
+            children = []
+            for QObj in {QPushButton, QToolButton}:
+                children.extend(topLevel.findChildren(QObj))
+            for child in children:
+                try:
+                    child.setCheckable(True)
+                except AttributeError:
+                    pass
+
+# def list_props(QObject):
+#     for topLevel in topLevelWidgets():
+#         for children in findChildren(QObject):
+#             dproperties_names = children.dynamicPropertyNames()
+#             if dproperties_names:
+#                 print("{}: ".format(children))
+#                 for property_name in dproperties_names:
+#                     print("\t{}:{}".format(property_name, children.property(property_name)))
 
 if __name__ == "__main__":
 
