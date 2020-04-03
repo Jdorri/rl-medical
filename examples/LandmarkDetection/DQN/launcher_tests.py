@@ -179,7 +179,7 @@ class LeftWidgetTester(unittest.TestCase):
 class ControllerTester(unittest.TestCase):
     ''' Tester for browse mode
     '''
-    def _setUp_default(self):
+    def _setUp_defaultMode(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
         self.controller = Controller()
         self.w = self.controller.window1.right_widget
@@ -202,7 +202,7 @@ class ControllerTester(unittest.TestCase):
         self.controller.app, self.w = None, None
 
     def test_switchBrowseMode(self):
-        self._setUp_default()
+        self._setUp_defaultMode()
         QTest.mouseClick(self.w.browseMode, Qt.LeftButton)
         self.assertTrue(isinstance(self.controller.app_settings, AppSettingsBrowseMode))
 

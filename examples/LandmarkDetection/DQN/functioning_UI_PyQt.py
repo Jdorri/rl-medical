@@ -118,10 +118,7 @@ class AppSettings(QFrame):
 
         # temporary default file paths
         self.fname_images = filenames_GUI()
-        self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
-        self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
         self.fname_landmarks = filenames_GUI()
-        self.fname_landmarks.name = "./data/filenames/landmark_files.txt"
         self.fname_logs_dir = "./data"
 
         # initialise grid/set spacing
@@ -354,18 +351,9 @@ class AppSettingsBrowseMode(QFrame):
 
         # temporary default file paths
         self.fname_images = filenames_GUI()
-        self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
         self.fname_landmarks = filenames_GUI()
-        self.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
-        self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
 
-        # initialise grid/set spacing
-        # hbox = QHBoxLayout()
-        # hbox.setSpacing(1)
-        # hbox.addStretch(0)
-        # hbox.addWidget(self.testMode)
-        # hbox.addWidget(self.browseMode)
-
+        ### LAYOUT ###
         gridMode = QGridLayout()
         gridMode.setSpacing(1)
         gridMode.addWidget(self.testMode, 0, 0)
@@ -373,7 +361,6 @@ class AppSettingsBrowseMode(QFrame):
 
         gridArrows = QGridLayout()
         gridArrows.setSpacing(5)
-
         gridArrows.addWidget(self.upButton, 0, 1)
         gridArrows.addWidget(self.downButton, 2, 1)
         gridArrows.addWidget(self.leftButton, 1, 0)
@@ -386,15 +373,8 @@ class AppSettingsBrowseMode(QFrame):
         # initialise grid/set spacing
         grid = QGridLayout()
         grid.setSpacing(10)
-
-        # # Add widgets to grid
-        # grid.addLayout(hbox, 0, 0)
-        # grid.addLayout(gridMode, 0, 0)
-
         grid.addWidget(self.img_file_edit, 3, 0)
-
         grid.addLayout(gridArrows, 7, 0)
-
         grid.addWidget(self.exit, 12, 0)
 
         gridNest = QGridLayout()
@@ -511,20 +491,22 @@ class AppSettingsBrowseMode(QFrame):
 
 
 class Controller:
-    def __init__(self, display=True):
+    def __init__(self, display=True, default_use_case='brain_MRI'):
+        self.default_use_case = default_use_case
         self.window1, self.window2 = None, None
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
-        self.show_default()
+        self.show_defaultMode()
         self.window1.show()
         # self.show_browseMode()
         # self.window2.show()
 
-    def show_default(self):
+    def show_defaultMode(self):
         # Init the window
         self.app_settings = AppSettings()
         self.window1 = Window(self.viewer_param, self.app_settings)
         self.app_settings.window = self.window1
+        self.set_paths()
 
         # Close previous window
         if self.window2:
@@ -538,24 +520,41 @@ class Controller:
         self.app_settings = AppSettingsBrowseMode()
         self.window2 = Window(self.viewer_param, self.app_settings)
         self.app_settings.window = self.window2
-        self.load_defauls()
+        self.load_defaults()
 
         # Close previous window
         if self.window1:
             self.window1.hide()
 
         # Open new window with new app_settings
-        self.window2.right_widget.SWITCH_WINDOW.connect(self.show_default)
+        self.window2.right_widget.SWITCH_WINDOW.connect(self.show_defaultMode)
 
-    def load_defauls(self):
-        self.app_settings.fname_images.name = './data/filenames/brain_test_files_new_paths.txt'
-        self.app_settings.fname_landmarks.name = './data/filenames/brain_test_landmarks_new_paths.txt'
+    def load_defaults(self):
+        self.set_paths()
         self.app_settings.load_img()
+
+    def set_paths(self):
+        assert self.default_use_case in ['brain_MRI','cardiac','fetal'], "Invalid default use case"
+        if self.default_use_case == 'brain_MRI':
+            # Default MRI
+            self.app_settings.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
+            self.app_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+            self.app_settings.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
+        elif self.default_use_case == 'cardiac':
+            # Default cardiac
+            self.app_settings.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
+            self.app_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
+            self.app_settings.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
+        elif self.default_use_case == 'fetal':
+            # Default fetal
+            self.app_settings.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
+            self.app_settings.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
+            self.app_settings.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
 
     @staticmethod
     def allWidgets_setCheckable(parentQWidget):
-        ''' Set every widget to checkable for so the .isChecked() method
-            can by used in testing.
+        ''' Method to eet every widget to checkable for so the .isChecked()
+            method can by used in testing.
         '''
         for topLevel in QApplication.topLevelWidgets():
             children = []
@@ -567,14 +566,6 @@ class Controller:
                 except AttributeError:
                     pass
 
-# def list_props(QObject):
-#     for topLevel in topLevelWidgets():
-#         for children in findChildren(QObject):
-#             dproperties_names = children.dynamicPropertyNames()
-#             if dproperties_names:
-#                 print("{}: ".format(children))
-#                 for property_name in dproperties_names:
-#                     print("\t{}:{}".format(property_name, children.property(property_name)))
 
 if __name__ == "__main__":
 
@@ -587,7 +578,8 @@ if __name__ == "__main__":
     # window = Window(viewer_param, app_settings)
     #
     # # window.left_widget.thread = thread
-    controller = Controller()
+    # controller = Controller()
+    controller = Controller(default_use_case='fetal')
     sys.exit(controller.app.exec_())
 
     ########################################################################
