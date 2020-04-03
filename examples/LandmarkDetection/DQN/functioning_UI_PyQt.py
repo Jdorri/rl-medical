@@ -578,8 +578,7 @@ if __name__ == "__main__":
     # window = Window(viewer_param, app_settings)
     #
     # # window.left_widget.thread = thread
-    # controller = Controller()
-    controller = Controller(default_use_case='fetal')
+    controller = Controller()
     sys.exit(controller.app.exec_())
 
     ########################################################################
