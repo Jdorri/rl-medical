@@ -432,7 +432,7 @@ class SimpleImageViewer(QWidget):
         pen = QPen(self.color_e)
         # pen.setWidth(self.line_width * 2)
         self.painterInstance.setPen(pen)
-        self.painterInstance.setFont(QFont('Decorative', self.size_e))
+        self.painterInstance.setFont(QFont("Arial", self.size_e))
         self.painterInstance.drawText(30, 30, f"Error: {self.error:.2f} mm")
         self.painterInstance.end()
 

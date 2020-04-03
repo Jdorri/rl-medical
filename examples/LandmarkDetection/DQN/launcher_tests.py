@@ -3,7 +3,7 @@ import unittest
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from thread import WorkerThread
-from functioning_UI_PyQt import Controller
+from functioning_UI_PyQt import Controller, AppSettings, AppSettingsBrowseMode
 
 class RightWidgetTester(unittest.TestCase):
     ''' Class to perform unit tests on the buttons within the right widget of the
@@ -179,7 +179,14 @@ class LeftWidgetTester(unittest.TestCase):
 class ControllerTester(unittest.TestCase):
     ''' Tester for browse mode
     '''
-    def setUp(self):
+    def _setUp_default(self):
+        '''Method run before every test. Use this to prepare the test fixture.'''
+        self.controller = Controller()
+        self.w = self.controller.window1.right_widget
+        self.w.testing = True
+        Controller.allWidgets_setCheckable(self.controller.app)
+
+    def _setUp_browseMode(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
         self.controller = Controller()
         self.controller.show_browseMode()
@@ -194,6 +201,15 @@ class ControllerTester(unittest.TestCase):
         self.controller.app.quit()
         self.controller.app, self.w = None, None
 
+    def test_switchBrowseMode(self):
+        self._setUp_default()
+        QTest.mouseClick(self.w.browseMode, Qt.LeftButton)
+        self.assertTrue(isinstance(self.controller.app_settings, AppSettingsBrowseMode))
+
+    def test_switchDefault(self):
+        self._setUp_browseMode()
+        QTest.mouseClick(self.w.testMode, Qt.LeftButton)
+        self.assertTrue(isinstance(self.controller.app_settings, AppSettings))
 
 
 if __name__ == '__main__':
