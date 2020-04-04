@@ -175,7 +175,8 @@ def get_config(files_list, data_type):
         max_epoch=1000,
     )
 
-
+# def r(*args):
+#     return args
 
 ###############################################################################
 ###############################################################################
@@ -264,9 +265,10 @@ if __name__ == '__main__':
         logger_dir = os.path.join(args.logDir, args.name)
         logger.set_logger_dir(logger_dir)
         config = get_config(args.files, args.type)
+        not_ignore = None
         if args.load:  # resume training from a saved checkpoint
             session_init = get_model_loader(args.load)
-        elif args.transferModel[0]:
+        elif args.transferModel:
             ignore_list = ["Adam",
                            "alpha",
                            "huber_loss",
@@ -299,4 +301,6 @@ if __name__ == '__main__':
             not_ignore = (list(set(variables) - set(ignore)))#not ignored
             session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
             config.session_init = session_init
+        # print(r(not_ignore, args.transferModel, args.type))
+        # exit()
         launch_train_with_config(config, SimpleTrainer())
