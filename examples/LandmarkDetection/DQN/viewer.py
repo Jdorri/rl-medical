@@ -417,7 +417,8 @@ class SimpleImageViewer(QWidget):
         self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
 
-        self.draw_error()
+        if self.task in ['eval','browse']:
+            self.draw_error()
 
         # TODO: resolve scaled to width later during final iteration (responsive)
         self.img = self.img.scaledToWidth(350)
@@ -446,12 +447,12 @@ class SimpleImageViewer(QWidget):
         rect_dims = [xPos,yPos,xLen,yLen,]
         hw_ratio = yLen / -xLen
 
-        if target is not None:
+        if self.task in ['eval','browse']:
             self.draw_point(target, self.color_t, width=12)
 
         self.draw_point(agent_loc, self.color_a)
 
-        if self.browseMode:
+        if self.task == 'browse':
             self.draw_crosshairs(agent_loc, hw_ratio)
         else:
             self.draw_rects(rect_dims)
@@ -569,7 +570,7 @@ class SimpleImageViewer(QWidget):
         Used to handle agent signal when it moves.
         """
         self.scale = value["scale"]
-        self.browseMode = value["browseMode"]
+        self.task = value["task"]
         self.error = value["error"]
         self.draw_image(
             arrs = value["arrs"],

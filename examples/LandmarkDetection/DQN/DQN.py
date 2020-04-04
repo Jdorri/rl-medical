@@ -59,12 +59,12 @@ EVAL_EPISODE = 50
 
 ###############################################################################
 
-def get_player(directory=None, files_list= None, viz=False,
+def get_player(directory=None, files_list= None, data_type=None, viz=False,
                task='play', saveGif=False, saveVideo=False):
     # in atari paper, max_num_frames = 30000
     env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
                         viz=viz, saveGif=saveGif, saveVideo=saveVideo,
-                        task=task, files_list=files_list, max_num_frames=1500)
+                        task=task, files_list=files_list, data_type=data_type, max_num_frames=1500)
     if (task in ['play','eval']):
         # in training, env will be decorated by ExpReplay, and history
         # is taken care of in expreplay buffer
@@ -129,11 +129,11 @@ class Model(DQNModel):
 
 ###############################################################################
 
-def get_config(files_list):
+def get_config(files_list, data_type):
     """This is only used during training."""
     expreplay = ExpReplay(
         predictor_io_names=(['state'], ['Qvalue']),
-        player=get_player(task='train', files_list=files_list),
+        player=get_player(task='train', files_list=files_list, data_type=data_type),
         state_shape=IMAGE_SIZE,
         batch_size=BATCH_SIZE,
         memory_size=MEMORY_SIZE,
@@ -164,6 +164,7 @@ def get_config(files_list):
             PeriodicTrigger(
                 Evaluator(nr_eval=EVAL_EPISODE, input_names=['state'],
                           output_names=['Qvalue'], files_list=files_list,
+                          data_type=data_type,
                           get_player_fn=get_player),
                 every_k_epochs=EPOCHS_PER_EVAL),
             HumanHyperParamSetter('learning_rate'),
@@ -190,12 +191,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--gpu', help='comma separated list of GPU(s) to use.')
-    parser.add_argument('--load', help='load model')
+    parser.add_argument('--load', help='load model to resume traning')
+    parser.add_argument('--transferModel',  nargs='+', help='load model for transfer learning' , type=str)
     parser.add_argument('--task', help='task to perform. Must load a pretrained model if task is "play" or "eval"',
                         choices=['play', 'eval', 'train'], default='train')
     parser.add_argument('--algo', help='algorithm',
                         choices=['DQN', 'Double', 'Dueling','DuelingDouble'],
                         default='DQN')
+    parser.add_argument('--type', help='the dataset to use',
+                        choices=['BrainMRI', 'CardiacMRI', 'FetalUS'],
+                        default=False)
     parser.add_argument('--files', type=argparse.FileType('r'), nargs='+',
                         help="""Filepath to the text file that comtains list of images.
                                 Each line of this file is a full path to an image scan.
@@ -208,7 +213,6 @@ if __name__ == '__main__':
                         default='train_log')
     parser.add_argument('--name', help='name of current experiment for logs',
                         default='experiment_1')
-
     args = parser.parse_args()
 
     if args.gpu:
@@ -222,14 +226,15 @@ if __name__ == '__main__':
         error_message = """Wrong input files {} for {} task - should be 2 [\'images.txt\', \'landmarks.txt\'] """.format(len(args.files), args.task)
         assert len(args.files) == 2, (error_message)
 
-
     METHOD = args.algo
     # load files into env to set num_actions, num_validation_files
     init_player = MedicalPlayer(files_list=args.files,
+                                data_type=args.type,
                                 screen_dims=IMAGE_SIZE,
                                 task='play')
     NUM_ACTIONS = init_player.action_space.n
     num_files = init_player.files.num_files
+
 
     if args.task != 'train':
         ########################################################################
@@ -249,18 +254,23 @@ if __name__ == '__main__':
                 output_names=['Qvalue']))
             # demo pretrained model one episode at a time
             if args.task == 'play':
-                play_n_episodes(get_player(files_list=args.files, viz=0.01,
+                play_n_episodes(get_player(files_list=args.files,
+                                           data_type=args.type,
+                                           viz=0.01,
                                            saveGif=args.saveGif,
                                            saveVideo=args.saveVideo,
                                            task='play'),
                                 pred, num_files, viewer=window)
+
             # run episodes in parallel and evaluate pretrained model
             elif args.task == 'eval':
-                play_n_episodes(get_player(files_list=args.files, viz=0.01,
+                play_n_episodes(get_player(files_list=args.files,
+                                            data_type=args.type,
+                                            viz=0.01,
                                            saveGif=args.saveGif,
                                            saveVideo=args.saveVideo,
                                            task='eval'),
-                                pred, num_files, viewer=window)
+                                         pred, num_files, viewer=window)
 
         # Create a thread to run background task
         thread = WorkerThread(target_function=thread_function)
@@ -272,7 +282,43 @@ if __name__ == '__main__':
     else:  # train model
         logger_dir = os.path.join(args.logDir, args.name)
         logger.set_logger_dir(logger_dir)
-        config = get_config(args.files)
+        config = get_config(args.files, args.type)
+        not_ignore = None
         if args.load:  # resume training from a saved checkpoint
-            config.session_init = get_model_loader(args.load)
+            session_init = get_model_loader(args.load)
+        elif args.transferModel:
+            ignore_list = ["Adam",
+                           "alpha",
+                           "huber_loss",
+                           "beta1_power",
+                           "beta2_power",
+                           "predict_reward",
+                           "learning_rate",
+                           "local_step",
+                           "QueueInput",
+                           "global_step",
+                           "SummaryGradient",
+                        ]#always ignore these
+
+            if not bool(args.transferModel[1:]):#transfer all layers of none specified
+                pass
+            else:
+                if 'CNN' not in args.transferModel[1:]:#ignore CNN part
+                    ignore_list.append("conv")
+                if 'DQN' not in args.transferModel[1:]:#ignore DQN
+                    ignore_list.append("fc")
+
+            session_init = get_model_loader(args.transferModel[0])
+            reader, variables = session_init._read_checkpoint_vars(args.transferModel[0])
+
+            #var = tf.stop_gradient(var) #use this to freeze layers later
+            #tensor = reader.get_tensor(var)
+            #tf.get_variable()
+
+            ignore = [var for var in variables if any([i in var for i in ignore_list])]
+            not_ignore = (list(set(variables) - set(ignore)))#not ignored
+            session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
+            config.session_init = session_init
+        # print(r(not_ignore, args.transferModel, args.type))
+        # exit()
         launch_train_with_config(config, SimpleTrainer())

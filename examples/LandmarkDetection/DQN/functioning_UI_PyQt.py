@@ -119,6 +119,7 @@ class AppSettings(QFrame):
         # temporary default file paths
         self.fname_images = filenames_GUI()
         self.fname_landmarks = filenames_GUI()
+        self.dtype = filenames_GUI()
         self.fname_logs_dir = "./data"
 
         # initialise grid/set spacing
@@ -242,6 +243,8 @@ class AppSettings(QFrame):
         self.METHOD = self.DQN_variant_value
         # load files into env to set num_actions, num_validation_files
         init_player = MedicalPlayer(files_list=self.selected_list,
+                                    # data_type=self.dtype,
+                                    data_type=self.dtype.name,
                                     screen_dims=IMAGE_SIZE,
                                     task='play')
         self.NUM_ACTIONS = init_player.action_space.n
@@ -266,17 +269,19 @@ class AppSettings(QFrame):
         # demo pretrained model one episode at a time
         if self.task_value == 'Play':
             play_n_episodes(get_player(files_list=self.selected_list, viz=0.01,
+                                        data_type=self.dtype.name,
                                         saveGif=self.GIF_value,
                                         saveVideo=self.video_value,
                                         task='play'),
-                            pred, self.num_files, viewer=self.window)
+                                pred, self.num_files, viewer=self.window)
         # run episodes in parallel and evaluate pretrained model
         elif self.task_value == 'Evaluation':
             play_n_episodes(get_player(files_list=self.selected_list, viz=0.01,
+                                            data_type=self.dtype.name,
                                              saveGif=self.GIF_value,
                                              saveVideo=self.video_value,
                                              task='eval'),
-                                  pred, self.num_files, viewer=self.window)
+                                pred, self.num_files, viewer=self.window)
 
     @property
     def window(self):
@@ -352,6 +357,7 @@ class AppSettingsBrowseMode(QFrame):
         # temporary default file paths
         self.fname_images = filenames_GUI()
         self.fname_landmarks = filenames_GUI()
+        self.dtype = filenames_GUI()
 
         ### LAYOUT ###
         gridMode = QGridLayout()
@@ -480,9 +486,10 @@ class AppSettingsBrowseMode(QFrame):
         self.selected_list = [self.fname_images, self.fname_landmarks]
 
         self.env = get_player(files_list=self.selected_list, viz=0.01,
-                        saveGif=False, saveVideo=False, task='browse')
+                        saveGif=False, saveVideo=False, task='browse',
+                        data_type=self.dtype.name)
         self.env.stepManual(act=-1, viewer=self.window)
-        self.env.display(browseMode=True)
+        self.env.display()
 
     def move_img(self, action):
         self.env.stepManual(action, self.window)
@@ -491,7 +498,7 @@ class AppSettingsBrowseMode(QFrame):
 
 
 class Controller:
-    def __init__(self, display=True, default_use_case='brain_MRI'):
+    def __init__(self, display=True, default_use_case='BrainMRI'):
         self.default_use_case = default_use_case
         self.window1, self.window2 = None, None
         self.app = QApplication(sys.argv)
@@ -534,18 +541,19 @@ class Controller:
         self.app_settings.load_img()
 
     def set_paths(self):
-        assert self.default_use_case in ['brain_MRI','cardiac','fetal'], "Invalid default use case"
-        if self.default_use_case == 'brain_MRI':
+        assert self.default_use_case in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
+        self.app_settings.dtype.name = self.default_use_case
+        if self.default_use_case == 'BrainMRI':
             # Default MRI
             self.app_settings.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
             self.app_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
             self.app_settings.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
-        elif self.default_use_case == 'cardiac':
+        elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
             self.app_settings.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
             self.app_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
             self.app_settings.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
-        elif self.default_use_case == 'fetal':
+        elif self.default_use_case == 'FetalUS':
             # Default fetal
             self.app_settings.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
             self.app_settings.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'

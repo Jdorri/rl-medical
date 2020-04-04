@@ -59,7 +59,7 @@ class MedicalPlayer(gym.Env):
 
     def __init__(self, directory=None, viz=False, task=False, files_list=None,
                  screen_dims=(27,27,27), history_length=20, multiscale=True,
-                 max_num_frames=0, saveGif=False, saveVideo=False):
+                 max_num_frames=0, saveGif=False, saveVideo=False, data_type=None):
         """
         :param train_directory: environment or game name
         :param viz: visualization
@@ -115,6 +115,8 @@ class MedicalPlayer(gym.Env):
         self.dims = len(self.screen_dims)
         # multi-scale agent
         self.multiscale = multiscale
+        #Type of data
+        self.data_type = data_type
 
         # init env dimensions
         if self.dims == 2:
@@ -149,13 +151,19 @@ class MedicalPlayer(gym.Env):
         # initialize rectangle limits from input image coordinates
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
+        if self.data_type == 'BrainMRI':
+            self.data_loader = filesListBrainMRLandmark
+        elif self.data_type == 'CardiacMRI':
+            self.data_loader = filesListCardioLandmark
+        elif self.data_type == 'FetalUS':
+            self.data_loader = filesListFetalUSLandmark
 
         if self.task == 'play':
-            self.files = filesListBrainMRLandmark(files_list,
-                                                  returnLandmarks=False,)
+            self.files = self.data_loader(files_list,
+                                          returnLandmarks=False)
         else:
-            self.files = filesListBrainMRLandmark(files_list,
-                                                  returnLandmarks=True)
+            self.files = self.data_loader(files_list,
+                                         returnLandmarks=True)
 
         # prepare file sampler
         self.filepath = None
@@ -225,16 +233,19 @@ class MedicalPlayer(gym.Env):
         # multiscale (e.g. start with 3 -> 2 -> 1)
         # scale can be thought of as sampling stride
         if self.multiscale:
-            ## brain
-            self.action_step = 9
-            self.xscale = 3
-            self.yscale = 3
-            self.zscale = 3
-            ## cardiac
-            # self.action_step = 6
-            # self.xscale = 2
-            # self.yscale = 2
-            # self.zscale = 2
+            #cardiac
+            if self.data_type == 'CardiacMRI':
+                self.action_step = 6
+                self.xscale = 2
+                self.yscale = 2
+                self.zscale = 2
+            #brain or fetal
+            else:
+                self.action_step = 9
+                self.xscale = 3
+                self.yscale = 3
+                self.zscale = 3
+
         else:
             self.action_step = 1
             self.xscale = 1
@@ -550,7 +561,7 @@ class MedicalPlayer(gym.Env):
         with _ALE_LOCK:
             if self.viz:
                 if isinstance(self.viz, float):
-                    self.display(browseMode=True)
+                    self.display()
 
         return self._current_state()
 
@@ -732,7 +743,7 @@ class MedicalPlayer(gym.Env):
         self.num_games = StatCounter()
         self.num_success = StatCounter()
 
-    def display(self, return_rgb_array=False, browseMode=False):
+    def display(self, return_rgb_array=False):
         # get dimensions
         current_point = self._location
         target_point = self._target_loc
@@ -793,10 +804,10 @@ class MedicalPlayer(gym.Env):
             "error": self.cur_dist,
             "scale": self.xscale,
             "rect": self.rectangle,
-            "browseMode": browseMode,
+            "task": self.task,
         })
 
-        if not browseMode:
+        if self.task != 'browse':
             # Control agent speed
             if self.viewer.left_widget.thread.speed == WorkerThread.FAST:
                 time.sleep(0)
