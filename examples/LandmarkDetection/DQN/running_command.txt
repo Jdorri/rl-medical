@@ -7,3 +7,46 @@ python DQN.py --task play --algo DQN --gpu 0 --load data/models/DQN_multiscale_b
 
 python3 DQN.py --task play --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files './data/filenames/image_files.txt' --type 'BrainMRI'
 python3 DQN.py --task train --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files ['./data/filenames/brain_test_files_new_paths.txt','./data/filenames/brain_test_landmarks_new_paths.txt'] --type 'BrainMRI'
+
+
+For Brain MRI:
+/vol/biomedic/users/aa16914/shared/data/RL_data/brain_test_files_new_paths.txt
+/vol/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000
+
+for CardiacMRI:
+/vol/biomedic/users/aa16914/shared/data/RL_data/cardiac_test_files_new_paths.txt
+/vol/project/2019/545/g1954503/oen19/LandmarkDetection/003/output/003/model-600000
+
+for ultrasound:
+/vol/biomedic/users/aa16914/shared/data/RL_data/fetalUS_test_files_new_paths.txt
+/vol/project/2019/545/g1954503/oen19/LandmarkDetection/FetalUS/001/output/FetalUS001/model-600000
+
+and if you want to run eval:
+/vol/biomedic/users/aa16914/shared/data/RL_data/brain_test_landmarks_new_paths.txt
+/vol/biomedic/users/aa16914/shared/data/RL_data/cardiac_test_landmarks_new_paths.txt
+/vol/biomedic/users/aa16914/shared/data/RL_data/fetalUS_test_landmarks_new_paths.txt
+
+
+### Random stuff (AG) ###
+wget --header="Authorization: token 995c84a0c38eb4fe09d691371029e30cda092dbb" -O - \
+    https://raw.githubusercontent.com/alexgaskell10/data-rl-medical/master/images/14SZ03090.nii.gz
+
+https://raw.githubusercontent.com/alexgaskell10/data-rl-medical/master/images/14SZ03090.nii.gz
+
+import requests
+from os import getcwd
+
+with open('./data/filenames/brain_test_files_new_paths.txt', 'r') as f:
+    temp = f.read().splitlines()
+
+exts = [l.replace('./data/images/','') for l in temp]
+
+for ext in exts:
+    source_dir = 'https://raw.githubusercontent.com/ollenilsson19/rl-medical/master/examples/LandmarkDetection/DQN/data/images/https://github.com/ollenilsson19/rl-medical/blob/master/examples/LandmarkDetection/DQN/data/images/'
+    url = source_dir + ext
+    dest_dir = getcwd() + '/data/images/'
+    filename = dest_dir + ext
+    r = requests.get(url)
+
+    with open(filename, 'w') as f:
+        f.write(r.content)
