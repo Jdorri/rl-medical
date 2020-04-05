@@ -124,6 +124,7 @@ class Model3D(ModelDesc):
         self.channel = channel
         self.image_shape = image_shape
         self.num_actions = num_actions
+        self.margin_lambda = 1.0
 
     def inputs(self):
         # Use a combined state for efficiency.
@@ -133,7 +134,8 @@ class Model3D(ModelDesc):
                           'comb_state'),
                 InputDesc(tf.int64, (None,), 'action'),
                 InputDesc(tf.float32, (None,), 'reward'),
-                InputDesc(tf.bool, (None,), 'isOver')]
+                InputDesc(tf.bool, (None,), 'isOver'),
+                InputDesc(tf.bool, (None,), 'human')]
 
     @abc.abstractmethod
     def _get_DQN_prediction(self, image):
@@ -146,9 +148,10 @@ class Model3D(ModelDesc):
         return self._get_DQN_prediction(image)
 
     def build_graph(self, *inputs):
-        comb_state, action, reward, isOver = inputs
+        comb_state, action, reward, isOver, human = inputs
         comb_state = tf.cast(comb_state, tf.float32)
         state = tf.slice(comb_state, [0, 0, 0, 0, 0], [-1, -1, -1, -1, self.channel], name='state')
+        # Standard DQN loss
         self.predict_value = self.get_DQN_prediction(state)
         if not get_current_tower_context().is_training:
             return
@@ -178,6 +181,24 @@ class Model3D(ModelDesc):
         target = reward + (1.0 - tf.cast(isOver, tf.float32)) * self.gamma * tf.stop_gradient(best_v)
         cost = tf.losses.huber_loss(target, pred_action_value,
                                     reduction=tf.losses.Reduction.MEAN)
+
+###############################################################################
+# HITL UPDATE: Margin classification loss
+# This can only be calculated on the Human generated samples. Therefore, I
+# think that we need a flag. Not too bad to implement.
+        if human:
+            # Q(s,A_E) (The Q value of the action that was take by the human in that state)
+            tar = tf.reduce_sum(self.predict_value * action_onehot, 1)
+            # l(a_E,a) here penalise every action plus 0.8 except the action that the
+            # human took which gets 0
+            mar = tf.one_hot(action, self.num_actions, 0.0, 0.8)
+            # max[Q(s,a) + l(a_E,a)]
+            margin = tf.reduce_max(mar + self.predict_value, 1)
+
+            margin_loss = margin - tar
+            cost = cost + self.margin_lambda*margin_loss
+
+###############################################################################
         summary.add_param_summary(('conv.*/W', ['histogram', 'rms']),
                                   ('fc.*/W', ['histogram', 'rms']))  # monitor all W
         summary.add_moving_summary(cost)

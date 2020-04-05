@@ -42,8 +42,14 @@ IMAGE_SIZE = (45, 45, 45)
 # how many frames to keep
 # in other words, how many observations the network can see
 FRAME_HISTORY = 4
-# the frequency of updating the target network
+# the frequency of updating the target network --> this is wrong, this is the
+# number of steps to take with the episilon greedy policy before comitting it
+# memory.
 UPDATE_FREQ = 4
+###############################################################################
+# HITL UPDATE
+INIT_UPDATE_FREQ = 0
+###############################################################################
 # DISCOUNT FACTOR - NATURE (0.99) - MEDICAL (0.9)
 GAMMA = 0.9 #0.99
 # REPLAY MEMORY SIZE - NATURE (1e6) - MEDICAL (1e5 view-patches)
@@ -139,7 +145,15 @@ def get_config(files_list, data_type):
         memory_size=MEMORY_SIZE,
         init_memory_size=INIT_MEMORY_SIZE,
         init_exploration=1.0,
-        update_frequency=UPDATE_FREQ,
+        #How my epsilon greedy steps to take before commiting to memory
+        #An idea to encorporate the pre-training phase is to schedule the
+        # the agent only to start taking steps after x amount of mini_batch
+        # samples......
+        ###############################################################################
+        # HITL UPDATE
+        update_frequency=INIT_UPDATE_FREQ,
+        #update_frequency=UPDATE_FREQ,
+        ###############################################################################
         history_len=FRAME_HISTORY
     )
 
@@ -161,6 +175,23 @@ def get_config(files_list, data_type):
                 # 1->0.1 in the first million steps
                 [(0, 1), (10, 0.1), (320, 0.01)],
                 interp='linear'),
+###############################################################################
+# HITL UPDATE
+# Here the number of steps taken in the environment is increased from 0, during
+# the pretraining phase, to 4 to allow the agent to take 4 steps in the env 
+# between each TD update.
+# Key: a discussion with the team needs to be made as to whether we need to push
+# back the updated to the other hyperparameters by 750,000 steps. Need to read
+# papers to determine what is best.
+
+            ScheduledHyperParamSetter(
+                ObjAttrParam(expreplay, 'update_frequency'),
+                # 1->0.1 in the first million steps
+                [(0, 0), (8, 4)],
+                interp=None, step_based=True),
+
+###############################################################################
+
             PeriodicTrigger(
                 Evaluator(nr_eval=EVAL_EPISODE, input_names=['state'],
                           output_names=['Qvalue'], files_list=files_list,
