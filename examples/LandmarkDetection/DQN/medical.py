@@ -293,7 +293,7 @@ class MedicalPlayer(gym.Env):
         points2 = spacing * np.array(points2)
         return np.linalg.norm(points1 - points2)
 
-    def step(self, act, qvalues, viewer):
+    def step(self, act, qvalues):
         """The environment's step function returns exactly what we need.
         Args:
           act:
@@ -322,7 +322,7 @@ class MedicalPlayer(gym.Env):
         current_loc = self._location
         self.terminal = False
         go_out = False
-        self.viewer = viewer
+        # self.viewer = viewer
 
         # UP Z+ -----------------------------------------------------------
         if (act == 0):
