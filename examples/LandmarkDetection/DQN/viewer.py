@@ -175,6 +175,17 @@ class Window(QMainWindow):
             elif event.key() == Qt.Key_Z:
                 self.right_widget.on_clicking_zoomOut()
 
+    def closeEvent(self, event):
+        """
+        Used to override close event and provide warning when closing application
+        """
+        try:
+            if self.right_widget.HITL and self.right_widget.env:
+                self.right_widget.save_HITL()
+        except AttributeError:
+            pass
+        event.accept()
+
     # def closeEvent(self, event):
     #     """
     #     Used to override close event and provide warning when closing application
@@ -382,6 +393,7 @@ class SimpleImageViewer(QWidget):
         """
         Main image drawer function
         """
+        self.arr = arrs[0]
         # Draw background image (brain)
         cvImg = arrs[0].astype(np.uint8)
         self.height, self.width, self.channel = cvImg.shape

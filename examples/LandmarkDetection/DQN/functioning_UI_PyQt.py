@@ -39,6 +39,7 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
 from viewer import SimpleImageViewer, Window
 import pickle
 from thread import WorkerThread
+from datetime import datetime
 
 ###############################################################################
 # BATCH SIZE USED IN NATURE PAPER IS 32 - MEDICAL IS 256
@@ -316,7 +317,10 @@ class AppSettingsBrowseMode(QFrame):
         self.browseMode.setChecked(True)
 
         self.img_file_edit = QPushButton('Upload Images', self)
+        self.next_img = QPushButton('Next Image', self)
         self.exit = QPushButton('Exit', self)
+        self.HITL_mode = QCheckBox('Enable HITL',self)
+        self.HITL_mode.setCheckable(True)
 
         self.upButton = QToolButton(self)
         self.upButton.setArrowType(Qt.UpArrow)
@@ -379,7 +383,9 @@ class AppSettingsBrowseMode(QFrame):
         # initialise grid/set spacing
         grid = QGridLayout()
         grid.setSpacing(10)
+        grid.addWidget(self.HITL_mode, 2, 0)
         grid.addWidget(self.img_file_edit, 3, 0)
+        grid.addWidget(self.next_img, 4, 0)
         grid.addLayout(gridArrows, 7, 0)
         grid.addWidget(self.exit, 12, 0)
 
@@ -402,60 +408,96 @@ class AppSettingsBrowseMode(QFrame):
         self.outButton.clicked.connect(self.on_clicking_out)
         self.zoomInButton.clicked.connect(self.on_clicking_zoomIn)
         self.zoomOutButton.clicked.connect(self.on_clicking_zoomOut)
+        self.HITL_mode.clicked.connect(self.on_clicking_HITL)
+        self.next_img.clicked.connect(self.on_clicking_nextImg)
 
         self.show()
 
-        # Flags for testing
+        # Flags
         self.testing = False
         self.test_click = None
-
         self.env = None
+        self.HITL = False
+        self.HITL_logger = []
+
+    @pyqtSlot()
+    def on_clicking_nextImg(self):
+        self.env.reset()
+        self.move_img(-1)
+
+    @pyqtSlot()
+    def on_clicking_HITL(self):
+        if self.testing:
+            result = QMessageBox.Yes
+        else:
+            result = self.show_HITL_msg()
+
+        if result == QMessageBox.Yes and self.HITL:
+            self.save_HITL()
+
+        if (result == QMessageBox.Yes and not self.HITL) or \
+            (result == QMessageBox.No and self.HITL):
+            self.HITL_mode.setChecked(True)
+        elif (result == QMessageBox.No and not self.HITL) or \
+            (result == QMessageBox.Yes and self.HITL):
+            self.HITL_mode.setChecked(False)
+
+        if result == QMessageBox.Yes:
+            self.HITL = not self.HITL
 
     @pyqtSlot()
     def on_clicking_up(self):
-        if not self.testing and self.env:
+        # if not self.testing and self.env:
+        if self.env:
             action = 1
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_down(self):
-        if not self.testing and self.env:
+        # if not self.testing and self.env:
+        if self.env:
             action = 4
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_left(self):
-        if not self.testing and self.env:
+        # if not self.testing and self.env:
+        if self.env:
             action = 3
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_right(self):
-        if not self.testing and self.env:
+        # if not self.testing and self.env:
+        if self.env:
             action = 2
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_in(self):
-        if not self.testing and self.env:
+        # if not self.testing and self.env:
+        if self.env:
             action = 0
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_out(self):
-        if not self.testing and self.env:
+        # if not self.testing and self.env:
+        if self.env:
             action = 5
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_zoomIn(self):
-        if not self.testing and self.env and self.env.xscale > 1:
+        # if not self.testing and self.env and self.env.xscale > 1:
+        if self.env and self.env.xscale > 1:
             self.env.adjustMultiScale(higherRes=True)
             self.move_img(-1)
 
     @pyqtSlot()
     def on_clicking_zoomOut(self):
-        if not self.testing and self.env and self.env.xscale < 3:
+        # if not self.testing and self.env and self.env.xscale < 3:
+        if self.env and self.env.xscale < 3:
             self.env.adjustMultiScale(higherRes=False)
             self.move_img(-1)
 
@@ -496,6 +538,35 @@ class AppSettingsBrowseMode(QFrame):
         QApplication.processEvents()
         self.window.update()
 
+    def show_HITL_msg(self):
+        self.HITL_msg = QMessageBox()
+        self.HITL_msg.setIcon(QMessageBox.Question)
+        if not self.HITL:
+            self.HITL_msg.setText("Human-In-The-Loop mode enabled")
+            self.HITL_msg.setInformativeText(("In Human-In-The-Loop mode, your "
+                "interactions will now be saved and used to train the reinforcement "
+                "learning algorithm faster. \n Do you want to proceed?"))
+        else:
+            self.HITL_msg.setText("Human-In-The-Loop mode disabled")
+            self.HITL_msg.setInformativeText(("Human-In-The-Loop mode "
+                "will now be disabled \n Do you want to proceed?"))
+        # self.HITL_msg.setWindowTitle("MessageBox demo")
+        # self.HITL_msg.setDetailedText("The details are as follows:")
+        self.HITL_msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        self.HITL_msg.setDefaultButton(QMessageBox.Yes)
+        result = self.HITL_msg.exec_()
+        return result
+
+    def save_HITL(self):
+        # Record current HITL loop
+        if len(self.env._loc_history) > 1:
+            self.env.reset()
+
+        now = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
+        path = f'./data/HITL/log_{str(now)}.pickle'
+        with open(path, 'wb') as f:
+            pickle.dump(self.env.HITL_logger, f)
+
 
 class Controller:
     def __init__(self, display=True, default_use_case='BrainMRI'):
@@ -509,6 +580,7 @@ class Controller:
         # self.window2.show()
 
     def show_defaultMode(self):
+        self.save_HITL()
         # Init the window
         self.app_settings = AppSettings()
         self.window1 = Window(self.viewer_param, self.app_settings)
@@ -535,6 +607,14 @@ class Controller:
 
         # Open new window with new app_settings
         self.window2.right_widget.SWITCH_WINDOW.connect(self.show_defaultMode)
+
+    def save_HITL(self):
+        ''' Method to save HITL if appropriate '''
+        try:
+            if self.app_settings.env and self.app_settings.HITL:
+                self.app_settings.save_HITL()
+        except AttributeError:
+            pass
 
     def load_defaults(self):
         self.set_paths()

@@ -146,8 +146,6 @@ class MedicalPlayer(gym.Env):
                                             dtype=np.uint8)
         # history buffer for storing last locations to check oscilations
         self._history_length = history_length
-        self._loc_history = [(0,) * self.dims] * self._history_length
-        self._qvalues_history = [(0,) * self.actions] * self._history_length
         # initialize rectangle limits from input image coordinates
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
@@ -168,8 +166,19 @@ class MedicalPlayer(gym.Env):
         # prepare file sampler
         self.filepath = None
         self.sampled_files = self.files.sample_circular()
+        self.HITL_logger = []
+        self._loc_history = None
         # reset buffer, terminal, counters, and init new_random_game
         self._restart_episode()
+
+    def HITL_episode_log(self):
+        """ Method to save episode info for HITL """
+        log = {
+            'states': self._loc_history,
+            'actions': self._act_history,
+            'target': self._target_loc,
+        }
+        self.HITL_logger.append(log)
 
     def reset(self):
         # with _ALE_LOCK:
@@ -180,14 +189,15 @@ class MedicalPlayer(gym.Env):
         """
         restart current episoide
         """
+        if self.task == 'browse' and self._loc_history:
+            self.HITL_episode_log()
+
         self.terminal = False
         self.reward = 0
         self.cnt = 0 # counter to limit number of steps per episodes
         self.num_games.feed(1)
         self.current_episode_score.reset()  # reset the stat counter
-        self._loc_history = [(0,) * self.dims] * self._history_length
-        # list of q-value lists
-        self._qvalues_history = [(0,) * self.actions] * self._history_length
+        self._clear_history()
         self.new_random_game()
 
     def new_random_game(self):
@@ -487,6 +497,7 @@ class MedicalPlayer(gym.Env):
         self.terminal = False
         go_out = False
         self.viewer = viewer
+        self._act = act
 
         # -1 passed during init so skip updating current location
         if act == -1:
@@ -557,6 +568,8 @@ class MedicalPlayer(gym.Env):
                                               self._target_loc,
                                               self.spacing)
 
+        self._update_history()
+
         # render screen if viz is on
         with _ALE_LOCK:
             if self.viz:
@@ -596,18 +609,26 @@ class MedicalPlayer(gym.Env):
     def _clear_history(self):
         ''' clear history buffer with current state
         '''
-        self._loc_history = [(0,) * self.dims] * self._history_length
-        self._qvalues_history = [(0,) * self.actions] * self._history_length
+        if self.task == 'browse':
+            self._loc_history = []
+            self._act_history = []
+        else:
+            self._loc_history = [(0,) * self.dims] * self._history_length
+            self._qvalues_history = [(0,) * self.actions] * self._history_length
 
     def _update_history(self):
         ''' update history buffer with current state
         '''
-        # update location history
-        self._loc_history[:-1] = self._loc_history[1:]
-        self._loc_history[-1] = self._location
-        # update q-value history
-        self._qvalues_history[:-1] = self._qvalues_history[1:]
-        self._qvalues_history[-1] = self._qvalues
+        if self.task == 'browse':
+            self._loc_history.append(self._location)
+            self._act_history.append(self._act)
+        else:
+            # update location history
+            self._loc_history[:-1] = self._loc_history[1:]
+            self._loc_history[-1] = self._location
+            # update q-value history
+            self._qvalues_history[:-1] = self._qvalues_history[1:]
+            self._qvalues_history[-1] = self._qvalues
 
     def _current_state(self):
         """

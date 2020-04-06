@@ -4,6 +4,10 @@ from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from thread import WorkerThread
 from functioning_UI_PyQt import Controller, AppSettings, AppSettingsBrowseMode
+import numpy as np
+import glob
+import os
+import pickle
 
 class RightWidgetTester(unittest.TestCase):
     ''' Class to perform unit tests on the buttons within the right widget of the
@@ -57,19 +61,6 @@ class RightWidgetTester(unittest.TestCase):
         QTest.mouseClick(self.w.browseMode, Qt.LeftButton)
         self.assertTrue(self.w.browseMode.isChecked())
 
-    # def test_browseLogsButton(self):
-    #     QTest.mouseClick(self.w.log_dir_edit, Qt.LeftButton)
-    #     self.assertTrue(self.w.test_click)
-
-    # def test_GIFCheckBox(self):
-    #     QTest.mouseClick(self.w.GIF_edit, Qt.LeftButton)
-    #     self.assertTrue(self.w.GIF_edit.isChecked(),
-    #         pos=QtCore.QPoint(2,self.w.GIF_edit.height()/2))
-    #
-    # def test_videoCheckBox(self):
-    #     QTest.mouseClick(self.w.video_edit, Qt.LeftButton)
-    #     self.assertTrue(self.w.test_click)
-
 
 class RightWidgetBrowseModeTester(unittest.TestCase):
     ''' Tester for browse mode
@@ -98,37 +89,107 @@ class RightWidgetBrowseModeTester(unittest.TestCase):
         self.assertTrue(self.w.img_file_edit.isChecked())
 
     def test_upButton(self):
+        init_loc = self.w.env._location
         QTest.mouseClick(self.w.upButton, Qt.LeftButton)
         self.assertTrue(self.w.upButton.isChecked())
+        self.assertNotEqual(init_loc, self.w.env._location)
 
     def test_downButton(self):
+        init_loc = self.w.env._location
         QTest.mouseClick(self.w.downButton, Qt.LeftButton)
         self.assertTrue(self.w.downButton.isChecked())
+        self.assertNotEqual(init_loc, self.w.env._location)
 
     def test_leftButton(self):
+        init_loc = self.w.env._location
         QTest.mouseClick(self.w.leftButton, Qt.LeftButton)
         self.assertTrue(self.w.leftButton.isChecked())
+        self.assertNotEqual(init_loc, self.w.env._location)
 
     def test_rightButton(self):
+        init_loc = self.w.env._location
         QTest.mouseClick(self.w.rightButton, Qt.LeftButton)
         self.assertTrue(self.w.rightButton.isChecked())
+        self.assertNotEqual(init_loc, self.w.env._location)
 
     def test_inButton(self):
+        init_loc = self.w.env._location
         QTest.mouseClick(self.w.inButton, Qt.LeftButton)
         self.assertTrue(self.w.inButton.isChecked())
+        self.assertNotEqual(init_loc, self.w.env._location)
 
     def test_outButton(self):
+        init_loc = self.w.env._location
         QTest.mouseClick(self.w.outButton, Qt.LeftButton)
         self.assertTrue(self.w.outButton.isChecked())
+        self.assertNotEqual(init_loc, self.w.env._location)
 
     def test_zoomInButton(self):
+        # init_res = 3
+        # self.w.env.xscale = init_res
         QTest.mouseClick(self.w.zoomInButton, Qt.LeftButton)
         self.assertTrue(self.w.zoomInButton.isChecked())
+        # self.assertEqual(self.w.env.xscale, 2)
 
     def test_zoomOutButton(self):
+        # init_res = 2
+        # self.w.env.xscale = init_res
         QTest.mouseClick(self.w.zoomOutButton, Qt.LeftButton)
         self.assertTrue(self.w.zoomOutButton.isChecked())
+        # self.assertEqual(self.w.env.xscale, 3)
 
+    def test_nextImgButton(self):
+        ''' Compare the intensity of the initial img to new img'''
+        init_intensity = np.sum(self.w.env.viewer.widget.arr)
+        QTest.mouseClick(self.w.next_img, Qt.LeftButton)
+        self.assertTrue(self.w.next_img.isChecked())
+        self.assertTrue(init_intensity - np.sum(self.w.env.viewer.widget.arr) > 1e-5)
+
+class RightWidgetHITLTester(unittest.TestCase):
+    ''' Tester for HITL mode
+    '''
+    def setUp(self):
+        '''Method run before every test. Use this to prepare the test fixture.'''
+        self.controller = Controller()
+        self.controller.show_browseMode()
+        self.w = self.controller.window2.right_widget
+        self.w.testing = True
+        Controller.allWidgets_setCheckable(self.controller.app)
+        self.w.HITL = True
+
+    def tearDown(self):
+        ''' Method run after each test is run. Use this to reset the testing
+            environment.'''
+        self.w.close()
+        self.controller.app.quit()
+        self.controller.app, self.w = None, None
+
+    def test_enableHITLCheckBox(self):
+        self.w.HITL = False
+        QTest.mouseClick(self.w.HITL_mode, Qt.LeftButton)
+        self.assertTrue(self.w.HITL_mode.isChecked())
+
+    def test_saveHITL(self):
+        # Move to fill location history
+        QTest.mouseClick(self.w.upButton, Qt.LeftButton)
+        QTest.mouseClick(self.w.downButton, Qt.LeftButton)
+
+        # End HITL mode (as this calls save_HITL())
+        QTest.mouseClick(self.w.HITL_mode, Qt.LeftButton)
+        self.assertTrue(not self.w.HITL_mode.isChecked())
+
+        # Load the created file
+        list_of_files = glob.glob('./data/HITL/*.pickle')
+        latest_file = max(list_of_files, key=os.path.getctime)
+        with open(latest_file, 'rb') as f:
+            log = pickle.load(f)
+
+        # Check contents of the log are correct
+        self.assertEqual(len(log), 1)
+        self.assertEqual(len(log[0]['states']), 3)
+
+        # Delete the log file
+        os.remove(latest_file)
 
 class LeftWidgetTester(unittest.TestCase):
     '''Same as above but for the left widget'''
@@ -211,6 +272,30 @@ class ControllerTester(unittest.TestCase):
         QTest.mouseClick(self.w.testMode, Qt.LeftButton)
         self.assertTrue(isinstance(self.controller.app_settings, AppSettings))
 
+    def test_load_defaults(self):
+        self._setUp_browseMode()
+        self.assertTrue(abs(np.sum(self.w.env.viewer.widget.arr)) > 1e-5)
+
 
 if __name__ == '__main__':
-    unittest.main()
+    classes_to_test = [
+        RightWidgetTester,
+        RightWidgetBrowseModeTester,
+        RightWidgetHITLTester,
+        LeftWidgetTester,
+        ControllerTester,
+    ]
+
+    loader = unittest.TestLoader()
+
+    suites_list = []
+    for test_class in classes_to_test:
+        suite = loader.loadTestsFromTestCase(test_class)
+        suites_list.append(suite)
+
+    big_suite = unittest.TestSuite(suites_list)
+
+    runner = unittest.TextTestRunner()
+    results = runner.run(big_suite)
+
+    # unittest.main()
