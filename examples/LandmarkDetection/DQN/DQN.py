@@ -160,7 +160,7 @@ def get_config(files_list, data_type):
     return TrainConfig(
         # dataflow=expreplay,
         data=QueueInput(expreplay),
-        model=Model(),
+        model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA),
         callbacks=[
             ModelSaver(),
             PeriodicTrigger(
