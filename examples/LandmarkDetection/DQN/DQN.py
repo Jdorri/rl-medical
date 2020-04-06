@@ -49,7 +49,7 @@ GAMMA = 0.9 #0.99
 # REPLAY MEMORY SIZE - NATURE (1e6) - MEDICAL (1e5 view-patches)
 MEMORY_SIZE = 1e5#6
 # consume at least 1e6 * 27 * 27 * 27 bytes
-INIT_MEMORY_SIZE = MEMORY_SIZE // 20 #5e4
+INIT_MEMORY_SIZE = MEMORY_SIZE // 2000 #5e4
 # each epoch is 100k played frames
 STEPS_PER_EPOCH = 10000 // UPDATE_FREQ * 10
 # num training epochs in between model evaluations
@@ -138,7 +138,7 @@ def get_config(files_list, data_type):
         batch_size=BATCH_SIZE,
         memory_size=MEMORY_SIZE,
         init_memory_size=INIT_MEMORY_SIZE,
-        init_exploration=1.0,
+        init_exploration=0.0,
         update_frequency=UPDATE_FREQ,
         history_len=FRAME_HISTORY
     )
