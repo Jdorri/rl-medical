@@ -3,33 +3,25 @@ import unittest
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from thread import WorkerThread
-from functioning_UI_PyQt import run
+from functioning_UI_PyQt import Controller, AppSettings, AppSettingsBrowseMode
 
 class RightWidgetTester(unittest.TestCase):
+    ''' Class to perform unit tests on the buttons within the right widget of the
+        GUI Launcher.
     '''
-    Class to perform unit tests on the buttons within the right widget of the
-    GUI Launcher.
-
-    * NOTE * These are tests only for functionality of the GUI. They do not
-    test the event signal causes the correct action.
-
-    To run these tests run the following command from the command line
-    when in the DQN folder:
-    - python -m tests.unit_tests.runner
-    '''
-
     def setUp(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
-        self.app, window = run()
-        self.w = window.right_widget
-        self.w.test_mode = True
+        self.controller = Controller()
+        self.w = self.controller.window1.right_widget
+        self.w.testing = True
+        Controller.allWidgets_setCheckable(self.controller.app)
 
     def tearDown(self):
-        '''Method run after each test is run. Use this to reset the testing
-        environment.'''
+        ''' Method run after each test is run. Use this to reset the testing
+            environment.'''
         self.w.close()
-        self.app.quit()
-        self.app, self.w = None, None
+        self.controller.app.quit()
+        self.controller.app, self.w = None, None
 
     def test_taskComboBox(self):
         # Check default
@@ -47,23 +39,23 @@ class RightWidgetTester(unittest.TestCase):
 
     def test_exitButton(self):
         QTest.mouseClick(self.w.exit, Qt.LeftButton)
-        self.assertTrue(self.w.test_click)
+        self.assertTrue(self.w.exit.isChecked())
 
     def test_runButton(self):
         QTest.mouseClick(self.w.run, Qt.LeftButton)
-        self.assertTrue(self.w.test_click)
-
-    def test_browseImgsButton(self):
-        QTest.mouseClick(self.w.img_file_edit, Qt.LeftButton)
-        self.assertTrue(self.w.test_click)
+        self.assertTrue(self.w.run.isChecked())
 
     def test_browseModelsButton(self):
         QTest.mouseClick(self.w.load_edit, Qt.LeftButton)
-        self.assertTrue(self.w.test_click)
+        self.assertTrue(self.w.load_edit.isChecked())
 
     def test_browseLandmarksButton(self):
         QTest.mouseClick(self.w.landmark_file_edit, Qt.LeftButton)
-        self.assertTrue(self.w.test_click)
+        self.assertTrue(self.w.landmark_file_edit.isChecked())
+
+    def test_browseModeButton(self):
+        QTest.mouseClick(self.w.browseMode, Qt.LeftButton)
+        self.assertTrue(self.w.browseMode.isChecked())
 
     # def test_browseLogsButton(self):
     #     QTest.mouseClick(self.w.log_dir_edit, Qt.LeftButton)
@@ -79,24 +71,84 @@ class RightWidgetTester(unittest.TestCase):
     #     self.assertTrue(self.w.test_click)
 
 
+class RightWidgetBrowseModeTester(unittest.TestCase):
+    ''' Tester for browse mode
+    '''
+    def setUp(self):
+        '''Method run before every test. Use this to prepare the test fixture.'''
+        self.controller = Controller()
+        self.controller.show_browseMode()
+        self.w = self.controller.window2.right_widget
+        self.w.testing = True
+        Controller.allWidgets_setCheckable(self.controller.app)
+
+    def tearDown(self):
+        ''' Method run after each test is run. Use this to reset the testing
+            environment.'''
+        self.w.close()
+        self.controller.app.quit()
+        self.controller.app, self.w = None, None
+
+    def test_exitButton(self):
+        QTest.mouseClick(self.w.exit, Qt.LeftButton)
+        self.assertTrue(self.w.exit.isChecked())
+
+    def test_browseImgsButton(self):
+        QTest.mouseClick(self.w.img_file_edit, Qt.LeftButton)
+        self.assertTrue(self.w.img_file_edit.isChecked())
+
+    def test_upButton(self):
+        QTest.mouseClick(self.w.upButton, Qt.LeftButton)
+        self.assertTrue(self.w.upButton.isChecked())
+
+    def test_downButton(self):
+        QTest.mouseClick(self.w.downButton, Qt.LeftButton)
+        self.assertTrue(self.w.downButton.isChecked())
+
+    def test_leftButton(self):
+        QTest.mouseClick(self.w.leftButton, Qt.LeftButton)
+        self.assertTrue(self.w.leftButton.isChecked())
+
+    def test_rightButton(self):
+        QTest.mouseClick(self.w.rightButton, Qt.LeftButton)
+        self.assertTrue(self.w.rightButton.isChecked())
+
+    def test_inButton(self):
+        QTest.mouseClick(self.w.inButton, Qt.LeftButton)
+        self.assertTrue(self.w.inButton.isChecked())
+
+    def test_outButton(self):
+        QTest.mouseClick(self.w.outButton, Qt.LeftButton)
+        self.assertTrue(self.w.outButton.isChecked())
+
+    def test_zoomInButton(self):
+        QTest.mouseClick(self.w.zoomInButton, Qt.LeftButton)
+        self.assertTrue(self.w.zoomInButton.isChecked())
+
+    def test_zoomOutButton(self):
+        QTest.mouseClick(self.w.zoomOutButton, Qt.LeftButton)
+        self.assertTrue(self.w.zoomOutButton.isChecked())
+
+
 class LeftWidgetTester(unittest.TestCase):
     '''Same as above but for the left widget'''
     def setUp(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
-        self.app, window = run()
-        self.w = window.left_widget
-        self.w.test_mode = True
+        self.controller = Controller()
+        self.w = self.controller.window1.left_widget
+        self.w.testing = True
+        Controller.allWidgets_setCheckable(self.controller.app)
 
     def tearDown(self):
-        '''Method run after each test is run. Use this to reset the testing
-        environment.'''
+        ''' Method run after each test is run. Use this to reset the testing
+            environment.'''
         self.w.close()
-        self.app.quit()
-        self.app, self.w = None, None
+        self.controller.app.quit()
+        self.controller.app, self.w = None, None
 
     def test_startButton(self):
         QTest.mouseClick(self.w.run_button, Qt.LeftButton)
-        self.assertTrue(self.w.test_click)
+        self.assertTrue(self.w.run_button.isChecked())
 
     def test_agentSpeedSlider(self):
         '''Checks if the slider works and if it adjusts the thread speed'''
@@ -122,6 +174,42 @@ class LeftWidgetTester(unittest.TestCase):
             self.assertEqual(self.w.thread.speed, WorkerThread.SLOW)
         else:
             self.assertEqual(self.w.thread.speed, WorkerThread.MEDIUM)
+
+
+class ControllerTester(unittest.TestCase):
+    ''' Tester for browse mode
+    '''
+    def _setUp_defaultMode(self):
+        '''Method run before every test. Use this to prepare the test fixture.'''
+        self.controller = Controller()
+        self.w = self.controller.window1.right_widget
+        self.w.testing = True
+        Controller.allWidgets_setCheckable(self.controller.app)
+
+    def _setUp_browseMode(self):
+        '''Method run before every test. Use this to prepare the test fixture.'''
+        self.controller = Controller()
+        self.controller.show_browseMode()
+        self.w = self.controller.window2.right_widget
+        self.w.testing = True
+        Controller.allWidgets_setCheckable(self.controller.app)
+
+    def tearDown(self):
+        ''' Method run after each test is run. Use this to reset the testing
+            environment.'''
+        self.w.close()
+        self.controller.app.quit()
+        self.controller.app, self.w = None, None
+
+    def test_switchBrowseMode(self):
+        self._setUp_defaultMode()
+        QTest.mouseClick(self.w.browseMode, Qt.LeftButton)
+        self.assertTrue(isinstance(self.controller.app_settings, AppSettingsBrowseMode))
+
+    def test_switchDefault(self):
+        self._setUp_browseMode()
+        QTest.mouseClick(self.w.testMode, Qt.LeftButton)
+        self.assertTrue(isinstance(self.controller.app_settings, AppSettings))
 
 
 if __name__ == '__main__':

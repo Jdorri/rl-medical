@@ -34,7 +34,6 @@ class Window(QMainWindow):
         super().__init__()
         self.initUI(viewer_param, app_settings)
         self.KEY_PRESSED.connect(self.on_key)
-        # self.setChildrenFocusPolicy(Qt.NoFocus)
 
     def initUI(self, viewer_param, app_settings):
         """
@@ -68,19 +67,20 @@ class Window(QMainWindow):
 
         # Manage layout
         self.grid = QGridLayout()
-        self.grid.addWidget(self.left_widget, 0, 0)
-        self.grid.addWidget(self.widget, 0, 1)
+        self.grid.addWidget(self.left_widget, 0, 0, 1, 1)
+        self.grid.addWidget(self.widget, 0, 1, 1, 10)
+        self.grid.addWidget(self.right_widget, 0, 11, 1, 1)
         # self.grid.setColumnStretch(1, 2) # default (later there will be event to change this when screen size change)
         # self.grid.setColumnStretch(0, 1) # default
-        if app_settings:
-            self.grid.addWidget(self.right_widget, 0, 2) # for integration with Jamie's code
+        # if app_settings:
+        #     self.grid.addWidget(self.right_widget, 0, 2) # for integration with Jamie's code
 
         self.layout_widget = QWidget()
         self.layout_widget.setLayout(self.grid)
         self.setCentralWidget(self.layout_widget)
 
         # Geometric window position and general setting
-        self.resize(1400, 800)
+        self.resize(1300, 800)
         self.center()
         self.setWindowTitle('Reinforcement Learning - Medical')
         self.menubar.setStyleSheet("background:#D2D4DC; color:black")
@@ -129,19 +129,6 @@ class Window(QMainWindow):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
-    # def closeEvent(self, event):
-    #     """
-    #     Used to override close event and provide warning when closing application
-    #     """
-    #     reply = QMessageBox.question(self, 'Message',
-    #         "Are you sure to quit?", QMessageBox.Yes |
-    #         QMessageBox.No, QMessageBox.Yes)
-    #
-    #     if reply == QMessageBox.Yes:
-    #         event.accept()
-    #     else:
-    #         event.ignore()
-
     def nightMode(self):
         "CSS Styling for night mode app version"
         # Overwrite widgets color
@@ -161,12 +148,15 @@ class Window(QMainWindow):
         else:
             self.dayMode()
 
+    @pyqtSlot(QEvent)
     def keyPressEvent(self, event):
         super().keyPressEvent(event)
         self.KEY_PRESSED.emit(event)
 
     def on_key(self, event):
-        # test for a specific key
+        ''' Different actions for different keyPressEvents.
+            Allows the user to move through the image by using arrow keys
+        '''
         if self.right_widget.MODE == 'BROWSE MODE' and self.right_widget.env:
             if event.key() == Qt.Key_S:
                 self.right_widget.on_clicking_in()
@@ -180,6 +170,23 @@ class Window(QMainWindow):
                 self.right_widget.on_clicking_left()
             elif event.key() == Qt.Key_Right:
                 self.right_widget.on_clicking_right()
+            elif event.key() == Qt.Key_X:
+                self.right_widget.on_clicking_zoomIn()
+            elif event.key() == Qt.Key_Z:
+                self.right_widget.on_clicking_zoomOut()
+
+    # def closeEvent(self, event):
+    #     """
+    #     Used to override close event and provide warning when closing application
+    #     """
+    #     reply = QMessageBox.question(self, 'Message',
+    #         "Are you sure to quit?", QMessageBox.Yes |
+    #         QMessageBox.No, QMessageBox.Yes)
+    #
+    #     if reply == QMessageBox.Yes:
+    #         event.accept()
+    #     else:
+    #         event.ignore()
 
     # def setChildrenFocusPolicy(self, policy):
     #     '''Method to allow arrow keys to be caught in keyPressEvent()'''
@@ -211,7 +218,7 @@ class SimpleImageViewerSettings(QFrame):
         hr2 = QLabel("<hr />")
         hr2.setStyleSheet("margin: 10px 0")
         label_speed = QLabel("Agent Speed")
-        self.setStyleSheet("font-family: sans-serif")
+        # self.setStyleSheet("font-family: sans-serif")
         label_run.setStyleSheet("margin-top: 10px")
 
         # Button settings
@@ -251,16 +258,13 @@ class SimpleImageViewerSettings(QFrame):
         self.setLayout(vbox)
 
         # Flags for testing
-        self.test_mode = False
-        self.test_click = None
+        self.testing = False
 
     def buttonClicked(self):
         """
         Event handler (slot) for when the button is clicked
         """
-        if self.test_mode:
-            self.test_click = True
-        elif self.run_button.text() == "Start":
+        if self.run_button.text() == "Start":
             self.thread.start()
             self.run_button.setText("Pause")
             self.window.statusbar.showMessage("Run")
@@ -367,7 +371,14 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setStyleSheet("background: black; border:3px solid green; ")
         self.label_img_y.setStyleSheet("background: black; border:3px solid blue; ")
 
-    def draw_image(self, arrs, agent_loc, target=(0,0), depth=1, text=None, spacing=1, rect=None):
+        # Style settings
+        self.color_a = QColor(111, 230, 158)
+        self.color_t = QColor(200, 100, 100)
+        self.color_e = QColor(250, 250, 250)
+        self.size_e = 20
+        self.line_width = 1
+
+    def draw_image(self, arrs, agent_loc, target=None, rect=None):
         """
         Main image drawer function
         """
@@ -392,26 +403,22 @@ class SimpleImageViewer(QWidget):
 
         # Draw some rectangle and agent (overlay)
         self.painterInstance = QPainter(self.img)
-        _agent_loc = (agent_loc[0], self.height-agent_loc[1])
-        rect_ = (self.height-rect[2], self.height-rect[3]) + rect[:2]
-        self.draw_rects(text, spacing, _agent_loc, rect_)
-        self.draw_circles(_agent_loc, target, depth)
+        _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
+        self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_x)
-        _agent_loc = (agent_loc[1], self.height_x-agent_loc[2])
-        rect_ = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
-        self.draw_rects(text, spacing, _agent_loc, rect_)
-        self.draw_circles(_agent_loc, target, depth)
+        _agent_loc, _rect, _target = self.translate_x(agent_loc, rect, target)
+        self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
 
         self.painterInstance = QPainter(self.img_y)
-        _agent_loc = (agent_loc[0]*self.width_y//self.height_y, self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
-        rect_ = (self.height_y-rect[4], self.height_y-rect[5]) + \
-            (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
-        self.draw_rects(text, spacing, agent_loc, rect_)
-        self.draw_circles(_agent_loc, target, depth)
+        _agent_loc, _rect, _target = self.translate_y(agent_loc, rect, target)
+        self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
+
+        if self.task in ['eval','browse']:
+            self.draw_error()
 
         # TODO: resolve scaled to width later during final iteration (responsive)
         self.img = self.img.scaledToWidth(350)
@@ -421,63 +428,155 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
 
-    def draw_circles(self, agent_loc, target, depth):
-        # Draw current agent location
-        self.penCentre = QPen(Qt.cyan)
-        self.penCentre.setWidth(4)
-        self.painterInstance.setPen(self.penCentre)
-        centre = QPoint(*agent_loc)
-        self.painterInstance.drawEllipse(centre, 2, 2)
+    def draw_error(self):
+        self.painterInstance = QPainter(self.img)
+        pen = QPen(self.color_e)
+        # pen.setWidth(self.line_width * 2)
+        self.painterInstance.setPen(pen)
+        self.painterInstance.setFont(QFont("Arial", self.size_e))
+        self.painterInstance.drawText(30, 30, f"Error: {self.error:.2f} mm")
+        self.painterInstance.end()
 
-        # Draw circle at target location
-        if target is not None:
-            self.penCentre = QPen(Qt.red)
-            self.penCentre.setWidth(3)
-            self.painterInstance.setPen(self.penCentre)
-            centre = QPoint(*target)
-            self.painterInstance.drawEllipse(centre, 2, 2)
 
-            # draw circle surrounding target
-            self.penCirlce = QPen(QColor(255,0,0,0))
-            self.penCirlce.setWidth(3)
-            self.painterInstance.setPen(self.penCirlce)
-            self.painterInstance.setBrush(Qt.red)
-            self.painterInstance.setOpacity(0.2)
-            centre = QPoint(*target)
-            radx = rady = depth * 30
-            self.painterInstance.drawEllipse(centre, radx, rady)
-
-    def draw_rects(self, text, spacing, agent_loc, rect):
-        # Coordinates for overlayed rectangle (ROI)
+    def drawer(self, agent_loc, rect, target):
         xPos = rect[2]
         yPos = rect[0]
         xLen = rect[3] - xPos
         yLen = rect[1] - yPos
 
-        # set rectangle color and thickness
-        self.penRectangle = QPen(Qt.cyan)
-        self.penRectangle.setWidth(3)
-        # draw rectangle on painter
-        self.painterInstance.setPen(self.penRectangle)
-        self.painterInstance.drawRect(xPos,yPos,xLen,yLen)
+        rect_dims = [xPos,yPos,xLen,yLen,]
+        hw_ratio = yLen / -xLen
 
-        # Annotate rectangle
-        self.painterInstance.setPen(Qt.cyan)
-        self.painterInstance.setFont(QFont('Decorative', max(abs(yLen)//12, 15)))
-        self.painterInstance.drawText(xPos, yPos-8, "Agent")
+        if self.task in ['eval','browse']:
+            self.draw_point(target, self.color_t, width=12)
+
+        self.draw_point(agent_loc, self.color_a)
+
+        if self.task == 'browse':
+            self.draw_crosshairs(agent_loc, hw_ratio)
+        else:
+            self.draw_rects(rect_dims)
+
+    def translate(self, agent_loc, rect, target):
+        _agent_loc = (agent_loc[0], self.height-agent_loc[1])
+        if target is not None:
+            _target = (target[0], self.height-target[1])
+        else:
+            _target = None
+        _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
+        return _agent_loc, _rect, _target
+
+    def translate_x(self, agent_loc, rect, target):
+        _agent_loc = (agent_loc[1], self.height_x-agent_loc[2])
+        if target is not None:
+            _target = (target[1], self.height_x-target[2])
+        else:
+            _target = None
+        _rect = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
+        return _agent_loc, _rect, _target
+
+    def translate_y(self, agent_loc, rect, target):
+        _agent_loc = (agent_loc[0]*self.width_y//self.height_y, self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
+        if target is not None:
+            _target = (target[0]*self.width_y//self.height_y, self.height_y-target[2])                # Rotate 90 degrees ccw
+        else:
+            _target = None
+        _rect = (self.height_y-rect[4], self.height_y-rect[5]) + \
+            (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
+        return _agent_loc, _rect, _target
+
+    def draw_point(self, point_loc, color, width=7):
+        pen = QPen(color, width, cap=Qt.RoundCap)
+        self.painterInstance.setPen(pen)
+        self.painterInstance.drawPoint(QPoint(*point_loc))
+
+    def draw_crosshairs(self, agent_loc, hw_ratio):
+        cross_len = 100
+        hair_len = 3
+        centre_space = 10
+        c = QPoint(*agent_loc)
+
+        pen = QPen(self.color_a)
+        pen.setWidth(self.line_width)
+        self.painterInstance.setPen(pen)
+
+        for i in self.units():
+            hw_ratio = hw_ratio if i[0] == 0 else 1
+
+            vec = QPoint(*i)
+            cross_s = c + centre_space * vec
+            cross_s.setY(cross_s.y() * hw_ratio)
+            cross_f = cross_s + cross_len * vec
+            cross_f.setY(cross_f.y() * hw_ratio)
+            self.painterInstance.drawLine(cross_s, cross_f)
+
+            # Draw hairs
+            for j in range(1,4):
+                loc = cross_s + j * (cross_f - cross_s) / 4
+
+                # Make crosshair thicker for correct resolution
+                if self.scale == j:
+                    pen.setWidth(3)
+                    self.painterInstance.setPen(pen)
+
+                if i[0] == 0:
+                    hair_s = loc + pen.width() * hair_len * QPoint(-1,0)
+                    hair_f = loc + pen.width() * hair_len * QPoint(+1,0)
+                else:
+                    hair_s = loc + pen.width() * hair_len * QPoint(0,-1)
+                    hair_f = loc + pen.width() * hair_len * QPoint(0,+1)
+
+                self.painterInstance.drawLine(hair_s, hair_f)
+
+                # Reset pen width
+                pen.setWidth(self.line_width)
+                self.painterInstance.setPen(pen)
+
+    def draw_rects(self, rect):
+        corner_len = 25
+        xPos, yPos, xLen, yLen = rect
+
+        bL = QPoint(xPos, yPos)
+        tL = QPoint(xPos, yPos + yLen)
+        bR = QPoint(xPos + xLen, yPos)
+        tR = QPoint(xPos + xLen, yPos + yLen)
+
+        vecs = self.units()
+
+        corners = {
+            'bL': {'loc': bL, 'd1': QPoint(*vecs[0]), 'd2': QPoint(*vecs[1])},
+            'tL': {'loc': tL, 'd1': QPoint(*vecs[0]), 'd2': QPoint(*vecs[3])},
+            'bR': {'loc': bR, 'd1': QPoint(*vecs[2]), 'd2': QPoint(*vecs[1])},
+            'tR': {'loc': tR, 'd1': QPoint(*vecs[2]), 'd2': QPoint(*vecs[3])},
+        }
+
+        pen = QPen(self.color_a)
+        pen.setWidth(self.line_width * 2)
+        self.painterInstance.setPen(pen)
+        for k in corners.values():
+            self.painterInstance.drawLine(k['loc'], k['loc'] + corner_len * k['d1'])
+            self.painterInstance.drawLine(k['loc'], k['loc'] + corner_len * k['d2'])
+
+        # # Annotate rectangle
+        # self.painterInstance.setFont(QFont('Decorative', max(abs(yLen)//12, 15)))
+        # self.painterInstance.drawText(xPos, yPos-8, "Agent ROI")
+
+    def units(self):
+        return [[1,0],[0,-1],[-1,0],[0,1]]
 
     @pyqtSlot(dict)
     def agent_signal_handler(self, value):
         """
         Used to handle agent signal when it moves.
         """
+        self.scale = value["scale"]
+        self.task = value["task"]
+        self.error = value["error"]
         self.draw_image(
-            arrs=value["arrs"],
-            agent_loc=value["agent_loc"],
-            target=value["target"],
-            text=value["text"],
-            spacing=value["spacing"],
-            rect=value["rect"]
+            arrs = value["arrs"],
+            agent_loc = value["agent_loc"],
+            target = value["target"],
+            rect = value["rect"]
         )
 
     def render(self):
@@ -496,5 +595,32 @@ class SimpleImageViewer(QWidget):
 
     def __del__(self):
         self.close()
+
+    # def draw_circles(self, agent_loc, target, depth):
+    #     # Draw current agent location
+    #     self.penCentre = QPen(Qt.cyan)
+    #     self.penCentre.setWidth(4)
+    #     self.painterInstance.setPen(self.penCentre)
+    #     centre = QPoint(*agent_loc)
+    #     self.painterInstance.drawEllipse(centre, 2, 2)
+    #
+    #     # Draw circle at target location
+    #     if target is not None:
+    #         self.penCentre = QPen(Qt.red)
+    #         self.penCentre.setWidth(3)
+    #         self.painterInstance.setPen(self.penCentre)
+    #         centre = QPoint(*target)
+    #         self.painterInstance.drawEllipse(centre, 2, 2)
+    #
+    #         # draw circle surrounding target
+    #         self.penCirlce = QPen(QColor(255,0,0,0))
+    #         self.penCirlce.setWidth(3)
+    #         self.painterInstance.setPen(self.penCirlce)
+    #         self.painterInstance.setBrush(Qt.red)
+    #         self.painterInstance.setOpacity(0.2)
+    #         centre = QPoint(*target)
+    #         radx = rady = depth * 30
+    #         self.painterInstance.drawEllipse(centre, radx, rady)
+
 
 ################################################################################

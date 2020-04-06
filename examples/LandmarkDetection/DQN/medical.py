@@ -59,7 +59,7 @@ class MedicalPlayer(gym.Env):
 
     def __init__(self, directory=None, viz=False, task=False, files_list=None,
                  screen_dims=(27,27,27), history_length=20, multiscale=True,
-                 max_num_frames=0, saveGif=False, saveVideo=False):
+                 max_num_frames=0, saveGif=False, saveVideo=False, data_type=None):
         """
         :param train_directory: environment or game name
         :param viz: visualization
@@ -115,6 +115,8 @@ class MedicalPlayer(gym.Env):
         self.dims = len(self.screen_dims)
         # multi-scale agent
         self.multiscale = multiscale
+        #Type of data
+        self.data_type = data_type
 
         # init env dimensions
         if self.dims == 2:
@@ -149,15 +151,19 @@ class MedicalPlayer(gym.Env):
         # initialize rectangle limits from input image coordinates
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
+        if self.data_type == 'BrainMRI':
+            self.data_loader = filesListBrainMRLandmark
+        elif self.data_type == 'CardiacMRI':
+            self.data_loader = filesListCardioLandmark
+        elif self.data_type == 'FetalUS':
+            self.data_loader = filesListFetalUSLandmark
 
-        if self.task in ['play', 'browse']:
-            self.files = filesListBrainMRLandmark(files_list,
-                                                  returnLandmarks=False,)
+        if self.task == 'play':
+            self.files = self.data_loader(files_list,
+                                          returnLandmarks=False)
         else:
-            self.files = filesListBrainMRLandmark(files_list,
-                                                  returnLandmarks=True)
-
-
+            self.files = self.data_loader(files_list,
+                                         returnLandmarks=True)
 
         # prepare file sampler
         self.filepath = None
@@ -222,22 +228,24 @@ class MedicalPlayer(gym.Env):
 
         # # sample a new image
         self._image, self._target_loc, self.filepath, self.spacing = next(self.sampled_files)
-        print("print this: ",self.filepath)
         self.filename = os.path.basename(self.filepath)
 
         # multiscale (e.g. start with 3 -> 2 -> 1)
         # scale can be thought of as sampling stride
         if self.multiscale:
-            ## brain
-            self.action_step = 9
-            self.xscale = 3
-            self.yscale = 3
-            self.zscale = 3
-            ## cardiac
-            # self.action_step = 6
-            # self.xscale = 2
-            # self.yscale = 2
-            # self.zscale = 2
+            #cardiac
+            if self.data_type == 'CardiacMRI':
+                self.action_step = 6
+                self.xscale = 2
+                self.yscale = 2
+                self.zscale = 2
+            #brain or fetal
+            else:
+                self.action_step = 9
+                self.xscale = 3
+                self.yscale = 3
+                self.zscale = 3
+
         else:
             self.action_step = 1
             self.xscale = 1
@@ -271,7 +279,7 @@ class MedicalPlayer(gym.Env):
         self._qvalues = [0, ] * self.actions
         self._screen = self._current_state()
 
-        if self.task in ['play', 'browse']:
+        if self.task == 'play':
             self.cur_dist = 0
         else:
             self.cur_dist = self.calcDistance(self._location,
@@ -285,7 +293,7 @@ class MedicalPlayer(gym.Env):
         points2 = spacing * np.array(points2)
         return np.linalg.norm(points1 - points2)
 
-    def step(self, act, qvalues, viewer):
+    def step(self, act, qvalues):
         """The environment's step function returns exactly what we need.
         Args:
           act:
@@ -314,7 +322,7 @@ class MedicalPlayer(gym.Env):
         current_loc = self._location
         self.terminal = False
         go_out = False
-        self.viewer = viewer
+        # self.viewer = viewer
 
         # UP Z+ -----------------------------------------------------------
         if (act == 0):
@@ -408,27 +416,25 @@ class MedicalPlayer(gym.Env):
             self._location = self.getBestLocation()
             self._screen = self._current_state()
 
-            if (self.task != 'play'):
+            if self.task != 'play':
                 self.cur_dist = self.calcDistance(self._location,
                                                   self._target_loc,
                                                   self.spacing)
             # multi-scale steps
             if self.multiscale:
                 if self.xscale > 1:
-                    self.xscale -= 1
-                    self.yscale -= 1
-                    self.zscale -= 1
-                    self.action_step = int(self.action_step / 3)
-                    self._clear_history()
+                    self.adjustMultiScale()
                 # terminate if scale is less than 1
                 else:
                     self.terminal = True
                     print("TERMINAL OCCILATE")
-                    if self.cur_dist <= 1: self.num_success.feed(1)
+                    if self.cur_dist <= 1:
+                        self.num_success.feed(1)
             else:
                 self.terminal = True
                 print("TERMINAL OCCILATE")
-                if self.cur_dist <= 1: self.num_success.feed(1)
+                if self.cur_dist <= 1:
+                    self.num_success.feed(1)
 
         # render screen if viz is on
         with _ALE_LOCK:
@@ -546,11 +552,16 @@ class MedicalPlayer(gym.Env):
 
         self._screen = self._current_state()
 
+        if self.task != 'play':
+            self.cur_dist = self.calcDistance(self._location,
+                                              self._target_loc,
+                                              self.spacing)
+
         # render screen if viz is on
         with _ALE_LOCK:
             if self.viz:
                 if isinstance(self.viz, float):
-                    self.display_browseMode()
+                    self.display()
 
         return self._current_state()
 
@@ -566,6 +577,21 @@ class MedicalPlayer(gym.Env):
         best_location = last_loc_history[best_idx]
 
         return best_location
+
+    def adjustMultiScale(self, higherRes=True):
+        '''Adjusts the agent's step size'''
+        if higherRes:
+            self.xscale -= 1
+            self.yscale -= 1
+            self.zscale -= 1
+            self.action_step = int(self.action_step / 3)
+        else:
+            self.xscale += 1
+            self.yscale += 1
+            self.zscale += 1
+            self.action_step = int(self.action_step * 3)
+
+        self._clear_history()
 
     def _clear_history(self):
         ''' clear history buffer with current state
@@ -734,6 +760,9 @@ class MedicalPlayer(gym.Env):
         scale_z = 2
         current_point = (current_point[0]*scale_x, current_point[1]*scale_y,
                         current_point[2]*scale_z)
+        if target_point is not None:
+            target_point = (target_point[0]*scale_x, target_point[1]*scale_y,
+                            target_point[2]*scale_z)
         self.rectangle = (self.rectangle[0]*scale_x, self.rectangle[1]*scale_x,
                             self.rectangle[2]*scale_y, self.rectangle[3]*scale_y,
                             self.rectangle[4]*scale_z, self.rectangle[5]*scale_z)
@@ -772,108 +801,58 @@ class MedicalPlayer(gym.Env):
             "arrs": (img, img_x, img_y),
             "agent_loc": current_point,
             "target": target_point,
-            "text": "Error " + str(round(self.cur_dist,3)) + "mm",
-            "spacing": 3,
-            "rect": self.rectangle
+            "error": self.cur_dist,
+            "scale": self.xscale,
+            "rect": self.rectangle,
+            "task": self.task,
         })
 
-        # Control agent speed
-        if self.viewer.left_widget.thread.speed == WorkerThread.FAST:
-            time.sleep(0)
-        elif self.viewer.left_widget.thread.speed == WorkerThread.MEDIUM:
-            time.sleep(0.5)
-        else:
-            time.sleep(1.5)
+        if self.task != 'browse':
+            # Control agent speed
+            if self.viewer.left_widget.thread.speed == WorkerThread.FAST:
+                time.sleep(0)
+            elif self.viewer.left_widget.thread.speed == WorkerThread.MEDIUM:
+                time.sleep(0.5)
+            else:
+                time.sleep(1.5)
 
-        ########################################################################
+            ########################################################################
 
-        # save gif
-        if self.saveGif:
-            image_data = pyglet.image.get_buffer_manager().get_color_buffer().get_image_data()
-            data = image_data.get_data('RGB', image_data.width * 3)
-            arr = np.array(bytearray(data)).astype('uint8')
-            arr = np.flip(np.reshape(arr, (image_data.height, image_data.width, -1)), 0)
-            im = Image.fromarray(arr)
-            self.gif_buffer.append(im)
+            # save gif
+            if self.saveGif:
+                image_data = pyglet.image.get_buffer_manager().get_color_buffer().get_image_data()
+                data = image_data.get_data('RGB', image_data.width * 3)
+                arr = np.array(bytearray(data)).astype('uint8')
+                arr = np.flip(np.reshape(arr, (image_data.height, image_data.width, -1)), 0)
+                im = Image.fromarray(arr)
+                self.gif_buffer.append(im)
 
-            if not self.terminal:
-                gifname = self.filename.split('.')[0] + '.gif'
-                self.viewer.saveGif(gifname, arr=self.gif_buffer,
-                                    duration=self.viz)
-        if self.saveVideo:
-            dirname = 'tmp_video'
-            if self.cnt <= 1:
-                if os.path.isdir(dirname):
-                    logger.warn("""Log directory {} exists! Use 'd' to delete it. """.format(dirname))
-                    act = input("select action: d (delete) / q (quit): ").lower().strip()
-                    if act == 'd':
-                        shutil.rmtree(dirname, ignore_errors=True)
-                    else:
-                        raise OSError("Directory {} exits!".format(dirname))
-                os.mkdir(dirname)
+                if not self.terminal:
+                    gifname = self.filename.split('.')[0] + '.gif'
+                    self.viewer.saveGif(gifname, arr=self.gif_buffer,
+                                        duration=self.viz)
+            if self.saveVideo:
+                dirname = 'tmp_video'
+                if self.cnt <= 1:
+                    if os.path.isdir(dirname):
+                        logger.warn("""Log directory {} exists! Use 'd' to delete it. """.format(dirname))
+                        act = input("select action: d (delete) / q (quit): ").lower().strip()
+                        if act == 'd':
+                            shutil.rmtree(dirname, ignore_errors=True)
+                        else:
+                            raise OSError("Directory {} exits!".format(dirname))
+                    os.mkdir(dirname)
 
-            frame = dirname + '/' + '%04d' % self.cnt + '.png'
-            pyglet.image.get_buffer_manager().get_color_buffer().save(frame)
-            if self.terminal:
-                resolution = str(3 * self.viewer.img_width) + 'x' + str(3 * self.viewer.img_height)
-                save_cmd = ['ffmpeg', '-f', 'image2', '-framerate', '30',
-                            '-pattern_type', 'sequence', '-start_number', '0', '-r',
-                            '6', '-i', dirname + '/%04d.png', '-s', resolution,
-                            '-vcodec', 'libx264', '-b:v', '2567k', self.filename + '.mp4']
-                subprocess.check_output(save_cmd)
-                shutil.rmtree(dirname, ignore_errors=True)
-
-    def display_browseMode(self, return_rgb_array=False):
-        # get dimensions
-        current_point = self._location
-        target_point = self._target_loc
-        # get image and convert it to pyglet
-        plane = self.get_plane(current_point[2])  # z-plane
-        plane_x = self.get_plane_x(current_point[0])  # x-plane
-        plane_y= self.get_plane_y(current_point[1])  # y-plane
-
-        # plane = np.squeeze(self._current_state()[:,:,13])
-        # rescale image
-        # INTER_NEAREST, INTER_LINEAR, INTER_AREA, INTER_CUBIC, INTER_LANCZOS4
-        scale_x = 2
-        scale_y = 2
-        scale_z = 2
-        current_point = (current_point[0]*scale_x, current_point[1]*scale_y,
-                        current_point[2]*scale_z)
-        self.rectangle = (self.rectangle[0]*scale_x, self.rectangle[1]*scale_x,
-                            self.rectangle[2]*scale_y, self.rectangle[3]*scale_y,
-                            self.rectangle[4]*scale_z, self.rectangle[5]*scale_z)
-        img = cv2.resize(plane,
-                         (int(scale_x*plane.shape[1]),int(scale_y*plane.shape[0])),
-                         interpolation=cv2.INTER_LINEAR)
-        img_x = cv2.resize(plane_x,
-                         (int(scale_x*plane_x.shape[1]),int(scale_y*plane_x.shape[0])),
-                         interpolation=cv2.INTER_LINEAR)
-        img_y = cv2.resize(plane_y,
-                         (int(scale_y*plane_x.shape[1]),int(scale_y*plane_y.shape[0])),
-                         interpolation=cv2.INTER_LINEAR)
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)  # congvert to rgb
-        img_x = cv2.cvtColor(img_x, cv2.COLOR_GRAY2RGB)  # congvert to rgb
-        img_y = cv2.cvtColor(img_y, cv2.COLOR_GRAY2RGB)  # congvert to rgb
-
-        ########################################################################
-
-        # Sleep until resume
-        while self.viewer.left_widget.thread.pause:
-            time.sleep(1)
-
-        # Need to emit signal here
-        self.viewer.widget.agent_signal.emit({
-            "arrs": (img, img_x, img_y),
-            "agent_loc": current_point,
-            "target": target_point,
-            "text": "Error " + str(round(self.cur_dist,3)) + "mm",
-            "spacing": 3,
-            "rect": self.rectangle
-        })
-
-        time.sleep(0)
-
+                frame = dirname + '/' + '%04d' % self.cnt + '.png'
+                pyglet.image.get_buffer_manager().get_color_buffer().save(frame)
+                if self.terminal:
+                    resolution = str(3 * self.viewer.img_width) + 'x' + str(3 * self.viewer.img_height)
+                    save_cmd = ['ffmpeg', '-f', 'image2', '-framerate', '30',
+                                '-pattern_type', 'sequence', '-start_number', '0', '-r',
+                                '6', '-i', dirname + '/%04d.png', '-s', resolution,
+                                '-vcodec', 'libx264', '-b:v', '2567k', self.filename + '.mp4']
+                    subprocess.check_output(save_cmd)
+                    shutil.rmtree(dirname, ignore_errors=True)
 
 # =============================================================================
 # ================================ FrameStack =================================
