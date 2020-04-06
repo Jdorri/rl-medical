@@ -293,7 +293,7 @@ class MedicalPlayer(gym.Env):
         points2 = spacing * np.array(points2)
         return np.linalg.norm(points1 - points2)
 
-    def step(self, act, qvalues, viewer):
+    def step(self, act, qvalues, viewer=None):
         """The environment's step function returns exactly what we need.
         Args:
           act:
