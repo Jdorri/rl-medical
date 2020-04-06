@@ -24,16 +24,19 @@ except ImportError as e:
     reraise(suffix="HINT: you can install pyglet directly via 'pip install pyglet'. But if you really just want to install all Gym dependencies and not have to think about it, 'pip install -e .[all]' or 'pip install gym[all]' will do it.")
 
 ################################################################################
-## QMainWindow
+## Main Window
+# Manages GUI application window general functionalities.
+
 class Window(QMainWindow):
     """
     Window used as the main window for the application which integrate different widgets.
     """
-    KEY_PRESSED = pyqtSignal(QEvent)
+    key_pressed = pyqtSignal(QEvent) # signal for hitl functionality
+
     def __init__(self, viewer_param, app_settings=None):
         super().__init__()
         self.initUI(viewer_param, app_settings)
-        self.KEY_PRESSED.connect(self.on_key)
+        self.key_pressed.connect(self.on_key)
 
     def initUI(self, viewer_param, app_settings):
         """
@@ -46,7 +49,7 @@ class Window(QMainWindow):
         # Menu Bar
         self.initMenu()
 
-        # Image widget
+        # Image widget (main widget)
         self.widget = SimpleImageViewer(arr=np.zeros(viewer_param["arrs"][0].shape),
                                    arr_x=np.zeros(viewer_param["arrs"][1].shape),
                                    arr_y=np.zeros(viewer_param["arrs"][2].shape),
@@ -54,22 +57,22 @@ class Window(QMainWindow):
 
         # Left Settings widget
         if app_settings:
-            self.left_widget = SimpleImageViewerSettings(self, True)
+            self.left_widget = LeftWidgetSettings(self, True)
         else:
-            self.left_widget = SimpleImageViewerSettings(self, False)
+            self.left_widget = LeftWidgetSettings(self, False)
         self.left_widget.setFrameShape(QFrame.StyledPanel)
 
         # Right Settings widget
         if app_settings:
             self.right_widget = app_settings
-            self.right_widget.setFrameShape(QFrame.StyledPanel)
-        # self.left_widget.thread = self.right_widget.thread
+        self.right_widget.setFrameShape(QFrame.StyledPanel)
 
         # Manage layout
         self.grid = QGridLayout()
         self.grid.addWidget(self.left_widget, 0, 0, 1, 1)
         self.grid.addWidget(self.widget, 0, 1, 1, 10)
         self.grid.addWidget(self.right_widget, 0, 11, 1, 1)
+        
         # self.grid.setColumnStretch(1, 2) # default (later there will be event to change this when screen size change)
         # self.grid.setColumnStretch(0, 1) # default
         # if app_settings:
@@ -151,24 +154,24 @@ class Window(QMainWindow):
     @pyqtSlot(QEvent)
     def keyPressEvent(self, event):
         super().keyPressEvent(event)
-        self.KEY_PRESSED.emit(event)
+        self.key_pressed.emit(event)
 
     def on_key(self, event):
         ''' Different actions for different keyPressEvents.
             Allows the user to move through the image by using arrow keys
         '''
         if self.right_widget.MODE == 'BROWSE MODE' and self.right_widget.env:
-            if event.key() == Qt.Key_S:
-                self.right_widget.on_clicking_in()
-            elif event.key() == Qt.Key_A:
-                self.right_widget.on_clicking_out()
-            elif event.key() == Qt.Key_Up:
+            # if event.key() == Qt.Key_S:
+                # self.right_widget.on_clicking_in()
+            # elif event.key() == Qt.Key_A:
+                # self.right_widget.on_clicking_out()
+            if event.key() == Qt.Key_W:
                 self.right_widget.on_clicking_up()
-            elif event.key() == Qt.Key_Down:
+            elif event.key() == Qt.Key_S:
                 self.right_widget.on_clicking_down()
-            elif event.key() == Qt.Key_Left:
+            elif event.key() == Qt.Key_A:
                 self.right_widget.on_clicking_left()
-            elif event.key() == Qt.Key_Right:
+            elif event.key() == Qt.Key_D:
                 self.right_widget.on_clicking_right()
             elif event.key() == Qt.Key_X:
                 self.right_widget.on_clicking_zoomIn()
@@ -200,7 +203,8 @@ class Window(QMainWindow):
 
 ################################################################################
 ## Left Widget
-class SimpleImageViewerSettings(QFrame):
+
+class LeftWidgetSettings(QFrame):
     """
     Left widget controlling GUI elements settings.
     """
@@ -233,7 +237,7 @@ class SimpleImageViewerSettings(QFrame):
 
         # Slider settings
         self.speed_slider = QSlider(Qt.Horizontal, self)
-        # self.speed_slider.setFocusPolicy(Qt.StrongFocus)
+        self.speed_slider.setFocusPolicy(Qt.NoFocus)
         self.speed_slider.setMinimum(0)
         self.speed_slider.setMaximum(5)
         self.speed_slider.setValue(5)

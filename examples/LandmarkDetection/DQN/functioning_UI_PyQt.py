@@ -1,8 +1,13 @@
+################################################################################
+## Doorway to launch application's GUI
+# Author: Jamie, Alex, Faidon, Maleakhi
+################################################################################
+
 import sys
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QEvent
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from dataReader import *
-# from DQN import Model, get_player
 
 from DQN import get_player, Model, get_config, get_viewer_data
 
@@ -41,6 +46,7 @@ import pickle
 from thread import WorkerThread
 
 ###############################################################################
+
 # BATCH SIZE USED IN NATURE PAPER IS 32 - MEDICAL IS 256
 BATCH_SIZE = 48
 # BREAKOUT (84,84) - MEDICAL 2D (60,60) - MEDICAL 3D (26,26,26)
@@ -70,13 +76,13 @@ class filenames_GUI:
         self.name = ""
 
 # custom class
-class AppSettings(QFrame):
+class RightWidgetSettings(QFrame):
 
     SWITCH_WINDOW = pyqtSignal()
     MODE = 'DEFAULT MODE'
 
     def __init__(self, *args, **kwargs):
-        super(AppSettings, self).__init__(*args, **kwargs)
+        super(RightWidgetSettings, self).__init__(*args, **kwargs)
 
         # window title
         self.setWindowTitle('Anatomical Landmark Detection')
@@ -104,13 +110,16 @@ class AppSettings(QFrame):
         #self.log_dir_edit = QPushButton('Browse', self)
         self.name_edit = QLineEdit()
         self.run = QPushButton('Run', self)
+        self.run.setFocusPolicy(Qt.NoFocus)
         self.exit = QPushButton('Exit', self)
+        self.exit.setFocusPolicy(Qt.NoFocus)
 
         self.testMode = QPushButton('Test Mode', self)
         self.testMode.setCheckable(True)
         self.testMode.setChecked(True)
         self.browseMode = QPushButton('Browse Mode', self)
         self.browseMode.setCheckable(True)
+
 
         # add widget functionality
         self.task_edit.addItems(['Play', 'Evaluation', 'Train'])
@@ -292,14 +301,14 @@ class AppSettings(QFrame):
         self._window = window
 
 
-class AppSettingsBrowseMode(QFrame):
+class RightWidgetSettingsBrowseMode(QFrame):
 
     SWITCH_WINDOW = pyqtSignal()
     KEY_PRESSED = pyqtSignal(QEvent)
     MODE = 'BROWSE MODE'
 
     def __init__(self, *args, **kwargs):
-        super(AppSettingsBrowseMode, self).__init__(*args, **kwargs)
+        super(RightWidgetSettingsBrowseMode, self).__init__(*args, **kwargs)
 
         # window title
         self.setWindowTitle('Anatomical Landmark Detection')
@@ -510,54 +519,54 @@ class Controller:
 
     def show_defaultMode(self):
         # Init the window
-        self.app_settings = AppSettings()
-        self.window1 = Window(self.viewer_param, self.app_settings)
-        self.app_settings.window = self.window1
+        self.right_settings = RightWidgetSettings()
+        self.window1 = Window(self.viewer_param, self.right_settings)
+        self.right_settings.window = self.window1
         self.set_paths()
 
         # Close previous window
         if self.window2:
             self.window2.hide()
 
-        # Open new window with new app_settings
+        # Open new window with new right_settings
         self.window1.right_widget.SWITCH_WINDOW.connect(self.show_browseMode)
 
     def show_browseMode(self):
         # Init the window
-        self.app_settings = AppSettingsBrowseMode()
-        self.window2 = Window(self.viewer_param, self.app_settings)
-        self.app_settings.window = self.window2
+        self.right_settings = RightWidgetSettingsBrowseMode()
+        self.window2 = Window(self.viewer_param, self.right_settings)
+        self.right_settings.window = self.window2
         self.load_defaults()
 
         # Close previous window
         if self.window1:
             self.window1.hide()
 
-        # Open new window with new app_settings
+        # Open new window with new right_settings
         self.window2.right_widget.SWITCH_WINDOW.connect(self.show_defaultMode)
 
     def load_defaults(self):
         self.set_paths()
-        self.app_settings.load_img()
+        self.right_settings.load_img()
 
     def set_paths(self):
         assert self.default_use_case in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
-        self.app_settings.dtype.name = self.default_use_case
+        self.right_settings.dtype.name = self.default_use_case
         if self.default_use_case == 'BrainMRI':
             # Default MRI
-            self.app_settings.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
-            self.app_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-            self.app_settings.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
+            self.right_settings.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
+            self.right_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+            self.right_settings.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
-            self.app_settings.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
-            self.app_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
-            self.app_settings.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
+            self.right_settings.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
+            self.right_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
+            self.right_settings.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'FetalUS':
             # Default fetal
-            self.app_settings.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
-            self.app_settings.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
-            self.app_settings.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
+            self.right_settings.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
+            self.right_settings.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
+            self.right_settings.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
 
     @staticmethod
     def allWidgets_setCheckable(parentQWidget):
@@ -582,8 +591,8 @@ if __name__ == "__main__":
     # Define application and viewer to run on the main thread
     # app = QApplication(sys.argv)
     # viewer_param = get_viewer_data()
-    # app_settings = AppSettings()
-    # window = Window(viewer_param, app_settings)
+    # right_settings = RightWidgetSettings()
+    # window = Window(viewer_param, right_settings)
     #
     # # window.left_widget.thread = thread
     controller = Controller()
