@@ -3,6 +3,7 @@
 # Author: Maleakhi, Alex, Faidon, Jamie
 # Credit: Code adapted from Amir Alansary viewer.py file
 ################################################################################
+
 import os
 import math
 import io
@@ -23,22 +24,25 @@ try:
 except ImportError as e:
     reraise(suffix="HINT: you can install pyglet directly via 'pip install pyglet'. But if you really just want to install all Gym dependencies and not have to think about it, 'pip install -e .[all]' or 'pip install gym[all]' will do it.")
 
+
 ################################################################################
 ## Main Window
-# Manages GUI application window general functionalities.
+# Integrate GUI application widgets and provide menus and windows functionalities.
 
 class Window(QMainWindow):
     """
     Window used as the main window for the application which integrate different widgets.
     """
-    key_pressed = pyqtSignal(QEvent) # signal for hitl functionality
+    # Signal for browse/ manual mode
+    # Captures key pressed that will be used to store data for Human-in-the loop
+    key_pressed = pyqtSignal(QEvent)
 
-    def __init__(self, viewer_param, app_settings=None):
+    def __init__(self, viewer_param, right_settings=None):
         super().__init__()
-        self.initUI(viewer_param, app_settings)
+        self.initUI(viewer_param, right_settings)
         self.key_pressed.connect(self.on_key)
 
-    def initUI(self, viewer_param, app_settings):
+    def initUI(self, viewer_param, right_settings):
         """
         Main UI init element.
         """
@@ -56,28 +60,23 @@ class Window(QMainWindow):
                                    filepath=viewer_param["filepath"])
 
         # Left Settings widget
-        if app_settings:
+        if right_settings:
             self.left_widget = LeftWidgetSettings(self, True)
         else:
             self.left_widget = LeftWidgetSettings(self, False)
         self.left_widget.setFrameShape(QFrame.StyledPanel)
 
         # Right Settings widget
-        if app_settings:
-            self.right_widget = app_settings
+        if right_settings:
+            self.right_widget = right_settings
         self.right_widget.setFrameShape(QFrame.StyledPanel)
 
         # Manage layout
         self.grid = QGridLayout()
-        self.grid.addWidget(self.left_widget, 0, 0, 1, 1)
+        self.grid.addWidget(self.left_widget, 0, 0, 1, 1) # (x, y, rowspan, colspan)
         self.grid.addWidget(self.widget, 0, 1, 1, 10)
         self.grid.addWidget(self.right_widget, 0, 11, 1, 1)
         
-        # self.grid.setColumnStretch(1, 2) # default (later there will be event to change this when screen size change)
-        # self.grid.setColumnStretch(0, 1) # default
-        # if app_settings:
-        #     self.grid.addWidget(self.right_widget, 0, 2) # for integration with Jamie's code
-
         self.layout_widget = QWidget()
         self.layout_widget.setLayout(self.grid)
         self.setCentralWidget(self.layout_widget)
@@ -85,7 +84,7 @@ class Window(QMainWindow):
         # Geometric window position and general setting
         self.resize(1300, 800)
         self.center()
-        self.setWindowTitle('Reinforcement Learning - Medical')
+        self.setWindowTitle('Anatomical Landmark Detection')
         self.menubar.setStyleSheet("background:#D2D4DC; color:black")
         self.statusbar.setStyleSheet("background:#D2D4DC; color:black")
         self.show()
@@ -157,52 +156,42 @@ class Window(QMainWindow):
         self.key_pressed.emit(event)
 
     def on_key(self, event):
-        ''' Different actions for different keyPressEvents.
-            Allows the user to move through the image by using arrow keys
-        '''
+        """
+        Event handler methods for manual browsing functionality.
+        Different actions for different keyPressEvents.
+        Allows the user to move through the image by using arrow keys.
+        """
         if self.right_widget.MODE == 'BROWSE MODE' and self.right_widget.env:
-            # if event.key() == Qt.Key_S:
-                # self.right_widget.on_clicking_in()
-            # elif event.key() == Qt.Key_A:
-                # self.right_widget.on_clicking_out()
-            if event.key() == Qt.Key_W:
+            if event.key() in {Qt.Key_W, Qt.Key_Up}:
                 self.right_widget.on_clicking_up()
-            elif event.key() == Qt.Key_S:
+            elif event.key() in {Qt.Key_S, Qt.Key_Down}:
                 self.right_widget.on_clicking_down()
-            elif event.key() == Qt.Key_A:
+            elif event.key() in {Qt.Key_A, Qt.Key_Left}:
                 self.right_widget.on_clicking_left()
-            elif event.key() == Qt.Key_D:
+            elif event.key() in {Qt.Key_D, Qt.Key_Right}:
                 self.right_widget.on_clicking_right()
             elif event.key() == Qt.Key_X:
                 self.right_widget.on_clicking_zoomIn()
             elif event.key() == Qt.Key_Z:
                 self.right_widget.on_clicking_zoomOut()
 
-    # def closeEvent(self, event):
-    #     """
-    #     Used to override close event and provide warning when closing application
-    #     """
-    #     reply = QMessageBox.question(self, 'Message',
-    #         "Are you sure to quit?", QMessageBox.Yes |
-    #         QMessageBox.No, QMessageBox.Yes)
-    #
-    #     if reply == QMessageBox.Yes:
-    #         event.accept()
-    #     else:
-    #         event.ignore()
-
-    # def setChildrenFocusPolicy(self, policy):
-    #     '''Method to allow arrow keys to be caught in keyPressEvent()'''
-    #     def recursiveSetChildFocusPolicy(parentQWidget):
-    #         for childQWidget in parentQWidget.findChildren(QWidget):
-    #             childQWidget.setFocusPolicy(policy)
-    #             recursiveSetChildFocusPolicy(childQWidget)
-    #     recursiveSetChildFocusPolicy(self)
-
+    def closeEvent(self, event):
+        """
+        Used to override close event and provide warning when closing application
+        """
+        reply = QMessageBox.question(self, 'Message',
+            "Are you sure to quit?", QMessageBox.Yes |
+            QMessageBox.No, QMessageBox.Yes)
+    
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
 
 
 ################################################################################
 ## Left Widget
+# Control several of main application functionalities (positioned on the left of image widget).
 
 class LeftWidgetSettings(QFrame):
     """
@@ -211,21 +200,21 @@ class LeftWidgetSettings(QFrame):
     def __init__(self, window, gui_launcher=False):
         super().__init__()
         self.thread = WorkerThread(None) # Store thread to allow pause and run functionality
-        self.window = window
+        self.window = window # Store window object to enable control over windows functionality
 
         # Widgets
         # Label settings
-        label_settings = QLabel("<b>SETTINGS</b>")
+        # label_settings = QLabel("<b>SETTINGS</b>")
         label_run = QLabel("Pause Agent")
         hr = QLabel("<hr />")
         hr.setStyleSheet("margin: 10px 0")
         hr2 = QLabel("<hr />")
         hr2.setStyleSheet("margin: 10px 0")
         label_speed = QLabel("Agent Speed")
-        # self.setStyleSheet("font-family: sans-serif")
         label_run.setStyleSheet("margin-top: 10px")
 
         # Button settings
+        # If gui just launch, display accordingly (initial state)
         if gui_launcher:
             self.run_button = QPushButton("Pause")
             self.run_button.clicked.connect(self.buttonClicked)
@@ -246,7 +235,7 @@ class LeftWidgetSettings(QFrame):
         # Manage layout
         vbox = QVBoxLayout()
         # First section
-        vbox.addWidget(label_settings)
+        # vbox.addWidget(label_settings)
         vbox.addWidget(label_run)
         vbox.addWidget(self.run_button)
         vbox.addWidget(hr)
@@ -298,6 +287,7 @@ class LeftWidgetSettings(QFrame):
 
 ################################################################################
 ## Main Widget
+# Responsible to draw images specified by settings and visualise agent's movement.
 
 class SimpleImageViewer(QWidget):
     """
@@ -433,6 +423,9 @@ class SimpleImageViewer(QWidget):
         self.label_img_y.setPixmap(self.img_y)
 
     def draw_error(self):
+        """
+        Error (mm) message during eval and browse mode.
+        """
         self.painterInstance = QPainter(self.img)
         pen = QPen(self.color_e)
         # pen.setWidth(self.line_width * 2)
@@ -441,8 +434,10 @@ class SimpleImageViewer(QWidget):
         self.painterInstance.drawText(30, 30, f"Error: {self.error:.2f} mm")
         self.painterInstance.end()
 
-
     def drawer(self, agent_loc, rect, target):
+        """
+        Draw rectangle and target location (will be called by (draw_image) main drawer function)
+        """
         xPos = rect[2]
         yPos = rect[0]
         xLen = rect[3] - xPos
@@ -462,24 +457,36 @@ class SimpleImageViewer(QWidget):
             self.draw_rects(rect_dims)
 
     def translate(self, agent_loc, rect, target):
+        """
+        Agent movement Calculator (return value is used to draw rectangle/cross hair + agent location)
+        """
         _agent_loc = (agent_loc[0], self.height-agent_loc[1])
         if target is not None:
             _target = (target[0], self.height-target[1])
         else:
             _target = None
         _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
+
         return _agent_loc, _rect, _target
 
     def translate_x(self, agent_loc, rect, target):
+        """
+        Agent movement Calculator
+        """
         _agent_loc = (agent_loc[1], self.height_x-agent_loc[2])
         if target is not None:
             _target = (target[1], self.height_x-target[2])
         else:
             _target = None
         _rect = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
+        print("hello2")
+
         return _agent_loc, _rect, _target
 
     def translate_y(self, agent_loc, rect, target):
+        """
+        Agent movement Calculator
+        """
         _agent_loc = (agent_loc[0]*self.width_y//self.height_y, self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
         if target is not None:
             _target = (target[0]*self.width_y//self.height_y, self.height_y-target[2])                # Rotate 90 degrees ccw
@@ -487,14 +494,22 @@ class SimpleImageViewer(QWidget):
             _target = None
         _rect = (self.height_y-rect[4], self.height_y-rect[5]) + \
             (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
+        print("hello1")
+        
         return _agent_loc, _rect, _target
 
     def draw_point(self, point_loc, color, width=7):
+        """
+        Draw target location
+        """
         pen = QPen(color, width, cap=Qt.RoundCap)
         self.painterInstance.setPen(pen)
         self.painterInstance.drawPoint(QPoint(*point_loc))
 
     def draw_crosshairs(self, agent_loc, hw_ratio):
+        """
+        Cross hair draw method that will be used for browser mode/ HITL mode.
+        """
         cross_len = 100
         hair_len = 3
         centre_space = 10
@@ -537,6 +552,9 @@ class SimpleImageViewer(QWidget):
                 self.painterInstance.setPen(pen)
 
     def draw_rects(self, rect):
+        """
+        Draw rectangle surrounding agent in automatic mode.
+        """
         corner_len = 25
         xPos, yPos, xLen, yLen = rect
 
@@ -566,6 +584,9 @@ class SimpleImageViewer(QWidget):
         # self.painterInstance.drawText(xPos, yPos-8, "Agent ROI")
 
     def units(self):
+        """
+        Helper functions to return all corner of a unit squares.
+        """
         return [[1,0],[0,-1],[-1,0],[0,1]]
 
     @pyqtSlot(dict)
@@ -583,8 +604,8 @@ class SimpleImageViewer(QWidget):
             rect = value["rect"]
         )
 
-    def render(self):
-        self.window.flip()
+    # def render(self):
+        # self.window.flip()
 
     def saveGif(self,filename=None,arr=None,duration=0):
         arr[0].save(filename, save_all=True,
@@ -599,32 +620,6 @@ class SimpleImageViewer(QWidget):
 
     def __del__(self):
         self.close()
-
-    # def draw_circles(self, agent_loc, target, depth):
-    #     # Draw current agent location
-    #     self.penCentre = QPen(Qt.cyan)
-    #     self.penCentre.setWidth(4)
-    #     self.painterInstance.setPen(self.penCentre)
-    #     centre = QPoint(*agent_loc)
-    #     self.painterInstance.drawEllipse(centre, 2, 2)
-    #
-    #     # Draw circle at target location
-    #     if target is not None:
-    #         self.penCentre = QPen(Qt.red)
-    #         self.penCentre.setWidth(3)
-    #         self.painterInstance.setPen(self.penCentre)
-    #         centre = QPoint(*target)
-    #         self.painterInstance.drawEllipse(centre, 2, 2)
-    #
-    #         # draw circle surrounding target
-    #         self.penCirlce = QPen(QColor(255,0,0,0))
-    #         self.penCirlce.setWidth(3)
-    #         self.painterInstance.setPen(self.penCirlce)
-    #         self.painterInstance.setBrush(Qt.red)
-    #         self.painterInstance.setOpacity(0.2)
-    #         centre = QPoint(*target)
-    #         radx = rady = depth * 30
-    #         self.painterInstance.drawEllipse(centre, radx, rady)
 
 
 ################################################################################

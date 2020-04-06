@@ -1,6 +1,6 @@
 ################################################################################
 ## Doorway to launch application's GUI
-# Author: Jamie, Alex, Faidon, Maleakhi
+# Author: Jamie, Faidon, Alex, Maleakhi
 ################################################################################
 
 import sys
