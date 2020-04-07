@@ -29,7 +29,7 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         launch_train_with_config)
 
 from thread import WorkerThread
-from viewer import SimpleImageViewer, Window
+# from viewer import SimpleImageViewer, Window
 import pickle
 
 from PyQt5.QtWidgets import QApplication
@@ -49,7 +49,7 @@ GAMMA = 0.9 #0.99
 # REPLAY MEMORY SIZE - NATURE (1e6) - MEDICAL (1e5 view-patches)
 MEMORY_SIZE = 1e5#6
 # consume at least 1e6 * 27 * 27 * 27 bytes
-INIT_MEMORY_SIZE = MEMORY_SIZE // 2000 #5e4
+INIT_MEMORY_SIZE = MEMORY_SIZE // 20 #5e4
 # each epoch is 100k played frames
 STEPS_PER_EPOCH = 10000 // UPDATE_FREQ * 10
 # num training epochs in between model evaluations
