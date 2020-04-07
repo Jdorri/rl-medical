@@ -42,6 +42,7 @@ from tensorpack.utils.stats import StatCounter
 
 from IPython.core.debugger import set_trace
 from dataReader import *
+from dataReader import fileHITL
 
 _ALE_LOCK = threading.Lock()
 
@@ -155,6 +156,8 @@ class MedicalPlayer(gym.Env):
             self.data_loader = filesListCardioLandmark
         elif self.data_type == 'FetalUS':
             self.data_loader = filesListFetalUSLandmark
+        elif self.data_type == "HITL":
+            self.data_loader = fileHITL
 
         if self.task == 'play':
             self.files = self.data_loader(files_list,
@@ -162,6 +165,7 @@ class MedicalPlayer(gym.Env):
         else:
             self.files = self.data_loader(files_list,
                                          returnLandmarks=True)
+
 
         # prepare file sampler
         self.filepath = None
@@ -183,6 +187,10 @@ class MedicalPlayer(gym.Env):
             'resolution': self._res_history,
         }
         self.HITL_logger.append(log)
+
+    def HITL_set_location(self, location):
+        """ Method to set the location in the image to that specified in the logs """
+        self._location = location
 
     def reset(self):
         # with _ALE_LOCK:

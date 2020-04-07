@@ -244,6 +244,47 @@ class filesListFetalUSLandmark(object):
             # break
 ###############################################################################
 
+class fileHITL(object):
+    """ A class for managing train image for HITL
+
+        Attributes:
+        files_list: Two or one text files that contain a list of all images and (landmarks)
+        returnLandmarks: Return landmarks if task is train or eval (default: True)
+    """
+
+    def __init__(self, file_name=None, returnLandmarks=False, agents=1):
+        # check if files_list exists
+        assert file_name, 'There is no file given'
+        # read image filenames
+        self.image_files = file_name
+        # read landmark filenames if task is train or eval
+        self.returnLandmarks = returnLandmarks
+        self.agents = agents
+
+    @property
+    def num_files(self):
+        return 1
+
+    def sample_circular(self, shuffle=False):
+        """ return a random sampled ImageRecord from the list of files
+        """
+        if shuffle:
+            indexes = rng.choice(x, len(x), replace=False)
+        else:
+            indexes = np.arange(self.num_files)
+
+        while True:
+            for idx in indexes:
+                sitk_image, image = NiftiImage().decode(self.image_files[idx])
+                landmark = None
+
+                # extract filename from path, remove .nii.gz extension
+                image_filename = self.image_files[idx][:-7]
+                # images = [image] * self.agents
+                yield image, landmark, image_filename, sitk_image.GetSpacing()
+            # break
+###############################################################################
+
 
 class ImageRecord(object):
     '''image object to contain height,width, depth and name '''
