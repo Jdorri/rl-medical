@@ -75,7 +75,6 @@ class filesListBrainMRLandmark(object):
         # check if files_list exists
         assert files_list, 'There is no file give'
         # read image filenames
-            # self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
         with open(files_list[0].name) as f:
             self.image_files = [line.split('\n')[0] for line in f]
         # read landmark filenames if task is train or eval
@@ -86,7 +85,7 @@ class filesListBrainMRLandmark(object):
                 self.landmark_files = [line.split('\n')[0] for line in f]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
-        
+
 
     @property
     def num_files(self):
@@ -107,7 +106,7 @@ class filesListBrainMRLandmark(object):
                     ## transform landmarks to image space if they are in physical space
                     landmark_file = self.landmark_files[idx]
                     all_landmarks = getLandmarksFromTXTFile(landmark_file)
-                    landmark = all_landmarks[0] # landmark index is 13 for ac-point and 14 pc-point
+                    landmark = all_landmarks[14] # landmark index is 13 for ac-point and 14 pc-point
                     # transform landmark from physical to image space if required
                     # landmarks = sitk_image.TransformPhysicalPointToContinuousIndex(landmark)
                     # landmarks = [np.round(all_landmarks[(i + 14) % 15]) for i in range(self.agents)]
@@ -228,7 +227,7 @@ class filesListFetalUSLandmark(object):
                     all_landmarks = getLandmarksFromTXTFileUS(landmark_file)
                     # landmark point 12 csp - 11 leftCerebellar - 10 rightCerebellar
                     landmark = all_landmarks[0]
-          
+
 
                     # landmarks = [np.round(all_landmarks[(i*2 + 10) % 13]) for i in range(self.agents)]
                     # landmark = [np.round(all_landmarks[(i + 10) % 13]) for i in range(self.agents)]  # Apex + MV
