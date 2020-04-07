@@ -175,8 +175,12 @@ class MedicalPlayer(gym.Env):
         """ Method to save episode info for HITL """
         log = {
             'states': self._loc_history,
+            'rewards':self._reward_history,
             'actions': self._act_history,
             'target': self._target_loc,
+            'img_name': self.filename,
+            'is_over': [0 for i in range(len(self._loc_history)-1)] + [1],
+            'resolution': self._res_history,
         }
         self.HITL_logger.append(log)
 
@@ -559,14 +563,17 @@ class MedicalPlayer(gym.Env):
                     next_location = current_loc
                     go_out = True
 
+            if go_out:
+                self.reward = -1
+            else:
+                self.reward = self._calc_reward(current_loc, next_location)
+
             self._location = next_location
 
         self._screen = self._current_state()
-
-        if self.task != 'play':
-            self.cur_dist = self.calcDistance(self._location,
-                                              self._target_loc,
-                                              self.spacing)
+        self.cur_dist = self.calcDistance(self._location,
+                                          self._target_loc,
+                                          self.spacing)
 
         self._update_history()
 
@@ -612,6 +619,8 @@ class MedicalPlayer(gym.Env):
         if self.task == 'browse':
             self._loc_history = []
             self._act_history = []
+            self._reward_history = []
+            self._res_history = []
         else:
             self._loc_history = [(0,) * self.dims] * self._history_length
             self._qvalues_history = [(0,) * self.actions] * self._history_length
@@ -622,6 +631,8 @@ class MedicalPlayer(gym.Env):
         if self.task == 'browse':
             self._loc_history.append(self._location)
             self._act_history.append(self._act)
+            self._res_history.append(self.xscale)
+            self._reward_history.append(self.reward)
         else:
             # update location history
             self._loc_history[:-1] = self._loc_history[1:]

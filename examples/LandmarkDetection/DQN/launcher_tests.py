@@ -145,6 +145,7 @@ class RightWidgetBrowseModeTester(unittest.TestCase):
         self.assertTrue(self.w.next_img.isChecked())
         self.assertTrue(init_intensity - np.sum(self.w.env.viewer.widget.arr) > 1e-5)
 
+
 class RightWidgetHITLTester(unittest.TestCase):
     ''' Tester for HITL mode
     '''
@@ -187,9 +188,19 @@ class RightWidgetHITLTester(unittest.TestCase):
         # Check contents of the log are correct
         self.assertEqual(len(log), 1)
         self.assertEqual(len(log[0]['states']), 3)
+        self.assertEqual(len(log[0]['rewards']), 3)
+        self.assertEqual(len(log[0]['actions']), 3)
+        self.assertEqual(log[0]['is_over'][-1], 1)
+        self.assertEqual(np.unique(log[0]['is_over'][:-1])[0], 0)
+        self.assertTrue(([i in [1,2,3] for i in log[0]['resolution']].count(True)
+                        == len(log[0]['resolution'])))
+        self.assertTrue((log[0]['img_name'].startswith('ADNI') or
+                        log[0]['img_name'].startswith('iFIND') or
+                        log[0]['img_name'].startswith('14')))
 
         # Delete the log file
         os.remove(latest_file)
+
 
 class LeftWidgetTester(unittest.TestCase):
     '''Same as above but for the left widget'''

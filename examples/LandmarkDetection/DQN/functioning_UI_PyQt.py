@@ -562,6 +562,7 @@ class AppSettingsBrowseMode(QFrame):
         if len(self.env._loc_history) > 1:
             self.env.reset()
 
+        # Create pickle file
         now = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
         path = f'./data/HITL/log_{str(now)}.pickle'
         with open(path, 'wb') as f:
