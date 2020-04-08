@@ -18,6 +18,10 @@ import sys
 from thread import WorkerThread
 from functools import partial
 
+from matplotlib.backends.qt_compat import QtCore, QtWidgets
+from matplotlib.backends.backend_qt5agg import (
+        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -341,27 +345,31 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y = QLabel()
         self.label_img_y.setPixmap(self.img_y)
-        self.label_img_z = QLabel()
-        self.label_img_z.setPixmap(self.img_y)
+        #self.label_img_z = QLabel()
+        #self.label_img_z.setPixmap(self.img_y)
 
         # Set background color for images to Black
         self.label_img.setAutoFillBackground(True)
         self.label_img_x.setAutoFillBackground(True)
         self.label_img_y.setAutoFillBackground(True)
-        self.label_img_z.setAutoFillBackground(True)
+        #self.label_img_z.setAutoFillBackground(True)
         p = self.palette()
         p.setColor(self.backgroundRole(), Qt.black)
         self.label_img.setPalette(p)
         self.label_img_x.setPalette(p)
         self.label_img_y.setPalette(p)
-        self.label_img_z.setPalette(p)
+        #self.label_img_z.setPalette(p)
+
+        self.fig = plt.figure(figsize=(6.0,6.0))
+        self.ax = self.fig.add_subplot(111, projection='3d')
+        self.canvas = FigureCanvas(self.fig)
 
         # Initiliase Grid
         self.grid = QGridLayout()
         self.grid.addWidget(self.label_img, 0, 0)
         self.grid.addWidget(self.label_img_x, 0, 1)
         self.grid.addWidget(self.label_img_y, 1, 0)
-        self.grid.addWidget(self.label_img_z, 1, 1)
+        self.grid.addWidget(self.canvas, 1, 1)
         self.agent_signal.connect(self.agent_signal_handler)
 
         # Set Layout of GUI
@@ -381,15 +389,10 @@ class SimpleImageViewer(QWidget):
         self.line_width = 1
 
         # agent trajactories
-        self.x_traj = []
-        self.y_traj = []
-        self.z_traj = []
+        self.example_traj_x = [210,210,210,210,210,192,192,174,156,174]
+        self.example_traj_y = [258,240,240,222,222,202,204,204,204,204]
+        self.example_traj_z = [102,102,120,120,138,138,138,138,138,138]
 
-    def populate_agent_tractory(agent_loc):
-        self.x_traj.append(agent_loc[0])
-        self.y_traj.append(agent_loc[1])
-        self.z_traj.append(agent_loc[2])
-        #return (x_traj,y_traj,z_traj)
 
     def draw_image(self, arrs, agent_loc, target=None, rect=None):
         """
@@ -442,15 +445,12 @@ class SimpleImageViewer(QWidget):
         self.label_img_y.setPixmap(self.img_y)
 
         # 3d plotting
-        self.x_traj.append(agent_loc[0])
-        self.y_traj.append(agent_loc[1])
-        self.z_traj.append(agent_loc[2])
+        #self.x_traj.append(agent_loc[0])
+        #self.y_traj.append(agent_loc[1])
+        #self.z_traj.append(agent_loc[2])
 
-        fig = plt.figure(figsize=(8.0,8.0))
-        ax = fig.add_subplot(111, projection='3d')
-        ax.plot(self.x_traj, self.y_traj, self.z_traj)
-        #plt.show()
-
+        self.ax.plot(self.example_traj_x,self.example_traj_y,self.example_traj_z)
+        self.canvas.draw()
 
     def draw_error(self):
         """
