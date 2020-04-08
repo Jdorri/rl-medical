@@ -145,6 +145,12 @@ class RightWidgetBrowseModeTester(unittest.TestCase):
         self.assertTrue(self.w.next_img.isChecked())
         self.assertTrue(init_intensity - np.sum(self.w.env.viewer.widget.arr) > 1e-5)
 
+    def test_delHITLButton_notClickable(self):
+        ''' Check the HITL delete button is not clickable if
+            HITL mode is not enabled.
+        '''
+        QTest.mouseClick(self.w.HITL_delete, Qt.LeftButton)
+        self.assertTrue(not self.w.HITL_delete.isChecked())
 
 class RightWidgetHITLTester(unittest.TestCase):
     ''' Tester for HITL mode
@@ -166,11 +172,23 @@ class RightWidgetHITLTester(unittest.TestCase):
         self.controller.app, self.w = None, None
 
     def test_enableHITLCheckBox(self):
+        ''' Test the HITL checkbox works '''
         self.w.HITL = False
         QTest.mouseClick(self.w.HITL_mode, Qt.LeftButton)
         self.assertTrue(self.w.HITL_mode.isChecked())
 
+    def test_delHITLButton(self):
+        ''' Test the HITL delete episode button works '''
+        # Move to fill location history
+        QTest.mouseClick(self.w.upButton, Qt.LeftButton)
+        QTest.mouseClick(self.w.downButton, Qt.LeftButton)
+
+        # Delete episode
+        QTest.mouseClick(self.w.HITL_delete, Qt.LeftButton)
+        self.assertEqual(len(self.w.HITL_logger), 0)
+
     def test_saveHITL(self):
+        ''' Test the HITL session is saved when HITL mode is disabled '''
         # Move to fill location history
         QTest.mouseClick(self.w.upButton, Qt.LeftButton)
         QTest.mouseClick(self.w.downButton, Qt.LeftButton)

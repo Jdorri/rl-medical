@@ -321,6 +321,8 @@ class AppSettingsBrowseMode(QFrame):
         self.exit = QPushButton('Exit', self)
         self.HITL_mode = QCheckBox('Enable HITL',self)
         self.HITL_mode.setCheckable(True)
+        self.HITL_delete = QPushButton('Delete Episode', self)
+        self.HITL_delete.setDisabled(True)
 
         self.upButton = QToolButton(self)
         self.upButton.setArrowType(Qt.UpArrow)
@@ -384,8 +386,9 @@ class AppSettingsBrowseMode(QFrame):
         grid = QGridLayout()
         grid.setSpacing(10)
         grid.addWidget(self.HITL_mode, 2, 0)
-        grid.addWidget(self.img_file_edit, 3, 0)
-        grid.addWidget(self.next_img, 4, 0)
+        grid.addWidget(self.HITL_delete, 3, 0)
+        grid.addWidget(self.img_file_edit, 4, 0)
+        grid.addWidget(self.next_img, 5, 0)
         grid.addLayout(gridArrows, 7, 0)
         grid.addWidget(self.exit, 12, 0)
 
@@ -410,6 +413,7 @@ class AppSettingsBrowseMode(QFrame):
         self.zoomOutButton.clicked.connect(self.on_clicking_zoomOut)
         self.HITL_mode.clicked.connect(self.on_clicking_HITL)
         self.next_img.clicked.connect(self.on_clicking_nextImg)
+        self.HITL_delete.clicked.connect(self.on_clicking_HITLDelete)
 
         self.show()
 
@@ -438,12 +442,25 @@ class AppSettingsBrowseMode(QFrame):
         if (result == QMessageBox.Yes and not self.HITL) or \
             (result == QMessageBox.No and self.HITL):
             self.HITL_mode.setChecked(True)
+            self.HITL_delete.setDisabled(False)
         elif (result == QMessageBox.No and not self.HITL) or \
             (result == QMessageBox.Yes and self.HITL):
             self.HITL_mode.setChecked(False)
 
         if result == QMessageBox.Yes:
             self.HITL = not self.HITL
+
+    @pyqtSlot()
+    def on_clicking_HITLDelete(self):
+        if self.testing:
+            result = QMessageBox.Yes
+        else:
+            result = self.show_HITL_del_msg()
+
+        # Remove the current episode and load a new image
+        if result == QMessageBox.Yes:
+            self.on_clicking_nextImg()
+            self.env.HITL_logger.pop()
 
     @pyqtSlot()
     def on_clicking_up(self):
@@ -549,12 +566,23 @@ class AppSettingsBrowseMode(QFrame):
         else:
             self.HITL_msg.setText("Human-In-The-Loop mode disabled")
             self.HITL_msg.setInformativeText(("Human-In-The-Loop mode "
-                "will now be disabled \n Do you want to proceed?"))
+                "will now be disabled. \n Do you want to proceed?"))
         # self.HITL_msg.setWindowTitle("MessageBox demo")
         # self.HITL_msg.setDetailedText("The details are as follows:")
         self.HITL_msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         self.HITL_msg.setDefaultButton(QMessageBox.Yes)
         result = self.HITL_msg.exec_()
+        return result
+
+    def show_HITL_del_msg(self):
+        self.HITL_del_msg = QMessageBox()
+        self.HITL_del_msg.setIcon(QMessageBox.Warning)
+        self.HITL_del_msg.setText("Delete button clicked")
+        self.HITL_del_msg.setInformativeText(("\n This will delete the current "
+            "episode. \nDo you want to proceed?"))
+        self.HITL_del_msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        self.HITL_del_msg.setDefaultButton(QMessageBox.Yes)
+        result = self.HITL_del_msg.exec_()
         return result
 
     def save_HITL(self):

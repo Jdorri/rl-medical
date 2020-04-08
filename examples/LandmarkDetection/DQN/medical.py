@@ -179,7 +179,7 @@ class MedicalPlayer(gym.Env):
             'actions': self._act_history,
             'target': self._target_loc,
             'img_name': self.filename,
-            'is_over': [0 for i in range(len(self._loc_history)-1)] + [1],
+            'is_over': [0 for i in range(len(self._loc_history)-2)] + [1],
             'resolution': self._res_history,
         }
         self.HITL_logger.append(log)
