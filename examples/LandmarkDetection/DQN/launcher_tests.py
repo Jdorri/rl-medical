@@ -8,6 +8,7 @@ import numpy as np
 import glob
 import os
 import pickle
+import time
 
 class RightWidgetTester(unittest.TestCase):
     ''' Class to perform unit tests on the buttons within the right widget of the
@@ -152,6 +153,7 @@ class RightWidgetBrowseModeTester(unittest.TestCase):
         QTest.mouseClick(self.w.HITL_delete, Qt.LeftButton)
         self.assertTrue(not self.w.HITL_delete.isChecked())
 
+
 class RightWidgetHITLTester(unittest.TestCase):
     ''' Tester for HITL mode
     '''
@@ -215,6 +217,50 @@ class RightWidgetHITLTester(unittest.TestCase):
         self.assertTrue((log[0]['img_name'].startswith('ADNI') or
                         log[0]['img_name'].startswith('iFIND') or
                         log[0]['img_name'].startswith('14')))
+
+        # Delete the log file
+        os.remove(latest_file)
+
+    def test_bufferFillsCorrectly(self):
+        ''' Test HITL buffer fills as desired when moving the agent'''
+        for i in range(6):
+            pairings = {
+                0: self.w.inButton,
+                1: self.w.upButton,
+                2: self.w.rightButton,
+                3: self.w.leftButton,
+                4: self.w.downButton,
+                5: self.w.outButton,
+            }
+            self.bufferChecker(i, pairings[i])
+            self.tearDown()
+            self.setUp()
+
+    def test_checkHITLZoom(self):
+        ''' Check that changing resolution doesn't make an action '''
+        buttons = [self.w.zoomInButton, self.w.zoomOutButton]
+        for button in buttons:
+            QTest.mouseClick(button, Qt.LeftButton)
+            self.assertEqual(self.w.HITL_logger, [])
+
+    def bufferChecker(self, action, button):
+        ''' Helper function for the buffer fills correctly '''
+        # Move to fill location history
+        QTest.mouseClick(button, Qt.LeftButton)
+
+        # End HITL mode (as this calls save_HITL())
+        QTest.mouseClick(self.w.HITL_mode, Qt.LeftButton)
+
+        # Load the created file
+        list_of_files = glob.glob('./data/HITL/*.pickle')
+        latest_file = max(list_of_files, key=os.path.getctime)
+        with open(latest_file, 'rb') as f:
+            log = pickle.load(f)
+
+        # Check contents of the log are correct
+        self.assertEqual(len(log), 1)
+        self.assertEqual(len(log[0]['actions']), 2)
+        self.assertEqual(log[0]['actions'][1], action)
 
         # Delete the log file
         os.remove(latest_file)

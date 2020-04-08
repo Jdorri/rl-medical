@@ -449,6 +449,7 @@ class AppSettingsBrowseMode(QFrame):
 
         if result == QMessageBox.Yes:
             self.HITL = not self.HITL
+            self.env.HITL_logger.clear()
 
     @pyqtSlot()
     def on_clicking_HITLDelete(self):
