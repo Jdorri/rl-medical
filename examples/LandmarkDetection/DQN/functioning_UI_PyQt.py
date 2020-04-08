@@ -429,6 +429,10 @@ class AppSettingsBrowseMode(QFrame):
         self.env.reset()
         self.move_img(-1)
 
+        # If doing HITL, 50/50 chance for the resultion to start on 2 or 3 (otherwise resolution=2 tends to get negleted)
+        if self.HITL and np.random.choice(2):
+            self.on_clicking_zoomIn()
+
     @pyqtSlot()
     def on_clicking_HITL(self):
         if self.testing:
@@ -465,56 +469,48 @@ class AppSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_up(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 1
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_down(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 4
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_left(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 3
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_right(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 2
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_in(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 0
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_out(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 5
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_zoomIn(self):
-        # if not self.testing and self.env and self.env.xscale > 1:
         if self.env and self.env.xscale > 1:
             self.env.adjustMultiScale(higherRes=True)
             self.move_img(-1)
 
     @pyqtSlot()
     def on_clicking_zoomOut(self):
-        # if not self.testing and self.env and self.env.xscale < 3:
         if self.env and self.env.xscale < 3:
             self.env.adjustMultiScale(higherRes=False)
             self.move_img(-1)
@@ -544,7 +540,6 @@ class AppSettingsBrowseMode(QFrame):
     def load_img(self):
         self.task_value = None
         self.selected_list = [self.fname_images, self.fname_landmarks]
-
         self.env = get_player(files_list=self.selected_list, viz=0.01,
                         saveGif=False, saveVideo=False, task='browse',
                         data_type=self.dtype.name)
