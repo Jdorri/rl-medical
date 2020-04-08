@@ -18,6 +18,9 @@ import sys
 from thread import WorkerThread
 from functools import partial
 
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 try:
     import pyglet
     from pyglet.gl import *
@@ -76,7 +79,7 @@ class Window(QMainWindow):
         self.grid.addWidget(self.left_widget, 0, 0, 1, 1) # (x, y, rowspan, colspan)
         self.grid.addWidget(self.widget, 0, 1, 1, 10)
         self.grid.addWidget(self.right_widget, 0, 11, 1, 1)
-        
+
         self.layout_widget = QWidget()
         self.layout_widget.setLayout(self.grid)
         self.setCentralWidget(self.layout_widget)
@@ -182,7 +185,7 @@ class Window(QMainWindow):
         reply = QMessageBox.question(self, 'Message',
             "Are you sure to quit?", QMessageBox.Yes |
             QMessageBox.No, QMessageBox.Yes)
-    
+
         if reply == QMessageBox.Yes:
             event.accept()
         else:
@@ -372,6 +375,17 @@ class SimpleImageViewer(QWidget):
         self.size_e = 20
         self.line_width = 1
 
+        # agent trajactories
+        self.x_traj = []
+        self.y_traj = []
+        self.z_traj = []
+
+    def populate_agent_tractory(agent_loc):
+        self.x_traj.append(agent_loc[0])
+        self.y_traj.append(agent_loc[1])
+        self.z_traj.append(agent_loc[2])
+        #return (x_traj,y_traj,z_traj)
+
     def draw_image(self, arrs, agent_loc, target=None, rect=None):
         """
         Main image drawer function
@@ -421,6 +435,17 @@ class SimpleImageViewer(QWidget):
         self.label_img.setPixmap(self.img)
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
+
+        # 3d plotting
+        self.x_traj.append(agent_loc[0])
+        self.y_traj.append(agent_loc[1])
+        self.z_traj.append(agent_loc[2])
+
+        fig = plt.figure(figsize=(8.0,8.0))
+        ax = fig.add_subplot(111, projection='3d')
+        ax.plot(self.x_traj, self.y_traj, self.z_traj)
+        #plt.show()
+
 
     def draw_error(self):
         """
@@ -479,7 +504,6 @@ class SimpleImageViewer(QWidget):
         else:
             _target = None
         _rect = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
-        print("hello2")
 
         return _agent_loc, _rect, _target
 
@@ -494,8 +518,7 @@ class SimpleImageViewer(QWidget):
             _target = None
         _rect = (self.height_y-rect[4], self.height_y-rect[5]) + \
             (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
-        print("hello1")
-        
+
         return _agent_loc, _rect, _target
 
     def draw_point(self, point_loc, color, width=7):

@@ -186,6 +186,7 @@ class MedicalPlayer(gym.Env):
         self.num_games.feed(1)
         self.current_episode_score.reset()  # reset the stat counter
         self._loc_history = [(0,) * self.dims] * self._history_length
+        print(self._loc_history)
         # list of q-value lists
         self._qvalues_history = [(0,) * self.actions] * self._history_length
         self.new_random_game()

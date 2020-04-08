@@ -262,6 +262,8 @@ class RightWidgetSettings(QFrame):
         self.thread = WorkerThread(target_function=self.thread_function)
         self.thread.start()
 
+        print(init_player._location)
+
     @pyqtSlot()
     def close_it(self):
         self.close()
