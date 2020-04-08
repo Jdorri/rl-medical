@@ -150,6 +150,16 @@ class MedicalPlayer(gym.Env):
         # initialize rectangle limits from input image coordinates
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
+        self.set_dataLoader(files_list)
+
+        # prepare file sampler
+        self.filepath = None
+        self.HITL_logger = []
+        self._loc_history = None
+        # reset buffer, terminal, counters, and init new_random_game
+        self._restart_episode()
+
+    def set_dataLoader(self, files_list):
         if self.data_type == 'BrainMRI':
             self.data_loader = filesListBrainMRLandmark
         elif self.data_type == 'CardiacMRI':
@@ -166,14 +176,7 @@ class MedicalPlayer(gym.Env):
             self.files = self.data_loader(files_list,
                                          returnLandmarks=True)
 
-
-        # prepare file sampler
-        self.filepath = None
         self.sampled_files = self.files.sample_circular()
-        self.HITL_logger = []
-        self._loc_history = None
-        # reset buffer, terminal, counters, and init new_random_game
-        self._restart_episode()
 
     def HITL_episode_log(self):
         """ Method to save episode info for HITL """

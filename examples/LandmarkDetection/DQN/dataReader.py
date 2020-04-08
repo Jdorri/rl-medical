@@ -11,6 +11,7 @@ import numpy as np
 import SimpleITK as sitk
 from tensorpack import logger
 from IPython.core.debugger import set_trace
+import os
 
 __all__ = ['filesListBrainMRLandmark', 'filesListCardioLandmark', 'filesListFetalUSLandmark', 'NiftiImage']
 
@@ -85,7 +86,6 @@ class filesListBrainMRLandmark(object):
                 self.landmark_files = [line.split('\n')[0] for line in f]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
-
 
     @property
     def num_files(self):
@@ -315,7 +315,7 @@ class NiftiImage(object):
           image: an image container with attributes; name, data, dims
         """
         image = ImageRecord()
-        image.name = filename
+        image.name = os.path.expanduser(filename)
         assert self._is_nifti(image.name), "unknown image format for %r" % image.name
 
         if label:
