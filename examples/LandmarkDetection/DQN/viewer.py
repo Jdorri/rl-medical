@@ -341,22 +341,27 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y = QLabel()
         self.label_img_y.setPixmap(self.img_y)
+        self.label_img_z = QLabel()
+        self.label_img_z.setPixmap(self.img_y)
 
         # Set background color for images to Black
         self.label_img.setAutoFillBackground(True)
         self.label_img_x.setAutoFillBackground(True)
         self.label_img_y.setAutoFillBackground(True)
+        self.label_img_z.setAutoFillBackground(True)
         p = self.palette()
         p.setColor(self.backgroundRole(), Qt.black)
         self.label_img.setPalette(p)
         self.label_img_x.setPalette(p)
         self.label_img_y.setPalette(p)
+        self.label_img_z.setPalette(p)
 
         # Initiliase Grid
         self.grid = QGridLayout()
         self.grid.addWidget(self.label_img, 0, 0)
         self.grid.addWidget(self.label_img_x, 0, 1)
         self.grid.addWidget(self.label_img_y, 1, 0)
+        self.grid.addWidget(self.label_img_z, 1, 1)
         self.agent_signal.connect(self.agent_signal_handler)
 
         # Set Layout of GUI
