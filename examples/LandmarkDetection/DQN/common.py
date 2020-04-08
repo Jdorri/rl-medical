@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# File: common.py
-# Author: Yuxin Wu <ppwwyyxxc@gmail.com>
-# Modified: Amir Alansary <amiralansary@gmail.com>
-
 import random
 import time
 import threading
@@ -26,11 +20,11 @@ import traceback
 
 ###############################################################################
 
-def play_one_episode(env, func, render=False):
+def play_one_episode(env, func, render=False, viewer=None):
     def predict(s):
         """
         Run a full episode, mapping observation to action, WITHOUT 0.001 greedy.
-    :returns sum of rewards
+        :returns sum of rewards
         """
         # pick action with best predicted Q-value
         q_values = func(s[None, :, :, :])[0][0]
@@ -46,9 +40,9 @@ def play_one_episode(env, func, render=False):
     sum_r = 0
     while True:
         act, q_values = predict(ob)
-        ob, r, isOver, info = env.step(act, q_values)
-        if render:
-            env.render()
+        ob, r, isOver, info = env.step(act, q_values, viewer=viewer)
+        # if render:
+        #     env.render()
         sum_r += r
         if isOver:
             return sum_r, info['filename'], info['distError'], q_values
@@ -56,24 +50,26 @@ def play_one_episode(env, func, render=False):
 
 ###############################################################################
 
-def play_n_episodes(player, predfunc, nr, render=False):
+def play_n_episodes(player, predfunc, nr, render=False, viewer=None):
     """wraps play_one_episode, playing a single episode at a time and logs results
     used when playing demos."""
     logger.info("Start Playing ... ")
     for k in range(nr):
-        # if k != 0:
-        #     player.restart_episode()
-        score, filename, ditance_error, q_values = play_one_episode(player,
+        score, filename, distance_error, q_values = play_one_episode(player,
                                                                     predfunc,
-                                                                    render=render)
+                                                                    render=False,
+                                                                    viewer=viewer)
         logger.info(
-            "{}/{} - {} - score {} - distError {} - q_values {}".format(k + 1, nr, filename, score, ditance_error,
+            "{}/{} - {} - score {} - distError {} - q_values {}".format(k + 1,
+                                                                        nr,
+                                                                        filename,
+                                                                        score,
+                                                                        distance_error,
                                                                         q_values))
-
 
 ###############################################################################
 
-def eval_with_funcs(predictors, nr_eval, get_player_fn, files_list=None):
+def eval_with_funcs(predictors, nr_eval, get_player_fn, files_list=None, data_type=None):
     """
     Args:
         predictors ([PredictorBase])
@@ -96,7 +92,8 @@ def eval_with_funcs(predictors, nr_eval, get_player_fn, files_list=None):
         def run(self):
             with self.default_sess():
                 player = get_player_fn(task=False,
-                                       files_list=files_list)
+                                       files_list=files_list,
+                                       data_type=data_type)
                 while not self.stopped():
                     try:
                         score, filename, ditance_error, q_values = play_one_episode(player, self.func)
@@ -142,7 +139,6 @@ def eval_with_funcs(predictors, nr_eval, get_player_fn, files_list=None):
         return (stat.average, stat.max, dist_stat.average, dist_stat.max)
     return (0, 0, 0, 0)
 
-
 ###############################################################################
 
 def eval_model_multithread(pred, nr_eval, get_player_fn, files_list):
@@ -163,12 +159,13 @@ def eval_model_multithread(pred, nr_eval, get_player_fn, files_list):
 class Evaluator(Callback):
 
     def __init__(self, nr_eval, input_names, output_names,
-                 get_player_fn, files_list=None):
+                 get_player_fn, files_list=None, data_type=None):
         self.files_list = files_list
         self.eval_episode = nr_eval
         self.input_names = input_names
         self.output_names = output_names
         self.get_player_fn = get_player_fn
+        self.data_type = data_type
 
     def _setup_graph(self):
         NR_PROC = min(multiprocessing.cpu_count() // 2, 20)
@@ -179,7 +176,7 @@ class Evaluator(Callback):
         """triggered by Trainer"""
         t = time.time()
         mean_score, max_score, mean_dist, max_dist = eval_with_funcs(
-            self.pred_funcs, self.eval_episode, self.get_player_fn, self.files_list)
+            self.pred_funcs, self.eval_episode, self.get_player_fn, self.files_list, self.data_type)
         t = time.time() - t
         if t > 10 * 60:  # eval takes too long
             self.eval_episode = int(self.eval_episode * 0.94)

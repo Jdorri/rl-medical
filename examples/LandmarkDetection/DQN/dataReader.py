@@ -22,7 +22,7 @@ def getLandmarksFromTXTFile(file):
     with open(file) as fp:
         landmarks = []
         for i, line in enumerate(fp):
-            landmarks.append([float(k) for k in line.split(',')]) 
+            landmarks.append([float(k) for k in line.split(',')])
         landmarks = np.asarray(landmarks).reshape((-1, 3))
         return landmarks
 
@@ -34,7 +34,7 @@ def getLandmarksFromTXTFileUS(file):
     with open(file) as fp:
         landmarks = []
         for i, line in enumerate(fp):
-            landmarks.append([float(k) for k in line.split()]) 
+            landmarks.append([float(k) for k in line.split()])
         landmarks = np.asarray(landmarks).reshape((-1, 3))
         return landmarks
 
@@ -75,14 +75,18 @@ class filesListBrainMRLandmark(object):
         # check if files_list exists
         assert files_list, 'There is no file give'
         # read image filenames
-        self.image_files = [line.split('\n')[0] for line in open(files_list[0].name)]
+            # self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
+        with open(files_list[0].name) as f:
+            self.image_files = [line.split('\n')[0] for line in f]
         # read landmark filenames if task is train or eval
         self.returnLandmarks = returnLandmarks
         self.agents = agents
         if self.returnLandmarks:
-            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1].name)]
+            with open(files_list[1].name) as f:
+                self.landmark_files = [line.split('\n')[0] for line in f]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
+        
 
     @property
     def num_files(self):
@@ -103,7 +107,7 @@ class filesListBrainMRLandmark(object):
                     ## transform landmarks to image space if they are in physical space
                     landmark_file = self.landmark_files[idx]
                     all_landmarks = getLandmarksFromTXTFile(landmark_file)
-                    landmark = all_landmarks[14] # landmark index is 13 for ac-point and 14 pc-point
+                    landmark = all_landmarks[0] # landmark index is 13 for ac-point and 14 pc-point
                     # transform landmark from physical to image space if required
                     # landmarks = sitk_image.TransformPhysicalPointToContinuousIndex(landmark)
                     # landmarks = [np.round(all_landmarks[(i + 14) % 15]) for i in range(self.agents)]
@@ -112,8 +116,10 @@ class filesListBrainMRLandmark(object):
                     landmark = None
                 # extract filename from path, remove .nii.gz extension
                 image_filename = self.image_files[idx][:-7]
+
                 # images = [image] * self.agents
                 yield image, landmark, image_filename, sitk_image.GetSpacing()
+            # break
 ###############################################################################
 
 
@@ -129,12 +135,14 @@ class filesListCardioLandmark(object):
         # check if files_list exists
         assert files_list, 'There is no file given'
         # read image filenames
-        self.image_files = [line.split('\n')[0] for line in open(files_list[0].name)]
+        with open(files_list[0].name) as f:
+            self.image_files = [line.split('\n')[0] for line in f]
         # read landmark filenames if task is train or eval
         self.returnLandmarks = returnLandmarks
         self.agents = agents
         if self.returnLandmarks:
-            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1].name)]
+            with open(files_list[1].name) as f:
+                self.landmark_files = [line.split('\n')[0] for line in f]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
 
@@ -161,7 +169,7 @@ class filesListCardioLandmark(object):
                                      for point in all_landmarks]
                     # Indexes: 0-2 RV insert points, 1 -> RV lateral wall turning point, 3 -> LV lateral wall mid-point,
                     # 4 -> apex, 5-> center of the mitral valve
-                    landmark = all_landmarks[4] 
+                    landmark = all_landmarks[4]
                     # landmarks = [np.round(all_landmarks[(i + 4) % 6]) for i in range(self.agents)]  # Apex + MV
                     # landmarks = [np.round(all_landmarks[(i + 3) % 6]) for i in range(self.agents)]  # LV + Apex
                     # landmarks = [np.round(all_landmarks[((i + 1) + 3) % 6]) for i in range(self.agents)] # LV + MV
@@ -172,8 +180,8 @@ class filesListCardioLandmark(object):
                 # extract filename from path, remove .nii.gz extension
                 image_filename = self.image_files[idx][:-7]
                 # images = [image] * self.agents
-
                 yield image, landmark, image_filename, sitk_image.GetSpacing()
+            # break
 ###############################################################################
 
 
@@ -189,12 +197,14 @@ class filesListFetalUSLandmark(object):
         # check if files_list exists
         assert files_list, 'There is no file given'
         # read image filenames
-        self.image_files = [line.split('\n')[0] for line in open(files_list[0].name)]
+        with open(files_list[0].name) as f:
+            self.image_files = [line.split('\n')[0] for line in f]
         # read landmark filenames if task is train or eval
         self.returnLandmarks = returnLandmarks
         self.agents = agents
         if self.returnLandmarks:
-            self.landmark_files = [line.split('\n')[0] for line in open(files_list[1].name)]
+            with open(files_list[1].name) as f:
+                self.landmark_files = [line.split('\n')[0] for line in f]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
 
@@ -217,8 +227,9 @@ class filesListFetalUSLandmark(object):
                     landmark_file = self.landmark_files[idx]
                     all_landmarks = getLandmarksFromTXTFileUS(landmark_file)
                     # landmark point 12 csp - 11 leftCerebellar - 10 rightCerebellar
-                    landmark = all_landmarks[12]
-                    print(landmark)
+                    landmark = all_landmarks[0]
+          
+
                     # landmarks = [np.round(all_landmarks[(i*2 + 10) % 13]) for i in range(self.agents)]
                     # landmark = [np.round(all_landmarks[(i + 10) % 13]) for i in range(self.agents)]  # Apex + MV
                     landmark = np.round(landmark).astype('int')
@@ -230,6 +241,7 @@ class filesListFetalUSLandmark(object):
                 # images = [image] * self.agents
 
                 yield image, landmark, image_filename, sitk_image.GetSpacing()
+            # break
 ###############################################################################
 
 
