@@ -25,7 +25,6 @@ class Trajectory3D(QtWidgets.QMainWindow):
 
         self.ax = self.fig.add_subplot(111, projection='3d')
         self.ax.plot(self.example_traj_x,self.example_traj_y,self.example_traj_z)
-
         self.canvas.draw()
 
         layout.addWidget(self.canvas)

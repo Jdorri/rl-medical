@@ -806,6 +806,7 @@ class MedicalPlayer(gym.Env):
             "scale": self.xscale,
             "rect": self.rectangle,
             "task": self.task,
+            "is_terminal": self.terminal
         })
 
         if self.task != 'browse':

@@ -356,7 +356,7 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPalette(p)
         self.label_img_y.setPalette(p)
 
-        self.fig = plt.figure(figsize=(3,6.0))
+        self.fig = plt.figure(figsize=(3, 6.0))
         self.ax = self.fig.add_subplot(111, projection='3d')
         self.canvas = FigureCanvas(self.fig)
 
@@ -376,6 +376,7 @@ class SimpleImageViewer(QWidget):
         self.label_img.setStyleSheet("background: black; border:3px solid rgb(255, 0, 0); ")
         self.label_img_x.setStyleSheet("background: black; border:3px solid green; ")
         self.label_img_y.setStyleSheet("background: black; border:3px solid blue; ")
+        self.canvas.setStyleSheet("background: black; border:3px solid blue; ")
 
         # Style settings
         self.color_a = QColor(111, 230, 158)
@@ -390,7 +391,7 @@ class SimpleImageViewer(QWidget):
         self.z_traj = []
 
 
-    def draw_image(self, arrs, agent_loc, target=None, rect=None):
+    def draw_image(self, arrs, agent_loc, target=None, rect=None, episode_end=False):
         """
         Main image drawer function
         """
@@ -439,14 +440,21 @@ class SimpleImageViewer(QWidget):
         self.label_img.setPixmap(self.img)
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
-
+        
+        print("episode end:", episode_end)
         # 3d plotting
-        # print(agent_loc[0])
-        self.x_traj.append(agent_loc[0])
-        self.y_traj.append(agent_loc[1])
-        self.z_traj.append(agent_loc[2])
+        if not episode_end:
+            self.x_traj.append(agent_loc[0])
+            self.y_traj.append(agent_loc[1])
+            self.z_traj.append(agent_loc[2])
+        else:
+            self.x_traj = []
+            self.y_traj = []
+            self.z_traj = []
+            self.ax.clear()
 
-        self.ax.plot(self.x_traj,self.y_traj,self.z_traj)
+        self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="r")
+        # self.ax.set_color("red")
         self.canvas.draw()
 
     def draw_error(self):
@@ -622,11 +630,13 @@ class SimpleImageViewer(QWidget):
         self.scale = value["scale"]
         self.task = value["task"]
         self.error = value["error"]
+        self.is_terminal = value["is_terminal"]
         self.draw_image(
             arrs = value["arrs"],
             agent_loc = value["agent_loc"],
             target = value["target"],
-            rect = value["rect"]
+            rect = value["rect"],
+            episode_end = self.is_terminal
         )
 
     # def render(self):
