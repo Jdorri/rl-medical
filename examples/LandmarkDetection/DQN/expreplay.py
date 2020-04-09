@@ -133,11 +133,11 @@ class HumanDemReplayMemory(ReplayMemory):
         Fills in the buffer with the saved actions from the expert.
         Actions are stored under .data/HITL in the form of log files
         """
-        directory = "./data/HITL"
+        directory = "./data/HITL/HITL_dummy"
         image_directory = "/volumes/project/2019/545/g1954503/aeg19/Brain_MRI/"
         # Loop 1: Loops through all log files in the directory
-        for filename in os.listdir("./data/HITL"):
-            if filename.endswith(".pickle") or filename.endswith(".p"): 
+        for filename in os.listdir(directory):
+            if filename.endswith(".pickle") or filename.endswith(".p"):
                 log_file = os.path.join(directory, filename)
                 logger.info("Log filename: {}".format(log_file))
                 file_contents = pickle.load( open( log_file, "rb" ) )
@@ -154,8 +154,8 @@ class HumanDemReplayMemory(ReplayMemory):
                             logger.info("{} reward: {}".format(key+1, entry['rewards'][key+1]))
                             logger.info("{} action: {}".format(key+1, entry['actions'][key+1]))
                             logger.info("{} is_over: {}".format(key+1, entry['is_over'][key+1]))
-                            logger.info("{} resolution: {}".format(key, entry['resolution'][key+1]))
-                            dummy_env = MedicalPlayer(directory="./data/images/", screen_dims=(45, 45, 45),
+                            logger.info("{} resolution: {}".format(key+1, entry['resolution'][key+1]))
+                            dummy_env = MedicalPlayer(directory=image_directory, screen_dims=(45, 45, 45),
                                                         viz=0, saveGif='False', saveVideo='False',
                                                         task='play', files_list=[image_path], data_type='HITL',
                                                         max_num_frames=1500)
@@ -220,7 +220,7 @@ class ExpReplay(DataFlow, Callback):
 
         self.hmem = HumanDemReplayMemory(memory_size, state_shape, history_len)
         self.hmem.load_experience()
-        exit()
+
 
         ###############################################################################
         self._current_ob = self.player.reset()
