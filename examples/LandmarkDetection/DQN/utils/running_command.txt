@@ -28,8 +28,7 @@ and if you want to run eval:
 
 
 ### Random stuff (AG) ###
-wget --header="Authorization: token 995c84a0c38eb4fe09d691371029e30cda092dbb" -O - \
-    https://raw.githubusercontent.com/alexgaskell10/data-rl-medical/master/images/14SZ03090.nii.gz
+wget --header="Authorization: token 995c84a0c38eb4fe09d691371029e30cda092dbb" -O - https://raw.githubusercontent.com/alexgaskell10/data-rl-medical/master/images/demo_file.py
 
 https://raw.githubusercontent.com/alexgaskell10/data-rl-medical/master/images/14SZ03090.nii.gz
 
@@ -42,7 +41,7 @@ with open('./data/filenames/brain_test_files_new_paths.txt', 'r') as f:
 exts = [l.replace('./data/images/','') for l in temp]
 
 for ext in exts:
-    source_dir = 'https://raw.githubusercontent.com/ollenilsson19/rl-medical/master/examples/LandmarkDetection/DQN/data/images/https://github.com/ollenilsson19/rl-medical/blob/master/examples/LandmarkDetection/DQN/data/images/'
+    source_dir = 'https://github.com/ollenilsson19/rl-medical/blob/master/examples/LandmarkDetection/DQN/data/images/'
     url = source_dir + ext
     dest_dir = getcwd() + '/data/images/'
     filename = dest_dir + ext

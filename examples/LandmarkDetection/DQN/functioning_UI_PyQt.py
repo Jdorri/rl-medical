@@ -321,6 +321,8 @@ class AppSettingsBrowseMode(QFrame):
         self.exit = QPushButton('Exit', self)
         self.HITL_mode = QCheckBox('Enable HITL',self)
         self.HITL_mode.setCheckable(True)
+        self.HITL_delete = QPushButton('Delete Episode', self)
+        self.HITL_delete.setDisabled(True)
 
         self.upButton = QToolButton(self)
         self.upButton.setArrowType(Qt.UpArrow)
@@ -384,8 +386,9 @@ class AppSettingsBrowseMode(QFrame):
         grid = QGridLayout()
         grid.setSpacing(10)
         grid.addWidget(self.HITL_mode, 2, 0)
-        grid.addWidget(self.img_file_edit, 3, 0)
-        grid.addWidget(self.next_img, 4, 0)
+        grid.addWidget(self.HITL_delete, 3, 0)
+        grid.addWidget(self.img_file_edit, 4, 0)
+        grid.addWidget(self.next_img, 5, 0)
         grid.addLayout(gridArrows, 7, 0)
         grid.addWidget(self.exit, 12, 0)
 
@@ -410,6 +413,7 @@ class AppSettingsBrowseMode(QFrame):
         self.zoomOutButton.clicked.connect(self.on_clicking_zoomOut)
         self.HITL_mode.clicked.connect(self.on_clicking_HITL)
         self.next_img.clicked.connect(self.on_clicking_nextImg)
+        self.HITL_delete.clicked.connect(self.on_clicking_HITLDelete)
 
         self.show()
 
@@ -425,8 +429,22 @@ class AppSettingsBrowseMode(QFrame):
         self.env.reset()
         self.move_img(-1)
 
+        # If doing HITL, 50/50 chance for the resultion to start on 2 or 3 (otherwise resolution=2 tends to get negleted)
+        if self.HITL and np.random.choice(2):
+            self.on_clicking_zoomIn()
+
     @pyqtSlot()
     def on_clicking_HITL(self):
+        ''' Activating HITL mode giv es following actions:
+            - Make HITL_delete button clickable
+            - Make HITL_mode button clickable
+            - Switch paths in dataloader so it uses all training data (rather than small sample)
+
+            Deactivating HITL mode gives following actions:
+            - Save HITL episode
+            - Make HITL delete button un-clickable
+            - Un-click HITL mode check box
+        '''
         if self.testing:
             result = QMessageBox.Yes
         else:
@@ -435,68 +453,84 @@ class AppSettingsBrowseMode(QFrame):
         if result == QMessageBox.Yes and self.HITL:
             self.save_HITL()
 
-        if (result == QMessageBox.Yes and not self.HITL) or \
-            (result == QMessageBox.No and self.HITL):
+        if result == QMessageBox.Yes and not self.HITL:
+            # Activate HITL mode button
             self.HITL_mode.setChecked(True)
+            self.HITL_delete.setDisabled(False)
+
+            # Switch file path
+            self.set_HITL_txtfile_paths()
+            self.selected_list = [self.fname_images, self.fname_landmarks]
+            self.env.set_dataLoader(self.selected_list)
+
+        elif result == QMessageBox.No and self.HITL:
+            self.HITL_mode.setChecked(True)
+
         elif (result == QMessageBox.No and not self.HITL) or \
             (result == QMessageBox.Yes and self.HITL):
             self.HITL_mode.setChecked(False)
+            self.HITL_delete.setDisabled(True)
 
         if result == QMessageBox.Yes:
             self.HITL = not self.HITL
+            self.env.HITL_logger.clear()
+
+    @pyqtSlot()
+    def on_clicking_HITLDelete(self):
+        if self.testing:
+            result = QMessageBox.Yes
+        else:
+            result = self.show_HITL_del_msg()
+
+        # Remove the current episode and load a new image
+        if result == QMessageBox.Yes:
+            self.on_clicking_nextImg()
+            self.env.HITL_logger.pop()
 
     @pyqtSlot()
     def on_clicking_up(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 1
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_down(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 4
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_left(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 3
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_right(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 2
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_in(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 0
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_out(self):
-        # if not self.testing and self.env:
         if self.env:
             action = 5
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_zoomIn(self):
-        # if not self.testing and self.env and self.env.xscale > 1:
         if self.env and self.env.xscale > 1:
             self.env.adjustMultiScale(higherRes=True)
             self.move_img(-1)
 
     @pyqtSlot()
     def on_clicking_zoomOut(self):
-        # if not self.testing and self.env and self.env.xscale < 3:
         if self.env and self.env.xscale < 3:
             self.env.adjustMultiScale(higherRes=False)
             self.move_img(-1)
@@ -526,7 +560,6 @@ class AppSettingsBrowseMode(QFrame):
     def load_img(self):
         self.task_value = None
         self.selected_list = [self.fname_images, self.fname_landmarks]
-
         self.env = get_player(files_list=self.selected_list, viz=0.01,
                         saveGif=False, saveVideo=False, task='browse',
                         data_type=self.dtype.name)
@@ -549,7 +582,7 @@ class AppSettingsBrowseMode(QFrame):
         else:
             self.HITL_msg.setText("Human-In-The-Loop mode disabled")
             self.HITL_msg.setInformativeText(("Human-In-The-Loop mode "
-                "will now be disabled \n Do you want to proceed?"))
+                "will now be disabled. \n Do you want to proceed?"))
         # self.HITL_msg.setWindowTitle("MessageBox demo")
         # self.HITL_msg.setDetailedText("The details are as follows:")
         self.HITL_msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
@@ -557,15 +590,31 @@ class AppSettingsBrowseMode(QFrame):
         result = self.HITL_msg.exec_()
         return result
 
+    def show_HITL_del_msg(self):
+        self.HITL_del_msg = QMessageBox()
+        self.HITL_del_msg.setIcon(QMessageBox.Warning)
+        self.HITL_del_msg.setText("Delete button clicked")
+        self.HITL_del_msg.setInformativeText(("\n This will delete the current "
+            "episode. \nDo you want to proceed?"))
+        self.HITL_del_msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        self.HITL_del_msg.setDefaultButton(QMessageBox.Yes)
+        result = self.HITL_del_msg.exec_()
+        return result
+
     def save_HITL(self):
         # Record current HITL loop
         if len(self.env._loc_history) > 1:
             self.env.reset()
 
+        # Create pickle file
         now = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
         path = f'./data/HITL/log_{str(now)}.pickle'
         with open(path, 'wb') as f:
             pickle.dump(self.env.HITL_logger, f)
+
+    def set_HITL_txtfile_paths(self):
+        self.fname_images.name = "./data/filenames/brain_filenames_HITL.txt"
+        self.fname_landmarks.name = "./data/filenames/brain_landmarks_HITL.txt"
 
 
 class Controller:

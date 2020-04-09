@@ -11,6 +11,7 @@ import numpy as np
 import SimpleITK as sitk
 from tensorpack import logger
 from IPython.core.debugger import set_trace
+import os
 
 __all__ = ['filesListBrainMRLandmark', 'filesListCardioLandmark', 'filesListFetalUSLandmark', 'NiftiImage']
 
@@ -75,7 +76,6 @@ class filesListBrainMRLandmark(object):
         # check if files_list exists
         assert files_list, 'There is no file give'
         # read image filenames
-            # self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
         with open(files_list[0].name) as f:
             self.image_files = [line.split('\n')[0] for line in f]
         # read landmark filenames if task is train or eval
@@ -86,7 +86,6 @@ class filesListBrainMRLandmark(object):
                 self.landmark_files = [line.split('\n')[0] for line in f]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
-        
 
     @property
     def num_files(self):
@@ -107,7 +106,7 @@ class filesListBrainMRLandmark(object):
                     ## transform landmarks to image space if they are in physical space
                     landmark_file = self.landmark_files[idx]
                     all_landmarks = getLandmarksFromTXTFile(landmark_file)
-                    landmark = all_landmarks[0] # landmark index is 13 for ac-point and 14 pc-point
+                    landmark = all_landmarks[14] # landmark index is 13 for ac-point and 14 pc-point
                     # transform landmark from physical to image space if required
                     # landmarks = sitk_image.TransformPhysicalPointToContinuousIndex(landmark)
                     # landmarks = [np.round(all_landmarks[(i + 14) % 15]) for i in range(self.agents)]
@@ -228,7 +227,7 @@ class filesListFetalUSLandmark(object):
                     all_landmarks = getLandmarksFromTXTFileUS(landmark_file)
                     # landmark point 12 csp - 11 leftCerebellar - 10 rightCerebellar
                     landmark = all_landmarks[0]
-          
+
 
                     # landmarks = [np.round(all_landmarks[(i*2 + 10) % 13]) for i in range(self.agents)]
                     # landmark = [np.round(all_landmarks[(i + 10) % 13]) for i in range(self.agents)]  # Apex + MV
@@ -240,6 +239,47 @@ class filesListFetalUSLandmark(object):
                 image_filename = self.image_files[idx][:-7]
                 # images = [image] * self.agents
 
+                yield image, landmark, image_filename, sitk_image.GetSpacing()
+            # break
+###############################################################################
+
+class fileHITL(object):
+    """ A class for managing train image for HITL
+
+        Attributes:
+        files_list: Two or one text files that contain a list of all images and (landmarks)
+        returnLandmarks: Return landmarks if task is train or eval (default: True)
+    """
+
+    def __init__(self, file_name=None, returnLandmarks=False, agents=1):
+        # check if files_list exists
+        assert file_name, 'There is no file given'
+        # read image filenames
+        self.image_files = file_name
+        # read landmark filenames if task is train or eval
+        self.returnLandmarks = returnLandmarks
+        self.agents = agents
+
+    @property
+    def num_files(self):
+        return 1
+
+    def sample_circular(self, shuffle=False):
+        """ return a random sampled ImageRecord from the list of files
+        """
+        if shuffle:
+            indexes = rng.choice(x, len(x), replace=False)
+        else:
+            indexes = np.arange(self.num_files)
+
+        while True:
+            for idx in indexes:
+                sitk_image, image = NiftiImage().decode(self.image_files[idx])
+                landmark = None
+
+                # extract filename from path, remove .nii.gz extension
+                image_filename = self.image_files[idx][:-7]
+                # images = [image] * self.agents
                 yield image, landmark, image_filename, sitk_image.GetSpacing()
             # break
 ###############################################################################
@@ -275,7 +315,7 @@ class NiftiImage(object):
           image: an image container with attributes; name, data, dims
         """
         image = ImageRecord()
-        image.name = filename
+        image.name = os.path.expanduser(filename)
         assert self._is_nifti(image.name), "unknown image format for %r" % image.name
 
         if label:

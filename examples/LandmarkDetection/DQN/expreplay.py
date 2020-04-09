@@ -18,10 +18,14 @@ from tensorpack.callbacks.base import Callback
 from tensorpack.utils.utils import get_tqdm, get_rng
 from tensorpack.utils.concurrency import LoopThread, ShareSessionThread
 
+import os
+import pickle
+from medical import MedicalPlayer
+
 __all__ = ['ExpReplay']
 
 Experience = namedtuple('Experience',
-                        ['state', 'action', 'reward', 'isOver'])
+                        ['state', 'action', 'reward', 'isOver','human'])
 
 
 class ReplayMemory(object):
@@ -184,6 +188,41 @@ class HumanDemReplayMemory(object):
         ret = self._pad_sample(state, reward, action, isOver, human)
         return ret
 
+    def load_experience(self):
+        """
+        Fills in the buffer with the saved actions from the expert.
+        Actions are stored under .data/HITL in the form of log files
+        """
+        directory = "./data/HITL"
+        # Loop 1: Loops through all log files in the directory
+        for filename in os.listdir("./data/HITL"):
+            if filename.endswith(".pickle") or filename.endswith(".p"): 
+                log_file = os.path.join(directory, filename)
+                logger.info("Log filename: {}".format(log_file))
+                file_contents = pickle.load( open( log_file, "rb" ) )
+                # Loop 2: Loops through all 3D images in the log file
+                for entry in file_contents:
+                    #TODO directory needs to be flexible for pulling images
+                    image_path = os.path.join("./data/images/", entry['img_name']+".nii.gz")
+                    target_coordinates = entry['target']
+                    logger.info("Image path: {}".format(image_path))
+                    # Loop 3: Loops through each state, action pair recorded
+                    for key, state_coordinates in enumerate(entry['states']):
+                        if key != len(entry['states'])-1:
+                            logger.info("{} state: {}".format(key, state_coordinates))
+                            logger.info("{} reward: {}".format(key+1, entry['rewards'][key+1]))
+                            logger.info("{} action: {}".format(key+1, entry['actions'][key+1]))
+                            logger.info("{} is_over: {}".format(key+1, entry['is_over'][key+1]))
+                            logger.info("{} resolution: {}".format(key, entry['resolution'][key+1]))
+                            dummy_env = MedicalPlayer(directory="./data/images/", screen_dims=(45, 45, 45),
+                                                        viz=0, saveGif='False', saveVideo='False',
+                                                        task='play', files_list=[image_path], data_type='HITL',
+                                                        max_num_frames=1500)
+                            dummy_env.HITL_set_location(state_coordinates)
+                            state_image = dummy_env._current_state()
+                            # TODO: do we need the human/non-human flag thingy that Harry mentioned
+                            self.append(Experience(state_image, entry['actions'][key+1], entry['rewards'][key+1], entry['is_over'][key+1], True))
+
     # the next_state is a different episode if current_state.isOver==True
     def _pad_sample(self, state, reward, action, isOver, human):
         for k in range(self.history_len - 2, -1, -1):
@@ -261,10 +300,14 @@ class ExpReplay(DataFlow, Callback):
         # a queue to receive notifications to populate memory
         self._populate_job_queue = queue.Queue(maxsize=5)
 
+
         self.mem = ReplayMemory(memory_size, state_shape, history_len)
         ###############################################################################
         # HITL UPDATE
+
         self.hmem = HumanDemReplayMemory(memory_size, state_shape, history_len)
+        self.hmem.load_experience()
+     
         ###############################################################################
         self._current_ob = self.player.reset()
         self._player_scores = StatCounter()

@@ -158,6 +158,7 @@ class Window(QMainWindow):
             Allows the user to move through the image by using arrow keys
         '''
         if self.right_widget.MODE == 'BROWSE MODE' and self.right_widget.env:
+            # Browse mode key bindings
             if event.key() == Qt.Key_S:
                 self.right_widget.on_clicking_in()
             elif event.key() == Qt.Key_A:
@@ -170,10 +171,17 @@ class Window(QMainWindow):
                 self.right_widget.on_clicking_left()
             elif event.key() == Qt.Key_Right:
                 self.right_widget.on_clicking_right()
-            elif event.key() == Qt.Key_X:
+            elif event.key() == Qt.Key_Space:
+                self.right_widget.on_clicking_nextImg()
+            elif event.key() == Qt.Key_Equal:
                 self.right_widget.on_clicking_zoomIn()
-            elif event.key() == Qt.Key_Z:
+            elif event.key() == Qt.Key_Minus:
                 self.right_widget.on_clicking_zoomOut()
+
+            # HITL mode additional key bindings
+            if self.right_widget.HITL_mode.isChecked():
+                if event.key() == Qt.Key_Backspace:
+                    self.right_widget.on_clicking_HITLDelete()
 
     def closeEvent(self, event):
         """
