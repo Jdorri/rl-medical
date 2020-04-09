@@ -126,67 +126,7 @@ class ReplayMemory(object):
 
 class HumanDemReplayMemory(object):
     def __init__(self, max_size, state_shape, history_len):
-        self.max_size = int(max_size)
-        self.state_shape = state_shape
-        self.history_len = int(history_len)
-
-        self.state = np.zeros((self.max_size,) + state_shape, dtype='uint8')
-        self.action = np.zeros((self.max_size,), dtype='int32')
-        self.reward = np.zeros((self.max_size,), dtype='float32')
-        self.isOver = np.zeros((self.max_size,), dtype='bool')
-        self.human = np.zeros((self.max_size,), dtype='bool')
-
-        self._curr_size = 0
-        self._curr_pos = 0
-        self._hist = deque(maxlen=history_len - 1)
-
-    def append(self, exp):
-        """Append the replay memory with experience sample
-        Args:
-            exp (Experience): experience contains (state, reward, action, isOver)
-        """
-        # increase current memory size if it is not full yet
-        if self._curr_size < self.max_size:
-            self._assign(self._curr_pos, exp)
-            self._curr_pos = (self._curr_pos + 1) % self.max_size
-            self._curr_size += 1
-        else:
-            self._assign(self._curr_pos, exp)
-            self._curr_pos = (self._curr_pos + 1) % self.max_size
-        if exp.isOver:
-            self._hist.clear()
-        else:
-            self._hist.append(exp)
-
-    def recent_state(self):
-        """ return a list of (hist_len-1,) + STATE_SIZE """
-        lst = list(self._hist)
-        states = [np.zeros(self.state_shape, dtype='uint8')] * (self._hist.maxlen - len(lst))
-        states.extend([k.state for k in lst])
-        return states
-
-    def sample(self, idx):
-        """ Sample an experience replay from memory with index idx
-        :returns: a tuple of (state, reward, action, isOver)
-                  where state is of shape STATE_SIZE + (history_length+1,)
-        """
-        idx = (self._curr_pos + idx) % self._curr_size
-        k = self.history_len + 1
-        if idx + k <= self._curr_size:
-            state = self.state[idx: idx + k]
-            reward = self.reward[idx: idx + k]
-            action = self.action[idx: idx + k]
-            isOver = self.isOver[idx: idx + k]
-            human = self.human[idx: idx + k]
-        else:
-            end = idx + k - self._curr_size
-            state = self._slice(self.state, idx, end)
-            reward = self._slice(self.reward, idx, end)
-            action = self._slice(self.action, idx, end)
-            isOver = self._slice(self.isOver, idx, end)
-            human = self._slice(self.human, idx, end)
-        ret = self._pad_sample(state, reward, action, isOver, human)
-        return ret
+        super(HumanDemReplayMemory, self).__init__()
 
     def load_experience(self):
         """
@@ -194,6 +134,7 @@ class HumanDemReplayMemory(object):
         Actions are stored under .data/HITL in the form of log files
         """
         directory = "./data/HITL"
+        image_directory = "/volumes/project/2019/545/g1954503/aeg19/"
         # Loop 1: Loops through all log files in the directory
         for filename in os.listdir("./data/HITL"):
             if filename.endswith(".pickle") or filename.endswith(".p"): 
@@ -203,7 +144,7 @@ class HumanDemReplayMemory(object):
                 # Loop 2: Loops through all 3D images in the log file
                 for entry in file_contents:
                     #TODO directory needs to be flexible for pulling images
-                    image_path = os.path.join("./data/images/", entry['img_name']+".nii.gz")
+                    image_path = os.path.join(image_directory, entry['img_name']+".nii.gz")
                     target_coordinates = entry['target']
                     logger.info("Image path: {}".format(image_path))
                     # Loop 3: Loops through each state, action pair recorded
@@ -220,37 +161,9 @@ class HumanDemReplayMemory(object):
                                                         max_num_frames=1500)
                             dummy_env.HITL_set_location(state_coordinates)
                             state_image = dummy_env._current_state()
-                            # TODO: do we need the human/non-human flag thingy that Harry mentioned
                             self.append(Experience(state_image, entry['actions'][key+1], entry['rewards'][key+1], entry['is_over'][key+1], True))
 
-    # the next_state is a different episode if current_state.isOver==True
-    def _pad_sample(self, state, reward, action, isOver, human):
-        for k in range(self.history_len - 2, -1, -1):
-            if isOver[k]:
-                state = copy.deepcopy(state)
-                state[:k + 1].fill(0)
-                break
-        # transpose state
-        if state.ndim == 4:  # 3d state
-            state = state.transpose(1, 2, 3, 0)
-        else:  # 2d states
-            state = state.transpose(1, 2, 0)
-        return state, reward[-2], action[-2], isOver[-2], human[-2]
 
-    def _slice(self, arr, start, end):
-        s1 = arr[start:]
-        s2 = arr[:end]
-        return np.concatenate((s1, s2), axis=0)
-
-    def __len__(self):
-        return self._curr_size
-
-    def _assign(self, pos, exp):
-        self.state[pos] = exp.state
-        self.reward[pos] = exp.reward
-        self.action[pos] = exp.action
-        self.isOver[pos] = exp.isOver
-        self.human[pos] = exp.human
 ###############################################################################
 ###############################################################################
 
@@ -307,7 +220,8 @@ class ExpReplay(DataFlow, Callback):
 
         self.hmem = HumanDemReplayMemory(memory_size, state_shape, history_len)
         self.hmem.load_experience()
-     
+        exit()
+
         ###############################################################################
         self._current_ob = self.player.reset()
         self._player_scores = StatCounter()
