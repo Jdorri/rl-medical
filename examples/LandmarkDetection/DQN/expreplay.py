@@ -124,9 +124,9 @@ class ReplayMemory(object):
 ###############################################################################
 # HITL UPDATE
 
-class HumanDemReplayMemory(object):
+class HumanDemReplayMemory(ReplayMemory):
     def __init__(self, max_size, state_shape, history_len):
-        super(HumanDemReplayMemory, self).__init__()
+        super(HumanDemReplayMemory, self).__init__(max_size, state_shape, history_len)
 
     def load_experience(self):
         """
@@ -134,7 +134,7 @@ class HumanDemReplayMemory(object):
         Actions are stored under .data/HITL in the form of log files
         """
         directory = "./data/HITL"
-        image_directory = "/volumes/project/2019/545/g1954503/aeg19/"
+        image_directory = "/volumes/project/2019/545/g1954503/aeg19/Brain_MRI/"
         # Loop 1: Loops through all log files in the directory
         for filename in os.listdir("./data/HITL"):
             if filename.endswith(".pickle") or filename.endswith(".p"): 
