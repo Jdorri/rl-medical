@@ -438,7 +438,6 @@ class AppSettingsBrowseMode(QFrame):
         ''' Activating HITL mode giv es following actions:
             - Make HITL_delete button clickable
             - Make HITL_mode button clickable
-            - Switch paths in dataloader so it uses all training data (rather than small sample)
 
             Deactivating HITL mode gives following actions:
             - Save HITL episode
@@ -457,11 +456,6 @@ class AppSettingsBrowseMode(QFrame):
             # Activate HITL mode button
             self.HITL_mode.setChecked(True)
             self.HITL_delete.setDisabled(False)
-
-            # # Switch file path
-            # self.set_HITL_txtfile_paths()
-            # self.selected_list = [self.fname_images, self.fname_landmarks]
-            # self.env.set_dataLoader(self.selected_list)
 
         elif result == QMessageBox.No and self.HITL:
             self.HITL_mode.setChecked(True)
@@ -611,10 +605,6 @@ class AppSettingsBrowseMode(QFrame):
         path = f'./data/HITL/log_{str(now)}.pickle'
         with open(path, 'wb') as f:
             pickle.dump(self.env.HITL_logger, f)
-
-    def set_HITL_txtfile_paths(self):
-        self.fname_images.name = "./data/filenames/brain_filenames_HITL.txt"
-        self.fname_landmarks.name = "./data/filenames/brain_landmarks_HITL.txt"
 
 
 class Controller:

@@ -15,7 +15,7 @@ for l in log:
     for state in l['states']:
         states += 1
         # print(state)
-    print('\n')
+    # print('\n')
 
 print('Episodes: ', episodes)
 print('States: ', states)
