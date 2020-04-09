@@ -134,6 +134,7 @@ class HumanDemReplayMemory(ReplayMemory):
         Actions are stored under .data/HITL in the form of log files
         """
         directory = "./data/HITL/HITL_dummy"
+        #TODO directory needs to be flexible for pulling images
         image_directory = "/volumes/project/2019/545/g1954503/aeg19/Brain_MRI/"
         # Loop 1: Loops through all log files in the directory
         for filename in os.listdir(directory):
@@ -143,10 +144,13 @@ class HumanDemReplayMemory(ReplayMemory):
                 file_contents = pickle.load( open( log_file, "rb" ) )
                 # Loop 2: Loops through all 3D images in the log file
                 for entry in file_contents:
-                    #TODO directory needs to be flexible for pulling images
                     image_path = os.path.join(image_directory, entry['img_name']+".nii.gz")
                     target_coordinates = entry['target']
                     logger.info("Image path: {}".format(image_path))
+                    dummy_env = MedicalPlayer(directory=image_directory, screen_dims=(45, 45, 45),
+                                                        viz=0, saveGif='False', saveVideo='False',
+                                                        task='play', files_list=[image_path], data_type='HITL',
+                                                        max_num_frames=1500)                    
                     # Loop 3: Loops through each state, action pair recorded
                     for key, state_coordinates in enumerate(entry['states']):
                         if key != len(entry['states'])-1:
@@ -154,11 +158,7 @@ class HumanDemReplayMemory(ReplayMemory):
                             logger.info("{} reward: {}".format(key+1, entry['rewards'][key+1]))
                             logger.info("{} action: {}".format(key+1, entry['actions'][key+1]))
                             logger.info("{} is_over: {}".format(key+1, entry['is_over'][key+1]))
-                            logger.info("{} resolution: {}".format(key+1, entry['resolution'][key+1]))
-                            dummy_env = MedicalPlayer(directory=image_directory, screen_dims=(45, 45, 45),
-                                                        viz=0, saveGif='False', saveVideo='False',
-                                                        task='play', files_list=[image_path], data_type='HITL',
-                                                        max_num_frames=1500)
+                            logger.info("{} resolution: {}".format(key+1, entry['resolution'][key+1]))                            
                             dummy_env.HITL_set_location(state_coordinates)
                             state_image = dummy_env._current_state()
                             self.append(Experience(state_image, entry['actions'][key+1], entry['rewards'][key+1], entry['is_over'][key+1], True))
