@@ -458,10 +458,10 @@ class AppSettingsBrowseMode(QFrame):
             self.HITL_mode.setChecked(True)
             self.HITL_delete.setDisabled(False)
 
-            # Switch file path
-            self.set_HITL_txtfile_paths()
-            self.selected_list = [self.fname_images, self.fname_landmarks]
-            self.env.set_dataLoader(self.selected_list)
+            # # Switch file path
+            # self.set_HITL_txtfile_paths()
+            # self.selected_list = [self.fname_images, self.fname_landmarks]
+            # self.env.set_dataLoader(self.selected_list)
 
         elif result == QMessageBox.No and self.HITL:
             self.HITL_mode.setChecked(True)

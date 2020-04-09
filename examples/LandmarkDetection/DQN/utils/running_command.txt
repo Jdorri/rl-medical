@@ -8,8 +8,10 @@ python DQN.py --task play --algo DQN --gpu 0 --load data/models/DQN_multiscale_b
 python3 DQN.py --task play --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files './data/filenames/image_files.txt' --type 'BrainMRI'
 python3 DQN.py --task train --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files ['./data/filenames/brain_test_files_new_paths.txt','./data/filenames/brain_test_landmarks_new_paths.txt'] --type 'BrainMRI'
 
+/vol/project/2019/545/g1954503/aeg19/
 
 For Brain MRI:
+/vol/biomedic/users/aa16914/shared/data/RL_data/brain_MRI_adult/Normalized_MNI/
 /vol/biomedic/users/aa16914/shared/data/RL_data/brain_test_files_new_paths.txt
 /vol/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000
 
@@ -49,3 +51,5 @@ for ext in exts:
 
     with open(filename, 'w') as f:
         f.write(r.content)
+
+/Volumes/project/2019/545/g1954503/oen19/rl-medical/examples/LandmarkDetection/DQN
