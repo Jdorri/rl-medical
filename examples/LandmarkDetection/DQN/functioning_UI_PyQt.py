@@ -122,7 +122,7 @@ class RightWidgetSettings(QFrame):
         gridMode.setVerticalSpacing(2)
 
         self.GIF_edit =  QCheckBox()
-
+        self.video_edit = QCheckBox()
 
         grid = QGridLayout()
 
@@ -170,6 +170,7 @@ class RightWidgetSettings(QFrame):
             self.task_value = self.task_edit.currentText()
             self.name_value = self.name_edit.text()
             self.GIF_value = self.GIF_edit.isChecked()
+            self.video_value = self.video_edit.isChecked()
             self.run_DQN()
 
     @pyqtSlot()
