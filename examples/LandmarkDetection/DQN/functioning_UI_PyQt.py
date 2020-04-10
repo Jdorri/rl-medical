@@ -174,7 +174,7 @@ class RightWidgetSettings(QFrame):
         self.testing = False
         self.test_click = None
     
-    @pyqtSlot()
+    @pyqtSlot(int)
     def changeValue(self, value):
         """
         Event handler for slider (adjusting agent speed)
