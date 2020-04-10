@@ -80,9 +80,9 @@ class Window(QMainWindow):
 
         # Manage layout
         self.grid = QGridLayout()
+        self.grid.addWidget(self.right_widget, 0, 11, 1, 1)
         self.grid.addWidget(self.left_widget, 0, 0, 1, 1) # (x, y, rowspan, colspan)
         self.grid.addWidget(self.widget, 0, 1, 1, 10)
-        self.grid.addWidget(self.right_widget, 0, 11, 1, 1)
 
         self.layout_widget = QWidget()
         self.layout_widget.setLayout(self.grid)
@@ -235,13 +235,13 @@ class LeftWidgetSettings(QFrame):
             self.run_button.clicked.connect(self.buttonClicked)
             self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
 
-        # Slider settings
-        self.speed_slider = QSlider(Qt.Horizontal, self)
-        self.speed_slider.setFocusPolicy(Qt.NoFocus)
-        self.speed_slider.setMinimum(0)
-        self.speed_slider.setMaximum(5)
-        self.speed_slider.setValue(5)
-        self.speed_slider.valueChanged[int].connect(self.changeValue)
+        # # Slider settings
+        # self.speed_slider = QSlider(Qt.Horizontal, self)
+        # self.speed_slider.setFocusPolicy(Qt.NoFocus)
+        # self.speed_slider.setMinimum(0)
+        # self.speed_slider.setMaximum(5)
+        # self.speed_slider.setValue(5)
+        # self.speed_slider.valueChanged[int].connect(self.changeValue)
 
         # Terminal log
         self.terminal = QPlainTextEdit(self)
@@ -256,9 +256,9 @@ class LeftWidgetSettings(QFrame):
         vbox.addWidget(hr)
 
         # Second section
-        vbox.addWidget(label_speed)
-        vbox.addWidget(self.speed_slider)
-        vbox.addWidget(hr2)
+        # vbox.addWidget(label_speed)
+        # vbox.addWidget(self.speed_slider)
+        # vbox.addWidget(hr2)
 
         # Third section (terminal)
         vbox.addWidget(label_log)

@@ -85,6 +85,7 @@ class RightWidgetSettings(QFrame):
         super(RightWidgetSettings, self).__init__(*args, **kwargs)
 
         # window title
+        self.thread = WorkerThread(None)
         self.setWindowTitle('Anatomical Landmark Detection')
         self.window = None
 
@@ -115,6 +116,15 @@ class RightWidgetSettings(QFrame):
         self.dtype = filenames_GUI()
         self.fname_logs_dir = "./data"
 
+        # Slider settings
+        label_speed = QLabel("Agent Speed")
+        self.speed_slider = QSlider(Qt.Horizontal, self)
+        self.speed_slider.setFocusPolicy(Qt.NoFocus)
+        self.speed_slider.setMinimum(0)
+        self.speed_slider.setMaximum(5)
+        self.speed_slider.setValue(5)
+        self.speed_slider.valueChanged[int].connect(self.changeValue)
+
         # initialise grid/set spacing
         gridMode = QGridLayout()
         gridMode.addWidget(self.testMode, 0, 0)
@@ -134,9 +144,11 @@ class RightWidgetSettings(QFrame):
         grid.addWidget(self.load_edit, 2, 1)
         grid.addWidget(self.landmark_file, 3, 0)
         grid.addWidget(self.landmark_file_edit, 3, 1)
-        verticalSpacer = QSpacerItem(0, 30)
-        grid.addItem(verticalSpacer, 4, 0)
-        grid.addWidget(self.run, 5, 0)
+        grid.addItem(QSpacerItem(0, 30), 4, 0) # add space
+        grid.addWidget(label_speed, 5, 0, 1, 2)
+        grid.addWidget(self.speed_slider, 6, 0, 1, 2)
+        grid.addItem(QSpacerItem(0, 30), 7, 0) # add space
+        grid.addWidget(self.run, 8, 0)
 
         gridMode.setContentsMargins(0, 0, 0, 30)
 
@@ -145,9 +157,6 @@ class RightWidgetSettings(QFrame):
         vbox.addLayout(gridMode)
         vbox.addLayout(grid)
         vbox.addStretch()
-        # gridNest = QGridLayout()
-        # gridNest.addLayout(gridMode, 0, 0)
-        # gridNest.addLayout(grid, 1, 0)
 
         self.setLayout(vbox)
         # self.setGeometry(100, 100, 350, 400)
@@ -163,6 +172,17 @@ class RightWidgetSettings(QFrame):
         # Flags for testing
         self.testing = False
         self.test_click = None
+    
+    def changeValue(self, value):
+        """
+        Event handler for slider (adjusting agent speed)
+        """
+        if value >= 4:
+            self.thread.speed = WorkerThread.FAST
+        elif value >= 2:
+            self.thread.speed = WorkerThread.MEDIUM
+        else:
+            self.thread.speed = WorkerThread.SLOW
 
     @pyqtSlot()
     def on_clicking_run(self):

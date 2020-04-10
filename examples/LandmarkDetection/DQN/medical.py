@@ -811,9 +811,9 @@ class MedicalPlayer(gym.Env):
 
         if self.task != 'browse':
             # Control agent speed
-            if self.viewer.left_widget.thread.speed == WorkerThread.FAST:
+            if self.viewer.right_widget.thread.speed == WorkerThread.FAST:
                 time.sleep(0)
-            elif self.viewer.left_widget.thread.speed == WorkerThread.MEDIUM:
+            elif self.viewer.right_widget.thread.speed == WorkerThread.MEDIUM:
                 time.sleep(0.5)
             else:
                 time.sleep(1.5)
