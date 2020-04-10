@@ -83,6 +83,8 @@ class RightWidgetSettings(QFrame):
 
     def __init__(self, *args, **kwargs):
         super(RightWidgetSettings, self).__init__(*args, **kwargs)
+        self.setMaximumWidth(400)
+        self.setMinimumHeight(800)
 
         # window title
         self.thread = WorkerThread(None)
@@ -239,6 +241,7 @@ class RightWidgetSettings(QFrame):
 
     @pyqtSlot()
     def on_clicking_browseMode(self):
+        self.thread.terminate = True
         self.SWITCH_WINDOW.emit()
 
     def run_DQN(self):

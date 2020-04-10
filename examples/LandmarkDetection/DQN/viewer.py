@@ -208,6 +208,8 @@ class LeftWidgetSettings(QFrame):
     def __init__(self, window, gui_launcher=False):
         super().__init__()
         self.window = window # Store window object to enable control over windows functionality
+        self.setMaximumWidth(400)
+        self.setMinimumHeight(800)
 
         # TODO: brain, cardiac, ultrasound default
 
