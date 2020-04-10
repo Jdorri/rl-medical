@@ -204,6 +204,8 @@ class LeftWidgetSettings(QFrame):
     """
     Left widget controlling GUI elements settings.
     """
+    terminal_signal = pyqtSignal(dict)
+
     def __init__(self, window, gui_launcher=False):
         super().__init__()
         self.thread = WorkerThread(None) # Store thread to allow pause and run functionality
@@ -219,6 +221,8 @@ class LeftWidgetSettings(QFrame):
         hr2.setStyleSheet("margin: 10px 0")
         label_speed = QLabel("Agent Speed")
         label_run.setStyleSheet("margin-top: 10px")
+        label_log = QLabel("Logs")
+        label_log.setStyleSheet("margin-top: 10px")
 
         # Button settings
         # If gui just launch, display accordingly (initial state)
@@ -239,6 +243,10 @@ class LeftWidgetSettings(QFrame):
         self.speed_slider.setValue(5)
         self.speed_slider.valueChanged[int].connect(self.changeValue)
 
+        # Terminal log
+        self.terminal = QPlainTextEdit(self)
+        self.terminal.setReadOnly(True)
+
         # Manage layout
         vbox = QVBoxLayout()
         # First section
@@ -252,6 +260,10 @@ class LeftWidgetSettings(QFrame):
         vbox.addWidget(self.speed_slider)
         vbox.addWidget(hr2)
 
+        # Third section (terminal)
+        vbox.addWidget(label_log)
+        vbox.addWidget(self.terminal)
+
         # Third section
         vbox.addStretch()
 
@@ -259,6 +271,36 @@ class LeftWidgetSettings(QFrame):
 
         # Flags for testing
         self.testing = False
+
+        # Connect to terminal
+        self.terminal_signal.connect(self.terminal_signal_handler)
+    
+    @pyqtSlot(dict)
+    def terminal_signal_handler(self, value):
+        """
+        Used to handle agent signal when it moves.
+        """
+        current_episode = value["current_episode"]
+        total_episode = value["total_episode"]
+        score = value["score"]
+        distance_error = value["distance_error"]
+        q_values = value["q_values"]
+
+        self.terminal.appendHtml(
+            f"<b> Episode {current_episode}/{total_episode} </b>"
+        )
+
+        self.terminal.appendHtml(
+            f"<i>Score:</i> {score}"
+        )
+
+        self.terminal.appendHtml(
+            f"<i>Distance Error:</i> {distance_error}"
+        )
+
+        self.terminal.appendHtml(
+            f"<i>Q Values:</i> {q_values} <hr />"
+        )
 
     def buttonClicked(self):
         """

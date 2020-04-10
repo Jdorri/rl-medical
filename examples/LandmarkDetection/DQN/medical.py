@@ -797,7 +797,7 @@ class MedicalPlayer(gym.Env):
         while self.viewer.left_widget.thread.pause:
             time.sleep(1)
 
-        # Need to emit signal here
+        # Need to emit signal here (to draw images)
         self.viewer.widget.agent_signal.emit({
             "arrs": (img, img_x, img_y),
             "agent_loc": current_point,

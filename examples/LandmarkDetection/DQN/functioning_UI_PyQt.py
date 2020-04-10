@@ -111,8 +111,6 @@ class RightWidgetSettings(QFrame):
         self.name_edit = QLineEdit()
         self.run = QPushButton('Run', self)
         self.run.setFocusPolicy(Qt.NoFocus)
-        self.exit = QPushButton('Exit', self)
-        self.exit.setFocusPolicy(Qt.NoFocus)
 
         self.testMode = QPushButton('Test Mode', self)
         self.testMode.setCheckable(True)
@@ -172,7 +170,6 @@ class RightWidgetSettings(QFrame):
         #grid.addWidget(self.name_edit, 10, 1)
 
         grid.addWidget(self.run, 11, 0)
-        grid.addWidget(self.exit, 12, 0)
 
         gridNest = QGridLayout()
         gridNest.addLayout(gridMode, 0, 0)
@@ -190,7 +187,6 @@ class RightWidgetSettings(QFrame):
         self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
         #self.log_dir_edit.clicked.connect(self.on_clicking_browse_logs_dir)
         self.run.clicked.connect(self.on_clicking_run)
-        self.exit.clicked.connect(self.on_clicking_exit)
 
         self.show()
 
@@ -210,10 +206,6 @@ class RightWidgetSettings(QFrame):
             self.run_DQN()
             # print(self.task_value)
             # self.close()
-
-    @pyqtSlot()
-    def on_clicking_exit(self):
-        self.close_it
 
     @pyqtSlot()
     def on_clicking_browse_model(self):
@@ -263,10 +255,6 @@ class RightWidgetSettings(QFrame):
         self.thread.start()
 
         print(init_player._location)
-
-    @pyqtSlot()
-    def close_it(self):
-        self.close()
 
     def thread_function(self):
         """Run on secondary thread"""
