@@ -331,6 +331,7 @@ class ExpReplay(DataFlow, Callback):
                 batch_exp = [self.hmem.sample(i) for i in idx]
 
                 yield self._process_batch(batch_exp)
+                logger.info("batch ...".format(batch_exp))
                 self._populate_job_queue.put(1)
 
         else:
