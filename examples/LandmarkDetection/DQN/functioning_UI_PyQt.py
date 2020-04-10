@@ -90,16 +90,10 @@ class RightWidgetSettings(QFrame):
         self.window = None
 
         # initialise labels
-        self.load = QLabel('Load Model', self)
         self.task = QLabel('Task', self)
-        self.landmark_file = QLabel('Landmarks', self)
 
         # initialise widgets
-        self.load_edit = QPushButton('Browse', self)
         self.task_edit = QComboBox()
-        self.landmark_file_edit = QPushButton('Browse', self)
-        self.name_edit = QLineEdit()
-
 
         # run
         self.run_button = QPushButton('Start', self)
@@ -134,24 +128,17 @@ class RightWidgetSettings(QFrame):
         gridMode.addWidget(self.browseMode, 0, 1)
         gridMode.setVerticalSpacing(2)
 
-        self.GIF_edit =  QCheckBox()
-        self.video_edit = QCheckBox()
-
         grid = QGridLayout()
 
         # Add widgets to grid
         grid.addWidget(self.task, 1, 0)
         grid.addWidget(self.task_edit, 1, 1)
         grid.setVerticalSpacing(20)
-        grid.addWidget(self.load, 2, 0)
-        grid.addWidget(self.load_edit, 2, 1)
-        grid.addWidget(self.landmark_file, 3, 0)
-        grid.addWidget(self.landmark_file_edit, 3, 1)
-        grid.addItem(QSpacerItem(0, 30), 4, 0) # add space
-        grid.addWidget(label_speed, 5, 0, 1, 2)
-        grid.addWidget(self.speed_slider, 6, 0, 1, 2)
-        grid.addItem(QSpacerItem(0, 30), 7, 0) # add space
-        # grid.addWidget(self.run, 8, 0)
+        grid.addItem(QSpacerItem(0, 30), 2, 0) # add space
+        grid.addWidget(label_speed, 3, 0, 1, 2)
+        grid.addWidget(self.speed_slider, 4, 0, 1, 2)
+        grid.addItem(QSpacerItem(0, 30), 5, 0) # add space
+        # grid.addWidget(self.run, 6, 0)
 
         gridMode.setContentsMargins(0, 0, 0, 30)
 
@@ -169,16 +156,15 @@ class RightWidgetSettings(QFrame):
         vbox.addItem(QSpacerItem(0, 30))
         vbox.addWidget(label_log)
         vbox.addWidget(self.terminal)
+        vbox.addItem(QSpacerItem(300, 0))
         vbox.addStretch()
 
         self.setLayout(vbox)
-        # self.setGeometry(100, 100, 350, 400)
 
         # Event handler
-        self.load_edit.clicked.connect(self.on_clicking_browse_model)
         self.browseMode.clicked.connect(self.on_clicking_browseMode)
-        self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
         self.run_button.clicked.connect(self.on_clicking_run)
+        
         # Connect to terminal
         self.terminal_signal.connect(self.terminal_signal_handler)
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
@@ -188,6 +174,7 @@ class RightWidgetSettings(QFrame):
         self.testing = False
         self.test_click = None
     
+    @pyqtSlot()
     def changeValue(self, value):
         """
         Event handler for slider (adjusting agent speed)
@@ -199,23 +186,13 @@ class RightWidgetSettings(QFrame):
         else:
             self.thread.speed = WorkerThread.SLOW
 
-    # @pyqtSlot()
-    # def on_clicking_run(self):
-    #     if not self.testing:
-    #         self.task_value = self.task_edit.currentText()
-    #         self.name_value = self.name_edit.text()
-    #         self.GIF_value = False
-    #         self.video_value = False
-    #         self.run_DQN()
-    #         print("hello")
-
+    @pyqtSlot()
     def on_clicking_run(self):
         """
         Event handler (slot) for when the button is clicked
         """
         if self.run_button.text() == "Start":
             self.task_value = self.task_edit.currentText()
-            self.name_value = self.name_edit.text()
             self.GIF_value = False
             self.video_value = False
             self.run_button.setText("Pause")
@@ -261,21 +238,8 @@ class RightWidgetSettings(QFrame):
         )
 
     @pyqtSlot()
-    def on_clicking_browse_model(self):
-        if not self.testing:
-            self.fname_model, _ = QFileDialog.getOpenFileName(None, None,
-                "./data/models", filter="*.data-*")
-            print(self.fname_model)
-
-    @pyqtSlot()
     def on_clicking_browseMode(self):
         self.SWITCH_WINDOW.emit()
-
-    @pyqtSlot()
-    def on_clicking_browse_landmarks(self):
-        if not self.testing:
-            self.fname_landmarks.name, _ = QFileDialog.getOpenFileName(None, None,
-                "./data/filenames", filter="txt files (*landmark*.txt)")
 
     def run_DQN(self):
         # if self.GPU_value:

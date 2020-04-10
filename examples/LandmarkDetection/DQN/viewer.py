@@ -204,65 +204,38 @@ class LeftWidgetSettings(QFrame):
     """
     Left widget controlling GUI elements settings.
     """
-    terminal_signal = pyqtSignal(dict)
 
     def __init__(self, window, gui_launcher=False):
         super().__init__()
-        self.thread = WorkerThread(None) # Store thread to allow pause and run functionality
         self.window = window # Store window object to enable control over windows functionality
 
-        # Widgets
-        # Label settings
-        # label_settings = QLabel("<b>SETTINGS</b>")
-        label_run = QLabel("Pause Agent")
-        hr = QLabel("<hr />")
-        hr.setStyleSheet("margin: 10px 0")
-        hr2 = QLabel("<hr />")
-        hr2.setStyleSheet("margin: 10px 0")
-        label_speed = QLabel("Agent Speed")
-        label_run.setStyleSheet("margin-top: 10px")
-        label_log = QLabel("Logs")
-        label_log.setStyleSheet("margin-top: 10px")
+        # TODO: brain, cardiac, ultrasound default
 
-        # Button settings
-        # If gui just launch, display accordingly (initial state)
-        if gui_launcher:
-            self.run_button = QPushButton("Pause")
-            self.run_button.clicked.connect(self.buttonClicked)
-            self.run_button.setStyleSheet("background-color:#f44336; color:white")
-        else:
-            self.run_button = QPushButton("Start")
-            self.run_button.clicked.connect(self.buttonClicked)
-            self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+        # Settings
 
-        # # Slider settings
-        # self.speed_slider = QSlider(Qt.Horizontal, self)
-        # self.speed_slider.setFocusPolicy(Qt.NoFocus)
-        # self.speed_slider.setMinimum(0)
-        # self.speed_slider.setMaximum(5)
-        # self.speed_slider.setValue(5)
-        # self.speed_slider.valueChanged[int].connect(self.changeValue)
+        # Load model settings
+        self.model_file = QLabel('Load Model', self)
+        self.model_file_edit = QPushButton('+', self)
 
-        # Terminal log
-        self.terminal = QPlainTextEdit(self)
-        self.terminal.setReadOnly(True)
+        # Load landmark settings
+        self.landmark_file = QLabel('Load Landmark', self)
+        self.landmark_file_edit = QPushButton('+', self)
+
+        # Upload image settings
+        self.img_file = QLabel('Upload Image', self)
+        self.img_file_edit = QPushButton('+', self)
 
         # Manage layout
         vbox = QVBoxLayout()
-        # First section
-        # vbox.addWidget(label_settings)
-        vbox.addWidget(label_run)
-        vbox.addWidget(self.run_button)
-        vbox.addWidget(hr)
 
-        # Second section
-        # vbox.addWidget(label_speed)
-        # vbox.addWidget(self.speed_slider)
-        # vbox.addWidget(hr2)
-
-        # Third section (terminal)
-        vbox.addWidget(label_log)
-        vbox.addWidget(self.terminal)
+        vbox.addWidget(self.model_file)
+        vbox.addWidget(self.model_file_edit)
+        vbox.addItem(QSpacerItem(0, 30))
+        vbox.addWidget(self.landmark_file)
+        vbox.addWidget(self.landmark_file_edit)
+        vbox.addItem(QSpacerItem(300, 30))
+        vbox.addWidget(self.img_file)
+        vbox.addWidget(self.img_file_edit)
 
         # Third section
         vbox.addStretch()
@@ -272,66 +245,33 @@ class LeftWidgetSettings(QFrame):
         # Flags for testing
         self.testing = False
 
-        # Connect to terminal
-        self.terminal_signal.connect(self.terminal_signal_handler)
-    
-    @pyqtSlot(dict)
-    def terminal_signal_handler(self, value):
-        """
-        Used to handle agent signal when it moves.
-        """
-        current_episode = value["current_episode"]
-        total_episode = value["total_episode"]
-        score = value["score"]
-        distance_error = value["distance_error"]
-        q_values = value["q_values"]
+        # Event handler connection
+        self.model_file_edit.clicked.connect(self.on_clicking_browse_model)
+        self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
+        self.img_file_edit.clicked.connect(self.on_clicking_browse_images)
 
-        self.terminal.appendHtml(
-            f"<b> Episode {current_episode}/{total_episode} </b>"
-        )
+    @pyqtSlot()
+    def on_clicking_browse_model(self):
+        if not self.testing:
+            self.fname_model, _ = QFileDialog.getOpenFileName(None, None,
+                "./data/models", filter="*.data-*")
+            print(self.fname_model)
 
-        self.terminal.appendHtml(
-            f"<i>Score:</i> {score}"
-        )
+    @pyqtSlot()
+    def on_clicking_browse_landmarks(self):
+        if not self.testing:
+            self.fname_landmarks.name, _ = QFileDialog.getOpenFileName(None, None,
+                "./data/filenames", filter="txt files (*landmark*.txt)")
 
-        self.terminal.appendHtml(
-            f"<i>Distance Error:</i> {distance_error}"
-        )
 
-        self.terminal.appendHtml(
-            f"<i>Q Values:</i> {q_values} <hr />"
-        )
-
-    def buttonClicked(self):
-        """
-        Event handler (slot) for when the button is clicked
-        """
-        if self.run_button.text() == "Start":
-            self.thread.start()
-            self.run_button.setText("Pause")
-            self.window.statusbar.showMessage("Run")
-            self.run_button.setStyleSheet("background-color:#f44336; color:white")
-        elif self.run_button.text() == "Resume":
-            self.thread.pause = False
-            self.run_button.setText("Pause")
-            self.run_button.setStyleSheet("background-color:#f44336; color:white")
-            self.window.statusbar.showMessage("Running")
-        else:
-            self.thread.pause = True
-            self.run_button.setText("Resume")
-            self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-            self.window.statusbar.showMessage("Paused")
-
-    def changeValue(self, value):
-        """
-        Event handler for slider (adjusting agent speed)
-        """
-        if value >= 4:
-            self.thread.speed = WorkerThread.FAST
-        elif value >= 2:
-            self.thread.speed = WorkerThread.MEDIUM
-        else:
-            self.thread.speed = WorkerThread.SLOW
+    @pyqtSlot()
+    def on_clicking_browse_images(self):
+        if not self.testing:
+            self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
+                "./data/filenames", filter="txt files (*test_files*.txt)")
+            self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
+                "./data/filenames", filter="txt files (*landmarks*.txt)")
+            self.load_img()
 
 
 ################################################################################
