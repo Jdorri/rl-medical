@@ -191,9 +191,12 @@ class MedicalPlayer(gym.Env):
         }
         self.HITL_logger.append(log)
 
-    def HITL_set_location(self, location):
+    def HITL_set_location(self, location, res):
         """ Method to set the location in the image to that specified in the logs """
         self._location = location
+        self.xscale = res
+        self.yscale = res
+        self.zscale = res
 
     def reset(self):
         # with _ALE_LOCK:
