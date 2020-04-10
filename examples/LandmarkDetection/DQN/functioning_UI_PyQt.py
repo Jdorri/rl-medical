@@ -77,7 +77,7 @@ class filenames_GUI:
 
 # custom class
 class RightWidgetSettings(QFrame):
-
+    terminal_signal = pyqtSignal(dict)
     SWITCH_WINDOW = pyqtSignal()
     MODE = 'DEFAULT MODE'
 
@@ -99,7 +99,10 @@ class RightWidgetSettings(QFrame):
         self.task_edit = QComboBox()
         self.landmark_file_edit = QPushButton('Browse', self)
         self.name_edit = QLineEdit()
-        self.run = QPushButton('Run', self)
+
+
+        # run
+        self.run_button = QPushButton('Start', self)
 
         self.testMode = QPushButton('Test Mode', self)
         self.testMode.setCheckable(True)
@@ -148,14 +151,24 @@ class RightWidgetSettings(QFrame):
         grid.addWidget(label_speed, 5, 0, 1, 2)
         grid.addWidget(self.speed_slider, 6, 0, 1, 2)
         grid.addItem(QSpacerItem(0, 30), 7, 0) # add space
-        grid.addWidget(self.run, 8, 0)
+        # grid.addWidget(self.run, 8, 0)
 
         gridMode.setContentsMargins(0, 0, 0, 30)
+
+        # Terminal log
+        label_log = QLabel("Logs")
+        label_log.setStyleSheet("margin-top: 10px")
+        self.terminal = QPlainTextEdit(self)
+        self.terminal.setReadOnly(True)
 
         # Main layout
         vbox = QVBoxLayout()
         vbox.addLayout(gridMode)
         vbox.addLayout(grid)
+        vbox.addWidget(self.run_button)
+        vbox.addItem(QSpacerItem(0, 30))
+        vbox.addWidget(label_log)
+        vbox.addWidget(self.terminal)
         vbox.addStretch()
 
         self.setLayout(vbox)
@@ -165,8 +178,10 @@ class RightWidgetSettings(QFrame):
         self.load_edit.clicked.connect(self.on_clicking_browse_model)
         self.browseMode.clicked.connect(self.on_clicking_browseMode)
         self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
-        self.run.clicked.connect(self.on_clicking_run)
-
+        self.run_button.clicked.connect(self.on_clicking_run)
+        # Connect to terminal
+        self.terminal_signal.connect(self.terminal_signal_handler)
+        self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
         self.show()
 
         # Flags for testing
@@ -184,14 +199,66 @@ class RightWidgetSettings(QFrame):
         else:
             self.thread.speed = WorkerThread.SLOW
 
-    @pyqtSlot()
+    # @pyqtSlot()
+    # def on_clicking_run(self):
+    #     if not self.testing:
+    #         self.task_value = self.task_edit.currentText()
+    #         self.name_value = self.name_edit.text()
+    #         self.GIF_value = False
+    #         self.video_value = False
+    #         self.run_DQN()
+    #         print("hello")
+
     def on_clicking_run(self):
-        if not self.testing:
+        """
+        Event handler (slot) for when the button is clicked
+        """
+        if self.run_button.text() == "Start":
             self.task_value = self.task_edit.currentText()
             self.name_value = self.name_edit.text()
-            self.GIF_value = self.GIF_edit.isChecked()
-            self.video_value = self.video_edit.isChecked()
+            self.GIF_value = False
+            self.video_value = False
+            self.run_button.setText("Pause")
+            self.window.statusbar.showMessage("Running")
+            self.run_button.setStyleSheet("background-color:#f44336; color:white")
             self.run_DQN()
+        elif self.run_button.text() == "Resume":
+            self.thread.pause = False
+            self.run_button.setText("Pause")
+            self.run_button.setStyleSheet("background-color:#f44336; color:white")
+            self.window.statusbar.showMessage("Running")
+        else:
+            self.thread.pause = True
+            self.run_button.setText("Resume")
+            self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+            self.window.statusbar.showMessage("Paused")
+
+    @pyqtSlot(dict)
+    def terminal_signal_handler(self, value):
+        """
+        Used to handle agent signal when it moves.
+        """
+        current_episode = value["current_episode"]
+        total_episode = value["total_episode"]
+        score = value["score"]
+        distance_error = value["distance_error"]
+        q_values = value["q_values"]
+
+        self.terminal.appendHtml(
+            f"<b> Episode {current_episode}/{total_episode} </b>"
+        )
+
+        self.terminal.appendHtml(
+            f"<i>Score:</i> {score}"
+        )
+
+        self.terminal.appendHtml(
+            f"<i>Distance Error:</i> {distance_error}"
+        )
+
+        self.terminal.appendHtml(
+            f"<i>Q Values:</i> {q_values} <hr />"
+        )
 
     @pyqtSlot()
     def on_clicking_browse_model(self):
@@ -230,8 +297,8 @@ class RightWidgetSettings(QFrame):
         self.NUM_ACTIONS = init_player.action_space.n
         self.num_files = init_player.files.num_files
         # Create a thread to run background task
-        self.thread = WorkerThread(target_function=self.thread_function)
-        self.thread.start()
+        self.worker_thread = WorkerThread(target_function=self.thread_function)
+        self.worker_thread.start()
 
         print(init_player._location)
 

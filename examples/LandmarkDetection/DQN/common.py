@@ -64,7 +64,7 @@ def play_n_episodes(player, predfunc, nr, render=False, viewer=None):
                                                                     viewer=viewer)
         
         # Emit signal for log
-        viewer.left_widget.terminal_signal.emit({
+        viewer.right_widget.terminal_signal.emit({
             "current_episode": k+1,
             "total_episode": nr,
             "score": score,

@@ -794,7 +794,7 @@ class MedicalPlayer(gym.Env):
         #     exit()
 
         # Sleep until resume
-        while self.viewer.left_widget.thread.pause:
+        while self.viewer.right_widget.thread.pause:
             time.sleep(1)
 
         # Need to emit signal here (to draw images)
