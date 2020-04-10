@@ -313,6 +313,8 @@ class RightWidgetSettingsBrowseMode(QFrame):
         # window title
         self.setWindowTitle('Anatomical Landmark Detection')
         self.window = None
+        self.thread = WorkerThread(None)
+        self.thread.pause = False
 
         # initialise labels
         # self.img_file = QLabel('Image file', self)
@@ -397,7 +399,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         gridNest.addLayout(grid, 1, 0, 10, 0)
 
         self.setLayout(gridNest)
-        self.setGeometry(100, 100, 350, 400)
+        # self.setGeometry(100, 100, 350, 400)
 
         # connections
         self.testMode.clicked.connect(self.on_clicking_testMode)
