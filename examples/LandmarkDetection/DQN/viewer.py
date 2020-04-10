@@ -483,7 +483,6 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
         
-        print("episode end:", episode_end)
         # 3d plotting
         if not episode_end:
             self.x_traj.append(agent_loc[0])

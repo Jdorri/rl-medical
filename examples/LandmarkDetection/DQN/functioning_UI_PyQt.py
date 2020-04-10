@@ -89,28 +89,16 @@ class RightWidgetSettings(QFrame):
         self.window = None
 
         # initialise labels
-        #self.GPU = QLabel('GPU', self)
         self.load = QLabel('Load Model', self)
         self.task = QLabel('Task', self)
-        self.algorithm = QLabel('Algorithm', self)
         self.landmark_file = QLabel('Landmarks', self)
-        #self.GIF = QLabel('Save GIF', self)
-        #self.video = QLabel('Save Video', self)
-        #self.log_dir = QLabel('Store Logs', self)
-        #self.name = QLabel('Experiment Name', self)
 
         # initialise widgets
-        self.GPU_edit = QLineEdit()
         self.load_edit = QPushButton('Browse', self)
         self.task_edit = QComboBox()
-        self.algorithm_edit = QComboBox()
         self.landmark_file_edit = QPushButton('Browse', self)
-        self.GIF_edit =  QCheckBox()
-        self.video_edit = QCheckBox()
-        #self.log_dir_edit = QPushButton('Browse', self)
         self.name_edit = QLineEdit()
         self.run = QPushButton('Run', self)
-        self.run.setFocusPolicy(Qt.NoFocus)
 
         self.testMode = QPushButton('Test Mode', self)
         self.testMode.setCheckable(True)
@@ -118,10 +106,8 @@ class RightWidgetSettings(QFrame):
         self.browseMode = QPushButton('Browse Mode', self)
         self.browseMode.setCheckable(True)
 
-
         # add widget functionality
-        self.task_edit.addItems(['Play', 'Evaluation', 'Train'])
-        self.algorithm_edit.addItems(['DQN', 'Double', 'Dueling', 'Dueling Double'])
+        self.task_edit.addItems(['Play', 'Evaluation'])
 
         # temporary default file paths
         self.fname_images = filenames_GUI()
@@ -131,61 +117,43 @@ class RightWidgetSettings(QFrame):
 
         # initialise grid/set spacing
         gridMode = QGridLayout()
-        gridMode.setSpacing(1)
         gridMode.addWidget(self.testMode, 0, 0)
         gridMode.addWidget(self.browseMode, 0, 1)
+        gridMode.setVerticalSpacing(2)
+
 
         grid = QGridLayout()
-        grid.setSpacing(10)
 
         # Add widgets to grid
         grid.addWidget(self.task, 1, 0)
         grid.addWidget(self.task_edit, 1, 1)
+        grid.setVerticalSpacing(20)
+        grid.addWidget(self.load, 2, 0)
+        grid.addWidget(self.load_edit, 2, 1)
+        grid.addWidget(self.landmark_file, 3, 0)
+        grid.addWidget(self.landmark_file_edit, 3, 1)
+        verticalSpacer = QSpacerItem(0, 30)
+        grid.addItem(verticalSpacer, 4, 0)
+        grid.addWidget(self.run, 5, 0)
 
-        grid.addWidget(self.algorithm, 2, 0)
-        grid.addWidget(self.algorithm_edit, 2, 1)
+        gridMode.setContentsMargins(0, 0, 0, 30)
 
-        grid.addWidget(self.load, 3, 0)
-        grid.addWidget(self.load_edit, 3, 1)
+        # Main layout
+        vbox = QVBoxLayout()
+        vbox.addLayout(gridMode)
+        vbox.addLayout(grid)
+        vbox.addStretch()
+        # gridNest = QGridLayout()
+        # gridNest.addLayout(gridMode, 0, 0)
+        # gridNest.addLayout(grid, 1, 0)
 
-        #grid.addWidget(self.GPU, 4, 0)
-        #grid.addWidget(self.GPU_edit, 4, 1)
-
-        # grid.addWidget(self.mode, 5, 0)
-        # grid.addWidget(self.mode_edit, 5, 1)
-
-        grid.addWidget(self.landmark_file, 6, 0)
-        grid.addWidget(self.landmark_file_edit, 6, 1)
-
-        #grid.addWidget(self.GIF, 7, 0)
-        #grid.addWidget(self.GIF_edit, 7, 1)
-
-        #grid.addWidget(self.video, 8, 0)
-        #grid.addWidget(self.video_edit, 8, 1)
-
-        #grid.addWidget(self.log_dir, 9, 0)
-        #grid.addWidget(self.log_dir_edit, 9, 1)
-
-        #grid.addWidget(self.name, 10, 0)
-        #grid.addWidget(self.name_edit, 10, 1)
-
-        grid.addWidget(self.run, 11, 0)
-
-        gridNest = QGridLayout()
-        gridNest.addLayout(gridMode, 0, 0)
-        gridNest.addLayout(grid, 1, 0, 10, 0)
-
-        self.setLayout(gridNest)
-        self.setGeometry(100, 100, 350, 400)
-
-        # self.setLayout(grid)
+        self.setLayout(vbox)
         # self.setGeometry(100, 100, 350, 400)
 
-        # connections
+        # Event handler
         self.load_edit.clicked.connect(self.on_clicking_browse_model)
         self.browseMode.clicked.connect(self.on_clicking_browseMode)
         self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
-        #self.log_dir_edit.clicked.connect(self.on_clicking_browse_logs_dir)
         self.run.clicked.connect(self.on_clicking_run)
 
         self.show()
@@ -197,15 +165,9 @@ class RightWidgetSettings(QFrame):
     @pyqtSlot()
     def on_clicking_run(self):
         if not self.testing:
-            self.GPU_value = self.GPU_edit.text()
-            self.DQN_variant_value = self.algorithm_edit.currentText()
             self.task_value = self.task_edit.currentText()
-            self.GIF_value = self.GIF_edit.isChecked()
-            self.video_value = self.video_edit.isChecked()
             self.name_value = self.name_edit.text()
             self.run_DQN()
-            # print(self.task_value)
-            # self.close()
 
     @pyqtSlot()
     def on_clicking_browse_model(self):
@@ -223,13 +185,6 @@ class RightWidgetSettings(QFrame):
         if not self.testing:
             self.fname_landmarks.name, _ = QFileDialog.getOpenFileName(None, None,
                 "./data/filenames", filter="txt files (*landmark*.txt)")
-
-    # @pyqtSlot()
-    # def on_clicking_browse_logs_dir(self):
-    #     if self.testing:
-    #         self.test_click = True
-    #     else:
-    #         self.fname_logs_dir, _ = QFileDialog.getOpenFileName()
 
     def run_DQN(self):
         if self.GPU_value:
