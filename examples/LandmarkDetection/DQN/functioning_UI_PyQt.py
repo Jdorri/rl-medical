@@ -187,8 +187,8 @@ class RightWidgetSettings(QFrame):
                 "./data/filenames", filter="txt files (*landmark*.txt)")
 
     def run_DQN(self):
-        if self.GPU_value:
-            os.environ['CUDA_VISIBLE_DEVICES'] = self.GPU_value
+        # if self.GPU_value:
+            # os.environ['CUDA_VISIBLE_DEVICES'] = self.GPU_value
 
         # check input files
         if self.task_value == 'Play':
@@ -196,7 +196,7 @@ class RightWidgetSettings(QFrame):
         else:
             self.selected_list = [self.fname_images, self.fname_landmarks]
 
-        self.METHOD = self.DQN_variant_value
+        self.METHOD = "DQN"
         # load files into env to set num_actions, num_validation_files
         init_player = MedicalPlayer(files_list=self.selected_list,
                                     # data_type=self.dtype,
