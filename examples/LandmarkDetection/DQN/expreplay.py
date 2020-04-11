@@ -154,11 +154,11 @@ class HumanDemReplayMemory(ReplayMemory):
                     # Loop 3: Loops through each state, action pair recorded
                     for key, state_coordinates in enumerate(entry['states']):
                         if key != len(entry['states'])-1:
-                            logger.info("{} state: {}".format(key, state_coordinates))
-                            logger.info("{} reward: {}".format(key+1, entry['rewards'][key+1]))
-                            logger.info("{} action: {}".format(key+1, entry['actions'][key+1]))
-                            logger.info("{} is_over: {}".format(key+1, entry['is_over'][key+1]))
-                            logger.info("{} resolution: {}".format(key, entry['resolution'][key]))
+                            # logger.info("{} state: {}".format(key, state_coordinates))
+                            # logger.info("{} reward: {}".format(key+1, entry['rewards'][key+1]))
+                            # logger.info("{} action: {}".format(key+1, entry['actions'][key+1]))
+                            # logger.info("{} is_over: {}".format(key+1, entry['is_over'][key+1]))
+                            # logger.info("{} resolution: {}".format(key, entry['resolution'][key]))
                             dummy_env.HITL_set_location(state_coordinates, entry['resolution'][key])
                             state_image = dummy_env._current_state()
                             self.append(Experience(state_image, entry['actions'][key+1], entry['rewards'][key+1], entry['is_over'][key+1], True))
