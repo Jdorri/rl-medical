@@ -4,11 +4,11 @@ import glob
 
 
 
-user = None # put your username here
-type_ = 'LandmarkDetection' 
+user = 'hgc19' # put your username here
+type_ = 'LandmarkDetection'
 task = 'train'
 algo = 'DQN'
-data_type ='CardiacMRI' 
+data_type ='BrainMRI'
 
 
 
@@ -17,14 +17,14 @@ data_type ='CardiacMRI'
 # transferModel = "'/vol/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000'"#BrainMRI basecase
 # to_Transfer = "CNN DQN"
 
-discription = """Cardiac MRI[4] with transfer from Brain MRI[14] greedy initial exploration and transfer everything"""
+discription = """Human in the loop initial experimentation"""
 
 home = os.environ['HOME']
 local_branch_path = os.path.join(home, 'Documents/rl-medical/')#path to where the code is
 # local_branch_path = os.path.join(home, '/vol/project/2019/545/g1954503/oen19/rl-medical/')#path to where the code is
 
 data_path = os.path.join(home, '/vol/biomedic/users/aa16914/shared/data/RL_data')#path to where the raw data is
-output_path = os.path.join(home, '/vol/project/2019/545/g1954503/')#path to where to store the results 
+output_path = os.path.join(home, '/vol/project/2019/545/g1954503/')#path to where to store the results
 venv_path = os.path.join(home, '/vol/bitbucket/oen19/rl-medical/')#path to where the virural environment is
 
 
@@ -94,14 +94,14 @@ with open(job_file, 'w') as fh:
     fh.writelines("TERM=vt100\n") # or TERM=xterm
     fh.writelines("/usr/bin/nvidia-smi\n")
     fh.writelines("uptime\n")
-    fh.writelines(f"python {local_branch_path}examples/{type_}/DQN/DQN.py " 
-                                                            f"--task {task} " 
+    fh.writelines(f"python {local_branch_path}examples/{type_}/DQN/DQN.py "
+                                                            f"--task {task} "
                                                             f"--algo {algo} "
-                                                            f"--gpu 0 " 
+                                                            f"--gpu 0 "
                                                             # f"--load {model} "
                                                             # f"--transferModel {transferModel} {to_Transfer} "
                                                             f"--type {data_type} "
-                                                            f"--files {files} " 
+                                                            f"--files {files} "
                                                             f"--logDir {output_path} "
                                                             f"--name {data_type}{case_number}")
 
