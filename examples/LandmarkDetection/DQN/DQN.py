@@ -29,7 +29,7 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         launch_train_with_config)
 
 from thread import WorkerThread
-from viewer import SimpleImageViewer, Window
+# from viewer import SimpleImageViewer, Window # This wont work on GPU cluster so uncomment for now
 import pickle
 
 from PyQt5.QtWidgets import QApplication
