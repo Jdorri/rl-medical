@@ -101,10 +101,9 @@ class RightWidgetSettings(QFrame):
 
         # Task
         self.task = QLabel('Task', self)
-        # self.play_button = QPushButton("Play", self)
-        # self.eval_button = QPushButton("Evaluation", self)
-        self.task_edit = QComboBox()
-        self.task_edit.addItems(['Play', 'Evaluation'])
+        self.play_button = QRadioButton("Play")
+        self.play_button.setChecked(True)
+        self.eval_button = QRadioButton("Evaluation")
 
         # Agent speed
         label_speed = QLabel("Agent Speed")
@@ -130,25 +129,37 @@ class RightWidgetSettings(QFrame):
         self.dtype = filenames_GUI()
         self.fname_logs_dir = "./data"
 
-        # Layout
+        ## Layout
         # Auto-browse mode layout
         gridMode = QGridLayout()
         gridMode.setContentsMargins(0, 0, 0, 30)
         gridMode.addWidget(self.testMode, 0, 0)
+        gridMode.setHorizontalSpacing(0)
         gridMode.addWidget(self.browseMode, 0, 1)
         gridMode.setVerticalSpacing(2)
+
+        # Task layout
+        hbox_task = QHBoxLayout()
+        hbox_task.setSpacing(50)
+        hbox_task.addWidget(self.play_button)
+        hbox_task.addWidget(self.eval_button)
+
+        # Run layout
+        hbox_run = QHBoxLayout()
+        hbox_run.setSpacing(10)
+        hbox_run.addWidget(self.run_button)
+        hbox_run.addWidget(self.terminate_button)
 
         # Task, agent speed, run, layout
         grid = QGridLayout()
         grid.setVerticalSpacing(20) # spacing
         grid.addWidget(self.task, 1, 0)
-        # grid.addWidget(self.task_edit, 1, 1)
-        grid.addItem(QSpacerItem(0, 30), 2, 0) # add space
-        grid.addWidget(label_speed, 3, 0, 1, 2)
-        grid.addWidget(self.speed_slider, 4, 0, 1, 2)
-        grid.addItem(QSpacerItem(0, 30), 5, 0) # add space
-        grid.addWidget(self.run_button, 6, 0)
-        grid.addWidget(self.terminate_button, 6, 1)
+        grid.addLayout(hbox_task, 2, 0)
+        grid.addItem(QSpacerItem(0, 30), 3, 0) # add space
+        grid.addWidget(label_speed, 4, 0, 1, 2)
+        grid.addWidget(self.speed_slider, 5, 0, 1, 2)
+        grid.addItem(QSpacerItem(0, 30), 6, 0) # add space
+        grid.addLayout(hbox_run, 7, 0)
 
         # Main layout
         vbox = QVBoxLayout()
@@ -170,7 +181,7 @@ class RightWidgetSettings(QFrame):
         # CSS styling for some widget components
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
         self.terminate_button.setStyleSheet("background-color:#f44336; color:white")
-        
+
         self.show()
 
         # Flags for testing
@@ -198,6 +209,15 @@ class RightWidgetSettings(QFrame):
         
         # Reset simple image viewer
         self.window.widget.reset()
+    
+    def which_task(self):
+        """
+        Determine which radio button task is checked
+        """
+        if self.play_button.isChecked():
+            return "Play"
+        else:
+            return "Evaluation"
 
     @pyqtSlot()
     def on_clicking_run(self):
@@ -206,7 +226,7 @@ class RightWidgetSettings(QFrame):
         """
         if self.run_button.text() == "Start":
             self.thread.terminate = False
-            self.task_value = self.task_edit.currentText()
+            self.task_value = self.which_task()
             self.GIF_value = False
             self.video_value = False
             self.run_button.setText("Pause")
