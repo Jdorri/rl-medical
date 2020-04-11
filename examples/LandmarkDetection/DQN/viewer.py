@@ -214,16 +214,16 @@ class LeftWidgetSettings(QFrame):
         # Window object to access windows components
         self.window = window # Store window object to enable control over windows functionality
 
-        self.title = QLabel("Settings")
+        self.title = QLabel("<b> Settings </b>")
 
         ## Default file mode
-        self.simple_title = QLabel("Load Default Data")
+        self.simple_title = QLabel("<i> Load Default Data </i>")
         self.brain_button = QRadioButton("Brain")
         self.cardiac_button = QRadioButton("Cardiac")
         self.ultrasound_button = QRadioButton("Ultrasound")
 
         ## Advance file mode
-        self.advance_title = QLabel("Load Custom Data")
+        self.advance_title = QLabel("<i> Load Custom Data </i>")
         # Load model settings
         self.model_file = QLabel('Load Model', self)
         self.model_file_edit = QPushButton('Browse', self)
@@ -238,6 +238,12 @@ class LeftWidgetSettings(QFrame):
         self.img_file = QLabel('Upload Image', self)
         self.img_file_edit = QPushButton('Browse', self)
         self.img_file_edit_text = QLabel("No file selected")
+
+        # Logo settings
+        self.logo = QLabel()
+        pixmap_logo = QPixmap("imperial_logo.png")
+        pixmap_logo = pixmap_logo.scaledToHeight(64)
+        self.logo.setPixmap(pixmap_logo)
         
         ## Manage layout
         # Default data settings layout
@@ -269,15 +275,18 @@ class LeftWidgetSettings(QFrame):
         vbox.addWidget(self.title)
         vbox.addWidget(self.simple_title)
         vbox.addLayout(hbox_simple)
-        vbox.addItem(QSpacerItem(300, 30))
+        vbox.addWidget(QLabel("<hr />"))
         vbox.addWidget(self.advance_title)
         vbox.addWidget(self.img_file)
         vbox.addLayout(hbox_image)
+        vbox.addItem(QSpacerItem(300, 20))
         vbox.addWidget(self.landmark_file)
         vbox.addLayout(hbox_landmark)
+        vbox.addItem(QSpacerItem(300, 20))
         vbox.addWidget(self.model_file)
         vbox.addLayout(hbox_model)
         vbox.addStretch()
+        vbox.addWidget(self.logo)
 
         self.setLayout(vbox)
 

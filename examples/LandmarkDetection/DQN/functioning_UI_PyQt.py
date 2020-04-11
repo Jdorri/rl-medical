@@ -100,13 +100,13 @@ class RightWidgetSettings(QFrame):
         self.browseMode.setCheckable(True)
 
         # Task
-        self.task = QLabel('Task', self)
+        self.task = QLabel('<i> Task </i>', self)
         self.play_button = QRadioButton("Play")
         self.play_button.setChecked(True)
         self.eval_button = QRadioButton("Evaluation")
 
         # Agent speed
-        label_speed = QLabel("Agent Speed")
+        label_speed = QLabel("<i> Agent Speed </i>")
         self.speed_slider = QSlider(Qt.Horizontal, self)
         self.speed_slider.setMinimum(0)
         self.speed_slider.setMaximum(5)
@@ -155,9 +155,10 @@ class RightWidgetSettings(QFrame):
         grid.setVerticalSpacing(20) # spacing
         grid.addWidget(self.task, 1, 0)
         grid.addLayout(hbox_task, 2, 0)
+        grid.addWidget(QLabel("<hr />"), 3, 0, 1, 2)
         grid.addWidget(label_speed, 4, 0, 1, 2)
         grid.addWidget(self.speed_slider, 5, 0, 1, 2)
-        grid.addItem(QSpacerItem(0, 30), 6, 0) # add space
+        grid.addItem(QSpacerItem(0, 50), 6, 0) # add space
         grid.addLayout(hbox_run, 7, 0)
 
         # Main layout
