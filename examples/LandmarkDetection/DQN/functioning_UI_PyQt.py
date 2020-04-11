@@ -70,12 +70,12 @@ EPOCHS_PER_EVAL = 2
 EVAL_EPISODE = 50
 
 ###############################################################################
+## Right Widget
 
 class filenames_GUI:
     def __init__(self):
         self.name = ""
 
-# custom class
 class RightWidgetSettings(QFrame):
     terminal_signal = pyqtSignal(dict)
     SWITCH_WINDOW = pyqtSignal()
@@ -132,7 +132,7 @@ class RightWidgetSettings(QFrame):
         ## Layout
         # Auto-browse mode layout
         gridMode = QGridLayout()
-        gridMode.setContentsMargins(0, 0, 0, 30)
+        gridMode.setContentsMargins(0, 0, 0, 20)
         gridMode.addWidget(self.testMode, 0, 0)
         gridMode.setHorizontalSpacing(0)
         gridMode.addWidget(self.browseMode, 0, 1)
@@ -140,7 +140,7 @@ class RightWidgetSettings(QFrame):
 
         # Task layout
         hbox_task = QHBoxLayout()
-        hbox_task.setSpacing(50)
+        hbox_task.setSpacing(30)
         hbox_task.addWidget(self.play_button)
         hbox_task.addWidget(self.eval_button)
 
@@ -155,7 +155,6 @@ class RightWidgetSettings(QFrame):
         grid.setVerticalSpacing(20) # spacing
         grid.addWidget(self.task, 1, 0)
         grid.addLayout(hbox_task, 2, 0)
-        grid.addItem(QSpacerItem(0, 30), 3, 0) # add space
         grid.addWidget(label_speed, 4, 0, 1, 2)
         grid.addWidget(self.speed_slider, 5, 0, 1, 2)
         grid.addItem(QSpacerItem(0, 30), 6, 0) # add space
@@ -165,7 +164,7 @@ class RightWidgetSettings(QFrame):
         vbox = QVBoxLayout()
         vbox.addLayout(gridMode)
         vbox.addLayout(grid)
-        vbox.addItem(QSpacerItem(300, 30)) # spacer
+        vbox.addItem(QSpacerItem(300, 50)) # spacer
         vbox.addWidget(label_log)
         vbox.addWidget(self.terminal)
         vbox.addStretch()
@@ -227,6 +226,7 @@ class RightWidgetSettings(QFrame):
         if self.run_button.text() == "Start":
             self.thread.terminate = False
             self.task_value = self.which_task()
+            self.terminal.appendPlainText(f"> Begin {self.task_value} Mode")
             self.GIF_value = False
             self.video_value = False
             self.run_button.setText("Pause")

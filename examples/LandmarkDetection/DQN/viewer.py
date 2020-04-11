@@ -207,50 +207,86 @@ class LeftWidgetSettings(QFrame):
 
     def __init__(self, window, gui_launcher=False):
         super().__init__()
-        self.window = window # Store window object to enable control over windows functionality
+        # Width and height settings
         self.setMaximumWidth(400)
         self.setMinimumHeight(800)
 
-        # TODO: brain, cardiac, ultrasound default
+        # Window object to access windows components
+        self.window = window # Store window object to enable control over windows functionality
 
-        # Settings
+        self.title = QLabel("Settings")
 
+        ## Default file mode
+        self.simple_title = QLabel("Load Default Data")
+        self.brain_button = QRadioButton("Brain")
+        self.cardiac_button = QRadioButton("Cardiac")
+        self.ultrasound_button = QRadioButton("Ultrasound")
+
+        ## Advance file mode
+        self.advance_title = QLabel("Load Custom Data")
         # Load model settings
         self.model_file = QLabel('Load Model', self)
-        self.model_file_edit = QPushButton('+', self)
+        self.model_file_edit = QPushButton('Browse', self)
+        self.model_file_edit_text = QLabel("No file selected")
 
         # Load landmark settings
         self.landmark_file = QLabel('Load Landmark', self)
-        self.landmark_file_edit = QPushButton('+', self)
+        self.landmark_file_edit = QPushButton('Browse', self)
+        self.landmark_file_edit_text = QLabel("No file selected")
 
         # Upload image settings
         self.img_file = QLabel('Upload Image', self)
-        self.img_file_edit = QPushButton('+', self)
+        self.img_file_edit = QPushButton('Browse', self)
+        self.img_file_edit_text = QLabel("No file selected")
+        
+        ## Manage layout
+        # Default data settings layout
+        hbox_simple = QHBoxLayout()
+        hbox_simple.setSpacing(20)
+        hbox_simple.addWidget(self.brain_button)
+        hbox_simple.addWidget(self.cardiac_button)
+        hbox_simple.addWidget(self.ultrasound_button)
 
-        # Manage layout
+        # Browse + Layout
+        hbox_model = QHBoxLayout()
+        hbox_model.setSpacing(20)
+        hbox_model.addWidget(self.model_file_edit)
+        hbox_model.addWidget(self.model_file_edit_text)
+        
+        hbox_image = QHBoxLayout()
+        hbox_image.setSpacing(20)
+        hbox_image.addWidget(self.img_file_edit)
+        hbox_image.addWidget(self.img_file_edit_text)
+
+        hbox_landmark = QHBoxLayout()
+        hbox_landmark.setSpacing(20)
+        hbox_landmark.addWidget(self.landmark_file_edit)
+        hbox_landmark.addWidget(self.landmark_file_edit_text)
+
+        # Main Layout
         vbox = QVBoxLayout()
-
-        vbox.addWidget(self.model_file)
-        vbox.addWidget(self.model_file_edit)
-        vbox.addItem(QSpacerItem(0, 30))
-        vbox.addWidget(self.landmark_file)
-        vbox.addWidget(self.landmark_file_edit)
+        vbox.setSpacing(20)
+        vbox.addWidget(self.title)
+        vbox.addWidget(self.simple_title)
+        vbox.addLayout(hbox_simple)
         vbox.addItem(QSpacerItem(300, 30))
+        vbox.addWidget(self.advance_title)
         vbox.addWidget(self.img_file)
-        vbox.addWidget(self.img_file_edit)
-
-        # Third section
+        vbox.addLayout(hbox_image)
+        vbox.addWidget(self.landmark_file)
+        vbox.addLayout(hbox_landmark)
+        vbox.addWidget(self.model_file)
+        vbox.addLayout(hbox_model)
         vbox.addStretch()
 
         self.setLayout(vbox)
-
-        # Flags for testing
-        self.testing = False
 
         # Event handler connection
         self.model_file_edit.clicked.connect(self.on_clicking_browse_model)
         self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
         self.img_file_edit.clicked.connect(self.on_clicking_browse_images)
+
+        self.testing = False
 
     @pyqtSlot()
     def on_clicking_browse_model(self):
