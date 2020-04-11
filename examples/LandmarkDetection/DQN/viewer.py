@@ -288,6 +288,7 @@ class SimpleImageViewer(QWidget):
 
     def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
         super().__init__()
+        self.arrs = [arr, arr_x, arr_y]
 
         self.isopen = False
         self.scale_x = scale_x
@@ -373,7 +374,41 @@ class SimpleImageViewer(QWidget):
         self.x_traj = []
         self.y_traj = []
         self.z_traj = []
+    
+    def reset(self):
+        """
+        Reset
+        """
+        # Draw background image (brain)
+        cvImg = self.arrs[0].astype(np.uint8)
+        self.height, self.width, self.channel = cvImg.shape
+        bytesPerLine = 3 * self.width
+        qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
+        self.img = QPixmap(qImg) # can use this to scale the image: .scaled(450, 350, QtCore.Qt.KeepAspectRatio)
 
+        cvImg_x = self.arrs[1].astype(np.uint8)
+        self.height_x, self.width_x, self.channel_x = cvImg_x.shape
+        bytesPerLine = 3 * self.width_x
+        qImg_x = QImage(cvImg_x.data, self.width_x, self.height_x, bytesPerLine, QImage.Format_RGB888)
+        self.img_x = QPixmap(qImg_x)
+
+        cvImg_y = self.arrs[2].astype(np.uint8)
+        self.height_y, self.width_y, self.channel_y = cvImg_y.shape
+        bytesPerLine = 3 * self.width_y
+        qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
+        self.img_y = QPixmap(qImg_y)
+
+        # TODO: resolve scaled to width later during final iteration (responsive)
+        self.img = self.img.scaledToWidth(350)
+        self.img_x = self.img_x.scaledToWidth(350)
+        self.img_y = self.img_y.scaledToWidth(350)
+        self.label_img.setPixmap(self.img)
+        self.label_img_x.setPixmap(self.img_x)
+        self.label_img_y.setPixmap(self.img_y)
+        
+        # 3d plotting
+        self.ax.clear()
+        self.canvas.draw()
 
     def draw_image(self, arrs, agent_loc, target=None, rect=None, episode_end=False):
         """

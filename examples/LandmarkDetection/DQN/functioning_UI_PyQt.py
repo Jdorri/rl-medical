@@ -83,66 +83,40 @@ class RightWidgetSettings(QFrame):
 
     def __init__(self, *args, **kwargs):
         super(RightWidgetSettings, self).__init__(*args, **kwargs)
+        # Width and height settings
         self.setMaximumWidth(400)
         self.setMinimumHeight(800)
 
-        # window title
+        # Thread and window object which will be used to gain access to primary
+        # windows.
         self.thread = WorkerThread(None)
-        self.setWindowTitle('Anatomical Landmark Detection')
         self.window = None
 
-        # initialise labels
-        self.task = QLabel('Task', self)
-
-        # initialise widgets
-        self.task_edit = QComboBox()
-
-        # run
-        self.run_button = QPushButton('Start', self)
-
-        self.testMode = QPushButton('Test Mode', self)
+        # Automatic, browse mode
+        self.testMode = QPushButton('Automatic Mode', self)
         self.testMode.setCheckable(True)
         self.testMode.setChecked(True)
         self.browseMode = QPushButton('Browse Mode', self)
         self.browseMode.setCheckable(True)
 
-        # add widget functionality
+        # Task
+        self.task = QLabel('Task', self)
+        # self.play_button = QPushButton("Play", self)
+        # self.eval_button = QPushButton("Evaluation", self)
+        self.task_edit = QComboBox()
         self.task_edit.addItems(['Play', 'Evaluation'])
 
-        # temporary default file paths
-        self.fname_images = filenames_GUI()
-        self.fname_landmarks = filenames_GUI()
-        self.dtype = filenames_GUI()
-        self.fname_logs_dir = "./data"
-
-        # Slider settings
+        # Agent speed
         label_speed = QLabel("Agent Speed")
         self.speed_slider = QSlider(Qt.Horizontal, self)
-        self.speed_slider.setFocusPolicy(Qt.NoFocus)
         self.speed_slider.setMinimum(0)
         self.speed_slider.setMaximum(5)
         self.speed_slider.setValue(5)
         self.speed_slider.valueChanged[int].connect(self.changeValue)
 
-        # initialise grid/set spacing
-        gridMode = QGridLayout()
-        gridMode.addWidget(self.testMode, 0, 0)
-        gridMode.addWidget(self.browseMode, 0, 1)
-        gridMode.setVerticalSpacing(2)
-
-        grid = QGridLayout()
-
-        # Add widgets to grid
-        grid.addWidget(self.task, 1, 0)
-        grid.addWidget(self.task_edit, 1, 1)
-        grid.setVerticalSpacing(20)
-        grid.addItem(QSpacerItem(0, 30), 2, 0) # add space
-        grid.addWidget(label_speed, 3, 0, 1, 2)
-        grid.addWidget(self.speed_slider, 4, 0, 1, 2)
-        grid.addItem(QSpacerItem(0, 30), 5, 0) # add space
-        # grid.addWidget(self.run, 6, 0)
-
-        gridMode.setContentsMargins(0, 0, 0, 30)
+        # Run and terminate
+        self.run_button = QPushButton('Start', self)
+        self.terminate_button = QPushButton('Terminate', self)
 
         # Terminal log
         label_log = QLabel("Logs")
@@ -150,15 +124,39 @@ class RightWidgetSettings(QFrame):
         self.terminal = QPlainTextEdit(self)
         self.terminal.setReadOnly(True)
 
+        # Temporary default file path
+        self.fname_images = filenames_GUI()
+        self.fname_landmarks = filenames_GUI()
+        self.dtype = filenames_GUI()
+        self.fname_logs_dir = "./data"
+
+        # Layout
+        # Auto-browse mode layout
+        gridMode = QGridLayout()
+        gridMode.setContentsMargins(0, 0, 0, 30)
+        gridMode.addWidget(self.testMode, 0, 0)
+        gridMode.addWidget(self.browseMode, 0, 1)
+        gridMode.setVerticalSpacing(2)
+
+        # Task, agent speed, run, layout
+        grid = QGridLayout()
+        grid.setVerticalSpacing(20) # spacing
+        grid.addWidget(self.task, 1, 0)
+        # grid.addWidget(self.task_edit, 1, 1)
+        grid.addItem(QSpacerItem(0, 30), 2, 0) # add space
+        grid.addWidget(label_speed, 3, 0, 1, 2)
+        grid.addWidget(self.speed_slider, 4, 0, 1, 2)
+        grid.addItem(QSpacerItem(0, 30), 5, 0) # add space
+        grid.addWidget(self.run_button, 6, 0)
+        grid.addWidget(self.terminate_button, 6, 1)
+
         # Main layout
         vbox = QVBoxLayout()
         vbox.addLayout(gridMode)
         vbox.addLayout(grid)
-        vbox.addWidget(self.run_button)
-        vbox.addItem(QSpacerItem(0, 30))
+        vbox.addItem(QSpacerItem(300, 30)) # spacer
         vbox.addWidget(label_log)
         vbox.addWidget(self.terminal)
-        vbox.addItem(QSpacerItem(300, 0))
         vbox.addStretch()
 
         self.setLayout(vbox)
@@ -166,10 +164,13 @@ class RightWidgetSettings(QFrame):
         # Event handler
         self.browseMode.clicked.connect(self.on_clicking_browseMode)
         self.run_button.clicked.connect(self.on_clicking_run)
-        
-        # Connect to terminal
         self.terminal_signal.connect(self.terminal_signal_handler)
+        self.terminate_button.clicked.connect(self.on_clicking_terminate)
+        
+        # CSS styling for some widget components
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+        self.terminate_button.setStyleSheet("background-color:#f44336; color:white")
+        
         self.show()
 
         # Flags for testing
@@ -187,6 +188,16 @@ class RightWidgetSettings(QFrame):
             self.thread.speed = WorkerThread.MEDIUM
         else:
             self.thread.speed = WorkerThread.SLOW
+    
+    @pyqtSlot()
+    def on_clicking_terminate(self):
+        self.thread.terminate = True # give signal to terminate thread
+        self.thread.pause = False
+        self.run_button.setText("Start")
+        self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+        
+        # Reset simple image viewer
+        self.window.widget.reset()
 
     @pyqtSlot()
     def on_clicking_run(self):
@@ -194,17 +205,18 @@ class RightWidgetSettings(QFrame):
         Event handler (slot) for when the button is clicked
         """
         if self.run_button.text() == "Start":
+            self.thread.terminate = False
             self.task_value = self.task_edit.currentText()
             self.GIF_value = False
             self.video_value = False
             self.run_button.setText("Pause")
             self.window.statusbar.showMessage("Running")
-            self.run_button.setStyleSheet("background-color:#f44336; color:white")
+            self.run_button.setStyleSheet("background-color:orange; color:white")
             self.run_DQN()
         elif self.run_button.text() == "Resume":
             self.thread.pause = False
             self.run_button.setText("Pause")
-            self.run_button.setStyleSheet("background-color:#f44336; color:white")
+            self.run_button.setStyleSheet("background-color:orange; color:white")
             self.window.statusbar.showMessage("Running")
         else:
             self.thread.pause = True

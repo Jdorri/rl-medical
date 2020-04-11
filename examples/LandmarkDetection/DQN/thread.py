@@ -14,7 +14,7 @@ class WorkerThread(Thread):
     SLOW = -1
 
     def __init__(self, target_function):
-        super().__init__(daemon=False)
+        super().__init__(daemon=True)
         self.terminate = False
         self.target_function = target_function
         self.pause = False
