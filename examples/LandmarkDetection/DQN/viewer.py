@@ -297,28 +297,24 @@ class LeftWidgetSettings(QFrame):
 
         self.testing = False
 
-    @pyqtSlot()
     def on_clicking_browse_model(self):
         if not self.testing:
-            self.fname_model, _ = QFileDialog.getOpenFileName(None, None,
+            self.fname_model = QFileDialog.getOpenFileName(self, "Open file",
                 "./data/models", filter="*.data-*")
             print(self.fname_model)
 
-    @pyqtSlot()
     def on_clicking_browse_landmarks(self):
         if not self.testing:
-            self.fname_landmarks.name, _ = QFileDialog.getOpenFileName(None, None,
+            self.fname_landmarks = QFileDialog.getOpenFileName(self, "Open file",
                 "./data/filenames", filter="txt files (*landmark*.txt)")
 
-
-    @pyqtSlot()
     def on_clicking_browse_images(self):
         if not self.testing:
-            self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
+            self.fname_images = QFileDialog.getOpenFileName(self, "Open file",
                 "./data/filenames", filter="txt files (*test_files*.txt)")
-            self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
+            self.fname_images = QFileDialog.getOpenFileName(self, "Open file",
                 "./data/filenames", filter="txt files (*landmarks*.txt)")
-            self.load_img()
+            # self.load_img()
 
 
 ################################################################################
