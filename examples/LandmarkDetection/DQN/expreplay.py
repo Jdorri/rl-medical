@@ -235,8 +235,9 @@ class ExpReplay(DataFlow, Callback):
             # HITL UPDATE
             # as self.update_frequency = 0 during pretraining, no workers will be initialized.
             ###############################################################################
-            for _ in range(self.update_frequency):
-                self._populate_exp()
+            if self.update_frequency != 0:
+                for _ in range(self.update_frequency):
+                    self._populate_exp()
 
         th = ShareSessionThread(LoopThread(populate_job_func, pausable=False))
         th.name = "SimulatorThread"
@@ -331,7 +332,7 @@ class ExpReplay(DataFlow, Callback):
                 batch_exp = [self.hmem.sample(i) for i in idx]
 
                 yield self._process_batch(batch_exp)
-                logger.info("batch ...".format(batch_exp))
+                logger.info("Human batch ...".format(batch_exp))
                 self._populate_job_queue.put(1)
 
         else:
@@ -353,6 +354,7 @@ class ExpReplay(DataFlow, Callback):
                     batch_exp.append(self.hmem.sample(j))
 
                 yield self._process_batch(batch_exp)
+                logger.info("Mixed batch 0.8agent 0.2human ...".format(batch_exp))
                 self._populate_job_queue.put(1)
         ###############################################################################
 

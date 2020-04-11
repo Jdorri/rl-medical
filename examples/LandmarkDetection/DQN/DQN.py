@@ -178,7 +178,7 @@ def get_config(files_list, data_type):
 ###############################################################################
 # HITL UPDATE
 # Here the number of steps taken in the environment is increased from 0, during
-# the pretraining phase, to 4 to allow the agent to take 4 steps in the env 
+# the pretraining phase, to 4 to allow the agent to take 4 steps in the env
 # between each TD update.
 # Key: a discussion with the team needs to be made as to whether we need to push
 # back the updated to the other hyperparameters by 750,000 steps. Need to read
@@ -186,8 +186,8 @@ def get_config(files_list, data_type):
 
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'update_frequency'),
-                # 1->0.1 in the first million steps
-                [(0, 0), (8, 4)],
+                # 1->0.1 in the first million steps/8
+                [(0, 0), (1, 4)],
                 interp=None, step_based=True),
 
 ###############################################################################

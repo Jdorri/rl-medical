@@ -213,6 +213,7 @@ class Model3D(ModelDesc):
         summary.add_param_summary(('conv.*/W', ['histogram', 'rms']),
                                   ('fc.*/W', ['histogram', 'rms']))  # monitor all W
         summary.add_moving_summary(cost)
+        logger.info("Cost: {}".format(cost))
         return cost
 
     def optimizer(self):
