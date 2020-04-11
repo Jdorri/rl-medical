@@ -11,8 +11,7 @@ from tensorpack.utils import logger
 from tensorpack.tfutils import (
     collection, summary, get_current_tower_context, optimizer, gradproc)
 from tensorpack.tfutils.scope_utils import auto_reuse_variable_scope
- # 
-import keras.backend as K
+
 
 
 
