@@ -150,7 +150,7 @@ class HumanDemReplayMemory(ReplayMemory):
                     dummy_env = MedicalPlayer(directory=image_directory, screen_dims=(45, 45, 45),
                                                         viz=0, saveGif='False', saveVideo='False',
                                                         task='play', files_list=[image_path], data_type='HITL',
-                                                        max_num_frames=1500)                    
+                                                        max_num_frames=1500)
                     # Loop 3: Loops through each state, action pair recorded
                     for key, state_coordinates in enumerate(entry['states']):
                         if key != len(entry['states'])-1:
@@ -158,7 +158,7 @@ class HumanDemReplayMemory(ReplayMemory):
                             logger.info("{} reward: {}".format(key+1, entry['rewards'][key+1]))
                             logger.info("{} action: {}".format(key+1, entry['actions'][key+1]))
                             logger.info("{} is_over: {}".format(key+1, entry['is_over'][key+1]))
-                            logger.info("{} resolution: {}".format(key, entry['resolution'][key]))                            
+                            logger.info("{} resolution: {}".format(key, entry['resolution'][key]))
                             dummy_env.HITL_set_location(state_coordinates, entry['resolution'][key])
                             state_image = dummy_env._current_state()
                             self.append(Experience(state_image, entry['actions'][key+1], entry['rewards'][key+1], entry['is_over'][key+1], True))
@@ -325,8 +325,8 @@ class ExpReplay(DataFlow, Callback):
         if self.update_frequency == 0:
             while True:
                 idx = self.rng.randint(
-                    0,
-                    len(self.hmem),
+                    self._populate_job_queue.maxsize * 4,
+                    len(self.hmem)- self.history_len - 1,
                     size=self.batch_size)
                 batch_exp = [self.hmem.sample(i) for i in idx]
 
