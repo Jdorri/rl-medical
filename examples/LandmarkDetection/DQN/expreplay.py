@@ -235,7 +235,7 @@ class ExpReplay(DataFlow, Callback):
             # HITL UPDATE
             # as self.update_frequency = 0 during pretraining, no workers will be initialized.
             ###############################################################################
-            logger.info("update_frequency: {}".format(self.update_frequency))
+            #logger.info("update_frequency: {}".format(self.update_frequency))
 
             for _ in range(int(self.update_frequency)):
                 self._populate_exp()
