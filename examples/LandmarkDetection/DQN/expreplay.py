@@ -324,9 +324,10 @@ class ExpReplay(DataFlow, Callback):
 
         ###############################################################################
         # HITL UPDATE
-        if self.update_frequency == 0:
-            logger.info("logging update freq ...".format(self.update_frequency))
-            while True:
+        # if self.update_frequency == 0:
+        #     logger.info("logging update freq ...".format(self.update_frequency))
+        while True:
+            if self.update_frequency == 0:
                 idx = self.rng.randint(
                     self._populate_job_queue.maxsize * 4,
                     len(self.hmem)- self.history_len - 1,
@@ -334,14 +335,9 @@ class ExpReplay(DataFlow, Callback):
                 batch_exp = [self.hmem.sample(i) for i in idx]
 
                 yield self._process_batch(batch_exp)
-                logger.info("Human batch ...".format(batch_exp))
+                logger.info("Human batch ...")
                 self._populate_job_queue.put(1)
-
-        else:
-            # for now I will just populute the batch with 20% from the Human buffer
-            # and 80% from the experience buffer
-
-            while True:
+            else:
                 ex_idx = self.rng.randint(
                     self._populate_job_queue.maxsize * self.update_frequency,
                     len(self.mem) - self.history_len - 1,
@@ -356,8 +352,30 @@ class ExpReplay(DataFlow, Callback):
                     batch_exp.append(self.hmem.sample(j))
 
                 yield self._process_batch(batch_exp)
-                logger.info("Mixed batch 0.8agent 0.2human ...".format(batch_exp))
+                logger.info("Mixed batch 0.8agent 0.2human ...")
                 self._populate_job_queue.put(1)
+
+        # else:
+        #     # for now I will just populute the batch with 20% from the Human buffer
+        #     # and 80% from the experience buffer
+        #
+        #     while True:
+        #         ex_idx = self.rng.randint(
+        #             self._populate_job_queue.maxsize * self.update_frequency,
+        #             len(self.mem) - self.history_len - 1,
+        #             size=self.batch_size*0.8)
+        #         hu_idx = self.rng.randint(
+        #             0,
+        #             len(self.hmem),
+        #             size=self.batch_size*0.2)
+        #
+        #         batch_exp = [self.mem.sample(i) for i in ex_idx]
+        #         for j in hu_idx:
+        #             batch_exp.append(self.hmem.sample(j))
+        # 
+        #         yield self._process_batch(batch_exp)
+        #         logger.info("Mixed batch 0.8agent 0.2human ...")
+        #         self._populate_job_queue.put(1)
         ###############################################################################
 
 
