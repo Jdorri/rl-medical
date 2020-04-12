@@ -343,8 +343,8 @@ class ExpReplay(DataFlow, Callback):
                     len(self.mem) - self.history_len - 1,
                     size=38)
                 hu_idx = self.rng.randint(
-                    0,
-                    len(self.hmem),
+                    self._populate_job_queue.maxsize * 4,
+                    len(self.hmem)- self.history_len - 1,
                     size=10)
 
                 batch_exp = [self.mem.sample(i) for i in ex_idx]
