@@ -236,9 +236,9 @@ class ExpReplay(DataFlow, Callback):
             # as self.update_frequency = 0 during pretraining, no workers will be initialized.
             ###############################################################################
             logger.info("update_frequency: {}".format(self.update_frequency))
-            if self.update_frequency > 0:
-                for _ in range(self.update_frequency):
-                    self._populate_exp()
+
+            for _ in range(int(self.update_frequency)):
+                self._populate_exp()
 
         th = ShareSessionThread(LoopThread(populate_job_func, pausable=False))
         th.name = "SimulatorThread"
