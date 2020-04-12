@@ -325,6 +325,7 @@ class ExpReplay(DataFlow, Callback):
         ###############################################################################
         # HITL UPDATE
         if self.update_frequency == 0:
+            logger.info("logging update freq ...".format(self.update_frequency))
             while True:
                 idx = self.rng.randint(
                     self._populate_job_queue.maxsize * 4,
