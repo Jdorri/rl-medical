@@ -190,7 +190,7 @@ def get_config(files_list, data_type):
                 ObjAttrParam(expreplay, 'update_frequency'),
                 # 1->0.1 in the first million steps note should be 8 but put to
                 # 4 for faster training
-                [(0, int(0)), (50000, int(4))],
+                [(0, int(0)), (100000, int(4))],
                 interp=None, step_based=True),
 
 ###############################################################################
@@ -234,10 +234,10 @@ if __name__ == '__main__':
     parser.add_argument('--type', help='the dataset to use',
                         choices=['BrainMRI', 'CardiacMRI', 'FetalUS'],
                         default=False)
-    # parser.add_argument('--files', type=argparse.FileType('r'), nargs='+',
-    #                     help="""Filepath to the text file that comtains list of images.
-    #                             Each line of this file is a full path to an image scan.
-    #                             For (task == train or eval) there should be two input files ['images', 'landmarks']""")
+    parser.add_argument('--files', type=argparse.FileType('r'), nargs='+',
+                        help="""Filepath to the text file that comtains list of images.
+                                Each line of this file is a full path to an image scan.
+                                For (task == train or eval) there should be two input files ['images', 'landmarks']""")
     parser.add_argument('--saveGif', help='save gif image of the game',
                         action='store_true', default=False)
     parser.add_argument('--saveVideo', help='save video of the game',
