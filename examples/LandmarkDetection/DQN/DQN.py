@@ -62,6 +62,8 @@ STEPS_PER_EPOCH = 10000 // UPDATE_FREQ * 10
 EPOCHS_PER_EVAL = 2
 # the number of episodes to run during evaluation
 EVAL_EPISODE = 50
+# Max number of training epochs
+MAX_EPOCHS = 1000
 
 ###############################################################################
 
@@ -71,7 +73,7 @@ def get_player(directory=None, files_list= None, data_type=None, viz=False,
     env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
                         viz=viz, saveGif=saveGif, saveVideo=saveVideo,
                         task=task, files_list=files_list, data_type=data_type, max_num_frames=1500)
-    if (task in ['play','eval']):
+    if task not in ['browse','train']:
         # in training, env will be decorated by ExpReplay, and history
         # is taken care of in expreplay buffer
         # otherwise, FrameStack modifies self.step to save observations into a queue
@@ -202,7 +204,7 @@ def get_config(files_list, data_type):
             HumanHyperParamSetter('learning_rate'),
         ],
         steps_per_epoch=STEPS_PER_EPOCH,
-        max_epoch=1000,
+        max_epoch=MAX_EPOCHS,
     )
 
 def get_viewer_data():
@@ -216,7 +218,6 @@ def get_viewer_data():
 
 ###############################################################################
 ###############################################################################
-
 
 if __name__ == '__main__':
 
@@ -233,10 +234,10 @@ if __name__ == '__main__':
     parser.add_argument('--type', help='the dataset to use',
                         choices=['BrainMRI', 'CardiacMRI', 'FetalUS'],
                         default=False)
-    parser.add_argument('--files', type=argparse.FileType('r'), nargs='+',
-                        help="""Filepath to the text file that comtains list of images.
-                                Each line of this file is a full path to an image scan.
-                                For (task == train or eval) there should be two input files ['images', 'landmarks']""")
+    # parser.add_argument('--files', type=argparse.FileType('r'), nargs='+',
+    #                     help="""Filepath to the text file that comtains list of images.
+    #                             Each line of this file is a full path to an image scan.
+    #                             For (task == train or eval) there should be two input files ['images', 'landmarks']""")
     parser.add_argument('--saveGif', help='save gif image of the game',
                         action='store_true', default=False)
     parser.add_argument('--saveVideo', help='save video of the game',
@@ -246,6 +247,12 @@ if __name__ == '__main__':
     parser.add_argument('--name', help='name of current experiment for logs',
                         default='experiment_1')
     args = parser.parse_args()
+
+    # f1 = filenames_GUI()
+    # f2 = filenames_GUI()
+    # f1.name = './data/filenames/brain_test_files_new_paths.txt'
+    # f2.name = './data/filenames/brain_test_landmarks_new_paths.txt'
+    # files_list = [f1, f2]
 
     if args.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
@@ -260,7 +267,7 @@ if __name__ == '__main__':
 
     METHOD = args.algo
     # load files into env to set num_actions, num_validation_files
-    init_player = MedicalPlayer(files_list=args.files,
+    init_player = MedicalPlayer(files_list=files_list, # files_list=args.files,
                                 data_type=args.type,
                                 screen_dims=IMAGE_SIZE,
                                 task='play')
@@ -314,7 +321,8 @@ if __name__ == '__main__':
     else:  # train model
         logger_dir = os.path.join(args.logDir, args.name)
         logger.set_logger_dir(logger_dir)
-        config = get_config(args.files, args.type)
+        config = get_config(files_list, # args.files,,
+                            args.type)
         not_ignore = None
         if args.load:  # resume training from a saved checkpoint
             session_init = get_model_loader(args.load)
@@ -354,3 +362,13 @@ if __name__ == '__main__':
         # print(r(not_ignore, args.transferModel, args.type))
         # exit()
         launch_train_with_config(config, SimpleTrainer())
+
+# #### TEST FOR EVALUATOR BELOW ####
+#     # DQN.py --task train --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --type 'BrainMRI'
+#
+#     EVAL_EPISODE = 2
+#     eval = Evaluator(nr_eval=EVAL_EPISODE, input_names=['state'],
+#               output_names=['Qvalue'], files_list = ['./data/filenames/brain_test_files_new_paths.txt','./data/filenames/brain_test_landmarks_new_paths.txt'],
+#               data_type=args.type, get_player_fn=get_player)
+#     eval._setup_graph()
+#     eval._trigger()

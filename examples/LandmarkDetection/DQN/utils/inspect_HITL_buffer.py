@@ -6,6 +6,7 @@ def show_latest():
     # Load the created file
     list_of_files = glob.glob('./data/HITL/*.pickle')
     latest_file = max(list_of_files, key=os.path.getctime)
+    print(latest_file)
     with open(latest_file, 'rb') as f:
         log = pickle.load(f)
 
