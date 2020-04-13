@@ -133,9 +133,12 @@ class HumanDemReplayMemory(ReplayMemory):
         Fills in the buffer with the saved actions from the expert.
         Actions are stored under .data/HITL in the form of log files
         """
-        directory = "Documents/rl-medical/examples/LandmarkDetection/DQN/data/HITL"
-        #TODO directory needs to be flexible for pulling images
-        image_directory = "/vol/project/2019/545/g1954503/aeg19/Brain_MRI/"
+        # directory = "Documents/rl-medical/examples/LandmarkDetection/DQN/data/HITL"
+        # # TODO directory needs to be flexible for pulling images
+        # image_directory = "/vol/project/2019/545/g1954503/aeg19/Brain_MRI/"
+        ## Paths for local testing ##
+        directory = "./data/HITL"
+        image_directory = '/Volumes/project/2019/545/g1954503/aeg19/Brain_MRI'
         # Loop 1: Loops through all log files in the directory
         for filename in os.listdir(directory):
             if filename.endswith(".pickle") or filename.endswith(".p"):
@@ -428,3 +431,8 @@ class ExpReplay(DataFlow, Callback):
             self.trainer.monitors.put_scalar('n_success_ratio', 0)
         # reset stats
         self.player.reset_stat()
+
+
+# if __name__ == 'main':
+    # hrb = HumanDemReplayMemory(max_size=1e5, state_shape=(45, 45, 45), history_len=4)
+    # hrb.load_experience()
