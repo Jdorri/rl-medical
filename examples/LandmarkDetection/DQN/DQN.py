@@ -190,7 +190,7 @@ def get_config(files_list, data_type):
                 ObjAttrParam(expreplay, 'update_frequency'),
                 # 1->0.1 in the first million steps note should be 8 but put to
                 # 4 for faster training
-                [(0, int(0)), (100000, int(4))],
+                [(0, int(0)), (50000, int(4))],
                 interp=None, step_based=True),
 
 ###############################################################################

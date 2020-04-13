@@ -133,12 +133,12 @@ class HumanDemReplayMemory(ReplayMemory):
         Fills in the buffer with the saved actions from the expert.
         Actions are stored under .data/HITL in the form of log files
         """
-        # directory = "Documents/rl-medical/examples/LandmarkDetection/DQN/data/HITL"
+        directory = "Documents/rl-medical/examples/LandmarkDetection/DQN/data/HITL"
         # # TODO directory needs to be flexible for pulling images
-        # image_directory = "/vol/project/2019/545/g1954503/aeg19/Brain_MRI/"
+        image_directory = "/vol/project/2019/545/g1954503/aeg19/Brain_MRI/"
         ## Paths for local testing ##
-        directory = "./data/HITL"
-        image_directory = '/Volumes/project/2019/545/g1954503/aeg19/Brain_MRI'
+        #directory = "./data/HITL"
+        #image_directory = '/Volumes/project/2019/545/g1954503/aeg19/Brain_MRI'
         # Loop 1: Loops through all log files in the directory
         for filename in os.listdir(directory):
             if filename.endswith(".pickle") or filename.endswith(".p"):
