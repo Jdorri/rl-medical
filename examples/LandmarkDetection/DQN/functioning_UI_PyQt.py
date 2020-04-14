@@ -84,6 +84,9 @@ class RightWidgetSettings(QFrame):
 
     def __init__(self, *args, **kwargs):
         super(RightWidgetSettings, self).__init__(*args, **kwargs)
+        # Responsive settings
+        self.setMaximumWidth(400)
+
         # Thread and window object which will be used to gain access to primary
         # windows.
         self.thread = WorkerThread(None)
@@ -200,6 +203,7 @@ class RightWidgetSettings(QFrame):
     def on_clicking_terminate(self):
         self.thread.terminate = True # give signal to terminate thread
         self.thread.pause = False
+        self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Terminate </p></b>")
         self.run_button.setText("Start")
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
         
@@ -248,17 +252,19 @@ class RightWidgetSettings(QFrame):
             self.run_button.setStyleSheet("background-color:orange; color:white")
             self.default_use_case = self.which_usecase()
             self.set_paths(self.default_use_case)
-            self.terminal.appendPlainText(f"> Begin {self.task_value} Mode ({self.default_use_case})")
+            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Start {self.task_value} Mode ({self.default_use_case}) </p></b>")
             self.run_DQN()
         elif self.run_button.text() == "Resume":
             self.thread.pause = False
             self.run_button.setText("Pause")
+            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Resume </p></b>")
             self.run_button.setStyleSheet("background-color:orange; color:white")
             self.window.statusbar.showMessage("Running")
         else:
             self.thread.pause = True
             self.run_button.setText("Resume")
             self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Pause </p></b>")
             self.window.statusbar.showMessage("Paused")
 
     @pyqtSlot(dict)
@@ -292,6 +298,21 @@ class RightWidgetSettings(QFrame):
     def on_clicking_browseMode(self):
         self.thread.terminate = True
         self.SWITCH_WINDOW.emit()
+
+    def check_user_define_usecase(self, filename_model):
+        """
+        Check which usecase that the user wants
+        """
+
+        filename = filename_model.split("/")
+        
+        # If cardiac
+        if cardiac in filename:
+            return "CardiacMRI"
+        elif brain in filename:
+            return "BrainMRI"
+        else:
+            return "FetalUS"
     
     def set_paths(self, default_use_case):
         """
@@ -314,12 +335,29 @@ class RightWidgetSettings(QFrame):
             self.fname_model.name = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
             self.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
         else:
-            self.default_use_case = "BrainMRI" # TODO: FUNCTION TO CHECK WHICH LOADER TO USE
             # User defined file selection
             self.fname_images.name = self.window.left_widget.fname_images
             self.fname_model.name = self.window.left_widget.fname_model
             self.fname_landmarks.name = self.window.left_widget.fname_landmarks
-            
+
+            # To tell the program which loader it should use
+            self.default_use_case = self.check_user_define_usecase(self.fname_model.name)
+
+    def error_message_box(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Error on user defined settings")
+        msg.setText("Error loading user defined settings. Please use appropriate model, image, and landmarks.")
+
+        # Clean up
+        self.fname_landmarks.user_define = False
+        self.fname_images.user_define = False
+        self.fname_model.user_define = False
+        self.window.left_widget.model_file_edit_text.setText("No file selected")
+        self.window.left_widget.landmark_file_edit_text.setText("No file selected")
+        self.window.left_widget.img_file_edit_text.setText("No file selected")
+        
+        # Display pop up message
+        msg.exec_()
 
     def run_DQN(self):
         # if self.GPU_value:
@@ -333,18 +371,21 @@ class RightWidgetSettings(QFrame):
 
         self.METHOD = "DQN"
         # load files into env to set num_actions, num_validation_files
-        init_player = MedicalPlayer(files_list=self.selected_list,
-                                    # data_type=self.dtype,
-                                    data_type=self.default_use_case,
-                                    screen_dims=IMAGE_SIZE,
-                                    task='play')
+        try:
+            init_player = MedicalPlayer(files_list=self.selected_list,
+                                        data_type=self.default_use_case,
+                                        screen_dims=IMAGE_SIZE,
+                                        task='play')
+        # If there is a problem with the loader, then user incorrectly add file
+        except:
+            self.terminal.appendHtml(f"<b><p style='color:red'> &#36; Error loading user defined settings. Please use appropriate model, image, and landmarks. </p></b>")
+            self.error_message_box()
+
         self.NUM_ACTIONS = init_player.action_space.n
         self.num_files = init_player.files.num_files
         # Create a thread to run background task
         self.worker_thread = WorkerThread(target_function=self.thread_function)
         self.worker_thread.start()
-
-        print(init_player._location)
 
     def thread_function(self):
         """Run on secondary thread"""
