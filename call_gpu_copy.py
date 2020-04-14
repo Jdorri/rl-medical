@@ -4,7 +4,7 @@ import glob
 
 
 
-user = 'hgc19' # put your username here
+user = 'aeg19' # put your username here
 type_ = 'LandmarkDetection'
 task = 'train'
 algo = 'DQN'
@@ -17,7 +17,7 @@ data_type ='BrainMRI'
 # transferModel = "'/vol/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000'"#BrainMRI basecase
 # to_Transfer = "CNN DQN"
 
-discription = """Human in the loop initial experimentation"""
+discription = """HITL experimentation with init_exploration=0.8 and initial episilon=0.8 AG"""
 
 home = os.environ['HOME']
 local_branch_path = os.path.join(home, 'Documents/rl-medical/')#path to where the code is

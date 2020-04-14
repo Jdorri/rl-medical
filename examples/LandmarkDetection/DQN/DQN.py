@@ -146,7 +146,7 @@ def get_config(files_list, data_type):
         batch_size=BATCH_SIZE,
         memory_size=MEMORY_SIZE,
         init_memory_size=INIT_MEMORY_SIZE,
-        init_exploration=1.0,
+        init_exploration=0.8, #0.0
         #How my epsilon greedy steps to take before commiting to memory
         #An idea to encorporate the pre-training phase is to schedule the
         # the agent only to start taking steps after x amount of mini_batch
@@ -175,7 +175,7 @@ def get_config(files_list, data_type):
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'exploration'),
                 # 1->0.1 in the first million steps
-                [(0, 1), (10, 0.1), (320, 0.01)],
+                [(0, 0.8), (10, 0.1), (320, 0.01)], #[(0, 1.0), (10, 0.1), (320, 0.01)],
                 interp='linear'),
 ###############################################################################
 # HITL UPDATE
@@ -267,7 +267,7 @@ if __name__ == '__main__':
 
     METHOD = args.algo
     # load files into env to set num_actions, num_validation_files
-    init_player = MedicalPlayer(files_list=args.files, #files_list=files_list, 
+    init_player = MedicalPlayer(files_list=args.files, #files_list=files_list,
                                 data_type=args.type,
                                 screen_dims=IMAGE_SIZE,
                                 task='play')

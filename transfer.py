@@ -1,18 +1,20 @@
 import subprocess
 import glob
 
-subprocess.run(["scp", "-pr", "./call_gpu_copy.py", "hgc19@gpucluster.doc.ic.ac.uk:Documents/rl-medical"])
+username = 'aeg19'  # <--- CHANGE HERE
+
+subprocess.run(["scp", "-pr", "./call_gpu_copy.py", username + "@gpucluster.doc.ic.ac.uk:Documents/rl-medical"])
 
 files = glob.glob("./examples/LandmarkDetection/DQN/*.py")
 for file in files:
-    subprocess.run(["scp", "-pr", file, "hgc19@gpucluster.doc.ic.ac.uk:Documents/rl-medical/examples/LandmarkDetection/DQN"])
+    subprocess.run(["scp", "-pr", file, username + "@gpucluster.doc.ic.ac.uk:Documents/rl-medical/examples/LandmarkDetection/DQN"])
 
 
 
 
 
 sshProcess = subprocess.Popen(['ssh',
-                               "hgc19@gpucluster.doc.ic.ac.uk"],
+                               username + "@gpucluster.doc.ic.ac.uk"],
                                stdin=subprocess.PIPE,
                                stdout = subprocess.PIPE,
                                universal_newlines=True,
