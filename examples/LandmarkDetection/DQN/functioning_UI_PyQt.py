@@ -74,6 +74,7 @@ EVAL_EPISODE = 50
 
 class filenames_GUI:
     def __init__(self):
+        self.user_define = False
         self.name = ""
 
 class RightWidgetSettings(QFrame):
@@ -83,17 +84,15 @@ class RightWidgetSettings(QFrame):
 
     def __init__(self, *args, **kwargs):
         super(RightWidgetSettings, self).__init__(*args, **kwargs)
-        # Width and height settings
-        self.setMaximumWidth(400)
-        self.setMinimumHeight(800)
-
         # Thread and window object which will be used to gain access to primary
         # windows.
         self.thread = WorkerThread(None)
         self.window = None
 
+        # Placeholder for GUI file names, status
         self.fname_images = filenames_GUI()
         self.fname_landmarks = filenames_GUI()
+        self.fname_model = filenames_GUI()
 
         # Automatic, browse mode
         self.testMode = QPushButton('Automatic Mode', self)
@@ -220,12 +219,19 @@ class RightWidgetSettings(QFrame):
         """
         Determine which radio button usecase is checked
         """
-        if self.window.left_widget.brain_button.isChecked():
-            return "BrainMRI"
-        elif self.window.left_widget.cardiac_button.isChecked():
-            return "CardiacMRI"
+        # If user does not specify specific file to load
+        if not self.fname_images.user_define or \
+            not self.fname_landmarks.user_define or \
+                not self.fname_model.user_define:
+            if self.window.left_widget.brain_button.isChecked():
+                return "BrainMRI"
+            elif self.window.left_widget.cardiac_button.isChecked():
+                return "CardiacMRI"
+            else:
+                return "FetalUS"
+        # Else user specify
         else:
-            return "FetalUS"
+            return "UserDefined"
 
     @pyqtSlot()
     def on_clicking_run(self):
@@ -235,7 +241,6 @@ class RightWidgetSettings(QFrame):
         if self.run_button.text() == "Start":
             self.thread.terminate = False
             self.task_value = self.which_task()
-            self.terminal.appendPlainText(f"> Begin {self.task_value} Mode")
             self.GIF_value = False
             self.video_value = False
             self.run_button.setText("Pause")
@@ -243,6 +248,7 @@ class RightWidgetSettings(QFrame):
             self.run_button.setStyleSheet("background-color:orange; color:white")
             self.default_use_case = self.which_usecase()
             self.set_paths(self.default_use_case)
+            self.terminal.appendPlainText(f"> Begin {self.task_value} Mode ({self.default_use_case})")
             self.run_DQN()
         elif self.run_button.text() == "Resume":
             self.thread.pause = False
@@ -295,18 +301,24 @@ class RightWidgetSettings(QFrame):
         if self.default_use_case == 'BrainMRI':
             # Default MRI
             self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
-            self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+            self.fname_model.name = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
             self.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
             self.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
-            self.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
+            self.fname_model.name = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
             self.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'FetalUS':
             # Default fetal
             self.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
-            self.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
+            self.fname_model.name = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
             self.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
+        else:
+            # User defined file selection
+            self.fname_images.name = self.window.right_widget.fname_images
+            self.fname_model.name = self.window.right_widget.fname_model
+            self.fname_landmarks.name = self.window.right_widget.fname_landmarks
+            
 
     def run_DQN(self):
         # if self.GPU_value:
@@ -338,7 +350,7 @@ class RightWidgetSettings(QFrame):
 
         pred = OfflinePredictor(PredictConfig(
             model=Model(IMAGE_SIZE, FRAME_HISTORY, self.METHOD, self.NUM_ACTIONS, GAMMA),
-            session_init=get_model_loader(self.fname_model),
+            session_init=get_model_loader(self.fname_model.name),
             input_names=['state'],
             output_names=['Qvalue']))
 

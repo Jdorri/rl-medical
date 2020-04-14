@@ -207,10 +207,6 @@ class LeftWidgetSettings(QFrame):
 
     def __init__(self, window, gui_launcher=False):
         super().__init__()
-        # Width and height settings
-        self.setMaximumWidth(400)
-        self.setMinimumHeight(800)
-
         # Window object to access windows components
         self.window = window # Store window object to enable control over windows functionality
 
@@ -302,22 +298,43 @@ class LeftWidgetSettings(QFrame):
         if not self.testing:
             self.fname_model = QFileDialog.getOpenFileName(self, "Browse Model",
                 "./data/models", filter="*.data-*")
+            # Set text to label
             filename = self.fname_model[0].split("/")
             self.model_file_edit_text.setText(filename[-1])
+
+            # Indicate that user has make a selection
+            self.window.right_widget.fname_model.user_define = True
+
+            # Indicate appropriate path
+            self.fname_model = "./data/models/" + filename[-1]
 
     def on_clicking_browse_landmarks(self):
         if not self.testing:
             self.fname_landmarks = QFileDialog.getOpenFileName(self, "Browse Landmark",
                 "./data/filenames", filter="txt files (*landmark*.txt)")
+            # Set text to label
             filename = self.fname_landmarks[0].split("/")
             self.landmark_file_edit_text.setText(filename[-1])
+
+            # Indicate that user has make a selection
+            self.window.right_widget.fname_landmarks.user_define = True
+
+            # Indicate appropriate path
+            self.fname_landmarks = "./data/filenames/" + filename[-1]
 
     def on_clicking_browse_images(self):
         if not self.testing:
             self.fname_images = QFileDialog.getOpenFileName(self, "Browse Image",
                 "./data/filenames", filter="txt files (*test_files*.txt)")
-            self.fname_images = QFileDialog.getOpenFileName(self, "Browse Image",
-                "./data/filenames", filter="txt files (*landmarks*.txt)")
+            # Set text to label
+            filename = self.fname_images[0].split("/")
+            self.img_file_edit_text.setText(filename[-1])
+
+            # Indicate that user has make a selection
+            self.window.right_widget.fname_images.user_define = True
+
+            # Indicate appropriate path
+            self.fname_images = "./data/filenames/" + filename[-1]
             
 
 
