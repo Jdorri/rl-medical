@@ -55,7 +55,7 @@ class Window(QMainWindow):
         """
         # Status Bar
         self.statusbar = self.statusBar()
-        self.statusbar.showMessage("Start")
+        self.statusbar.showMessage("Ready")
 
         # Menu Bar
         self.initMenu()
@@ -89,7 +89,7 @@ class Window(QMainWindow):
         self.setCentralWidget(self.layout_widget)
 
         # Geometric window position and general setting
-        self.resize(1300, 800)
+        self.showMaximized()
         self.center()
         self.setWindowTitle('Anatomical Landmark Detection')
         self.menubar.setStyleSheet("background:#003E74; color:white; padding: 5px 0")
@@ -355,7 +355,7 @@ class SimpleImageViewer(QWidget):
     def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
         super().__init__()
         self.arrs = [arr, arr_x, arr_y]
-
+        self.setStyleSheet("background: white")
         self.isopen = False
         self.scale_x = scale_x
         self.scale_y = scale_y
@@ -410,7 +410,7 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPalette(p)
         self.label_img_y.setPalette(p)
 
-        self.fig = plt.figure(figsize=(3, 6.0))
+        self.fig = plt.figure(figsize=(3, 6))
         self.ax = self.fig.add_subplot(111, projection='3d')
         self.canvas = FigureCanvas(self.fig)
 
@@ -427,9 +427,9 @@ class SimpleImageViewer(QWidget):
         self.setWindowTitle("Landmark Detection Agent")
 
         # Stylesheet
-        self.label_img.setStyleSheet("background: black; border:3px solid rgb(255, 0, 0); ")
-        self.label_img_x.setStyleSheet("background: black; border:3px solid green; ")
-        self.label_img_y.setStyleSheet("background: black; border:3px solid blue; ")
+        self.label_img.setStyleSheet("background: black; border:3px solid #DD2501; ")
+        self.label_img_x.setStyleSheet("background: black; border:3px solid #66A40A; ")
+        self.label_img_y.setStyleSheet("background: black; border:3px solid #006EAF; ")
 
         # Style settings
         self.color_a = QColor(111, 230, 158)
@@ -543,8 +543,7 @@ class SimpleImageViewer(QWidget):
             self.z_traj = []
             self.ax.clear()
 
-        self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="r")
-        # self.ax.set_color("red")
+        self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4")
         self.canvas.draw()
 
     def draw_error(self):

@@ -211,6 +211,8 @@ class RightWidgetSettings(QFrame):
         
         # Reset simple image viewer
         self.window.widget.reset()
+
+        self.window.statusbar.showMessage("Ready")
     
     def which_task(self):
         """
