@@ -468,6 +468,9 @@ class SimpleImageViewer(QWidget):
         self.label_img_y.setPixmap(self.img_y)
         
         # 3d plotting
+        self.x_traj = []
+        self.y_traj = []
+        self.z_traj = []
         self.ax.clear()
         self.canvas.draw()
 

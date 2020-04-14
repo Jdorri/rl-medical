@@ -299,20 +299,30 @@ class RightWidgetSettings(QFrame):
         self.thread.terminate = True
         self.SWITCH_WINDOW.emit()
 
-    def check_user_define_usecase(self, filename_model):
+    def check_user_define_usecase(self, filename_model, filename_img, filename_landmark):
         """
         Check which usecase that the user wants
         """
 
-        filename = filename_model.split("/")
-        
-        # If cardiac
-        if "cardiac" in filename:
+        filename_model = filename_model.split("/")
+        filename_img = filename_img.split("/")
+        filename_landmark = filename_landmark.split("/")
+
+        # Ensure that user input file properly
+        if "cardiac" in filename_model[-2] \
+            and "cardiac" in filename_img[-1]\
+            and "cardiac" in filename_landmark[-1] :
             return "CardiacMRI"
-        elif "brain" in filename:
+        elif "brain" in filename_model[-2] \
+            and "brain" in filename_img[-1] \
+            and "brain" in filename_landmark[-1]:
             return "BrainMRI"
-        else:
+        elif "ultrasound" in filename_model[-2] \
+            and "fetal" in filename_img[-1] \
+            and "fetal" in filename_landmark[-1]:
             return "FetalUS"
+        else:
+            return ""
     
     def set_paths(self, default_use_case):
         """
@@ -377,16 +387,18 @@ class RightWidgetSettings(QFrame):
                                         screen_dims=IMAGE_SIZE,
                                         task='play')
 
+            self.NUM_ACTIONS = init_player.action_space.n
+            self.num_files = init_player.files.num_files
+            # Create a thread to run background task
+            self.worker_thread = WorkerThread(target_function=self.thread_function)
+            self.worker_thread.window = self.window
+            self.worker_thread.start()
+
         # If there is a problem with the loader, then user incorrectly add file
         except:
             self.terminal.appendHtml(f"<b><p style='color:red'> &#36; Error loading user defined settings. Please use appropriate model, image, and landmarks. </p></b>")
             self.error_message_box()
-
-        self.NUM_ACTIONS = init_player.action_space.n
-        self.num_files = init_player.files.num_files
-        # Create a thread to run background task
-        self.worker_thread = WorkerThread(target_function=self.thread_function)
-        self.worker_thread.start()
+        
 
     def thread_function(self):
         """Run on secondary thread"""

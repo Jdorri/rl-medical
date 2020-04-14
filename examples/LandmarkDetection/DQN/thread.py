@@ -19,6 +19,10 @@ class WorkerThread(Thread):
         self.target_function = target_function
         self.pause = False
         self.speed = WorkerThread.FAST # Maximum agent speed
+        self.window = None
 
     def run(self):
         self.target_function()
+        self.window.right_widget.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+        self.window.right_widget.run_button.setText("Start")
+
