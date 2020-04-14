@@ -221,6 +221,7 @@ class LeftWidgetSettings(QFrame):
         self.brain_button = QRadioButton("Brain")
         self.cardiac_button = QRadioButton("Cardiac")
         self.ultrasound_button = QRadioButton("Ultrasound")
+        self.brain_button.setChecked(True)
 
         ## Advance file mode
         self.advance_title = QLabel("<i> Load Custom Data </i>")

@@ -92,6 +92,9 @@ class RightWidgetSettings(QFrame):
         self.thread = WorkerThread(None)
         self.window = None
 
+        self.fname_images = filenames_GUI()
+        self.fname_landmarks = filenames_GUI()
+
         # Automatic, browse mode
         self.testMode = QPushButton('Automatic Mode', self)
         self.testMode.setCheckable(True)
@@ -122,12 +125,6 @@ class RightWidgetSettings(QFrame):
         label_log.setStyleSheet("margin-top: 10px")
         self.terminal = QPlainTextEdit(self)
         self.terminal.setReadOnly(True)
-
-        # Temporary default file path
-        self.fname_images = filenames_GUI()
-        self.fname_landmarks = filenames_GUI()
-        self.dtype = filenames_GUI()
-        self.fname_logs_dir = "./data"
 
         ## Layout
         # Auto-browse mode layout
@@ -218,6 +215,17 @@ class RightWidgetSettings(QFrame):
             return "Play"
         else:
             return "Evaluation"
+    
+    def which_usecase(self):
+        """
+        Determine which radio button usecase is checked
+        """
+        if self.window.left_widget.brain_button.isChecked():
+            return "BrainMRI"
+        elif self.window.left_widget.cardiac_button.isChecked():
+            return "CardiacMRI"
+        else:
+            return "FetalUS"
 
     @pyqtSlot()
     def on_clicking_run(self):
@@ -233,6 +241,8 @@ class RightWidgetSettings(QFrame):
             self.run_button.setText("Pause")
             self.window.statusbar.showMessage("Running")
             self.run_button.setStyleSheet("background-color:orange; color:white")
+            self.default_use_case = self.which_usecase()
+            self.set_paths(self.default_use_case)
             self.run_DQN()
         elif self.run_button.text() == "Resume":
             self.thread.pause = False
@@ -277,24 +287,26 @@ class RightWidgetSettings(QFrame):
         self.thread.terminate = True
         self.SWITCH_WINDOW.emit()
     
-    def set_paths(self):
-        assert self.default_use_case in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
-        self.right_settings.dtype.name = self.default_use_case
+    def set_paths(self, default_use_case):
+        """
+        Used to set paths before running the code
+        """
+        self.default_use_case = default_use_case
         if self.default_use_case == 'BrainMRI':
             # Default MRI
-            self.right_settings.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
-            self.right_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-            self.right_settings.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
+            self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
+            self.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+            self.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
-            self.right_settings.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
-            self.right_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
-            self.right_settings.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
+            self.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
+            self.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
+            self.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'FetalUS':
             # Default fetal
-            self.right_settings.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
-            self.right_settings.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
-            self.right_settings.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
+            self.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
+            self.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
+            self.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
 
     def run_DQN(self):
         # if self.GPU_value:
@@ -310,7 +322,7 @@ class RightWidgetSettings(QFrame):
         # load files into env to set num_actions, num_validation_files
         init_player = MedicalPlayer(files_list=self.selected_list,
                                     # data_type=self.dtype,
-                                    data_type=self.dtype.name,
+                                    data_type=self.default_use_case,
                                     screen_dims=IMAGE_SIZE,
                                     task='play')
         self.NUM_ACTIONS = init_player.action_space.n
@@ -333,7 +345,7 @@ class RightWidgetSettings(QFrame):
         # demo pretrained model one episode at a time
         if self.task_value == 'Play':
             play_n_episodes(get_player(files_list=self.selected_list, viz=0.01,
-                                        data_type=self.dtype.name,
+                                        data_type=self.default_use_case,
                                         saveGif=self.GIF_value,
                                         saveVideo=self.video_value,
                                         task='play'),
@@ -341,7 +353,7 @@ class RightWidgetSettings(QFrame):
         # run episodes in parallel and evaluate pretrained model
         elif self.task_value == 'Evaluation':
             play_n_episodes(get_player(files_list=self.selected_list, viz=0.01,
-                                            data_type=self.dtype.name,
+                                            data_type=self.default_use_case,
                                              saveGif=self.GIF_value,
                                              saveVideo=self.video_value,
                                              task='eval'),
@@ -579,7 +591,6 @@ class Controller:
         self.right_settings = RightWidgetSettings()
         self.window1 = Window(self.viewer_param, self.right_settings)
         self.right_settings.window = self.window1
-        self.set_paths()
 
         # Close previous window
         if self.window2:
