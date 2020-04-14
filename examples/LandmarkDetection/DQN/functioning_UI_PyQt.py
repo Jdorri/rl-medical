@@ -351,7 +351,7 @@ class RightWidgetSettings(QFrame):
             self.fname_landmarks.name = self.window.left_widget.fname_landmarks
 
             # To tell the program which loader it should use
-            self.default_use_case = self.check_user_define_usecase(self.fname_model.name)
+            self.default_use_case = self.check_user_define_usecase(self.fname_model.name, self.fname_images.name, self.fname_landmarks.name)
 
     def error_message_box(self):
         msg = QMessageBox()
@@ -366,6 +366,8 @@ class RightWidgetSettings(QFrame):
         self.window.left_widget.landmark_file_edit_text.setText("No file selected")
         self.window.left_widget.img_file_edit_text.setText("No file selected")
         
+        self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+        self.run_button.setText("Start")
         # Display pop up message
         msg.exec_()
 
