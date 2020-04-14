@@ -357,6 +357,8 @@ class RightWidgetSettings(QFrame):
             # To tell the program which loader it should use
             self.default_use_case = self.check_user_define_usecase(self.fname_model.name, self.fname_images.name, self.fname_landmarks.name)
 
+        self.window.usecase = self.default_use_case # indicate which use case currently
+
     def error_message_box(self):
         msg = QMessageBox()
         msg.setWindowTitle("Error on user defined settings")

@@ -53,6 +53,9 @@ class Window(QMainWindow):
         """
         Main UI init element.
         """
+        # Indication of usecase
+        self.usecase = None
+
         # Status Bar
         self.statusbar = self.statusBar()
         self.statusbar.showMessage("Ready")
@@ -64,7 +67,8 @@ class Window(QMainWindow):
         self.widget = SimpleImageViewer(arr=np.zeros(viewer_param["arrs"][0].shape),
                                    arr_x=np.zeros(viewer_param["arrs"][1].shape),
                                    arr_y=np.zeros(viewer_param["arrs"][2].shape),
-                                   filepath=viewer_param["filepath"])
+                                   filepath=viewer_param["filepath"],
+                                   window=self)
 
         # Left Settings widget
         if right_settings:
@@ -352,7 +356,7 @@ class SimpleImageViewer(QWidget):
     """
     agent_signal = pyqtSignal(dict) # Signaling agent move (current location, status)
 
-    def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
+    def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None, window=None):
         super().__init__()
         self.arrs = [arr, arr_x, arr_y]
         self.setStyleSheet("background: white")
@@ -362,6 +366,7 @@ class SimpleImageViewer(QWidget):
         self.display = display
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
+        self.window = window
 
         # Set image formatting and get shape
         cvImg = arr.astype(np.uint8)
@@ -435,7 +440,7 @@ class SimpleImageViewer(QWidget):
         self.color_a = QColor(111, 230, 158)
         self.color_t = QColor(200, 100, 100)
         self.color_e = QColor(250, 250, 250)
-        self.size_e = 20
+        self.size_e = 18 
         self.line_width = 1
 
         # agent trajactories
@@ -546,16 +551,27 @@ class SimpleImageViewer(QWidget):
         self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4")
         self.canvas.draw()
 
+    def which_size(self):
+        if self.window.usecase == "BrainMRI":
+            self.size_e = 18
+        elif self.window.usecase == "CardiacMRI":
+            self.size_e = 25
+        else:
+            self.size_e = 25
+
     def draw_error(self):
         """
         Error (mm) message during eval and browse mode.
         """
         self.painterInstance = QPainter(self.img)
         pen = QPen(self.color_e)
-        # pen.setWidth(self.line_width * 2)
         self.painterInstance.setPen(pen)
+        self.which_size() # determine size of pen
         self.painterInstance.setFont(QFont("Arial", self.size_e))
-        self.painterInstance.drawText(30, 30, f"Error: {self.error:.2f} mm")
+        if self.window.usecase in {"BrainMRI", "CardiacMRI"}:
+            self.painterInstance.drawText(25, 25, f"Error: {self.error:.2f} mm")
+        else:
+            self.painterInstance.drawText(15, 22, f"Error: {self.error:.2f} mm")
         self.painterInstance.end()
 
     def drawer(self, agent_loc, rect, target):
