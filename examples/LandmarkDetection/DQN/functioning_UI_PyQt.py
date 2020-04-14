@@ -307,9 +307,9 @@ class RightWidgetSettings(QFrame):
         filename = filename_model.split("/")
         
         # If cardiac
-        if cardiac in filename:
+        if "cardiac" in filename:
             return "CardiacMRI"
-        elif brain in filename:
+        elif "brain" in filename:
             return "BrainMRI"
         else:
             return "FetalUS"
@@ -376,6 +376,7 @@ class RightWidgetSettings(QFrame):
                                         data_type=self.default_use_case,
                                         screen_dims=IMAGE_SIZE,
                                         task='play')
+
         # If there is a problem with the loader, then user incorrectly add file
         except:
             self.terminal.appendHtml(f"<b><p style='color:red'> &#36; Error loading user defined settings. Please use appropriate model, image, and landmarks. </p></b>")
