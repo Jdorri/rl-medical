@@ -276,6 +276,25 @@ class RightWidgetSettings(QFrame):
     def on_clicking_browseMode(self):
         self.thread.terminate = True
         self.SWITCH_WINDOW.emit()
+    
+    def set_paths(self):
+        assert self.default_use_case in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
+        self.right_settings.dtype.name = self.default_use_case
+        if self.default_use_case == 'BrainMRI':
+            # Default MRI
+            self.right_settings.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
+            self.right_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+            self.right_settings.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
+        elif self.default_use_case == 'CardiacMRI':
+            # Default cardiac
+            self.right_settings.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
+            self.right_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
+            self.right_settings.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
+        elif self.default_use_case == 'FetalUS':
+            # Default fetal
+            self.right_settings.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
+            self.right_settings.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
+            self.right_settings.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
 
     def run_DQN(self):
         # if self.GPU_value:
@@ -545,7 +564,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
 
 class Controller:
-    def __init__(self, display=True, default_use_case='BrainMRI'):
+    def __init__(self, display=True, default_use_case='FetalUS'):
         self.default_use_case = default_use_case
         self.window1, self.window2 = None, None
         self.app = QApplication(sys.argv)
@@ -574,7 +593,10 @@ class Controller:
         self.right_settings = RightWidgetSettingsBrowseMode()
         self.window2 = Window(self.viewer_param, self.right_settings)
         self.right_settings.window = self.window2
+        default_use_case = self.default_use_case # TODO
+        self.default_use_case = "BrainMRI" # TODO
         self.load_defaults()
+        self.default_use_case = default_use_case
 
         # Close previous window
         if self.window1:
