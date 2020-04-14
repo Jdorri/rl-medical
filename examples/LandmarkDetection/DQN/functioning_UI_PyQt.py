@@ -314,10 +314,11 @@ class RightWidgetSettings(QFrame):
             self.fname_model.name = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
             self.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
         else:
+            self.default_use_case = "BrainMRI" # TODO: FUNCTION TO CHECK WHICH LOADER TO USE
             # User defined file selection
-            self.fname_images.name = self.window.right_widget.fname_images
-            self.fname_model.name = self.window.right_widget.fname_model
-            self.fname_landmarks.name = self.window.right_widget.fname_landmarks
+            self.fname_images.name = self.window.left_widget.fname_images
+            self.fname_model.name = self.window.left_widget.fname_model
+            self.fname_landmarks.name = self.window.left_widget.fname_landmarks
             
 
     def run_DQN(self):

@@ -306,7 +306,7 @@ class LeftWidgetSettings(QFrame):
             self.window.right_widget.fname_model.user_define = True
 
             # Indicate appropriate path
-            self.fname_model = "./data/models/" + filename[-1]
+            self.fname_model = "./data/models/" + filename[-2] + "/" + filename[-1]
 
     def on_clicking_browse_landmarks(self):
         if not self.testing:
@@ -335,7 +335,6 @@ class LeftWidgetSettings(QFrame):
 
             # Indicate appropriate path
             self.fname_images = "./data/filenames/" + filename[-1]
-            
 
 
 ################################################################################
