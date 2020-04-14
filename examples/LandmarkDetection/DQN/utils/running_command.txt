@@ -53,3 +53,9 @@ for ext in exts:
         f.write(r.content)
 
 /Volumes/project/2019/545/g1954503/oen19/rl-medical/examples/LandmarkDetection/DQN
+
+
+
+# Faidon random
+
+python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/brain_test_files_new_paths.txt' './data/filenames/brain_test_landmarks_new_paths.txt' --type 'BrainMRI'

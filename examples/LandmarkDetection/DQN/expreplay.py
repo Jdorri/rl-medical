@@ -133,12 +133,23 @@ class HumanDemReplayMemory(ReplayMemory):
         Fills in the buffer with the saved actions from the expert.
         Actions are stored under .data/HITL in the form of log files
         """
+        ## Path for GPU cluster ##
         directory = "Documents/rl-medical/examples/LandmarkDetection/DQN/data/HITL"
-        # # TODO directory needs to be flexible for pulling images
+        # TODO directory needs to be flexible for pulling images
         image_directory = "/vol/project/2019/545/g1954503/aeg19/Brain_MRI/"
+        train_paths = "/vol/biomedic/users/aa16914/shared/data/RL_data/brain_train_files_new_paths.txt"
         ## Paths for local testing ##
-        #directory = "./data/HITL"
-        #image_directory = '/Volumes/project/2019/545/g1954503/aeg19/Brain_MRI'
+        # directory = "./data/HITL"
+        # image_directory = '/Volumes/project/2019/545/g1954503/aeg19/Brain_MRI'
+        # train_paths = "./brain_train_files_new_paths.txt"
+        ## Temporary fix to exclude testing images ##
+        allowed_images = []
+        with open(train_paths) as f:
+            for line in f.readlines():
+                allowed_images.append((line.split("/")[-1]).split('.')[0])
+        total_images = 0
+        used_images = 0
+        ##
         # Loop 1: Loops through all log files in the directory
         for filename in os.listdir(directory):
             if filename.endswith(".pickle") or filename.endswith(".p"):
@@ -147,24 +158,29 @@ class HumanDemReplayMemory(ReplayMemory):
                 file_contents = pickle.load( open( log_file, "rb" ) )
                 # Loop 2: Loops through all 3D images in the log file
                 for entry in file_contents:
-                    image_path = os.path.join(image_directory, entry['img_name']+".nii.gz")
-                    target_coordinates = entry['target']
-                    logger.info("Image path: {}".format(image_path))
-                    dummy_env = MedicalPlayer(directory=image_directory, screen_dims=(45, 45, 45),
-                                                        viz=0, saveGif='False', saveVideo='False',
-                                                        task='play', files_list=[image_path], data_type='HITL',
-                                                        max_num_frames=1500)
-                    # Loop 3: Loops through each state, action pair recorded
-                    for key, state_coordinates in enumerate(entry['states']):
-                        if key != len(entry['states'])-1:
-                            # logger.info("{} state: {}".format(key, state_coordinates))
-                            # logger.info("{} reward: {}".format(key+1, entry['rewards'][key+1]))
-                            # logger.info("{} action: {}".format(key+1, entry['actions'][key+1]))
-                            # logger.info("{} is_over: {}".format(key+1, entry['is_over'][key+1]))
-                            # logger.info("{} resolution: {}".format(key, entry['resolution'][key]))
-                            dummy_env.HITL_set_location(state_coordinates, entry['resolution'][key])
-                            state_image = dummy_env._current_state()
-                            self.append(Experience(state_image, entry['actions'][key+1], entry['rewards'][key+1], entry['is_over'][key+1], True))
+                    total_images += 1
+                    if (entry['img_name']) in allowed_images:
+                        image_path = os.path.join(image_directory, entry['img_name']+".nii.gz")
+                        # target_coordinates = entry['target']
+                        logger.info("Image path: {}".format(image_path))
+                        used_images += 1
+                        dummy_env = MedicalPlayer(directory=image_directory, screen_dims=(45, 45, 45),
+                                                            viz=0, saveGif='False', saveVideo='False',
+                                                            task='play', files_list=[image_path], data_type='HITL',
+                                                            max_num_frames=1500)
+                        # Loop 3: Loops through each state, action pair recorded
+                        for key, state_coordinates in enumerate(entry['states']):
+                            if key != len(entry['states'])-1:
+                                # logger.info("{} state: {}".format(key, state_coordinates))
+                                # logger.info("{} reward: {}".format(key+1, entry['rewards'][key+1]))
+                                # logger.info("{} action: {}".format(key+1, entry['actions'][key+1]))
+                                # logger.info("{} is_over: {}".format(key+1, entry['is_over'][key+1]))
+                                # logger.info("{} resolution: {}".format(key, entry['resolution'][key]))
+                                dummy_env.HITL_set_location(state_coordinates, entry['resolution'][key])
+                                state_image = dummy_env._current_state()
+                                self.append(Experience(state_image, entry['actions'][key+1], entry['rewards'][key+1], entry['is_over'][key+1], True))
+        logger.info("total images: {}".format(total_images))
+        logger.info("used images: {}".format(used_images))
 
 
 ###############################################################################
@@ -223,7 +239,6 @@ class ExpReplay(DataFlow, Callback):
 
         self.hmem = HumanDemReplayMemory(memory_size, state_shape, history_len)
         self.hmem.load_experience()
-
 
         ###############################################################################
         self._current_ob = self.player.reset()

@@ -267,7 +267,7 @@ if __name__ == '__main__':
 
     METHOD = args.algo
     # load files into env to set num_actions, num_validation_files
-    init_player = MedicalPlayer(files_list=files_list, # files_list=args.files,
+    init_player = MedicalPlayer(files_list=args.files, #files_list=files_list, 
                                 data_type=args.type,
                                 screen_dims=IMAGE_SIZE,
                                 task='play')
@@ -321,7 +321,7 @@ if __name__ == '__main__':
     else:  # train model
         logger_dir = os.path.join(args.logDir, args.name)
         logger.set_logger_dir(logger_dir)
-        config = get_config(files_list, # args.files,,
+        config = get_config(args.files, #files_list
                             args.type)
         not_ignore = None
         if args.load:  # resume training from a saved checkpoint
