@@ -299,22 +299,25 @@ class LeftWidgetSettings(QFrame):
 
     def on_clicking_browse_model(self):
         if not self.testing:
-            self.fname_model = QFileDialog.getOpenFileName(self, "Open file",
+            self.fname_model = QFileDialog.getOpenFileName(self, "Browse Model",
                 "./data/models", filter="*.data-*")
-            print(self.fname_model)
+            filename = self.fname_model[0].split("/")
+            self.model_file_edit_text.setText(filename[-1])
 
     def on_clicking_browse_landmarks(self):
         if not self.testing:
-            self.fname_landmarks = QFileDialog.getOpenFileName(self, "Open file",
+            self.fname_landmarks = QFileDialog.getOpenFileName(self, "Browse Landmark",
                 "./data/filenames", filter="txt files (*landmark*.txt)")
+            filename = self.fname_landmarks[0].split("/")
+            self.landmark_file_edit_text.setText(filename[-1])
 
     def on_clicking_browse_images(self):
         if not self.testing:
-            self.fname_images = QFileDialog.getOpenFileName(self, "Open file",
+            self.fname_images = QFileDialog.getOpenFileName(self, "Browse Image",
                 "./data/filenames", filter="txt files (*test_files*.txt)")
-            self.fname_images = QFileDialog.getOpenFileName(self, "Open file",
+            self.fname_images = QFileDialog.getOpenFileName(self, "Browse Image",
                 "./data/filenames", filter="txt files (*landmarks*.txt)")
-            # self.load_img()
+            
 
 
 ################################################################################
