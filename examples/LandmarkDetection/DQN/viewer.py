@@ -383,19 +383,22 @@ class SimpleImageViewer(QWidget):
         qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
 
         # Initialise images with labels
-        # TODO: resolve scaled to width later during final iteration (responsive)
         self.img = QPixmap(qImg)
-        self.img = self.img.scaledToWidth(350)
+        self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.img_x = QPixmap(qImg_x)
-        self.img_x = self.img_x.scaledToWidth(350)
+        self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.img_y = QPixmap(qImg_y)
-        self.img_y = self.img_y.scaledToWidth(350)
+        self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
 
         self.label_img = QLabel()
+        self.label_img.setPixmap(self.img)
         self.label_img_x = QLabel()
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y = QLabel()
         self.label_img_y.setPixmap(self.img_y)
+        self.label_img.setMinimumSize(400, 400)
+        self.label_img_x.setMinimumSize(400, 400)
+        self.label_img_y.setMinimumSize(400, 400)
 
         # Set background color for images to Black
         self.label_img.setAutoFillBackground(True)
@@ -427,7 +430,6 @@ class SimpleImageViewer(QWidget):
         self.label_img.setStyleSheet("background: black; border:3px solid rgb(255, 0, 0); ")
         self.label_img_x.setStyleSheet("background: black; border:3px solid green; ")
         self.label_img_y.setStyleSheet("background: black; border:3px solid blue; ")
-        self.canvas.setStyleSheet("background: black; border:3px solid blue; ")
 
         # Style settings
         self.color_a = QColor(111, 230, 158)
@@ -464,10 +466,9 @@ class SimpleImageViewer(QWidget):
         qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
         self.img_y = QPixmap(qImg_y)
 
-        # TODO: resolve scaled to width later during final iteration (responsive)
-        self.img = self.img.scaledToWidth(350)
-        self.img_x = self.img_x.scaledToWidth(350)
-        self.img_y = self.img_y.scaledToWidth(350)
+        self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.label_img.setPixmap(self.img)
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
@@ -521,13 +522,15 @@ class SimpleImageViewer(QWidget):
         if self.task in ['eval','browse']:
             self.draw_error()
 
-        # TODO: resolve scaled to width later during final iteration (responsive)
-        self.img = self.img.scaledToWidth(350)
-        self.img_x = self.img_x.scaledToWidth(350)
-        self.img_y = self.img_y.scaledToWidth(350)
+        self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.label_img.setPixmap(self.img)
+        self.label_img.setAlignment(QtCore.Qt.AlignCenter)
         self.label_img_x.setPixmap(self.img_x)
+        self.label_img_x.setAlignment(QtCore.Qt.AlignCenter)
         self.label_img_y.setPixmap(self.img_y)
+        self.label_img_y.setAlignment(QtCore.Qt.AlignCenter)
         
         # 3d plotting
         if not episode_end:
