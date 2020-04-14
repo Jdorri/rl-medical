@@ -362,13 +362,3 @@ if __name__ == '__main__':
         # print(r(not_ignore, args.transferModel, args.type))
         # exit()
         launch_train_with_config(config, SimpleTrainer())
-
-# #### TEST FOR EVALUATOR BELOW ####
-#     # DQN.py --task train --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --type 'BrainMRI'
-#
-#     EVAL_EPISODE = 2
-#     eval = Evaluator(nr_eval=EVAL_EPISODE, input_names=['state'],
-#               output_names=['Qvalue'], files_list = ['./data/filenames/brain_test_files_new_paths.txt','./data/filenames/brain_test_landmarks_new_paths.txt'],
-#               data_type=args.type, get_player_fn=get_player)
-#     eval._setup_graph()
-#     eval._trigger()
