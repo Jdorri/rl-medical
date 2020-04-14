@@ -170,6 +170,8 @@ class RightWidgetSettings(QFrame):
         vbox.addStretch()
 
         self.setLayout(vbox)
+        self.setStyleSheet("background:#EBEEEE")
+
 
         # Event handler
         self.browseMode.clicked.connect(self.on_clicking_browseMode)
@@ -362,9 +364,9 @@ class RightWidgetSettings(QFrame):
         self.fname_landmarks.user_define = False
         self.fname_images.user_define = False
         self.fname_model.user_define = False
-        self.window.left_widget.model_file_edit_text.setText("No file selected")
-        self.window.left_widget.landmark_file_edit_text.setText("No file selected")
-        self.window.left_widget.img_file_edit_text.setText("No file selected")
+        self.window.left_widget.model_file_edit_text.setText("Default data selected")
+        self.window.left_widget.landmark_file_edit_text.setText("Default data selected")
+        self.window.left_widget.img_file_edit_text.setText("Default data selected")
         
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
         self.run_button.setText("Start")

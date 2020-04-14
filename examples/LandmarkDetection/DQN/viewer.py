@@ -92,8 +92,9 @@ class Window(QMainWindow):
         self.resize(1300, 800)
         self.center()
         self.setWindowTitle('Anatomical Landmark Detection')
-        self.menubar.setStyleSheet("background:#D2D4DC; color:black")
-        self.statusbar.setStyleSheet("background:#D2D4DC; color:black")
+        self.menubar.setStyleSheet("background:#003E74; color:white; padding: 5px 0")
+        self.statusbar.setStyleSheet("background:#003E74; color:white")
+        self.setStyleSheet("background: white")
         self.show()
 
     def initMenu(self):
@@ -209,7 +210,7 @@ class LeftWidgetSettings(QFrame):
         super().__init__()
         # Window object to access windows components
         self.window = window # Store window object to enable control over windows functionality
-
+        
         self.title = QLabel("<b> Settings </b>")
 
         ## Default file mode
@@ -224,17 +225,17 @@ class LeftWidgetSettings(QFrame):
         # Load model settings
         self.model_file = QLabel('Load Model', self)
         self.model_file_edit = QPushButton('Browse', self)
-        self.model_file_edit_text = QLabel("No file selected")
+        self.model_file_edit_text = QLabel("Default data selected")
 
         # Load landmark settings
         self.landmark_file = QLabel('Load Landmark', self)
         self.landmark_file_edit = QPushButton('Browse', self)
-        self.landmark_file_edit_text = QLabel("No file selected")
+        self.landmark_file_edit_text = QLabel("Default data selected")
 
         # Upload image settings
         self.img_file = QLabel('Upload Image', self)
         self.img_file_edit = QPushButton('Browse', self)
-        self.img_file_edit_text = QLabel("No file selected")
+        self.img_file_edit_text = QLabel("Default data selected")
 
         # Logo settings
         self.logo = QLabel()
@@ -286,6 +287,7 @@ class LeftWidgetSettings(QFrame):
         vbox.addWidget(self.logo)
 
         self.setLayout(vbox)
+        self.setStyleSheet("background:#EBEEEE")
 
         # Event handler connection
         self.model_file_edit.clicked.connect(self.on_clicking_browse_model)
@@ -304,6 +306,7 @@ class LeftWidgetSettings(QFrame):
 
             # Indicate that user has make a selection
             self.window.right_widget.fname_model.user_define = True
+            self.window.right_widget.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Model: {filename} </p></b>")
 
             # Indicate appropriate path
             self.fname_model = "./data/models/" + filename[-2] + "/" + filename[-1]
@@ -318,6 +321,7 @@ class LeftWidgetSettings(QFrame):
 
             # Indicate that user has make a selection
             self.window.right_widget.fname_landmarks.user_define = True
+            self.window.right_widget.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Landmark: {filename} </p></b>")
 
             # Indicate appropriate path
             self.fname_landmarks = "./data/filenames/" + filename[-1]
@@ -332,6 +336,7 @@ class LeftWidgetSettings(QFrame):
 
             # Indicate that user has make a selection
             self.window.right_widget.fname_images.user_define = True
+            self.window.right_widget.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Image: {filename} </p></b>")
 
             # Indicate appropriate path
             self.fname_images = "./data/filenames/" + filename[-1]
