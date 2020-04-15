@@ -680,7 +680,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
     
     def set_paths(self):
         self.default_use_case = self.which_usecase()
-        assert self.default_use_case in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
         if self.default_use_case == 'BrainMRI':
             # Default MRI
             self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
