@@ -291,8 +291,16 @@ class LeftWidgetSettings(QFrame):
         vbox.addWidget(self.logo)
 
         self.setLayout(vbox)
-        self.setStyleSheet("background:#EBEEEE")
-        self.setStyleSheet("QPushButton {background: #006EAF; color: white}")
+        self.setStyleSheet("""
+            QPushButton {
+                background: #006EAF; 
+                color: white
+            }
+
+            QFrame {
+                background: #EBEEEE;
+            }
+            """)
 
         # Event handler connection
         self.model_file_edit.clicked.connect(self.on_clicking_browse_model)

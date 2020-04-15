@@ -70,7 +70,7 @@ EPOCHS_PER_EVAL = 2
 EVAL_EPISODE = 50
 
 ###############################################################################
-## Right Widget
+## Right Widget (Automatic Mode)
 
 class filenames_GUI:
     def __init__(self):
@@ -443,6 +443,9 @@ class RightWidgetSettings(QFrame):
     def window(self, window):
         self._window = window
 
+
+###############################################################################
+## Right Widget (Browse Mode)
 
 class RightWidgetSettingsBrowseMode(QFrame):
 
