@@ -662,7 +662,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.window.update()
     
     def set_paths(self):
-        self.default_use_case = "BrainMRI"
+        self.default_use_case = self.which_usecase()
         assert self.default_use_case in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
         if self.default_use_case == 'BrainMRI':
             # Default MRI
@@ -676,6 +676,81 @@ class RightWidgetSettingsBrowseMode(QFrame):
             # Default fetal
             self.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
             self.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
+        else:
+            # User defined file selection
+            self.fname_images.name = self.window.left_widget.fname_images
+            self.fname_landmarks.name = self.window.left_widget.fname_landmarks
+
+            # To tell the program which loader it should use
+            self.default_use_case = self.check_user_define_usecase(self.fname_images.name, self.fname_landmarks.name)
+
+            if not self.default_use_case:
+                self.error_message_box()
+                self.default_use_case = self.which_usecase()
+                return
+
+        self.window.usecase = self.default_use_case # indicate which use case currently
+    
+    def check_user_define_usecase(self, filename_img, filename_landmark):
+        """
+        Check which usecase that the user wants
+        """
+
+        filename_img = filename_img.split("/")
+        filename_landmark = filename_landmark.split("/")
+
+        # Ensure that user input file properly
+        if "cardiac" in filename_img[-1]\
+            and "cardiac" in filename_landmark[-1] :
+            return "CardiacMRI"
+        elif "brain" in filename_img[-1] \
+            and "brain" in filename_landmark[-1]:
+            return "BrainMRI"
+        elif "fetal" in filename_img[-1] \
+            and "fetal" in filename_landmark[-1]:
+            return "FetalUS"
+        else:
+            return ""
+    
+    def error_message_box(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Error on user defined settings")
+        msg.setText("Please use appropriate model, image, and landmarks.")
+        msg.setIcon(QMessageBox.Critical)
+
+        # Clean up
+        self.fname_landmarks.user_define = False
+        self.fname_images.user_define = False
+        self.window.left_widget.model_file_edit_text.setText("Default data selected")
+        self.window.left_widget.landmark_file_edit_text.setText("Default data selected")
+        self.window.left_widget.img_file_edit_text.setText("Default data selected")
+        
+        self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+        self.run_button.setText("Start")
+        # Display pop up message
+        msg.exec_()
+    
+    def which_usecase(self):
+        """
+        Determine which radio button usecase is checked
+        """
+        # If user does not specify specific file to load
+        if not self.fname_images.user_define or \
+            not self.fname_landmarks.user_define:
+            if self.window.left_widget.brain_button.isChecked():
+                return "BrainMRI"
+            elif self.window.left_widget.cardiac_button.isChecked():
+                return "CardiacMRI"
+            else:
+                return "FetalUS"
+        # Else user specify
+        else:
+            return "UserDefined"
+
+
+################################################################################
+## Main Function
+# Responsible for execution of the whole application
 
 if __name__ == "__main__":
 
