@@ -87,9 +87,10 @@ class Controller:
         self.window = Window(self.viewer_param, self.right_settings)
         self.right_settings.automatic_mode.window = self.window
         self.right_settings.browse_mode.window = self.window
-        # Set paths and load image
-        self.right_settings.browse_mode.set_paths()
-        self.right_settings.browse_mode.load_img()
+        
+        # # Set paths and load image
+        # self.right_settings.browse_mode.set_paths()
+        # self.right_settings.browse_mode.load_img()
 
         # Show window
         self.window.show()
@@ -119,9 +120,22 @@ class Tab(QFrame):
         vbox.addWidget(self.tab_widget)
         self.setLayout(vbox)
 
+        # Event handler
+        self.tab_widget.currentChanged.connect(self.on_change)
+
         # Responsive
         self.setMaximumWidth(400)
         self.setStyleSheet("background:#EBEEEE")
+    
+    @pyqtSlot(int)
+    def on_change(self, index):
+        # If automatic mode is selected
+        if index == 0:
+            self.automatic_mode.window.widget.reset()
+        else:
+            self.automatic_mode.thread.terminate = True
+            self.browse_mode.set_paths()
+            self.browse_mode.load_img()
     
     def get_mode(self):
         """

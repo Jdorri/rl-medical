@@ -175,17 +175,17 @@ class Window(QMainWindow):
         """
         if self.right_widget.get_mode() == 'BROWSE' and self.right_widget.browse_mode.env:
             if event.key() in {Qt.Key_W, Qt.Key_Up}:
-                self.right_widget.on_clicking_up()
+                self.right_widget.browse_mode.on_clicking_up()
             elif event.key() in {Qt.Key_S, Qt.Key_Down}:
-                self.right_widget.on_clicking_down()
+                self.right_widget.browse_mode.on_clicking_down()
             elif event.key() in {Qt.Key_A, Qt.Key_Left}:
-                self.right_widget.on_clicking_left()
+                self.right_widget.browse_mode.on_clicking_left()
             elif event.key() in {Qt.Key_D, Qt.Key_Right}:
-                self.right_widget.on_clicking_right()
+                self.right_widget.browse_mode.on_clicking_right()
             elif event.key() == Qt.Key_X:
-                self.right_widget.on_clicking_zoomIn()
+                self.right_widget.browse_mode.on_clicking_zoomIn()
             elif event.key() == Qt.Key_Z:
-                self.right_widget.on_clicking_zoomOut()
+                self.right_widget.browse_mode.on_clicking_zoomOut()
 
     def closeEvent(self, event):
         """
