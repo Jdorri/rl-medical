@@ -173,7 +173,7 @@ class Window(QMainWindow):
         Different actions for different keyPressEvents.
         Allows the user to move through the image by using arrow keys.
         """
-        if self.right_widget.MODE == 'BROWSE MODE' and self.right_widget.env:
+        if self.right_widget.get_mode() == 'BROWSE' and self.right_widget.browse_mode.env:
             if event.key() in {Qt.Key_W, Qt.Key_Up}:
                 self.right_widget.on_clicking_up()
             elif event.key() in {Qt.Key_S, Qt.Key_Down}:
@@ -297,7 +297,7 @@ class LeftWidgetSettings(QFrame):
                 color: white
             }
 
-            QFrame {
+            QFrame, QRadioButton {
                 background: #EBEEEE;
             }
             """)
@@ -318,8 +318,8 @@ class LeftWidgetSettings(QFrame):
             self.model_file_edit_text.setText(filename[-1])
 
             # Indicate that user has make a selection
-            self.window.right_widget.fname_model.user_define = True
-            self.window.right_widget.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Model: {filename} </p></b>")
+            self.window.right_widget.automatic_mode.fname_model.user_define = True
+            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Model: {filename} </p></b>")
 
             # Indicate appropriate path
             self.fname_model = "./data/models/" + filename[-2] + "/" + filename[-1]
@@ -333,8 +333,8 @@ class LeftWidgetSettings(QFrame):
             self.landmark_file_edit_text.setText(filename[-1])
 
             # Indicate that user has make a selection
-            self.window.right_widget.fname_landmarks.user_define = True
-            self.window.right_widget.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Landmark: {filename} </p></b>")
+            self.window.right_widget.automatic_mode.fname_landmarks.user_define = True
+            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Landmark: {filename} </p></b>")
 
             # Indicate appropriate path
             self.fname_landmarks = "./data/filenames/" + filename[-1]
@@ -348,8 +348,8 @@ class LeftWidgetSettings(QFrame):
             self.img_file_edit_text.setText(filename[-1])
 
             # Indicate that user has make a selection
-            self.window.right_widget.fname_images.user_define = True
-            self.window.right_widget.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Image: {filename} </p></b>")
+            self.window.right_widget.automatic_mode.fname_images.user_define = True
+            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Image: {filename} </p></b>")
 
             # Indicate appropriate path
             self.fname_images = "./data/filenames/" + filename[-1]

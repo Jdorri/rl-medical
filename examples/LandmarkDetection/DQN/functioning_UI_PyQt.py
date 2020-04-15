@@ -69,6 +69,70 @@ EPOCHS_PER_EVAL = 2
 # the number of episodes to run during evaluation
 EVAL_EPISODE = 50
 
+
+###############################################################################
+## Controller class 
+# Responsible to run the entire application
+
+class Controller:
+    def __init__(self, display=True):
+        self.window = None # Application window
+        self.app = QApplication(sys.argv)
+        self.viewer_param = get_viewer_data()
+
+        # Initialise the right settings tab
+        self.right_settings = Tab()
+
+        # Initialise the window
+        self.window = Window(self.viewer_param, self.right_settings)
+        self.right_settings.automatic_mode.window = self.window
+        self.right_settings.browse_mode.window = self.window
+        # Set paths and load image
+        self.right_settings.browse_mode.set_paths()
+        self.right_settings.browse_mode.load_img()
+
+        # Show window
+        self.window.show()
+
+
+###############################################################################
+## Tab Widget
+# Responsible to integrate automatic mode and browse mode through tab functionality
+
+class Tab(QFrame):
+    def __init__(self):
+        super().__init__()
+
+        # Create tab widget that integrates automatic and browse mode
+        self.tab_widget = QTabWidget()
+
+        # Right widgets initialisation
+        self.automatic_mode = RightWidgetSettings()
+        self.browse_mode = RightWidgetSettingsBrowseMode()
+
+        # Tab settings
+        self.tab_widget.addTab(self.automatic_mode, "Automatic Mode")
+        self.tab_widget.addTab(self.browse_mode, "Browse Mode")
+
+        # Layout
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.tab_widget)
+        self.setLayout(vbox)
+
+        # Responsive
+        self.setMaximumWidth(400)
+        self.setStyleSheet("background:#EBEEEE")
+    
+    def get_mode(self):
+        """
+        Used to find application mode (automatic or browse)
+        """
+        if self.tab_widget.currentIndex() == 0:
+            return "AUTOMATIC"
+        else:
+            return "BROWSE"
+
+
 ###############################################################################
 ## Right Widget (Automatic Mode)
 
@@ -79,13 +143,11 @@ class filenames_GUI:
 
 class RightWidgetSettings(QFrame):
     terminal_signal = pyqtSignal(dict)
-    SWITCH_WINDOW = pyqtSignal()
-    MODE = 'DEFAULT MODE'
 
     def __init__(self, *args, **kwargs):
         super(RightWidgetSettings, self).__init__(*args, **kwargs)
         # Responsive settings
-        self.setMaximumWidth(400)
+        # self.setMaximumWidth(400)
 
         # Thread and window object which will be used to gain access to primary
         # windows.
@@ -96,13 +158,6 @@ class RightWidgetSettings(QFrame):
         self.fname_images = filenames_GUI()
         self.fname_landmarks = filenames_GUI()
         self.fname_model = filenames_GUI()
-
-        # Automatic, browse mode
-        self.testMode = QPushButton('Automatic Mode', self)
-        self.testMode.setCheckable(True)
-        self.testMode.setChecked(True)
-        self.browseMode = QPushButton('Browse Mode', self)
-        self.browseMode.setCheckable(True)
 
         # Task
         self.task = QLabel('<i> Task </i>', self)
@@ -129,14 +184,6 @@ class RightWidgetSettings(QFrame):
         self.terminal.setReadOnly(True)
 
         ## Layout
-        # Auto-browse mode layout
-        gridMode = QGridLayout()
-        gridMode.setContentsMargins(0, 0, 0, 20)
-        gridMode.addWidget(self.testMode, 0, 0)
-        gridMode.setHorizontalSpacing(0)
-        gridMode.addWidget(self.browseMode, 0, 1)
-        gridMode.setVerticalSpacing(2)
-
         # Task layout
         hbox_task = QHBoxLayout()
         hbox_task.setSpacing(30)
@@ -162,7 +209,6 @@ class RightWidgetSettings(QFrame):
 
         # Main layout
         vbox = QVBoxLayout()
-        vbox.addLayout(gridMode)
         vbox.addLayout(grid)
         vbox.addItem(QSpacerItem(300, 50)) # spacer
         vbox.addWidget(label_log)
@@ -170,24 +216,18 @@ class RightWidgetSettings(QFrame):
         vbox.addStretch()
 
         self.setLayout(vbox)
-        self.setStyleSheet("background:#EBEEEE")
-
 
         # Event handler
-        self.browseMode.clicked.connect(self.on_clicking_browseMode)
         self.run_button.clicked.connect(self.on_clicking_run)
         self.terminal_signal.connect(self.terminal_signal_handler)
         self.terminate_button.clicked.connect(self.on_clicking_terminate)
         
         # CSS styling for some widget components
+        self.setStyleSheet("background:white")
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
         self.terminate_button.setStyleSheet("background-color:#f44336; color:white")
 
         self.show()
-
-        # Flags for testing
-        self.testing = False
-        self.test_click = None
     
     @pyqtSlot(int)
     def changeValue(self, value):
@@ -297,11 +337,6 @@ class RightWidgetSettings(QFrame):
         self.terminal.appendHtml(
             f"<i>Q Values:</i> {q_values} <hr />"
         )
-
-    @pyqtSlot()
-    def on_clicking_browseMode(self):
-        self.thread.terminate = True
-        self.SWITCH_WINDOW.emit()
 
     def check_user_define_usecase(self, filename_model, filename_img, filename_landmark):
         """
@@ -449,32 +484,14 @@ class RightWidgetSettings(QFrame):
 
 class RightWidgetSettingsBrowseMode(QFrame):
 
-    SWITCH_WINDOW = pyqtSignal()
-    KEY_PRESSED = pyqtSignal(QEvent)
-    MODE = 'BROWSE MODE'
-
     def __init__(self, *args, **kwargs):
         super(RightWidgetSettingsBrowseMode, self).__init__(*args, **kwargs)
-
-        # window title
-        self.setWindowTitle('Anatomical Landmark Detection')
+        # Window and thread object
         self.window = None
         self.thread = WorkerThread(None)
         self.thread.pause = False
 
-        # initialise labels
-        # self.img_file = QLabel('Image file', self)
-        # self.mode = QLabel('Mode', self)
-
-        # initialise widgets
-        self.testMode = QPushButton('Test Mode', self)
-        self.browseMode = QPushButton('Browse Mode', self)
-        self.browseMode.setCheckable(True)
-        self.browseMode.setChecked(True)
-
-        self.img_file_edit = QPushButton('Upload Images', self)
-        self.exit = QPushButton('Exit', self)
-
+        # Widgets
         self.upButton = QToolButton(self)
         self.upButton.setArrowType(Qt.UpArrow)
 
@@ -489,6 +506,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         self.inButton = QToolButton(self)
         self.inButton.setText('+')
+
         font = self.inButton.font()
         font.setBold(True)
         self.inButton.setFont(font)
@@ -511,17 +529,11 @@ class RightWidgetSettingsBrowseMode(QFrame):
         font.setBold(True)
         self.zoomOutButton.setFont(font)
 
-        # temporary default file paths
+        # Placeholder for GUI filenames
         self.fname_images = filenames_GUI()
         self.fname_landmarks = filenames_GUI()
-        self.dtype = filenames_GUI()
 
-        ### LAYOUT ###
-        gridMode = QGridLayout()
-        gridMode.setSpacing(1)
-        gridMode.addWidget(self.testMode, 0, 0)
-        gridMode.addWidget(self.browseMode, 0, 1)
-
+        ## Layout
         gridArrows = QGridLayout()
         gridArrows.setSpacing(5)
         gridArrows.addWidget(self.upButton, 0, 1)
@@ -533,24 +545,17 @@ class RightWidgetSettingsBrowseMode(QFrame):
         gridArrows.addWidget(self.zoomInButton, 0, 4)
         gridArrows.addWidget(self.zoomOutButton, 2, 4)
 
-        # initialise grid/set spacing
+        # Initialise grid/set spacing
         grid = QGridLayout()
         grid.setSpacing(10)
-        grid.addWidget(self.img_file_edit, 3, 0)
         grid.addLayout(gridArrows, 7, 0)
-        grid.addWidget(self.exit, 12, 0)
 
         gridNest = QGridLayout()
-        gridNest.addLayout(gridMode, 0, 0)
         gridNest.addLayout(grid, 1, 0, 10, 0)
 
         self.setLayout(gridNest)
-        # self.setGeometry(100, 100, 350, 400)
 
-        # connections
-        self.testMode.clicked.connect(self.on_clicking_testMode)
-        self.img_file_edit.clicked.connect(self.on_clicking_browse_images)
-        self.exit.clicked.connect(self.on_clicking_exit)
+        # Connections
         self.upButton.clicked.connect(self.on_clicking_up)
         self.downButton.clicked.connect(self.on_clicking_down)
         self.leftButton.clicked.connect(self.on_clicking_left)
@@ -562,10 +567,10 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         self.show()
 
-        # Flags for testing
-        self.testing = False
-        self.test_click = None
+        # Flags for testing and env
+        self.setStyleSheet("background:white")
 
+        self.testing = False
         self.env = None
 
     @pyqtSlot()
@@ -616,35 +621,13 @@ class RightWidgetSettingsBrowseMode(QFrame):
             self.env.adjustMultiScale(higherRes=False)
             self.move_img(-1)
 
-    @pyqtSlot()
-    def on_clicking_testMode(self):
-        self.SWITCH_WINDOW.emit()
-
-    @pyqtSlot()
-    def on_clicking_exit(self):
-        if not self.testing:
-            self.close_it
-
-    @pyqtSlot()
-    def on_clicking_browse_images(self):
-        if not self.testing:
-            self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
-                "./data/filenames", filter="txt files (*test_files*.txt)")
-            self.fname_images.name, _ = QFileDialog.getOpenFileName(None, None,
-                "./data/filenames", filter="txt files (*landmarks*.txt)")
-            self.load_img()
-
-    @pyqtSlot()
-    def close_it(self):
-        self.close()
-
     def load_img(self):
-        self.task_value = None
         self.selected_list = [self.fname_images, self.fname_landmarks]
 
         self.env = get_player(files_list=self.selected_list, viz=0.01,
                         saveGif=False, saveVideo=False, task='browse',
-                        data_type=self.dtype.name)
+                        data_type=self.default_use_case)
+        
         self.env.stepManual(act=-1, viewer=self.window)
         self.env.display()
 
@@ -652,87 +635,22 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.env.stepManual(action, self.window)
         QApplication.processEvents()
         self.window.update()
-
-
-class Controller:
-    def __init__(self, display=True, default_use_case='FetalUS'):
-        self.default_use_case = default_use_case
-        self.window1, self.window2 = None, None
-        self.app = QApplication(sys.argv)
-        self.viewer_param = get_viewer_data()
-        self.show_defaultMode()
-        self.window1.show()
-        # self.show_browseMode()
-        # self.window2.show()
-
-    def show_defaultMode(self):
-        # Init the window
-        self.right_settings = RightWidgetSettings()
-        self.window1 = Window(self.viewer_param, self.right_settings)
-        self.right_settings.window = self.window1
-
-        # Close previous window
-        if self.window2:
-            self.window2.hide()
-
-        # Open new window with new right_settings
-        self.window1.right_widget.SWITCH_WINDOW.connect(self.show_browseMode)
-
-    def show_browseMode(self):
-        # Init the window
-        self.right_settings = RightWidgetSettingsBrowseMode()
-        self.window2 = Window(self.viewer_param, self.right_settings)
-        self.right_settings.window = self.window2
-        default_use_case = self.default_use_case # TODO
-        self.default_use_case = "BrainMRI" # TODO
-        self.load_defaults()
-        self.default_use_case = default_use_case
-
-        # Close previous window
-        if self.window1:
-            self.window1.hide()
-
-        # Open new window with new right_settings
-        self.window2.right_widget.SWITCH_WINDOW.connect(self.show_defaultMode)
-
-    def load_defaults(self):
-        self.set_paths()
-        self.right_settings.load_img()
-
+    
     def set_paths(self):
+        self.default_use_case = "BrainMRI"
         assert self.default_use_case in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
-        self.right_settings.dtype.name = self.default_use_case
         if self.default_use_case == 'BrainMRI':
             # Default MRI
-            self.right_settings.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
-            self.right_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-            self.right_settings.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
+            self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
+            self.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
-            self.right_settings.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
-            self.right_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
-            self.right_settings.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
+            self.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
+            self.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'FetalUS':
             # Default fetal
-            self.right_settings.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
-            self.right_settings.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
-            self.right_settings.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
-
-    @staticmethod
-    def allWidgets_setCheckable(parentQWidget):
-        ''' Method to eet every widget to checkable for so the .isChecked()
-            method can by used in testing.
-        '''
-        for topLevel in QApplication.topLevelWidgets():
-            children = []
-            for QObj in {QPushButton, QToolButton}:
-                children.extend(topLevel.findChildren(QObj))
-            for child in children:
-                try:
-                    child.setCheckable(True)
-                except AttributeError:
-                    pass
-
+            self.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
+            self.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
 
 if __name__ == "__main__":
 

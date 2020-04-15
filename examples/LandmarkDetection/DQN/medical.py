@@ -794,15 +794,15 @@ class MedicalPlayer(gym.Env):
         #     exit()
 
         # Sleep until resume
-        while self.viewer.right_widget.thread.pause:
+        while self.viewer.right_widget.automatic_mode.thread.pause:
             time.sleep(1)
 
             # Check whether thread should be killed (pause)
-            if self.viewer.right_widget.thread.terminate:
+            if self.viewer.right_widget.automatic_mode.thread.terminate:
                 exit()
         
         # Check whether thread should be killed (general)
-        if self.viewer.right_widget.thread.terminate:
+        if self.viewer.right_widget.automatic_mode.thread.terminate:
             exit()
 
         # Need to emit signal here (to draw images)
@@ -819,9 +819,9 @@ class MedicalPlayer(gym.Env):
 
         if self.task != 'browse':
             # Control agent speed
-            if self.viewer.right_widget.thread.speed == WorkerThread.FAST:
+            if self.viewer.right_widget.automatic_mode.thread.speed == WorkerThread.FAST:
                 time.sleep(0)
-            elif self.viewer.right_widget.thread.speed == WorkerThread.MEDIUM:
+            elif self.viewer.right_widget.automatic_mode.thread.speed == WorkerThread.MEDIUM:
                 time.sleep(0.5)
             else:
                 time.sleep(1.5)
