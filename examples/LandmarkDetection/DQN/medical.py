@@ -793,17 +793,18 @@ class MedicalPlayer(gym.Env):
         #     viewer_param = pickle.dump(viewer_param, f)
         #     exit()
 
-        # Sleep until resume
-        while self.viewer.right_widget.automatic_mode.thread.pause:
-            time.sleep(1)
+        # Sleep until resume (for browse mode)
+        if self.task != 'browse':
+            while self.viewer.right_widget.automatic_mode.thread.pause:
+                time.sleep(1)
 
-            # Check whether thread should be killed (pause)
+                # Check whether thread should be killed (pause)
+                if self.viewer.right_widget.automatic_mode.thread.terminate:
+                    exit()
+        
+            # Check whether thread should be killed (general)
             if self.viewer.right_widget.automatic_mode.thread.terminate:
                 exit()
-        
-        # Check whether thread should be killed (general)
-        if self.viewer.right_widget.automatic_mode.thread.terminate:
-            exit()
 
         # Need to emit signal here (to draw images)
         self.viewer.widget.agent_signal.emit({

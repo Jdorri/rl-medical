@@ -129,13 +129,24 @@ class Tab(QFrame):
     
     @pyqtSlot(int)
     def on_change(self, index):
-        # If automatic mode is selected
+        # If automatic mode is selected, reset image and other relevant flags
         if index == 0:
+            self.automatic_mode.thread.terminate = False
+            self.automatic_mode.thread.pause = False
             self.automatic_mode.window.widget.reset()
+            self.automatic_mode.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+            self.automatic_mode.run_button.setText("Start")
+            self.browse_mode.window.left_widget.model_file.show()
+            self.browse_mode.window.left_widget.model_file_edit.show()
+            self.browse_mode.window.left_widget.model_file_edit_text.show()
+        # If browse mode is selected, reset image and other relevant flags
         else:
             self.automatic_mode.thread.terminate = True
             self.browse_mode.set_paths()
             self.browse_mode.load_img()
+            self.browse_mode.window.left_widget.model_file.hide()
+            self.browse_mode.window.left_widget.model_file_edit.hide()
+            self.browse_mode.window.left_widget.model_file_edit_text.hide()
     
     def get_mode(self):
         """
