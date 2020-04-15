@@ -145,7 +145,7 @@ class RightWidgetSettings(QFrame):
 
         # Run layout
         hbox_run = QHBoxLayout()
-        hbox_run.setSpacing(10)
+        hbox_run.setSpacing(30)
         hbox_run.addWidget(self.run_button)
         hbox_run.addWidget(self.terminate_button)
 
@@ -362,7 +362,8 @@ class RightWidgetSettings(QFrame):
     def error_message_box(self):
         msg = QMessageBox()
         msg.setWindowTitle("Error on user defined settings")
-        msg.setText("Error loading user defined settings. Please use appropriate model, image, and landmarks.")
+        msg.setText("Please use appropriate model, image, and landmarks.")
+        msg.setIcon(QMessageBox.Critical)
 
         # Clean up
         self.fname_landmarks.user_define = False
