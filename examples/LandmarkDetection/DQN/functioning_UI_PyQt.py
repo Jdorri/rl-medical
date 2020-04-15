@@ -741,8 +741,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.window.left_widget.landmark_file_edit_text.setText("Default data selected")
         self.window.left_widget.img_file_edit_text.setText("Default data selected")
         
-        self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-        self.run_button.setText("Start")
         # Display pop up message
         msg.exec_()
     
