@@ -319,7 +319,7 @@ class LeftWidgetSettings(QFrame):
 
             # Indicate that user has make a selection
             self.window.right_widget.automatic_mode.fname_model.user_define = True
-            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Model: {filename} </p></b>")
+            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Model: {filename[-1]} </p></b>")
 
             # Indicate appropriate path
             self.fname_model = "./data/models/" + filename[-2] + "/" + filename[-1]
@@ -334,7 +334,7 @@ class LeftWidgetSettings(QFrame):
 
             # Indicate that user has make a selection
             self.window.right_widget.automatic_mode.fname_landmarks.user_define = True
-            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Landmark: {filename} </p></b>")
+            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
 
             # Indicate appropriate path
             self.fname_landmarks = "./data/filenames/" + filename[-1]
@@ -349,7 +349,7 @@ class LeftWidgetSettings(QFrame):
 
             # Indicate that user has make a selection
             self.window.right_widget.automatic_mode.fname_images.user_define = True
-            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Image: {filename} </p></b>")
+            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
 
             # Indicate appropriate path
             self.fname_images = "./data/filenames/" + filename[-1]

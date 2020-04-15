@@ -139,6 +139,11 @@ class Tab(QFrame):
             self.browse_mode.window.left_widget.model_file.show()
             self.browse_mode.window.left_widget.model_file_edit.show()
             self.browse_mode.window.left_widget.model_file_edit_text.show()
+            
+            # Pass the data
+            filenames_GUI.copy(self.browse_mode.fname_images, self.automatic_mode.fname_images)
+            filenames_GUI.copy(self.browse_mode.fname_landmarks, self.automatic_mode.fname_landmarks)
+
         # If browse mode is selected, reset image and other relevant flags
         else:
             self.automatic_mode.thread.terminate = True
@@ -147,6 +152,10 @@ class Tab(QFrame):
             self.browse_mode.window.left_widget.model_file.hide()
             self.browse_mode.window.left_widget.model_file_edit.hide()
             self.browse_mode.window.left_widget.model_file_edit_text.hide()
+
+            # Pass data
+            filenames_GUI.copy(self.automatic_mode.fname_images, self.browse_mode.fname_images)
+            filenames_GUI.copy(self.automatic_mode.fname_landmarks, self.browse_mode.fname_landmarks)
     
     def get_mode(self):
         """
@@ -165,6 +174,14 @@ class filenames_GUI:
     def __init__(self):
         self.user_define = False
         self.name = ""
+    
+    @staticmethod
+    def copy(file1, file2):
+        """
+        Copy file 1 to file 2
+        """
+        file2.name = file1.name
+        file2.user_define = file1.user_define
 
 class RightWidgetSettings(QFrame):
     terminal_signal = pyqtSignal(dict)
