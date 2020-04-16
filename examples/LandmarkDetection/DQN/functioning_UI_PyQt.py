@@ -608,7 +608,7 @@ class AppSettingsBrowseMode(QFrame):
 
 
 class Controller:
-    def __init__(self, display=True, default_use_case='FetalUS'):
+    def __init__(self, display=True, default_use_case='BrainMRI'):
         self.default_use_case = default_use_case
         self.window1, self.window2 = None, None
         self.app = QApplication(sys.argv)

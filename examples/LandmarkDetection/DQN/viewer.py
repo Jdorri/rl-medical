@@ -423,6 +423,7 @@ class SimpleImageViewer(QWidget):
 
         # Draw some rectangle and agent (overlay)
         self.painterInstance = QPainter(self.img)
+        self.draw_point(point_loc=(10,30), color=self.color_a)
         _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
         self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
@@ -479,8 +480,10 @@ class SimpleImageViewer(QWidget):
 
     def translate(self, agent_loc, rect, target):
         _agent_loc = (agent_loc[0], self.height-agent_loc[1])
+        # _agent_loc = (self.height-agent_loc[1], self.width-agent_loc[0])
         if target is not None:
             _target = (target[0], self.height-target[1])
+            # _target = (self.height-target[1], self.width-target[0])
         else:
             _target = None
         _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]

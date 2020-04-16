@@ -794,6 +794,7 @@ class MedicalPlayer(gym.Env):
         current_point = self._location
         target_point = self._target_loc
         # get image and convert it to pyglet
+
         plane = self.get_plane(current_point[2])  # z-plane
         plane_x = self.get_plane_x(current_point[0])  # x-plane
         plane_y= self.get_plane_y(current_point[1])  # y-plane
