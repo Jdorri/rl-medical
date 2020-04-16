@@ -608,7 +608,7 @@ class AppSettingsBrowseMode(QFrame):
 
 
 class Controller:
-    def __init__(self, display=True, default_use_case='BrainMRI'):
+    def __init__(self, display=True, default_use_case='FetalUS'):
         self.default_use_case = default_use_case
         self.window1, self.window2 = None, None
         self.app = QApplication(sys.argv)
@@ -664,19 +664,19 @@ class Controller:
         self.app_settings.dtype.name = self.default_use_case
         if self.default_use_case == 'BrainMRI':
             # Default MRI
-            self.app_settings.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
+            self.app_settings.fname_images.name = "./data/filenames/old/brain_test_files_new_paths.txt"
             self.app_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-            self.app_settings.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
+            self.app_settings.fname_landmarks.name = "./data/filenames/old/brain_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
-            self.app_settings.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
+            self.app_settings.fname_images.name = "./data/filenames/old/cardiac_test_files_new_paths.txt"
             self.app_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
-            self.app_settings.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
+            self.app_settings.fname_landmarks.name = "./data/filenames/old/cardiac_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'FetalUS':
             # Default fetal
-            self.app_settings.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
+            self.app_settings.fname_images.name = "./data/filenames/old/fetalUS_test_files_new_paths.txt"
             self.app_settings.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
-            self.app_settings.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
+            self.app_settings.fname_landmarks.name = "./data/filenames/old/fetalUS_test_landmarks_new_paths.txt"
 
     @staticmethod
     def allWidgets_setCheckable(parentQWidget):
