@@ -186,6 +186,7 @@ class MedicalPlayer(gym.Env):
         self.num_games.feed(1)
         self.current_episode_score.reset()  # reset the stat counter
         self._loc_history = [(0,) * self.dims] * self._history_length
+        print(self._loc_history)
         # list of q-value lists
         self._qvalues_history = [(0,) * self.actions] * self._history_length
         self.new_random_game()
@@ -792,11 +793,20 @@ class MedicalPlayer(gym.Env):
         #     viewer_param = pickle.dump(viewer_param, f)
         #     exit()
 
-        # Sleep until resume
-        while self.viewer.left_widget.thread.pause:
-            time.sleep(1)
+        # Sleep until resume (for browse mode)
+        if self.task != 'browse':
+            while self.viewer.right_widget.automatic_mode.thread.pause:
+                time.sleep(0.5)
 
-        # Need to emit signal here
+                # Check whether thread should be killed (pause)
+                if self.viewer.right_widget.automatic_mode.thread.terminate:
+                    exit()
+        
+            # Check whether thread should be killed (general)
+            if self.viewer.right_widget.automatic_mode.thread.terminate:
+                exit()
+
+        # Need to emit signal here (to draw images)
         self.viewer.widget.agent_signal.emit({
             "arrs": (img, img_x, img_y),
             "agent_loc": current_point,
@@ -805,13 +815,14 @@ class MedicalPlayer(gym.Env):
             "scale": self.xscale,
             "rect": self.rectangle,
             "task": self.task,
+            "is_terminal": self.terminal
         })
 
         if self.task != 'browse':
             # Control agent speed
-            if self.viewer.left_widget.thread.speed == WorkerThread.FAST:
+            if self.viewer.right_widget.automatic_mode.thread.speed == WorkerThread.FAST:
                 time.sleep(0)
-            elif self.viewer.left_widget.thread.speed == WorkerThread.MEDIUM:
+            elif self.viewer.right_widget.automatic_mode.thread.speed == WorkerThread.MEDIUM:
                 time.sleep(0.5)
             else:
                 time.sleep(1.5)

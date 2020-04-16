@@ -54,11 +54,24 @@ def play_n_episodes(player, predfunc, nr, render=False, viewer=None):
     """wraps play_one_episode, playing a single episode at a time and logs results
     used when playing demos."""
     logger.info("Start Playing ... ")
+    
+    viewer = viewer # viewer object
+
     for k in range(nr):
         score, filename, distance_error, q_values = play_one_episode(player,
                                                                     predfunc,
                                                                     render=False,
                                                                     viewer=viewer)
+        
+        # Emit signal for log
+        viewer.right_widget.automatic_mode.terminal_signal.emit({
+            "current_episode": k+1,
+            "total_episode": nr,
+            "score": score,
+            "distance_error": distance_error,
+            "q_values": q_values
+        })
+
         logger.info(
             "{}/{} - {} - score {} - distError {} - q_values {}".format(k + 1,
                                                                         nr,
