@@ -357,11 +357,10 @@ class SimpleImageViewer(QWidget):
         self.resize_img()
 
         self.label_img = QLabel()
-        self.label_img.setPixmap(self.img)
         self.label_img_x = QLabel()
-        self.label_img_x.setPixmap(self.img_x)
         self.label_img_y = QLabel()
-        self.label_img_y.setPixmap(self.img_y)
+
+        self.set_pixmap_and_alignment()
 
         # Set background color for images to Black
         self.label_img.setAutoFillBackground(True)
@@ -394,7 +393,7 @@ class SimpleImageViewer(QWidget):
         self.color_t = QColor(200, 100, 100)
         self.color_e = QColor(250, 250, 250)
         self.size_e = 20
-        self.line_width = 1
+        self.line_width = 2
 
     def draw_image(self, arrs, agent_loc, target=None, rect=None):
         """
@@ -439,9 +438,16 @@ class SimpleImageViewer(QWidget):
 
         # TODO: resolve scaled to width later during final iteration (responsive)
         self.resize_img()
+        self.set_pixmap_and_alignment()
+
+    def set_pixmap_and_alignment(self):
         self.label_img.setPixmap(self.img)
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
+
+        self.label_img.setAlignment(Qt.AlignCenter)
+        self.label_img_x.setAlignment(Qt.AlignCenter)
+        self.label_img_y.setAlignment(Qt.AlignCenter)
 
     def get_imgs(self, arrs):
         if self.data_type in ['BrainMRI', 'CardiacMRI']:
