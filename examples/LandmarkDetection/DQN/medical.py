@@ -796,7 +796,7 @@ class MedicalPlayer(gym.Env):
         # Sleep until resume (for browse mode)
         if self.task != 'browse':
             while self.viewer.right_widget.automatic_mode.thread.pause:
-                time.sleep(1)
+                time.sleep(0.5)
 
                 # Check whether thread should be killed (pause)
                 if self.viewer.right_widget.automatic_mode.thread.terminate:

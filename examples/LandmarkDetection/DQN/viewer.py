@@ -94,7 +94,7 @@ class Window(QMainWindow):
 
         # Geometric window position and general setting
         self.showMaximized()
-        self.center()
+        # self.center()
         self.setWindowTitle('Anatomical Landmark Detection')
         self.menubar.setStyleSheet("background:#003E74; color:white; padding: 5px 0")
         self.statusbar.setStyleSheet("background:#003E74; color:white")
@@ -578,9 +578,9 @@ class SimpleImageViewer(QWidget):
         self.which_size() # determine size of pen
         self.painterInstance.setFont(QFont("Arial", self.size_e))
         if self.window.usecase in {"BrainMRI", "CardiacMRI"}:
-            self.painterInstance.drawText(30, 30, f"Error: {self.error:.2f} mm")
+            self.painterInstance.drawText(0, 30, f"Error: {self.error:.2f} mm")
         else:
-            self.painterInstance.drawText(15, 22, f"Error: {self.error:.2f} mm")
+            self.painterInstance.drawText(0, 22, f"Error: {self.error:.2f} mm")
         self.painterInstance.end()
 
     def drawer(self, agent_loc, rect, target):
