@@ -716,9 +716,7 @@ class MedicalPlayer(gym.Env):
 
         # update rectangle limits from input image coordinates
         # this is what the network sees
-        self.rectangle = Rectangle(xmin, xmax,
-                                   ymin, ymax,
-                                   zmin, zmax)
+        self.rectangle = Rectangle(xmin, xmax, ymin, ymax, zmin, zmax)
 
         return screen
 

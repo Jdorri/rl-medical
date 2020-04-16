@@ -226,7 +226,7 @@ class filesListFetalUSLandmark(object):
                     landmark_file = self.landmark_files[idx]
                     all_landmarks = getLandmarksFromTXTFileUS(landmark_file)
                     # landmark point 12 csp - 11 leftCerebellar - 10 rightCerebellar
-                    landmark = all_landmarks[0]
+                    landmark = all_landmarks[12] #0
 
 
                     # landmarks = [np.round(all_landmarks[(i*2 + 10) % 13]) for i in range(self.agents)]

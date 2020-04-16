@@ -30,12 +30,12 @@ class Window(QMainWindow):
     Window used as the main window for the application which integrate different widgets.
     """
     KEY_PRESSED = pyqtSignal(QEvent)
-    def __init__(self, viewer_param, app_settings=None):
+    def __init__(self, viewer_param, app_settings=None, data_type='BrainMRI'):
         super().__init__()
-        self.initUI(viewer_param, app_settings)
+        self.initUI(viewer_param, app_settings, data_type)
         self.KEY_PRESSED.connect(self.on_key)
 
-    def initUI(self, viewer_param, app_settings):
+    def initUI(self, viewer_param, app_settings, data_type):
         """
         Main UI init element.
         """
@@ -50,7 +50,8 @@ class Window(QMainWindow):
         self.widget = SimpleImageViewer(arr=np.zeros(viewer_param["arrs"][0].shape),
                                    arr_x=np.zeros(viewer_param["arrs"][1].shape),
                                    arr_y=np.zeros(viewer_param["arrs"][2].shape),
-                                   filepath=viewer_param["filepath"])
+                                   filepath=viewer_param["filepath"],
+                                   data_type=data_type)
 
         # Left Settings widget
         if app_settings:
@@ -320,7 +321,8 @@ class SimpleImageViewer(QWidget):
     """
     agent_signal = pyqtSignal(dict) # Signaling agent move (current location, status)
 
-    def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None):
+    def __init__(self, arr, arr_x, arr_y, data_type, scale_x=1, scale_y=1,
+                    filepath=None, display=None):
         super().__init__()
 
         self.isopen = False
@@ -329,6 +331,7 @@ class SimpleImageViewer(QWidget):
         self.display = display
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
+        self.data_type = data_type
 
         # Set image formatting and get shape
         cvImg = arr.astype(np.uint8)
@@ -352,11 +355,9 @@ class SimpleImageViewer(QWidget):
         # Initialise images with labels
         # TODO: resolve scaled to width later during final iteration (responsive)
         self.img = QPixmap(qImg)
-        self.img = self.img.scaledToWidth(350)
         self.img_x = QPixmap(qImg_x)
-        self.img_x = self.img_x.scaledToWidth(350)
         self.img_y = QPixmap(qImg_y)
-        self.img_y = self.img_y.scaledToWidth(350)
+        self.resize_img()
 
         self.label_img = QLabel()
         self.label_img_x = QLabel()
@@ -442,12 +443,18 @@ class SimpleImageViewer(QWidget):
             self.draw_error()
 
         # TODO: resolve scaled to width later during final iteration (responsive)
-        self.img = self.img.scaledToWidth(350)
-        self.img_x = self.img_x.scaledToWidth(350)
-        self.img_y = self.img_y.scaledToWidth(350)
+        self.resize_img()
         self.label_img.setPixmap(self.img)
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
+
+    def resize_img(self):
+        if self.data_type == 'BrainMRI':
+            self.img = self.img.scaledToWidth(350)
+        else:
+            self.img = self.img.scaledToHeight(350)
+        self.img_x = self.img_x.scaledToWidth(350)
+        self.img_y = self.img_y.scaledToWidth(350)
 
     def draw_error(self):
         self.painterInstance = QPainter(self.img)
@@ -481,12 +488,13 @@ class SimpleImageViewer(QWidget):
     def translate(self, agent_loc, rect, target):
         # _agent_loc = (agent_loc[0], self.height-agent_loc[1])
         # _agent_loc = (self.height-agent_loc[1], self.width-agent_loc[0])
-        _agent_loc = (self.width-agent_loc[1], self.height-agent_loc[0])
+        # _agent_loc = (self.width-agent_loc[1], self.height-agent_loc[0])
+        _agent_loc = (agent_loc[1], agent_loc[0])
         print(agent_loc, _agent_loc)
         if target is not None:
             # _target = (target[0], self.height-target[1])
             # _target = (self.height-target[1], self.width-target[0])
-            _target = (self.width-target[1], self.height-target[0])
+            _target = (target[1], target[0])
         else:
             _target = None
         _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
