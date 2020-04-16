@@ -40,6 +40,7 @@ from viewer import SimpleImageViewer, Window
 import pickle
 from thread import WorkerThread
 from datetime import datetime
+import platform
 
 ###############################################################################
 # BATCH SIZE USED IN NATURE PAPER IS 32 - MEDICAL IS 256
@@ -602,21 +603,24 @@ class AppSettingsBrowseMode(QFrame):
 
         # Create pickle file
         now = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
-        path = f'./data/HITL/log_{str(now)}.pickle'
+        device_name = platform.node()
+        path = f'./data/HITL/log_{self.data_type}_{str(now)}_{device_name}.pickle'
         with open(path, 'wb') as f:
             pickle.dump(self.env.HITL_logger, f)
 
 
 class Controller:
-    def __init__(self, display=True, data_type='FetalUS'):
+    def __init__(self, display=True, data_type='BrainMRI', mounted=True):
         self.data_type = data_type
+        self.mounted = mounted
+
         self.window1, self.window2 = None, None
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
-        self.show_defaultMode()
-        self.window1.show()
-        # self.show_browseMode()
-        # self.window2.show()
+        # self.show_defaultMode()
+        # self.window1.show()
+        self.show_browseMode()
+        self.window2.show()
 
     def show_defaultMode(self):
         self.save_HITL()
@@ -663,21 +667,24 @@ class Controller:
     def set_paths(self):
         assert self.data_type in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
         self.app_settings.dtype.name = self.data_type
+
+        redir = '' if self.mounted else 'old/'
+
         if self.data_type == 'BrainMRI':
             # Default MRI
-            self.app_settings.fname_images.name = "./data/filenames/old/brain_test_files_new_paths.txt"
+            self.app_settings.fname_images.name = f"./data/filenames/{redir}brain_test_files_new_paths.txt"
+            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}brain_test_landmarks_new_paths.txt"
             self.app_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-            self.app_settings.fname_landmarks.name = "./data/filenames/old/brain_test_landmarks_new_paths.txt"
         elif self.data_type == 'CardiacMRI':
             # Default cardiac
-            self.app_settings.fname_images.name = "./data/filenames/old/cardiac_test_files_new_paths.txt"
+            self.app_settings.fname_images.name = f"./data/filenames/{redir}cardiac_test_files_new_paths.txt"
+            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}cardiac_test_landmarks_new_paths.txt"
             self.app_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
-            self.app_settings.fname_landmarks.name = "./data/filenames/old/cardiac_test_landmarks_new_paths.txt"
         elif self.data_type == 'FetalUS':
             # Default fetal
-            self.app_settings.fname_images.name = "./data/filenames/old/fetalUS_test_files_new_paths.txt"
+            self.app_settings.fname_images.name = f"./data/filenames/{redir}fetalUS_test_files_new_paths.txt"
+            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_test_landmarks_new_paths.txt"
             self.app_settings.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
-            self.app_settings.fname_landmarks.name = "./data/filenames/old/fetalUS_test_landmarks_new_paths.txt"
 
     @staticmethod
     def allWidgets_setCheckable(parentQWidget):

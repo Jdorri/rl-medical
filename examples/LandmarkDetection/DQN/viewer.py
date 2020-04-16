@@ -354,6 +354,7 @@ class SimpleImageViewer(QWidget):
         self.img = QPixmap(qImg)
         self.img_x = QPixmap(qImg_x)
         self.img_y = QPixmap(qImg_y)
+
         self.resize_img()
 
         self.label_img = QLabel()
@@ -476,6 +477,12 @@ class SimpleImageViewer(QWidget):
             self.img_y = self.img_y.scaledToHeight(350)
 
     def translate(self, agent_loc, rect, target):
+        ''' 2 step process:
+                - change from agent coords into img coords. Img coords
+                start from top left, agent coords start from bottom right. So
+                need to do (x,y) -> (y,x) for agent coords
+                - Perform relevant rotation (i.e. 90 degrees ccw)
+        '''
         if self.data_type in ['BrainMRI', 'CardiacMRI']:
             _agent_loc = (agent_loc[0], self.height-agent_loc[1])
             if target is not None:
@@ -531,7 +538,8 @@ class SimpleImageViewer(QWidget):
         hw_ratio = abs(yLen / xLen)
 
         if self.task in ['eval','browse']:
-            self.draw_point(target, self.color_t, width=12)
+            w = 12 if self.data_type != 'FetalUS' else 16
+            self.draw_point(target, self.color_t, width=w)
 
         self.draw_point(agent_loc, self.color_a)
 
