@@ -610,17 +610,17 @@ class AppSettingsBrowseMode(QFrame):
 
 
 class Controller:
-    def __init__(self, display=True, data_type='BrainMRI', mounted=True):
+    def __init__(self, display=True, data_type='FetalUS', mounted=True):
         self.data_type = data_type
         self.mounted = mounted
 
         self.window1, self.window2 = None, None
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
-        # self.show_defaultMode()
-        # self.window1.show()
-        self.show_browseMode()
-        self.window2.show()
+        self.show_defaultMode()
+        self.window1.show()
+        # self.show_browseMode()
+        # self.window2.show()
 
     def show_defaultMode(self):
         self.save_HITL()

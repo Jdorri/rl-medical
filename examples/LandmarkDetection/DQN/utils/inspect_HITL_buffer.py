@@ -6,7 +6,6 @@ def show_latest():
     # Load the created file
     list_of_files = glob.glob('./data/HITL/*.pickle')
     latest_file = max(list_of_files, key=os.path.getctime)
-    print(latest_file)
     with open(latest_file, 'rb') as f:
         log = pickle.load(f)
 
@@ -22,8 +21,8 @@ def show_latest():
     print('States: ', states)
     print('')
 
-def show_all():
-    list_of_files = glob.glob('./data/HITL/*.pickle')
+def show_all(data_type):
+    list_of_files = glob.glob(f'./data/HITL/*{data_type}*.pickle')
 
     tot_episodes = tot_states = 0
     for file in list_of_files:
@@ -40,11 +39,12 @@ def show_all():
         tot_episodes += episodes
         tot_states += states
 
-    print('For all pickle files: ')
+    print(f'Total for {data_type}: ')
     print('Episodes: ', tot_episodes)
     print('States: ', tot_states)
     print('')
 
 print('')
 show_latest()
-show_all()
+for d in ['BrainMRI','CardiacMRI','FetalUS']:
+    show_all(d)
