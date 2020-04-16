@@ -47,9 +47,11 @@ class Window(QMainWindow):
         self.initMenu()
 
         # Image widget
-        self.widget = SimpleImageViewer(arr=np.zeros(viewer_param["arrs"][0].shape),
-                                   arr_x=np.zeros(viewer_param["arrs"][1].shape),
-                                   arr_y=np.zeros(viewer_param["arrs"][2].shape),
+        arrs = (np.zeros(viewer_param["arrs"][0].shape),
+                np.zeros(viewer_param["arrs"][1].shape),
+                np.zeros(viewer_param["arrs"][2].shape))
+
+        self.widget = SimpleImageViewer(arrs,
                                    filepath=viewer_param["filepath"],
                                    data_type=data_type)
 
@@ -321,8 +323,7 @@ class SimpleImageViewer(QWidget):
     """
     agent_signal = pyqtSignal(dict) # Signaling agent move (current location, status)
 
-    def __init__(self, arr, arr_x, arr_y, data_type, scale_x=1, scale_y=1,
-                    filepath=None, display=None):
+    def __init__(self, arrs, data_type, scale_x=1, scale_y=1, filepath=None, display=None):
         super().__init__()
 
         self.isopen = False
@@ -332,17 +333,13 @@ class SimpleImageViewer(QWidget):
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
         self.data_type = data_type
+        self.rotate = False
 
         # Set image formatting and get shape
-        cvImg = arr.astype(np.uint8)
-        self.height, self.width, self.channel = cvImg.shape
-        cvImg_x = arr_x.astype(np.uint8)
-        self.height_x, self.width_x, self.channel_x = cvImg_x.shape
-        cvImg_y = arr_y.astype(np.uint8)
-        self.height_y, self.width_y, self.channel_y = cvImg_y.shape
+        cvImg, cvImg_x, cvImg_y = self.get_imgs(arrs)
 
         # initialize window with the input image
-        assert arr.shape == (self.height, self.width, 3), "You passed in an image with the wrong number shape"
+        assert arrs[0].shape == (self.height, self.width, 3), "You passed in an image with the wrong shape"
 
         # Convert image to correct format
         bytesPerLine = 3 * self.width
@@ -360,6 +357,7 @@ class SimpleImageViewer(QWidget):
         self.resize_img()
 
         self.label_img = QLabel()
+        self.label_img.setPixmap(self.img)
         self.label_img_x = QLabel()
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y = QLabel()
@@ -403,28 +401,25 @@ class SimpleImageViewer(QWidget):
         Main image drawer function
         """
         self.arr = arrs[0]
-        # Draw background image (brain)
-        cvImg = arrs[0].astype(np.uint8)
-        self.height, self.width, self.channel = cvImg.shape
+
+        cvImg, cvImg_x, cvImg_y = self.get_imgs(arrs)
+
         bytesPerLine = 3 * self.width
         qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
-        self.img = QPixmap(qImg) # can use this to scale the image: .scaled(450, 350, QtCore.Qt.KeepAspectRatio)
-
-        cvImg_x = arrs[1].astype(np.uint8)
-        self.height_x, self.width_x, self.channel_x = cvImg_x.shape
         bytesPerLine = 3 * self.width_x
         qImg_x = QImage(cvImg_x.data, self.width_x, self.height_x, bytesPerLine, QImage.Format_RGB888)
-        self.img_x = QPixmap(qImg_x)
-
-        cvImg_y = arrs[2].astype(np.uint8)
-        self.height_y, self.width_y, self.channel_y = cvImg_y.shape
         bytesPerLine = 3 * self.width_y
         qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
+
+        self.img = QPixmap(qImg)
+        self.img_x = QPixmap(qImg_x)
         self.img_y = QPixmap(qImg_y)
 
-        # Draw some rectangle and agent (overlay)
+        # Draw rectangles and agent (overlay)
         self.painterInstance = QPainter(self.img)
-        self.draw_point(point_loc=(10,30), color=self.color_a)
+        # self.draw_point(point_loc=(10,30), color=self.color_a)
+        if self.data_type == 'FetalUS':
+            self.rotate = True
         _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
         self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
@@ -448,45 +443,33 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
 
+    def get_imgs(self, arrs):
+        if self.data_type in ['BrainMRI', 'CardiacMRI']:
+            cvImg = arrs[0].astype(np.uint8)
+            cvImg_x = arrs[1].astype(np.uint8)
+            cvImg_y = arrs[2].astype(np.uint8)
+        elif self.data_type == 'FetalUS':
+            cvImg = arrs[0].astype(np.uint8)
+            cvImg_x = arrs[2].astype(np.uint8)
+            cvImg_y = arrs[1].astype(np.uint8)
+
+        self.height, self.width, self.channel = cvImg.shape
+        self.height_x, self.width_x, self.channel_x = cvImg_x.shape
+        self.height_y, self.width_y, self.channel_y = cvImg_y.shape
+
+        return cvImg, cvImg_x, cvImg_y
+
     def resize_img(self):
-        if self.data_type == 'BrainMRI':
+        if self.data_type in ['BrainMRI', 'CardiacMRI']:
             self.img = self.img.scaledToWidth(350)
-        else:
+            self.img_x = self.img_x.scaledToWidth(350)
+            self.img_y = self.img_y.scaledToWidth(350)
+        elif self.data_type == 'FetalUS':
             self.img = self.img.scaledToHeight(350)
-        self.img_x = self.img_x.scaledToWidth(350)
-        self.img_y = self.img_y.scaledToWidth(350)
-
-    def draw_error(self):
-        self.painterInstance = QPainter(self.img)
-        pen = QPen(self.color_e)
-        # pen.setWidth(self.line_width * 2)
-        self.painterInstance.setPen(pen)
-        self.painterInstance.setFont(QFont("Arial", self.size_e))
-        self.painterInstance.drawText(30, 30, f"Error: {self.error:.2f} mm")
-        self.painterInstance.end()
-
-
-    def drawer(self, agent_loc, rect, target):
-        xPos = rect[2]
-        yPos = rect[0]
-        xLen = rect[3] - xPos
-        yLen = rect[1] - yPos
-
-        rect_dims = [xPos,yPos,xLen,yLen,]
-        hw_ratio = yLen / -xLen
-
-        if self.task in ['eval','browse']:
-            self.draw_point(target, self.color_t, width=12)
-
-        self.draw_point(agent_loc, self.color_a)
-
-        if self.task == 'browse':
-            self.draw_crosshairs(agent_loc, hw_ratio)
-        else:
-            self.draw_rects(rect_dims)
+            self.img_x = self.img_x.scaledToWidth(350)
+            self.img_y = self.img_y.scaledToHeight(350)
 
     def translate(self, agent_loc, rect, target):
-
         if self.data_type in ['BrainMRI', 'CardiacMRI']:
             _agent_loc = (agent_loc[0], self.height-agent_loc[1])
             if target is not None:
@@ -496,9 +479,9 @@ class SimpleImageViewer(QWidget):
             _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
 
         elif self.data_type == 'FetalUS':
-            _agent_loc = (agent_loc[1], agent_loc[0])
+            _agent_loc = agent_loc[1::-1]
             if target is not None:
-                _target = (target[1], target[0])
+                _target = target[1::-1]
             else:
                 _target = None
             _rect = rect[:4]
@@ -515,14 +498,41 @@ class SimpleImageViewer(QWidget):
         return _agent_loc, _rect, _target
 
     def translate_y(self, agent_loc, rect, target):
-        _agent_loc = (agent_loc[0]*self.width_y//self.height_y, self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
+        _agent_loc = (agent_loc[0], self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
         if target is not None:
-            _target = (target[0]*self.width_y//self.height_y, self.height_y-target[2])                # Rotate 90 degrees ccw
+            _target = (target[0], self.height_y-target[2])                # Rotate 90 degrees ccw
         else:
             _target = None
-        _rect = (self.height_y-rect[4], self.height_y-rect[5]) + \
-            (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
+        _rect = (self.height_y-rect[4], self.height_y-rect[5]) + rect[:2]
         return _agent_loc, _rect, _target
+
+    def draw_error(self):
+        self.painterInstance = QPainter(self.img)
+        pen = QPen(self.color_e)
+        # pen.setWidth(self.line_width * 2)
+        self.painterInstance.setPen(pen)
+        self.painterInstance.setFont(QFont("Arial", self.size_e))
+        self.painterInstance.drawText(30, 30, f"Error: {self.error:.2f} mm")
+        self.painterInstance.end()
+
+    def drawer(self, agent_loc, rect, target):
+        xPos = rect[2]
+        yPos = rect[0]
+        xLen = rect[3] - xPos
+        yLen = rect[1] - yPos
+
+        rect_dims = [xPos,yPos,xLen,yLen,]
+        hw_ratio = abs(yLen / xLen)
+
+        if self.task in ['eval','browse']:
+            self.draw_point(target, self.color_t, width=12)
+
+        self.draw_point(agent_loc, self.color_a)
+
+        if self.task == 'browse':
+            self.draw_crosshairs(agent_loc, hw_ratio)
+        else:
+            self.draw_rects(rect_dims)
 
     def draw_point(self, point_loc, color, width=7):
         pen = QPen(color, width, cap=Qt.RoundCap)
@@ -575,10 +585,17 @@ class SimpleImageViewer(QWidget):
         corner_len = 25
         xPos, yPos, xLen, yLen = rect
 
-        bL = QPoint(xPos, yPos)
-        tL = QPoint(xPos, yPos + yLen)
-        bR = QPoint(xPos + xLen, yPos)
-        tR = QPoint(xPos + xLen, yPos + yLen)
+        if self.rotate:
+            tL = QPoint(xPos, yPos)
+            bL = QPoint(xPos, yPos + yLen)
+            tR = QPoint(xPos + xLen, yPos)
+            bR = QPoint(xPos + xLen, yPos + yLen)
+            self.rotate = False
+        else:
+            bL = QPoint(xPos, yPos)
+            tL = QPoint(xPos, yPos + yLen)
+            bR = QPoint(xPos + xLen, yPos)
+            tR = QPoint(xPos + xLen, yPos + yLen)
 
         vecs = self.units()
 

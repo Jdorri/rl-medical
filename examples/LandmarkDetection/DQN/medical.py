@@ -720,15 +720,15 @@ class MedicalPlayer(gym.Env):
 
         return screen
 
-    def get_plane(self, z=0):
+    def get_plane_z(self, z=0):
         im = self._image.data[:, :, z]
         if self.data_type == 'BrainMRI':
-            im = np.rot90(im, 1)
+            im = np.rot90(im, 1)                # Rotate 90 degrees ccw
         return im
 
     def get_plane_x(self, x=0):
         im = self._image.data[x, :, :]
-        im = np.rot90(im, 1)                # Rotate 90 degrees ccw
+        im = np.rot90(im, 1)
         return im
 
     def get_plane_y(self, y=0):
@@ -794,11 +794,10 @@ class MedicalPlayer(gym.Env):
         target_point = self._target_loc
         # get image and convert it to pyglet
 
-        plane = self.get_plane(current_point[2])  # z-plane
-        plane_x = self.get_plane_x(current_point[0])  # x-plane
-        plane_y= self.get_plane_y(current_point[1])  # y-plane
+        plane = self.get_plane_z(current_point[2])
+        plane_x = self.get_plane_x(current_point[0])
+        plane_y= self.get_plane_y(current_point[1])
 
-        # plane = np.squeeze(self._current_state()[:,:,13])
         # rescale image
         # INTER_NEAREST, INTER_LINEAR, INTER_AREA, INTER_CUBIC, INTER_LANCZOS4
         scale_x = 2
@@ -819,7 +818,7 @@ class MedicalPlayer(gym.Env):
                          (int(scale_x*plane_x.shape[1]),int(scale_y*plane_x.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
         img_y = cv2.resize(plane_y,
-                         (int(scale_y*plane_x.shape[1]),int(scale_y*plane_y.shape[0])),
+                         (int(scale_y*plane_y.shape[1]),int(scale_y*plane_y.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)  # congvert to rgb
         img_x = cv2.cvtColor(img_x, cv2.COLOR_GRAY2RGB)  # congvert to rgb
