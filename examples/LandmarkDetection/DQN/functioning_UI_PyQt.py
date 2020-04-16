@@ -484,25 +484,25 @@ class AppSettingsBrowseMode(QFrame):
     @pyqtSlot()
     def on_clicking_up(self):
         if self.env:
-            action = 1
+            action = 1 if self.data_type != 'FetalUS' else 3
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_down(self):
         if self.env:
-            action = 4
+            action = 4 if self.data_type != 'FetalUS' else 2
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_left(self):
         if self.env:
-            action = 3
+            action = 3 if self.data_type != 'FetalUS' else 4
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_right(self):
         if self.env:
-            action = 2
+            action = 2 if self.data_type != 'FetalUS' else 1
             self.move_img(action)
 
     @pyqtSlot()
@@ -638,6 +638,7 @@ class Controller:
         self.app_settings = AppSettingsBrowseMode()
         self.window2 = Window(self.viewer_param, self.app_settings, self.data_type)
         self.app_settings.window = self.window2
+        self.app_settings.data_type = self.data_type
         self.load_defaults()
 
         # Close previous window

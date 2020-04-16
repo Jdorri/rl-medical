@@ -486,18 +486,23 @@ class SimpleImageViewer(QWidget):
             self.draw_rects(rect_dims)
 
     def translate(self, agent_loc, rect, target):
-        # _agent_loc = (agent_loc[0], self.height-agent_loc[1])
-        # _agent_loc = (self.height-agent_loc[1], self.width-agent_loc[0])
-        # _agent_loc = (self.width-agent_loc[1], self.height-agent_loc[0])
-        _agent_loc = (agent_loc[1], agent_loc[0])
-        print(agent_loc, _agent_loc)
-        if target is not None:
-            # _target = (target[0], self.height-target[1])
-            # _target = (self.height-target[1], self.width-target[0])
-            _target = (target[1], target[0])
-        else:
-            _target = None
-        _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
+
+        if self.data_type in ['BrainMRI', 'CardiacMRI']:
+            _agent_loc = (agent_loc[0], self.height-agent_loc[1])
+            if target is not None:
+                _target = (target[0], self.height-target[1])
+            else:
+                _target = None
+            _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
+
+        elif self.data_type == 'FetalUS':
+            _agent_loc = (agent_loc[1], agent_loc[0])
+            if target is not None:
+                _target = (target[1], target[0])
+            else:
+                _target = None
+            _rect = rect[:4]
+
         return _agent_loc, _rect, _target
 
     def translate_x(self, agent_loc, rect, target):
