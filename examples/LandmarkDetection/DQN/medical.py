@@ -724,7 +724,8 @@ class MedicalPlayer(gym.Env):
 
     def get_plane(self, z=0):
         im = self._image.data[:, :, z]
-        im = np.rot90(im, 1)
+        if self.data_type == 'BrainMRI':
+            im = np.rot90(im, 1)
         return im
 
     def get_plane_x(self, x=0):

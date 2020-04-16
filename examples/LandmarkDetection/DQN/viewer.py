@@ -479,11 +479,14 @@ class SimpleImageViewer(QWidget):
             self.draw_rects(rect_dims)
 
     def translate(self, agent_loc, rect, target):
-        _agent_loc = (agent_loc[0], self.height-agent_loc[1])
+        # _agent_loc = (agent_loc[0], self.height-agent_loc[1])
         # _agent_loc = (self.height-agent_loc[1], self.width-agent_loc[0])
+        _agent_loc = (self.width-agent_loc[1], self.height-agent_loc[0])
+        print(agent_loc, _agent_loc)
         if target is not None:
-            _target = (target[0], self.height-target[1])
+            # _target = (target[0], self.height-target[1])
             # _target = (self.height-target[1], self.width-target[0])
+            _target = (self.width-target[1], self.height-target[0])
         else:
             _target = None
         _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]

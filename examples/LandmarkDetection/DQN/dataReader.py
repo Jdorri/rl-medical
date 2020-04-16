@@ -106,7 +106,7 @@ class filesListBrainMRLandmark(object):
                     ## transform landmarks to image space if they are in physical space
                     landmark_file = self.landmark_files[idx]
                     all_landmarks = getLandmarksFromTXTFile(landmark_file)
-                    landmark = all_landmarks[13] # landmark index is 13 for ac-point and 14 pc-point
+                    landmark = all_landmarks[14] # landmark index is 13 for ac-point and 14 pc-point
                     # transform landmark from physical to image space if required
                     # landmarks = sitk_image.TransformPhysicalPointToContinuousIndex(landmark)
                     # landmarks = [np.round(all_landmarks[(i + 14) % 15]) for i in range(self.agents)]
