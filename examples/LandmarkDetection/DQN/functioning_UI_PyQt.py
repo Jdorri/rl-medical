@@ -679,6 +679,9 @@ class Controller:
             # Default cardiac
             self.app_settings.fname_images.name = f"./data/filenames/{redir}cardiac_test_files_new_paths.txt"
             self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}cardiac_test_landmarks_new_paths.txt"
+            # if self.mounted:
+            #     self.app_settings.fname_images.name = f"./data/filenames/cardiac_train_files_new_paths.txt"
+            #     self.app_settings.fname_landmarks.name = f"./data/filenames/cardiac_train_files_new_paths.txt"
             self.app_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
         elif self.data_type == 'FetalUS':
             # Default fetal
