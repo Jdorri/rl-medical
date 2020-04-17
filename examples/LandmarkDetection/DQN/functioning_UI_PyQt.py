@@ -610,7 +610,7 @@ class AppSettingsBrowseMode(QFrame):
 
 
 class Controller:
-    def __init__(self, display=True, data_type='FetalUS', mounted=True):
+    def __init__(self, display=True, data_type='CardiacMRI', mounted=False):
         self.data_type = data_type
         self.mounted = mounted
 
@@ -618,9 +618,7 @@ class Controller:
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
         self.show_defaultMode()
-        self.window1.show()
         # self.show_browseMode()
-        # self.window2.show()
 
     def show_defaultMode(self):
         self.save_HITL()
@@ -636,6 +634,7 @@ class Controller:
 
         # Open new window with new app_settings
         self.window1.right_widget.SWITCH_WINDOW.connect(self.show_browseMode)
+        self.window1.show()
 
     def show_browseMode(self):
         # Init the window
@@ -651,6 +650,7 @@ class Controller:
 
         # Open new window with new app_settings
         self.window2.right_widget.SWITCH_WINDOW.connect(self.show_defaultMode)
+        self.window2.show()
 
     def save_HITL(self):
         ''' Method to save HITL if appropriate '''

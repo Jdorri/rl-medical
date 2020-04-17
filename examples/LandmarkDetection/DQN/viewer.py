@@ -123,8 +123,7 @@ class Window(QMainWindow):
         help_menu = self.menubar.addMenu("&Help")
 
     def center(self):
-        """
-        Used to center the window automatically
+        """Used to center the window automatically
         """
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
@@ -354,6 +353,7 @@ class SimpleImageViewer(QWidget):
         self.img = QPixmap(qImg)
         self.img_x = QPixmap(qImg_x)
         self.img_y = QPixmap(qImg_y)
+        self.img_z = QPixmap(qImg)      # <- placeholder
 
         self.resize_img()
 
@@ -373,16 +373,9 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPalette(p)
         self.label_img_y.setPalette(p)
 
-        # Initiliase Grid
-        self.grid = QGridLayout()
-        self.grid.addWidget(self.label_img, 0, 0)
-        self.grid.addWidget(self.label_img_x, 0, 1)
-        self.grid.addWidget(self.label_img_y, 1, 0)
-        self.agent_signal.connect(self.agent_signal_handler)
+        self.init_grid()
 
-        # Set Layout of GUI
-        self.setLayout(self.grid)
-        self.setWindowTitle("Landmark Detection Agent")
+        self.agent_signal.connect(self.agent_signal_handler)
 
         # Stylesheet
         self.label_img.setStyleSheet("background: black; border:3px solid rgb(255, 0, 0); ")
@@ -395,6 +388,30 @@ class SimpleImageViewer(QWidget):
         self.color_e = QColor(250, 250, 250)
         self.size_e = 20
         self.line_width = 2
+
+    def init_grid(self):
+        # Initiliase Grid
+        self.grid = QGridLayout()
+
+        if self.data_type in ['BrainMRI','FetalUS']:
+            self.grid.addWidget(self.label_img, 0, 0)
+            self.grid.addWidget(self.label_img_x, 0, 1)
+            self.grid.addWidget(self.label_img_y, 1, 0)
+        elif self.data_type in ['CardiacMRI']:
+            self.top_grid = QGridLayout()
+            self.top_grid.addWidget(self.label_img, 0, 0)
+            ### Add 3d volume here ###
+
+            self.bot_grid = QGridLayout()
+            self.bot_grid.addWidget(self.label_img_x, 0, 0)
+            self.bot_grid.addWidget(self.label_img_y, 1, 0)
+
+            self.grid.addLayout(self.top_grid, 0, 0)
+            self.grid.addLayout(self.bot_grid, 1, 0)
+
+        # Set Layout of GUI
+        self.setLayout(self.grid)
+        self.setWindowTitle("Landmark Detection Agent")
 
     def draw_image(self, arrs, agent_loc, target=None, rect=None):
         """
@@ -467,10 +484,14 @@ class SimpleImageViewer(QWidget):
         return cvImg, cvImg_x, cvImg_y
 
     def resize_img(self):
-        if self.data_type in ['BrainMRI', 'CardiacMRI']:
+        if self.data_type == 'BrainMRI':
             self.img = self.img.scaledToWidth(350)
             self.img_x = self.img_x.scaledToWidth(350)
             self.img_y = self.img_y.scaledToWidth(350)
+        elif self.data_type == 'CardiacMRI':
+            self.img = self.img.scaledToWidth(350)
+            self.img_x = self.img_x.scaledToHeight(150)
+            self.img_y = self.img_y.scaledToWidth(150)
         elif self.data_type == 'FetalUS':
             self.img = self.img.scaledToHeight(350)
             self.img_x = self.img_x.scaledToWidth(350)
