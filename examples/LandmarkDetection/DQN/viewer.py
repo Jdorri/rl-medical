@@ -353,7 +353,6 @@ class SimpleImageViewer(QWidget):
         self.img = QPixmap(qImg)
         self.img_x = QPixmap(qImg_x)
         self.img_y = QPixmap(qImg_y)
-        self.img_z = QPixmap(qImg)      # <- placeholder
 
         self.resize_img()
 
@@ -492,6 +491,7 @@ class SimpleImageViewer(QWidget):
             self.img = self.img.scaledToWidth(350)
             self.img_x = self.img_x.scaledToHeight(150)
             self.img_y = self.img_y.scaledToWidth(150)
+
         elif self.data_type == 'FetalUS':
             self.img = self.img.scaledToHeight(350)
             self.img_x = self.img_x.scaledToWidth(350)
