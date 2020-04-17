@@ -684,6 +684,9 @@ class Controller:
             # Default fetal
             self.app_settings.fname_images.name = f"./data/filenames/{redir}fetalUS_test_files_new_paths.txt"
             self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_test_landmarks_new_paths.txt"
+            if self.mounted:
+                self.app_settings.fname_images.name = f"./data/filenames/fetalUS_train_files_new_paths.txt"
+                self.app_settings.fname_landmarks.name = f"./data/filenames/fetalUS_train_landmarks_new_paths.txt"
             self.app_settings.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
 
     @staticmethod
