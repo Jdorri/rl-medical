@@ -1,7 +1,7 @@
 Instructions for using the HITL functionality to gather data for the
 Human Replay Buffer.
 
-- We want 25k states in total. This equates to 4.2k each (should take approx 1hr)
+- 1hr each should be enough
 
 To begin HITL:
 - Go to branch HITL_extension
@@ -31,3 +31,4 @@ Additional points:
 - To check how many HITL episodes you have done, end your HITL session (see line 27) and run "python3 -m inspect_HITL_buffer.py"
   - This will tell you how many episodes and states you have done
 - There is a 50% chance the resolution will start on 2 or 3.  This is deliberate: otherwise resolution = 2 would occur often from the human.
+- Try to do horizontal axis first then vertical then z-axis (in/out)
