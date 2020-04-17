@@ -391,22 +391,9 @@ class SimpleImageViewer(QWidget):
     def init_grid(self):
         # Initiliase Grid
         self.grid = QGridLayout()
-
-        if self.data_type in ['BrainMRI','FetalUS']:
-            self.grid.addWidget(self.label_img, 0, 0)
-            self.grid.addWidget(self.label_img_x, 0, 1)
-            self.grid.addWidget(self.label_img_y, 1, 0)
-        elif self.data_type in ['CardiacMRI']:
-            self.top_grid = QGridLayout()
-            self.top_grid.addWidget(self.label_img, 0, 0)
-            ### Add 3d volume here ###
-
-            self.bot_grid = QGridLayout()
-            self.bot_grid.addWidget(self.label_img_x, 0, 0)
-            self.bot_grid.addWidget(self.label_img_y, 1, 0)
-
-            self.grid.addLayout(self.top_grid, 0, 0)
-            self.grid.addLayout(self.bot_grid, 1, 0)
+        self.grid.addWidget(self.label_img, 0, 0)
+        self.grid.addWidget(self.label_img_x, 0, 1)
+        self.grid.addWidget(self.label_img_y, 1, 0)
 
         # Set Layout of GUI
         self.setLayout(self.grid)
@@ -489,9 +476,11 @@ class SimpleImageViewer(QWidget):
             self.img_y = self.img_y.scaledToWidth(350)
         elif self.data_type == 'CardiacMRI':
             self.img = self.img.scaledToWidth(350)
-            self.img_x = self.img_x.scaledToHeight(150)
-            self.img_y = self.img_y.scaledToWidth(150)
-
+            self.img_x = self.img_x.scaledToWidth(350)
+            self.img_y = self.img_y.scaledToWidth(350)
+            # self.img = self.img.scaledToWidth(350)
+            # self.img_x = self.img_x.scaledToHeight(150)
+            # self.img_y = self.img_y.scaledToWidth(150)
         elif self.data_type == 'FetalUS':
             self.img = self.img.scaledToHeight(350)
             self.img_x = self.img_x.scaledToWidth(350)

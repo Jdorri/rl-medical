@@ -610,7 +610,7 @@ class AppSettingsBrowseMode(QFrame):
 
 
 class Controller:
-    def __init__(self, display=True, data_type='CardiacMRI', mounted=False):
+    def __init__(self, display=True, data_type='FetalUS', mounted=True):
         self.data_type = data_type
         self.mounted = mounted
 
