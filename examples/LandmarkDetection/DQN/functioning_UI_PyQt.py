@@ -690,7 +690,7 @@ class Controller:
             if self.mounted:
                 self.app_settings.fname_images.name = f"./data/filenames/fetalUS_train_files_new_paths.txt"
                 self.app_settings.fname_landmarks.name = f"./data/filenames/fetalUS_train_landmarks_new_paths.txt"
-            self.app_settings.fname_model = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
+            self.app_settings.fname_model = './data/models/DQN_ultrasound/model-600000.data-00000-of-00001'
 
     @staticmethod
     def allWidgets_setCheckable(parentQWidget):
