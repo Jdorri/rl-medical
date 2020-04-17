@@ -312,7 +312,7 @@ class LeftWidgetSettings(QFrame):
     def on_clicking_browse_model(self):
         if not self.testing:
             self.fname_model = QFileDialog.getOpenFileName(self, "Browse Model",
-                "./data/models", filter="*.data-*")
+                "./data/models/", filter="*.data-*")
             # Set text to label
             filename = self.fname_model[0].split("/")
             self.model_file_edit_text.setText(filename[-1])
