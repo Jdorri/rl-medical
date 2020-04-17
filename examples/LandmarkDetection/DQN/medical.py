@@ -824,6 +824,9 @@ class MedicalPlayer(gym.Env):
         img_x = cv2.cvtColor(img_x, cv2.COLOR_GRAY2RGB)  # congvert to rgb
         img_y = cv2.cvtColor(img_y, cv2.COLOR_GRAY2RGB)  # congvert to rgb
 
+        if self.data_type == 'CardiacMRI':
+            print(img_x.shape)
+
         ########################################################################
         # PyQt GUI Code Section
 
