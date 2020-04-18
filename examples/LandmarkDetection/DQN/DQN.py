@@ -147,7 +147,7 @@ def get_config(files_list, data_type, trainable_variables):
         batch_size=BATCH_SIZE,
         memory_size=MEMORY_SIZE,
         init_memory_size=INIT_MEMORY_SIZE,
-        init_exploration=0.0,
+        init_exploration=1.0,
         update_frequency=UPDATE_FREQ,
         history_len=FRAME_HISTORY
     )
@@ -168,7 +168,7 @@ def get_config(files_list, data_type, trainable_variables):
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'exploration'),
                 # 1->0.1 in the first million steps
-                [(0, 1), (10, 0.1), (320, 0.01)],
+                [(0, 0.8), (10, 0.1), (320, 0.01)],
                 interp='linear'),
             PeriodicTrigger(
                 Evaluator(nr_eval=EVAL_EPISODE, input_names=['state'],
