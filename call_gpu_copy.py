@@ -16,9 +16,9 @@ data_type ='CardiacMRI'
 # transferModel = "'/vol/project/2019/545/g1954503/oen19/LandmarkDetection/003/output/003/model-600000'"#CardiacMRI basecase
 transferModel = "'/vol/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000'"#BrainMRI basecase
 to_Transfer = "CNN DQN"
-trainable = "DQN LAST"
+trainable = "LAST"
 
-discription = """Cardiac MRI[4] with transfer from Brain MRI[14] with initial eps=0.8 and freezing CNN"""
+discription = """Cardiac MRI[4] with transfer from Brain MRI[14] with initial eps=0.8 and freezing all but last layer"""
 
 home = os.environ['HOME']
 local_branch_path = os.path.join(home, 'Documents/rl-medical/')#path to where the code is
@@ -108,4 +108,4 @@ with open(job_file, 'w') as fh:
                                                             f"--name {data_type}{case_number}")
 
 
-subprocess.call(f"(. {venv_path}bin/activate && sbatch {job_file})", shell=True)
+subprocess.call(f"(. {venv_path}bin/activate && sbatch -w kingfisher {job_file})", shell=True)
