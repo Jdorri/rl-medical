@@ -669,8 +669,8 @@ class Controller:
         redir = '' if self.mounted else 'local/'
 
         if self.data_type == 'BrainMRI':
-            self.app_settings.fname_images.name = f"./data/filenames/{redir}brain_test_files_new_paths.txt"
-            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}brain_test_landmarks_new_paths.txt"
+            self.app_settings.fname_images.name = f"./data/filenames/{redir}brain_train_files_new_paths.txt"
+            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}brain_train_landmarks_new_paths.txt"
             self.app_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
         elif self.data_type == 'CardiacMRI':
             self.app_settings.fname_images.name = f"./data/filenames/{redir}cardiac_train_files_new_paths.txt"
