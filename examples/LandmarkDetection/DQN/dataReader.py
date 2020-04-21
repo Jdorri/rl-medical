@@ -12,7 +12,7 @@ import SimpleITK as sitk
 from tensorpack import logger
 from IPython.core.debugger import set_trace
 import os
-from scipy.spatial.transform import Rotation
+# from scipy.spatial.transform import Rotation
 
 __all__ = ['filesListBrainMRLandmark', 'filesListCardioLandmark', 'filesListFetalUSLandmark', 'NiftiImage']
 
