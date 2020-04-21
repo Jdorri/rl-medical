@@ -484,7 +484,7 @@ class RightWidgetSettings(QFrame):
                                         data_type=self.default_use_case,
                                         screen_dims=IMAGE_SIZE,
                                         task='play')
-
+            
             self.NUM_ACTIONS = init_player.action_space.n
             self.num_files = init_player.files.num_files
             # Create a thread to run background task
