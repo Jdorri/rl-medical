@@ -44,12 +44,12 @@ class Window(QMainWindow):
     # Captures key pressed that will be used to store data for Human-in-the loop
     key_pressed = pyqtSignal(QEvent)
 
-    def __init__(self, viewer_param, right_settings=None):
+    def __init__(self, viewer_param, right_settings=None, data_type="BrainMRI"):
         super().__init__()
-        self.initUI(viewer_param, right_settings)
+        self.initUI(viewer_param, right_settings, data_type)
         self.key_pressed.connect(self.on_key)
 
-    def initUI(self, viewer_param, right_settings):
+    def initUI(self, viewer_param, right_settings, data_type):
         """
         Main UI init element.
         """
@@ -68,13 +68,14 @@ class Window(QMainWindow):
                                    arr_x=np.zeros(viewer_param["arrs"][1].shape),
                                    arr_y=np.zeros(viewer_param["arrs"][2].shape),
                                    filepath=viewer_param["filepath"],
-                                   window=self)
+                                   window=self,
+                                   data_type=data_type)
 
         # Left Settings widget
         if right_settings:
-            self.left_widget = LeftWidgetSettings(self, True)
+            self.left_widget = LeftWidgetSettings(self)
         else:
-            self.left_widget = LeftWidgetSettings(self, False)
+            self.left_widget = LeftWidgetSettings(self)
         self.left_widget.setFrameShape(QFrame.StyledPanel)
 
         # Right Settings widget
@@ -94,7 +95,6 @@ class Window(QMainWindow):
 
         # Geometric window position and general setting
         self.showMaximized()
-        # self.center()
         self.setWindowTitle('Anatomical Landmark Detection')
         self.menubar.setStyleSheet("background:#003E74; color:white; padding: 5px 0")
         self.statusbar.setStyleSheet("background:#003E74; color:white")
@@ -132,16 +132,6 @@ class Window(QMainWindow):
 
         # Help menu
         help_menu = self.menubar.addMenu("&Help")
-
-    def center(self):
-        """
-        Used to center the window automatically
-        """
-        frameGm = self.frameGeometry()
-        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
-        centerPoint = QApplication.desktop().screenGeometry(screen).center()
-        frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())
 
     def nightMode(self):
         "CSS Styling for night mode app version"
@@ -186,6 +176,31 @@ class Window(QMainWindow):
                 self.right_widget.browse_mode.on_clicking_zoomIn()
             elif event.key() == Qt.Key_Z:
                 self.right_widget.browse_mode.on_clicking_zoomOut()
+        
+            # Browse mode key bindings (original)
+            # if event.key() == Qt.Key_S:
+            #     self.right_widget.on_clicking_in()
+            # elif event.key() == Qt.Key_A:
+            #     self.right_widget.on_clicking_out()
+            # elif event.key() == Qt.Key_Up:
+            #     self.right_widget.on_clicking_up()
+            # elif event.key() == Qt.Key_Down:
+            #     self.right_widget.on_clicking_down()
+            # elif event.key() == Qt.Key_Left:
+            #     self.right_widget.on_clicking_left()
+            # elif event.key() == Qt.Key_Right:
+            #     self.right_widget.on_clicking_right()
+            # elif event.key() == Qt.Key_Space:
+            #     self.right_widget.on_clicking_nextImg()
+            # elif event.key() == Qt.Key_Equal:
+            #     self.right_widget.on_clicking_zoomIn()
+            # elif event.key() == Qt.Key_Minus:
+            #     self.right_widget.on_clicking_zoomOut()
+
+            # HITL mode additional key bindings
+            if self.right_widget.browse_mode.HITL_mode.isChecked():
+                if event.key() == Qt.Key_Backspace:
+                    self.right_widget.browse_mode.on_clicking_HITLDelete()
 
     def closeEvent(self, event):
         """
@@ -194,12 +209,18 @@ class Window(QMainWindow):
         reply = QMessageBox.question(self, 'Message',
             "Are you sure to quit?", QMessageBox.Yes |
             QMessageBox.No, QMessageBox.Yes)
+        
+        try:
+            if self.right_widget.get_mode() == 'BROWSE':
+                if self.right_widget.browse_mode.HITL and self.right_widget.browse_mode.env:
+                    self.right_widget.browse_mode.save_HITL()
+        except AttributeError:
+            pass
 
         if reply == QMessageBox.Yes:
             event.accept()
         else:
             event.ignore()
-
 
 ################################################################################
 ## Left Widget
@@ -210,7 +231,7 @@ class LeftWidgetSettings(QFrame):
     Left widget controlling GUI elements settings.
     """
 
-    def __init__(self, window, gui_launcher=False):
+    def __init__(self, window):
         super().__init__()
         # Window object to access windows components
         self.window = window # Store window object to enable control over windows functionality
@@ -244,7 +265,7 @@ class LeftWidgetSettings(QFrame):
         # Logo settings
         self.logo = QLabel()
         pixmap_logo = QPixmap("imperial_logo.png")
-        pixmap_logo = pixmap_logo.scaledToHeight(64)
+        pixmap_logo = pixmap_logo.scaledToHeight(50)
         self.logo.setPixmap(pixmap_logo)
         
         ## Manage layout
@@ -365,7 +386,8 @@ class SimpleImageViewer(QWidget):
     """
     agent_signal = pyqtSignal(dict) # Signaling agent move (current location, status)
 
-    def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None, window=None):
+    def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None, window=None, data_type="BrainMRI"):
+
         super().__init__()
         self.arrs = [arr, arr_x, arr_y]
         self.setStyleSheet("background: white")
@@ -376,17 +398,14 @@ class SimpleImageViewer(QWidget):
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
         self.window = window
+        self.data_type = data_type
+        self.rotate = False
 
         # Set image formatting and get shape
-        cvImg = arr.astype(np.uint8)
-        self.height, self.width, self.channel = cvImg.shape
-        cvImg_x = arr_x.astype(np.uint8)
-        self.height_x, self.width_x, self.channel_x = cvImg_x.shape
-        cvImg_y = arr_y.astype(np.uint8)
-        self.height_y, self.width_y, self.channel_y = cvImg_y.shape
+        cvImg, cvImg_x, cvImg_y = self.get_imgs(self.arrs)
 
         # initialize window with the input image
-        assert arr.shape == (self.height, self.width, 3), "You passed in an image with the wrong number shape"
+        assert self.arrs[0].shape == (self.height, self.width, 3), "You passed in an image with the wrong shape"
 
         # Convert image to correct format
         bytesPerLine = 3 * self.width
@@ -407,7 +426,6 @@ class SimpleImageViewer(QWidget):
         self.label_img = QLabel()
         self.label_img.setPixmap(self.img)
         self.label_img_x = QLabel()
-        self.label_img_x.setPixmap(self.img_x)
         self.label_img_y = QLabel()
         self.label_img_y.setPixmap(self.img_y)
         self.label_img.setMinimumSize(400, 400)
@@ -436,9 +454,7 @@ class SimpleImageViewer(QWidget):
         self.grid.addWidget(self.canvas, 1, 1)
         self.agent_signal.connect(self.agent_signal_handler)
 
-        # Set Layout of GUI
         self.setLayout(self.grid)
-        self.setWindowTitle("Landmark Detection Agent")
 
         # Stylesheet
         self.label_img.setStyleSheet("background: black; border:3px solid #DD2501; ")
@@ -498,27 +514,24 @@ class SimpleImageViewer(QWidget):
         """
         Main image drawer function
         """
-        # Draw background image (brain)
-        cvImg = arrs[0].astype(np.uint8)
-        self.height, self.width, self.channel = cvImg.shape
+        cvImg, cvImg_x, cvImg_y = self.get_imgs(arrs)
+
         bytesPerLine = 3 * self.width
         qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
-        self.img = QPixmap(qImg) # can use this to scale the image: .scaled(450, 350, QtCore.Qt.KeepAspectRatio)
-
-        cvImg_x = arrs[1].astype(np.uint8)
-        self.height_x, self.width_x, self.channel_x = cvImg_x.shape
         bytesPerLine = 3 * self.width_x
         qImg_x = QImage(cvImg_x.data, self.width_x, self.height_x, bytesPerLine, QImage.Format_RGB888)
-        self.img_x = QPixmap(qImg_x)
-
-        cvImg_y = arrs[2].astype(np.uint8)
-        self.height_y, self.width_y, self.channel_y = cvImg_y.shape
         bytesPerLine = 3 * self.width_y
         qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
+
+        self.img = QPixmap(qImg)
+        self.img_x = QPixmap(qImg_x)
         self.img_y = QPixmap(qImg_y)
 
-        # Draw some rectangle and agent (overlay)
+        # Draw rectangles and agent (overlay)
         self.painterInstance = QPainter(self.img)
+        # For rotation purposes
+        if self.data_type == 'FetalUS':
+            self.rotate = True
         _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
         self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
@@ -568,6 +581,69 @@ class SimpleImageViewer(QWidget):
         else:
             self.size_e = 25
 
+        self.label_img.setAlignment(Qt.AlignCenter)
+        self.label_img_x.setAlignment(Qt.AlignCenter)
+        self.label_img_y.setAlignment(Qt.AlignCenter)
+
+    def get_imgs(self, arrs):
+        if self.data_type in ['BrainMRI', 'CardiacMRI']:
+            cvImg = arrs[0].astype(np.uint8)
+            cvImg_x = arrs[1].astype(np.uint8)
+            cvImg_y = arrs[2].astype(np.uint8)
+        elif self.data_type == 'FetalUS':
+            cvImg = arrs[0].astype(np.uint8)
+            cvImg_x = arrs[2].astype(np.uint8)
+            cvImg_y = arrs[1].astype(np.uint8)
+
+        self.height, self.width, self.channel = cvImg.shape
+        self.height_x, self.width_x, self.channel_x = cvImg_x.shape
+        self.height_y, self.width_y, self.channel_y = cvImg_y.shape
+
+        return cvImg, cvImg_x, cvImg_y
+
+    def translate(self, agent_loc, rect, target):
+        ''' 2 step process:
+                - change from agent coords into img coords. Img coords
+                start from top left, agent coords start from bottom right. So
+                need to do (x,y) -> (y,x) for agent coords
+                - Perform relevant rotation (i.e. 90 degrees ccw)
+        '''
+        if self.data_type in ['BrainMRI', 'CardiacMRI']:
+            _agent_loc = (agent_loc[0], self.height-agent_loc[1])
+            if target is not None:
+                _target = (target[0], self.height-target[1])
+            else:
+                _target = None
+            _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
+
+        elif self.data_type == 'FetalUS':
+            _agent_loc = agent_loc[1::-1]
+            if target is not None:
+                _target = target[1::-1]
+            else:
+                _target = None
+            _rect = rect[:4]
+
+        return _agent_loc, _rect, _target
+
+    def translate_x(self, agent_loc, rect, target):
+        _agent_loc = (agent_loc[1], self.height_x-agent_loc[2])
+        if target is not None:
+            _target = (target[1], self.height_x-target[2])
+        else:
+            _target = None
+        _rect = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
+        return _agent_loc, _rect, _target
+
+    def translate_y(self, agent_loc, rect, target):
+        _agent_loc = (agent_loc[0], self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
+        if target is not None:
+            _target = (target[0], self.height_y-target[2])                # Rotate 90 degrees ccw
+        else:
+            _target = None
+        _rect = (self.height_y-rect[4], self.height_y-rect[5]) + rect[:2]
+        return _agent_loc, _rect, _target
+
     def draw_error(self):
         """
         Error (mm) message during eval and browse mode.
@@ -593,10 +669,11 @@ class SimpleImageViewer(QWidget):
         yLen = rect[1] - yPos
 
         rect_dims = [xPos,yPos,xLen,yLen,]
-        hw_ratio = yLen / -xLen
+        hw_ratio = abs(yLen / xLen)
 
         if self.task in ['eval','browse']:
-            self.draw_point(target, self.color_t, width=12)
+            w = 12 if self.data_type == 'BrainMRI' else 16
+            self.draw_point(target, self.color_t, width=w)
 
         self.draw_point(agent_loc, self.color_a)
 
@@ -604,46 +681,6 @@ class SimpleImageViewer(QWidget):
             self.draw_crosshairs(agent_loc, hw_ratio)
         else:
             self.draw_rects(rect_dims)
-
-    def translate(self, agent_loc, rect, target):
-        """
-        Agent movement Calculator (return value is used to draw rectangle/cross hair + agent location)
-        """
-        _agent_loc = (agent_loc[0], self.height-agent_loc[1])
-        if target is not None:
-            _target = (target[0], self.height-target[1])
-        else:
-            _target = None
-        _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
-
-        return _agent_loc, _rect, _target
-
-    def translate_x(self, agent_loc, rect, target):
-        """
-        Agent movement Calculator
-        """
-        _agent_loc = (agent_loc[1], self.height_x-agent_loc[2])
-        if target is not None:
-            _target = (target[1], self.height_x-target[2])
-        else:
-            _target = None
-        _rect = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
-
-        return _agent_loc, _rect, _target
-
-    def translate_y(self, agent_loc, rect, target):
-        """
-        Agent movement Calculator
-        """
-        _agent_loc = (agent_loc[0]*self.width_y//self.height_y, self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
-        if target is not None:
-            _target = (target[0]*self.width_y//self.height_y, self.height_y-target[2])                # Rotate 90 degrees ccw
-        else:
-            _target = None
-        _rect = (self.height_y-rect[4], self.height_y-rect[5]) + \
-            (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
-
-        return _agent_loc, _rect, _target
 
     def draw_point(self, point_loc, color, width=7):
         """
@@ -705,10 +742,17 @@ class SimpleImageViewer(QWidget):
         corner_len = 25
         xPos, yPos, xLen, yLen = rect
 
-        bL = QPoint(xPos, yPos)
-        tL = QPoint(xPos, yPos + yLen)
-        bR = QPoint(xPos + xLen, yPos)
-        tR = QPoint(xPos + xLen, yPos + yLen)
+        if self.rotate:
+            tL = QPoint(xPos, yPos)
+            bL = QPoint(xPos, yPos + yLen)
+            tR = QPoint(xPos + xLen, yPos)
+            bR = QPoint(xPos + xLen, yPos + yLen)
+            self.rotate = False
+        else:
+            bL = QPoint(xPos, yPos)
+            tL = QPoint(xPos, yPos + yLen)
+            bR = QPoint(xPos + xLen, yPos)
+            tR = QPoint(xPos + xLen, yPos + yLen)
 
         vecs = self.units()
 
@@ -753,22 +797,6 @@ class SimpleImageViewer(QWidget):
             episode_end = self.is_terminal
         )
 
-    # def render(self):
-        # self.window.flip()
-
-    def saveGif(self,filename=None,arr=None,duration=0):
-        arr[0].save(filename, save_all=True,
-                    append_images=arr[1:],
-                    duration=500,
-                    quality=95) # duration milliseconds
-
-    def close(self):
-        if self.isopen:
-            self.window.close()
-            self.isopen = False
-
-    def __del__(self):
-        self.close()
 
 
 ################################################################################

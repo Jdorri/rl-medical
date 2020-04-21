@@ -29,11 +29,11 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         launch_train_with_config)
 
 from thread import WorkerThread
-from viewer import SimpleImageViewer, Window
+# from viewer import SimpleImageViewer, Window # This wont work on GPU cluster so uncomment for now
 import pickle
 
 from PyQt5.QtWidgets import QApplication
-
+from freeze_variables import freeze_variables
 ###############################################################################
 # BATCH SIZE USED IN NATURE PAPER IS 32 - MEDICAL IS 256
 BATCH_SIZE = 48
@@ -42,8 +42,14 @@ IMAGE_SIZE = (45, 45, 45)
 # how many frames to keep
 # in other words, how many observations the network can see
 FRAME_HISTORY = 4
-# the frequency of updating the target network
+# the frequency of updating the target network --> this is wrong, this is the
+# number of steps to take with the episilon greedy policy before comitting it
+# memory.
 UPDATE_FREQ = 4
+###############################################################################
+# HITL UPDATE
+INIT_UPDATE_FREQ = 0
+###############################################################################
 # DISCOUNT FACTOR - NATURE (0.99) - MEDICAL (0.9)
 GAMMA = 0.9 #0.99
 # REPLAY MEMORY SIZE - NATURE (1e6) - MEDICAL (1e5 view-patches)
@@ -56,6 +62,8 @@ STEPS_PER_EPOCH = 10000 // UPDATE_FREQ * 10
 EPOCHS_PER_EVAL = 2
 # the number of episodes to run during evaluation
 EVAL_EPISODE = 50
+# Max number of training epochs
+MAX_EPOCHS = 1000
 
 ###############################################################################
 
@@ -65,7 +73,7 @@ def get_player(directory=None, files_list= None, data_type=None, viz=False,
     env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
                         viz=viz, saveGif=saveGif, saveVideo=saveVideo,
                         task=task, files_list=files_list, data_type=data_type, max_num_frames=1500)
-    if (task in ['play','eval']):
+    if task not in ['browse','train']:
         # in training, env will be decorated by ExpReplay, and history
         # is taken care of in expreplay buffer
         # otherwise, FrameStack modifies self.step to save observations into a queue
@@ -75,8 +83,11 @@ def get_player(directory=None, files_list= None, data_type=None, viz=False,
 ###############################################################################
 
 class Model(DQNModel):
-    def __init__(self,IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA):
+    def __init__(self,IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA, trainable_variables):
         super(Model, self).__init__(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA)
+        self.conv_freeze = "CNN" not in trainable_variables
+        self.fc_freeze = "DQN" not in trainable_variables
+        self.final_layer_freeze = "LAST" not in trainable_variables
 
     def _get_DQN_prediction(self, image):
         """ image: [0,255]
@@ -87,41 +98,47 @@ class Model(DQNModel):
 
         with argscope(Conv3D, nl=PReLU.symbolic_function, use_bias=True):
             # core layers of the network
-            conv = (LinearWrap(image)
-                 .Conv3D('conv0', out_channel=32,
-                         kernel_shape=[5,5,5], stride=[1,1,1])
-                 .MaxPooling3D('pool0',2)
-                 .Conv3D('conv1', out_channel=32,
-                         kernel_shape=[5,5,5], stride=[1,1,1])
-                 .MaxPooling3D('pool1',2)
-                 .Conv3D('conv2', out_channel=64,
-                         kernel_shape=[4,4,4], stride=[1,1,1])
-                 .MaxPooling3D('pool2',2)
-                 .Conv3D('conv3', out_channel=64,
-                         kernel_shape=[3,3,3], stride=[1,1,1])
-                 # .MaxPooling3D('pool3',2)
-                 )
+            with freeze_variables(stop_gradient=False, skip_collection=self.conv_freeze):#conv
+                conv = (LinearWrap(image)
+                    .Conv3D('conv0', out_channel=32,
+                            kernel_shape=[5,5,5], stride=[1,1,1])
+                    .MaxPooling3D('pool0',2)
+                    .Conv3D('conv1', out_channel=32,
+                            kernel_shape=[5,5,5], stride=[1,1,1])
+                    .MaxPooling3D('pool1',2)
+                    .Conv3D('conv2', out_channel=64,
+                            kernel_shape=[4,4,4], stride=[1,1,1])
+                    .MaxPooling3D('pool2',2)
+                    .Conv3D('conv3', out_channel=64,
+                            kernel_shape=[3,3,3], stride=[1,1,1])
+                    # .MaxPooling3D('pool3',2)
+                    )
 
         if 'Dueling' not in self.method:
-            lq = (conv
-                 .FullyConnected('fc0', 512).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc1', 256).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc2', 128).tf.nn.leaky_relu(alpha=0.01)())
-            Q = FullyConnected('fct', lq, self.num_actions, nl=tf.identity)
+            with freeze_variables(stop_gradient=False, skip_collection=self.fc_freeze):#fc
+                lq = (conv
+                    .FullyConnected('fc0', 512).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc1', 256).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc2', 128).tf.nn.leaky_relu(alpha=0.01)())
+            with freeze_variables(stop_gradient=False, skip_collection=self.final_layer_freeze):#fclast
+                Q = FullyConnected('fct', lq, self.num_actions, nl=tf.identity)
         else:
             # Dueling DQN or Double Dueling
             # state value function
-            lv = (conv
-                 .FullyConnected('fc0V', 512).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc1V', 256).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc2V', 128).tf.nn.leaky_relu(alpha=0.01)())
-            V = FullyConnected('fctV', lv, 1, nl=tf.identity)
-            # advantage value function
-            la = (conv
-                 .FullyConnected('fc0A', 512).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc1A', 256).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc2A', 128).tf.nn.leaky_relu(alpha=0.01)())
-            As = FullyConnected('fctA', la, self.num_actions, nl=tf.identity)
+            with freeze_variables(stop_gradient=False, skip_collection=self.fc_freeze):#fc
+                lv = (conv
+                    .FullyConnected('fc0V', 512).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc1V', 256).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc2V', 128).tf.nn.leaky_relu(alpha=0.01)())
+            with freeze_variables(stop_gradient=False, skip_collection=self.final_layer_freeze):#fclast
+                V = FullyConnected('fctV', lv, 1, nl=tf.identity)
+                # advantage value function
+                la = (conv
+                    .FullyConnected('fc0A', 512).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc1A', 256).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc2A', 128).tf.nn.leaky_relu(alpha=0.01)())
+            with freeze_variables(stop_gradient=False, skip_collection=self.final_layer_freeze):#fclast
+                As = FullyConnected('fctA', la, self.num_actions, nl=tf.identity)
 
             Q = tf.add(As, V - tf.reduce_mean(As, 1, keepdims=True))
 
@@ -129,7 +146,7 @@ class Model(DQNModel):
 
 ###############################################################################
 
-def get_config(files_list, data_type):
+def get_config(files_list, data_type, trainable_variables):
     """This is only used during training."""
     expreplay = ExpReplay(
         predictor_io_names=(['state'], ['Qvalue']),
@@ -138,15 +155,23 @@ def get_config(files_list, data_type):
         batch_size=BATCH_SIZE,
         memory_size=MEMORY_SIZE,
         init_memory_size=INIT_MEMORY_SIZE,
-        init_exploration=1.0,
-        update_frequency=UPDATE_FREQ,
+        init_exploration=0.8, #0.0
+        #How my epsilon greedy steps to take before commiting to memory
+        #An idea to encorporate the pre-training phase is to schedule the
+        # the agent only to start taking steps after x amount of mini_batch
+        # samples......
+        ###############################################################################
+        # HITL UPDATE
+        update_frequency=INIT_UPDATE_FREQ,
+        #update_frequency=UPDATE_FREQ,
+        ###############################################################################
         history_len=FRAME_HISTORY
     )
 
     return TrainConfig(
         # dataflow=expreplay,
         data=QueueInput(expreplay),
-        model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA),
+        model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA, trainable_variables),
         callbacks=[
             ModelSaver(),
             PeriodicTrigger(
@@ -159,8 +184,26 @@ def get_config(files_list, data_type):
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'exploration'),
                 # 1->0.1 in the first million steps
-                [(0, 1), (10, 0.1), (320, 0.01)],
+                [(0, 0.8), (10, 0.1), (320, 0.01)], #[(0, 1.0), (10, 0.1), (320, 0.01)],
                 interp='linear'),
+###############################################################################
+# HITL UPDATE
+# Here the number of steps taken in the environment is increased from 0, during
+# the pretraining phase, to 4 to allow the agent to take 4 steps in the env
+# between each TD update.
+# Key: a discussion with the team needs to be made as to whether we need to push
+# back the updated to the other hyperparameters by 750,000 steps. Need to read
+# papers to determine what is best.
+
+            ScheduledHyperParamSetter(
+                ObjAttrParam(expreplay, 'update_frequency'),
+                # 1->0.1 in the first million steps note should be 8 but put to
+                # 4 for faster training
+                [(0, int(0)), (100000, int(4))],
+                interp=None, step_based=True),
+
+###############################################################################
+
             PeriodicTrigger(
                 Evaluator(nr_eval=EVAL_EPISODE, input_names=['state'],
                           output_names=['Qvalue'], files_list=files_list,
@@ -170,7 +213,7 @@ def get_config(files_list, data_type):
             HumanHyperParamSetter('learning_rate'),
         ],
         steps_per_epoch=STEPS_PER_EPOCH,
-        max_epoch=1000,
+        max_epoch=MAX_EPOCHS,
     )
 
 def get_viewer_data():
@@ -185,7 +228,6 @@ def get_viewer_data():
 ###############################################################################
 ###############################################################################
 
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -193,6 +235,7 @@ if __name__ == '__main__':
     parser.add_argument('--gpu', help='comma separated list of GPU(s) to use.')
     parser.add_argument('--load', help='load model to resume traning')
     parser.add_argument('--transferModel',  nargs='+', help='load model for transfer learning' , type=str)
+    parser.add_argument('--trainable',  nargs='+', help='list of trainable variables' , type=str, default=['CNN', 'DQN', 'LAST'])
     parser.add_argument('--task', help='task to perform. Must load a pretrained model if task is "play" or "eval"',
                         choices=['play', 'eval', 'train'], default='train')
     parser.add_argument('--algo', help='algorithm',
@@ -215,6 +258,12 @@ if __name__ == '__main__':
                         default='experiment_1')
     args = parser.parse_args()
 
+    # f1 = filenames_GUI()
+    # f2 = filenames_GUI()
+    # f1.name = './data/filenames/brain_test_files_new_paths.txt'
+    # f2.name = './data/filenames/brain_test_landmarks_new_paths.txt'
+    # files_list = [f1, f2]
+
     if args.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
@@ -228,7 +277,7 @@ if __name__ == '__main__':
 
     METHOD = args.algo
     # load files into env to set num_actions, num_validation_files
-    init_player = MedicalPlayer(files_list=args.files,
+    init_player = MedicalPlayer(files_list=args.files, #files_list=files_list,
                                 data_type=args.type,
                                 screen_dims=IMAGE_SIZE,
                                 task='play')
@@ -280,9 +329,10 @@ if __name__ == '__main__':
         ########################################################################
 
     else:  # train model
+        print(f"TRAINABLE PARAMETERS: {args.trainable}")
         logger_dir = os.path.join(args.logDir, args.name)
         logger.set_logger_dir(logger_dir)
-        config = get_config(args.files, args.type)
+        config = get_config(args.files, args.type, args.trainable)
         not_ignore = None
         if args.load:  # resume training from a saved checkpoint
             session_init = get_model_loader(args.load)
@@ -310,15 +360,9 @@ if __name__ == '__main__':
 
             session_init = get_model_loader(args.transferModel[0])
             reader, variables = session_init._read_checkpoint_vars(args.transferModel[0])
-
-            #var = tf.stop_gradient(var) #use this to freeze layers later
-            #tensor = reader.get_tensor(var)
-            #tf.get_variable()
-
+           
             ignore = [var for var in variables if any([i in var for i in ignore_list])]
             not_ignore = (list(set(variables) - set(ignore)))#not ignored
             session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
             config.session_init = session_init
-        # print(r(not_ignore, args.transferModel, args.type))
-        # exit()
         launch_train_with_config(config, SimpleTrainer())

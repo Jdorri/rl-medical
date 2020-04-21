@@ -18,10 +18,14 @@ from tensorpack.callbacks.base import Callback
 from tensorpack.utils.utils import get_tqdm, get_rng
 from tensorpack.utils.concurrency import LoopThread, ShareSessionThread
 
+import os
+import pickle
+from medical import MedicalPlayer
+
 __all__ = ['ExpReplay']
 
 Experience = namedtuple('Experience',
-                        ['state', 'action', 'reward', 'isOver'])
+                        ['state', 'action', 'reward', 'isOver','human'])
 
 
 class ReplayMemory(object):
@@ -34,6 +38,7 @@ class ReplayMemory(object):
         self.action = np.zeros((self.max_size,), dtype='int32')
         self.reward = np.zeros((self.max_size,), dtype='float32')
         self.isOver = np.zeros((self.max_size,), dtype='bool')
+        self.human = np.zeros((self.max_size,), dtype='bool')
 
         self._curr_size = 0
         self._curr_pos = 0
@@ -76,17 +81,19 @@ class ReplayMemory(object):
             reward = self.reward[idx: idx + k]
             action = self.action[idx: idx + k]
             isOver = self.isOver[idx: idx + k]
+            human = self.human[idx: idx + k]
         else:
             end = idx + k - self._curr_size
             state = self._slice(self.state, idx, end)
             reward = self._slice(self.reward, idx, end)
             action = self._slice(self.action, idx, end)
             isOver = self._slice(self.isOver, idx, end)
-        ret = self._pad_sample(state, reward, action, isOver)
+            human = self._slice(self.human, idx, end)
+        ret = self._pad_sample(state, reward, action, isOver, human)
         return ret
 
     # the next_state is a different episode if current_state.isOver==True
-    def _pad_sample(self, state, reward, action, isOver):
+    def _pad_sample(self, state, reward, action, isOver, human):
         for k in range(self.history_len - 2, -1, -1):
             if isOver[k]:
                 state = copy.deepcopy(state)
@@ -97,7 +104,7 @@ class ReplayMemory(object):
             state = state.transpose(1, 2, 3, 0)
         else:  # 2d states
             state = state.transpose(1, 2, 0)
-        return state, reward[-2], action[-2], isOver[-2]
+        return state, reward[-2], action[-2], isOver[-2], human[-2]
 
     def _slice(self, arr, start, end):
         s1 = arr[start:]
@@ -112,8 +119,71 @@ class ReplayMemory(object):
         self.reward[pos] = exp.reward
         self.action[pos] = exp.action
         self.isOver[pos] = exp.isOver
+        self.human[pos] = exp.human
+
+###############################################################################
+# HITL UPDATE
+
+class HumanDemReplayMemory(ReplayMemory):
+    def __init__(self, max_size, state_shape, history_len):
+        super(HumanDemReplayMemory, self).__init__(max_size, state_shape, history_len)
+
+    def load_experience(self):
+        """
+        Fills in the buffer with the saved actions from the expert.
+        Actions are stored under .data/HITL in the form of log files
+        """
+        ## Path for GPU cluster ##
+        directory = "Documents/rl-medical/examples/LandmarkDetection/DQN/data/HITL"
+        # TODO directory needs to be flexible for pulling images
+        image_directory = "/vol/project/2019/545/g1954503/aeg19/Fetal_US/"
+        train_paths = "/vol/biomedic/users/aa16914/shared/data/RL_data/fetalUS_train_files_new_paths.txt"
+        ## Paths for local testing ##
+        # directory = "./data/HITL"
+        # image_directory = '/Volumes/project/2019/545/g1954503/aeg19/Brain_MRI'
+        # train_paths = "./brain_train_files_new_paths.txt"
+        ## Temporary fix to exclude testing images ##
+        allowed_images = []
+        with open(train_paths) as f:
+            for line in f.readlines():
+                allowed_images.append((line.split("/")[-1]).split('.')[0])
+        total_images = 0
+        used_images = 0
+        ##
+        # Loop 1: Loops through all log files in the directory
+        for filename in os.listdir(directory):
+            if (filename.endswith(".pickle") or filename.endswith(".p")) and "FetalUS" in filename:
+                log_file = os.path.join(directory, filename)
+                logger.info("Log filename: {}".format(log_file))
+                file_contents = pickle.load( open( log_file, "rb" ) )
+                # Loop 2: Loops through all 3D images in the log file
+                for entry in file_contents:
+                    total_images += 1
+                    if (entry['img_name']) in allowed_images:
+                        image_path = os.path.join(image_directory, entry['img_name']+".nii.gz")
+                        # target_coordinates = entry['target']
+                        logger.info("Image path: {}".format(image_path))
+                        used_images += 1
+                        dummy_env = MedicalPlayer(directory=image_directory, screen_dims=(45, 45, 45),
+                                                            viz=0, saveGif='False', saveVideo='False',
+                                                            task='play', files_list=[image_path], data_type='HITL',
+                                                            max_num_frames=1500)
+                        # Loop 3: Loops through each state, action pair recorded
+                        for key, state_coordinates in enumerate(entry['states']):
+                            if key != len(entry['states'])-1:
+                                # logger.info("{} state: {}".format(key, state_coordinates))
+                                # logger.info("{} reward: {}".format(key+1, entry['rewards'][key+1]))
+                                # logger.info("{} action: {}".format(key+1, entry['actions'][key+1]))
+                                # logger.info("{} is_over: {}".format(key+1, entry['is_over'][key+1]))
+                                # logger.info("{} resolution: {}".format(key, entry['resolution'][key]))
+                                dummy_env.HITL_set_location(state_coordinates, entry['resolution'][key])
+                                state_image = dummy_env._current_state()
+                                self.append(Experience(state_image, entry['actions'][key+1], entry['rewards'][key+1], entry['is_over'][key+1], True))
+        logger.info("total images: {}".format(total_images))
+        logger.info("used images: {}".format(used_images))
 
 
+###############################################################################
 ###############################################################################
 
 class ExpReplay(DataFlow, Callback):
@@ -162,7 +232,15 @@ class ExpReplay(DataFlow, Callback):
         # a queue to receive notifications to populate memory
         self._populate_job_queue = queue.Queue(maxsize=5)
 
+
         self.mem = ReplayMemory(memory_size, state_shape, history_len)
+        ###############################################################################
+        # HITL UPDATE
+
+        self.hmem = HumanDemReplayMemory(memory_size, state_shape, history_len)
+        self.hmem.load_experience()
+
+        ###############################################################################
         self._current_ob = self.player.reset()
         self._player_scores = StatCounter()
         self._player_distError = StatCounter()
@@ -171,7 +249,13 @@ class ExpReplay(DataFlow, Callback):
         # spawn a separate thread to run policy
         def populate_job_func():
             self._populate_job_queue.get()
-            for _ in range(self.update_frequency):
+            ###############################################################################
+            # HITL UPDATE
+            # as self.update_frequency = 0 during pretraining, no workers will be initialized.
+            ###############################################################################
+            #logger.info("update_frequency: {}".format(self.update_frequency))
+
+            for _ in range(int(self.update_frequency)):
                 self._populate_exp()
 
         th = ShareSessionThread(LoopThread(populate_job_func, pausable=False))
@@ -201,6 +285,8 @@ class ExpReplay(DataFlow, Callback):
 
     def _populate_exp(self):
         """ populate a transition by epsilon-greedy"""
+
+
         old_s = self._current_ob
 
         # initialize q_values to zeros
@@ -231,8 +317,8 @@ class ExpReplay(DataFlow, Callback):
             self._player_scores.feed(info['score'])
             self._player_distError.feed(info['distError'])
             self.player.reset()
-
-        self.mem.append(Experience(old_s, act, reward, isOver))
+        # As generated by AI human = False
+        self.mem.append(Experience(old_s, act, reward, isOver, False))
 
     def _debug_sample(self, sample):
         import cv2
@@ -254,22 +340,70 @@ class ExpReplay(DataFlow, Callback):
         # wait for memory to be initialized
         self._init_memory_flag.wait()
 
+        ###############################################################################
+        # HITL UPDATE
+        # if self.update_frequency == 0:
+        #     logger.info("logging update freq ...".format(self.update_frequency))
         while True:
-            idx = self.rng.randint(
-                self._populate_job_queue.maxsize * self.update_frequency,
-                len(self.mem) - self.history_len - 1,
-                size=self.batch_size)
-            batch_exp = [self.mem.sample(i) for i in idx]
+            if self.update_frequency == 0:
+                idx = self.rng.randint(
+                    self._populate_job_queue.maxsize * 4,
+                    len(self.hmem)- self.history_len - 1,
+                    size=self.batch_size)
+                batch_exp = [self.hmem.sample(i) for i in idx]
 
-            yield self._process_batch(batch_exp)
-            self._populate_job_queue.put(1)
+                yield self._process_batch(batch_exp)
+                logger.info("Human batch ...")
+                self._populate_job_queue.put(1)
+            else:
+                ex_idx = self.rng.randint(
+                    self._populate_job_queue.maxsize * self.update_frequency,
+                    len(self.mem) - self.history_len - 1,
+                    size=38)
+                hu_idx = self.rng.randint(
+                    self._populate_job_queue.maxsize * 4,
+                    len(self.hmem)- self.history_len - 1,
+                    size=10)
+
+                batch_exp = [self.mem.sample(i) for i in ex_idx]
+                for j in hu_idx:
+                    batch_exp.append(self.hmem.sample(j))
+
+                yield self._process_batch(batch_exp)
+                logger.info("Mixed batch 0.8agent 0.2human ...")
+                self._populate_job_queue.put(1)
+
+        # else:
+        #     # for now I will just populute the batch with 20% from the Human buffer
+        #     # and 80% from the experience buffer
+        #
+        #     while True:
+        #         ex_idx = self.rng.randint(
+        #             self._populate_job_queue.maxsize * self.update_frequency,
+        #             len(self.mem) - self.history_len - 1,
+        #             size=self.batch_size*0.8)
+        #         hu_idx = self.rng.randint(
+        #             0,
+        #             len(self.hmem),
+        #             size=self.batch_size*0.2)
+        #
+        #         batch_exp = [self.mem.sample(i) for i in ex_idx]
+        #         for j in hu_idx:
+        #             batch_exp.append(self.hmem.sample(j))
+        #
+        #         yield self._process_batch(batch_exp)
+        #         logger.info("Mixed batch 0.8agent 0.2human ...")
+        #         self._populate_job_queue.put(1)
+        ###############################################################################
+
 
     def _process_batch(self, batch_exp):
         state = np.asarray([e[0] for e in batch_exp], dtype='uint8')
         reward = np.asarray([e[1] for e in batch_exp], dtype='float32')
         action = np.asarray([e[2] for e in batch_exp], dtype='int8')
         isOver = np.asarray([e[3] for e in batch_exp], dtype='bool')
-        return [state, action, reward, isOver]
+        human = np.asarray([e[4] for e in batch_exp], dtype='bool')
+        return [state, action, reward, isOver, human]
 
     def _setup_graph(self):
         self.predictor = self.trainer.get_predictor(*self.predictor_io_names)
@@ -313,3 +447,7 @@ class ExpReplay(DataFlow, Callback):
         # reset stats
         self.player.reset_stat()
 
+
+# if __name__ == 'main':
+    # hrb = HumanDemReplayMemory(max_size=1e5, state_shape=(45, 45, 45), history_len=4)
+    # hrb.load_experience()

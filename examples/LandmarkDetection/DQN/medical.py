@@ -42,6 +42,7 @@ from tensorpack.utils.stats import StatCounter
 
 from IPython.core.debugger import set_trace
 from dataReader import *
+from dataReader import fileHITL
 
 _ALE_LOCK = threading.Lock()
 
@@ -146,17 +147,27 @@ class MedicalPlayer(gym.Env):
                                             dtype=np.uint8)
         # history buffer for storing last locations to check oscilations
         self._history_length = history_length
-        self._loc_history = [(0,) * self.dims] * self._history_length
-        self._qvalues_history = [(0,) * self.actions] * self._history_length
         # initialize rectangle limits from input image coordinates
         self.rectangle = Rectangle(0, 0, 0, 0, 0, 0)
         # add your data loader here
+        self.set_dataLoader(files_list)
+
+        # prepare file sampler
+        self.filepath = None
+        self.HITL_logger = []
+        self._loc_history = None
+        # reset buffer, terminal, counters, and init new_random_game
+        self._restart_episode()
+
+    def set_dataLoader(self, files_list):
         if self.data_type == 'BrainMRI':
             self.data_loader = filesListBrainMRLandmark
         elif self.data_type == 'CardiacMRI':
             self.data_loader = filesListCardioLandmark
         elif self.data_type == 'FetalUS':
             self.data_loader = filesListFetalUSLandmark
+        elif self.data_type == "HITL":
+            self.data_loader = fileHITL
 
         if self.task == 'play':
             self.files = self.data_loader(files_list,
@@ -165,11 +176,27 @@ class MedicalPlayer(gym.Env):
             self.files = self.data_loader(files_list,
                                          returnLandmarks=True)
 
-        # prepare file sampler
-        self.filepath = None
         self.sampled_files = self.files.sample_circular()
-        # reset buffer, terminal, counters, and init new_random_game
-        self._restart_episode()
+
+    def HITL_episode_log(self):
+        """ Method to save episode info for HITL """
+        log = {
+            'states': self._loc_history,
+            'rewards':self._reward_history,
+            'actions': self._act_history,
+            'target': self._target_loc,
+            'img_name': self.filename,
+            'is_over': [False for i in range(len(self._loc_history)-1)] + [True],
+            'resolution': self._res_history,
+        }
+        self.HITL_logger.append(log)
+
+    def HITL_set_location(self, location, res):
+        """ Method to set the location in the image to that specified in the logs """
+        self._location = location
+        self.xscale = res
+        self.yscale = res
+        self.zscale = res
 
     def reset(self):
         # with _ALE_LOCK:
@@ -180,6 +207,9 @@ class MedicalPlayer(gym.Env):
         """
         restart current episoide
         """
+        if self.task == 'browse' and self._loc_history:
+            self.HITL_episode_log()
+
         self.terminal = False
         self.reward = 0
         self.cnt = 0 # counter to limit number of steps per episodes
@@ -189,6 +219,7 @@ class MedicalPlayer(gym.Env):
         print(self._loc_history)
         # list of q-value lists
         self._qvalues_history = [(0,) * self.actions] * self._history_length
+        self._clear_history()
         self.new_random_game()
 
     def new_random_game(self):
@@ -227,25 +258,29 @@ class MedicalPlayer(gym.Env):
         # logger.info('starting point {}-{}-{}'.format(x,y,z))
         # ######################################################################
 
-        # # sample a new image
+        # sample a new image
         self._image, self._target_loc, self.filepath, self.spacing = next(self.sampled_files)
         self.filename = os.path.basename(self.filepath)
 
         # multiscale (e.g. start with 3 -> 2 -> 1)
         # scale can be thought of as sampling stride
         if self.multiscale:
-            #cardiac
-            if self.data_type == 'CardiacMRI':
-                self.action_step = 6
-                self.xscale = 2
-                self.yscale = 2
-                self.zscale = 2
-            #brain or fetal
-            else:
-                self.action_step = 9
-                self.xscale = 3
-                self.yscale = 3
-                self.zscale = 3
+            # #cardiac
+            # if self.data_type == 'CardiacMRI':
+            #     self.action_step = 6
+            #     self.xscale = 2
+            #     self.yscale = 2
+            #     self.zscale = 2
+            # #brain or fetal
+            # else:
+            #     self.action_step = 9
+            #     self.xscale = 3
+            #     self.yscale = 3
+            #     self.zscale = 3
+            self.action_step = 9
+            self.xscale = 3
+            self.yscale = 3
+            self.zscale = 3
 
         else:
             self.action_step = 1
@@ -488,6 +523,7 @@ class MedicalPlayer(gym.Env):
         self.terminal = False
         go_out = False
         self.viewer = viewer
+        self._act = act
 
         # -1 passed during init so skip updating current location
         if act == -1:
@@ -549,14 +585,19 @@ class MedicalPlayer(gym.Env):
                     next_location = current_loc
                     go_out = True
 
+            if go_out:
+                self.reward = -1
+            else:
+                self.reward = self._calc_reward(current_loc, next_location)
+
             self._location = next_location
 
         self._screen = self._current_state()
+        self.cur_dist = self.calcDistance(self._location,
+                                          self._target_loc,
+                                          self.spacing)
 
-        if self.task != 'play':
-            self.cur_dist = self.calcDistance(self._location,
-                                              self._target_loc,
-                                              self.spacing)
+        self._update_history()
 
         # render screen if viz is on
         with _ALE_LOCK:
@@ -597,18 +638,30 @@ class MedicalPlayer(gym.Env):
     def _clear_history(self):
         ''' clear history buffer with current state
         '''
-        self._loc_history = [(0,) * self.dims] * self._history_length
-        self._qvalues_history = [(0,) * self.actions] * self._history_length
+        if self.task == 'browse':
+            self._loc_history = []
+            self._act_history = []
+            self._reward_history = []
+            self._res_history = []
+        else:
+            self._loc_history = [(0,) * self.dims] * self._history_length
+            self._qvalues_history = [(0,) * self.actions] * self._history_length
 
     def _update_history(self):
         ''' update history buffer with current state
         '''
-        # update location history
-        self._loc_history[:-1] = self._loc_history[1:]
-        self._loc_history[-1] = self._location
-        # update q-value history
-        self._qvalues_history[:-1] = self._qvalues_history[1:]
-        self._qvalues_history[-1] = self._qvalues
+        if self.task == 'browse':
+            self._loc_history.append(self._location)
+            self._act_history.append(self._act)
+            self._res_history.append(self.xscale)
+            self._reward_history.append(self.reward)
+        else:
+            # update location history
+            self._loc_history[:-1] = self._loc_history[1:]
+            self._loc_history[-1] = self._location
+            # update q-value history
+            self._qvalues_history[:-1] = self._qvalues_history[1:]
+            self._qvalues_history[-1] = self._qvalues
 
     def _current_state(self):
         """
@@ -671,20 +724,19 @@ class MedicalPlayer(gym.Env):
 
         # update rectangle limits from input image coordinates
         # this is what the network sees
-        self.rectangle = Rectangle(xmin, xmax,
-                                   ymin, ymax,
-                                   zmin, zmax)
+        self.rectangle = Rectangle(xmin, xmax, ymin, ymax, zmin, zmax)
 
         return screen
 
-    def get_plane(self, z=0):
+    def get_plane_z(self, z=0):
         im = self._image.data[:, :, z]
-        im = np.rot90(im, 1)
+        if self.data_type in ['BrainMRI', 'CardiacMRI']:
+            im = np.rot90(im, 1)                # Rotate 90 degrees ccw
         return im
 
     def get_plane_x(self, x=0):
         im = self._image.data[x, :, :]
-        im = np.rot90(im, 1)                # Rotate 90 degrees ccw
+        im = np.rot90(im, 1)
         return im
 
     def get_plane_y(self, y=0):
@@ -749,11 +801,11 @@ class MedicalPlayer(gym.Env):
         current_point = self._location
         target_point = self._target_loc
         # get image and convert it to pyglet
-        plane = self.get_plane(current_point[2])  # z-plane
-        plane_x = self.get_plane_x(current_point[0])  # x-plane
-        plane_y= self.get_plane_y(current_point[1])  # y-plane
 
-        # plane = np.squeeze(self._current_state()[:,:,13])
+        plane = self.get_plane_z(current_point[2])
+        plane_x = self.get_plane_x(current_point[0])
+        plane_y= self.get_plane_y(current_point[1])
+
         # rescale image
         # INTER_NEAREST, INTER_LINEAR, INTER_AREA, INTER_CUBIC, INTER_LANCZOS4
         scale_x = 2
@@ -774,7 +826,7 @@ class MedicalPlayer(gym.Env):
                          (int(scale_x*plane_x.shape[1]),int(scale_y*plane_x.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
         img_y = cv2.resize(plane_y,
-                         (int(scale_y*plane_x.shape[1]),int(scale_y*plane_y.shape[0])),
+                         (int(scale_y*plane_y.shape[1]),int(scale_y*plane_y.shape[0])),
                          interpolation=cv2.INTER_LINEAR)
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)  # congvert to rgb
         img_x = cv2.cvtColor(img_x, cv2.COLOR_GRAY2RGB)  # congvert to rgb

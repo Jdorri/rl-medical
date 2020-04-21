@@ -11,6 +11,8 @@ import numpy as np
 import SimpleITK as sitk
 from tensorpack import logger
 from IPython.core.debugger import set_trace
+import os
+# from scipy.spatial.transform import Rotation
 
 __all__ = ['filesListBrainMRLandmark', 'filesListCardioLandmark', 'filesListFetalUSLandmark', 'NiftiImage']
 
@@ -21,7 +23,7 @@ def getLandmarksFromTXTFile(file):
     """
     with open(file) as fp:
         landmarks = []
-        for i, line in enumerate(fp):
+        for i,line in enumerate(fp):
             landmarks.append([float(k) for k in line.split(',')])
         landmarks = np.asarray(landmarks).reshape((-1, 3))
         return landmarks
@@ -49,6 +51,7 @@ def getLandmarksFromVTKFile(file):
         4 -> apex
         5-> center of the mitral valve
     """
+    print(file)
     with open(file) as fp:
         landmarks = []
         for i, line in enumerate(fp):
@@ -75,7 +78,6 @@ class filesListBrainMRLandmark(object):
         # check if files_list exists
         assert files_list, 'There is no file give'
         # read image filenames
-            # self.image_files = [line.split('\n')[0] for line in open(files_list[0])]
         with open(files_list[0].name) as f:
             self.image_files = [line.split('\n')[0] for line in f]
         # read landmark filenames if task is train or eval
@@ -86,7 +88,6 @@ class filesListBrainMRLandmark(object):
                 self.landmark_files = [line.split('\n')[0] for line in f]
             assert len(self.image_files) == len(
                 self.landmark_files), 'number of image files is not equal to number of landmark files'
-        
 
     @property
     def num_files(self):
@@ -160,13 +161,15 @@ class filesListCardioLandmark(object):
 
         while True:
             for idx in indexes:
-                sitk_image, image = NiftiImage().decode(self.image_files[idx])
+                sitk_image, image = NiftiImage().decode(self.image_files[idx], is_cardiac=True)
                 if self.returnLandmarks:
                     landmark_file = self.landmark_files[idx]
                     all_landmarks = getLandmarksFromVTKFile(landmark_file)
                     # transform landmarks to image coordinates
+                    # print(all_landmarks, '\n')
                     all_landmarks = [sitk_image.TransformPhysicalPointToContinuousIndex(point)
                                      for point in all_landmarks]
+                    # print(all_landmarks, '\n')
                     # Indexes: 0-2 RV insert points, 1 -> RV lateral wall turning point, 3 -> LV lateral wall mid-point,
                     # 4 -> apex, 5-> center of the mitral valve
                     landmark = all_landmarks[4]
@@ -227,8 +230,8 @@ class filesListFetalUSLandmark(object):
                     landmark_file = self.landmark_files[idx]
                     all_landmarks = getLandmarksFromTXTFileUS(landmark_file)
                     # landmark point 12 csp - 11 leftCerebellar - 10 rightCerebellar
-                    landmark = all_landmarks[12]
-          
+                    landmark = all_landmarks[12] #0
+
 
                     # landmarks = [np.round(all_landmarks[(i*2 + 10) % 13]) for i in range(self.agents)]
                     # landmark = [np.round(all_landmarks[(i + 10) % 13]) for i in range(self.agents)]  # Apex + MV
@@ -240,6 +243,47 @@ class filesListFetalUSLandmark(object):
                 image_filename = self.image_files[idx][:-7]
                 # images = [image] * self.agents
 
+                yield image, landmark, image_filename, sitk_image.GetSpacing()
+            # break
+###############################################################################
+
+class fileHITL(object):
+    """ A class for managing train image for HITL
+
+        Attributes:
+        files_list: Two or one text files that contain a list of all images and (landmarks)
+        returnLandmarks: Return landmarks if task is train or eval (default: True)
+    """
+
+    def __init__(self, file_name=None, returnLandmarks=False, agents=1):
+        # check if files_list exists
+        assert file_name, 'There is no file given'
+        # read image filenames
+        self.image_files = file_name
+        # read landmark filenames if task is train or eval
+        self.returnLandmarks = returnLandmarks
+        self.agents = agents
+
+    @property
+    def num_files(self):
+        return 1
+
+    def sample_circular(self, shuffle=False):
+        """ return a random sampled ImageRecord from the list of files
+        """
+        if shuffle:
+            indexes = rng.choice(x, len(x), replace=False)
+        else:
+            indexes = np.arange(self.num_files)
+
+        while True:
+            for idx in indexes:
+                sitk_image, image = NiftiImage().decode(self.image_files[idx])
+                landmark = None
+
+                # extract filename from path, remove .nii.gz extension
+                image_filename = self.image_files[idx][:-7]
+                # images = [image] * self.agents
                 yield image, landmark, image_filename, sitk_image.GetSpacing()
             # break
 ###############################################################################
@@ -266,7 +310,7 @@ class NiftiImage(object):
         extensions = ['.nii', '.nii.gz', '.img', '.hdr']
         return any(i in filename for i in extensions)
 
-    def decode(self, filename, label=False):
+    def decode(self, filename, label=False, is_cardiac=False):
         """ decode a single nifti image
         Args
           filename: string for input images
@@ -275,7 +319,8 @@ class NiftiImage(object):
           image: an image container with attributes; name, data, dims
         """
         image = ImageRecord()
-        image.name = filename
+        image.name = os.path.expanduser(filename)
+        # print(image.name)
         assert self._is_nifti(image.name), "unknown image format for %r" % image.name
 
         if label:
@@ -283,6 +328,16 @@ class NiftiImage(object):
         else:
             sitk_image = sitk.ReadImage(image.name, sitk.sitkFloat32)
             np_image = sitk.GetArrayFromImage(sitk_image)
+
+            # vert_align = all(i < 0 for i in sitk_image.GetOrigin())
+            # if vert_align and is_cardiac:
+            #     print('Rotated')
+            #     # rot = Rotation.from_rotvec([0,0,np.pi/2])
+            #     rot = np.array([[ 0, 1, 0],
+            #                     [-1, 0, 0],
+            #                     [ 0, 0, 1]])
+            #     np_image = np_image @ rot
+
             # threshold image between p10 and p98 then re-scale [0-255]
             p0 = np_image.min().astype('float')
             p10 = np.percentile(np_image, 10)

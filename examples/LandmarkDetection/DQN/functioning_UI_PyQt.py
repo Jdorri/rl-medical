@@ -1,6 +1,6 @@
 ################################################################################
 ## Doorway to launch application's GUI
-# Author: Jamie, Faidon, Alex, Maleakhi
+# Author: Maleakhi, Alex, Jamie, Faidon
 ################################################################################
 
 import sys
@@ -44,6 +44,8 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
 from viewer import SimpleImageViewer, Window
 import pickle
 from thread import WorkerThread
+from datetime import datetime
+import platform
 
 ###############################################################################
 
@@ -75,23 +77,20 @@ EVAL_EPISODE = 50
 # Responsible to run the entire application
 
 class Controller:
-    def __init__(self, display=True):
+    def __init__(self, display=True, mounted=False):
         self.window = None # Application window
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
 
         # Initialise the right settings tab
         self.right_settings = Tab()
+        self.right_settings.mounted = mounted
 
         # Initialise the window
         self.window = Window(self.viewer_param, self.right_settings)
         self.right_settings.automatic_mode.window = self.window
         self.right_settings.browse_mode.window = self.window
         
-        # # Set paths and load image
-        # self.right_settings.browse_mode.set_paths()
-        # self.right_settings.browse_mode.load_img()
-
         # Show window
         self.window.show()
 
@@ -103,6 +102,7 @@ class Controller:
 class Tab(QFrame):
     def __init__(self):
         super().__init__()
+        self.mounted = False # by default mounted = false, will be updated later
 
         # Create tab widget that integrates automatic and browse mode
         self.tab_widget = QTabWidget()
@@ -110,6 +110,8 @@ class Tab(QFrame):
         # Right widgets initialisation
         self.automatic_mode = RightWidgetSettings()
         self.browse_mode = RightWidgetSettingsBrowseMode()
+        self.automatic_mode.mounted = self.mounted
+        self.browse_mode.mounted = self.mounted
 
         # Tab settings
         self.tab_widget.addTab(self.automatic_mode, "Automatic Mode")
@@ -127,10 +129,19 @@ class Tab(QFrame):
         self.setMaximumWidth(400)
         self.setStyleSheet("background:#EBEEEE")
     
+    def save_HITL(self):
+        ''' Method to save HITL if appropriate '''
+        try:
+            if self.browse_mode.env and self.browse_mode.HITL:
+                self.browse_mode.save_HITL()
+        except AttributeError:
+            pass
+    
     @pyqtSlot(int)
     def on_change(self, index):
         # If automatic mode is selected, reset image and other relevant flags
         if index == 0:
+            self.save_HITL()
             self.automatic_mode.thread.terminate = False
             self.automatic_mode.thread.pause = False
             self.automatic_mode.window.widget.reset()
@@ -188,8 +199,7 @@ class RightWidgetSettings(QFrame):
 
     def __init__(self, *args, **kwargs):
         super(RightWidgetSettings, self).__init__(*args, **kwargs)
-        # Responsive settings
-        # self.setMaximumWidth(400)
+        self.mounted = False
 
         # Thread and window object which will be used to gain access to primary
         # windows.
@@ -410,21 +420,23 @@ class RightWidgetSettings(QFrame):
         Used to set paths before running the code
         """
         self.default_use_case = default_use_case
+        redir = '' if self.mounted else 'local/'
+
         if self.default_use_case == 'BrainMRI':
             # Default MRI
-            self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}brain_train_files_new_paths.txt"
             self.fname_model.name = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-            self.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}brain_train_landmarks_new_paths.txt"
         elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
-            self.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}cardiac_train_files_new_paths.txt"
             self.fname_model.name = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
-            self.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}cardiac_train_landmarks_new_paths.txt"
         elif self.default_use_case == 'FetalUS':
             # Default fetal
-            self.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}fetalUS_train_files_new_paths.txt"
             self.fname_model.name = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
-            self.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_train_landmarks_new_paths.txt"
         else:
             # User defined file selection
             self.fname_images.name = self.window.left_widget.fname_images
@@ -466,31 +478,32 @@ class RightWidgetSettings(QFrame):
             self.selected_list = [self.fname_images, self.fname_landmarks]
 
         self.METHOD = "DQN"
+        
         # load files into env to set num_actions, num_validation_files
-        try:
-            init_player = MedicalPlayer(files_list=self.selected_list,
+        # try:
+        init_player = MedicalPlayer(files_list=self.selected_list,
                                         data_type=self.default_use_case,
                                         screen_dims=IMAGE_SIZE,
                                         task='play')
-
-            self.NUM_ACTIONS = init_player.action_space.n
-            self.num_files = init_player.files.num_files
-            # Create a thread to run background task
-            self.worker_thread = WorkerThread(target_function=self.thread_function)
-            self.worker_thread.window = self.window
-            self.worker_thread.start()
+            
+        self.NUM_ACTIONS = init_player.action_space.n
+        self.num_files = init_player.files.num_files
+        # Create a thread to run background task
+        self.worker_thread = WorkerThread(target_function=self.thread_function)
+        self.worker_thread.window = self.window
+        self.worker_thread.start()
 
         # If there is a problem with the loader, then user incorrectly add file
-        except:
-            self.terminal.appendHtml(f"<b><p style='color:red'> &#36; Error loading user defined settings. Please use appropriate model, image, and landmarks. </p></b>")
-            self.error_message_box()
+        # except:
+            # self.terminal.appendHtml(f"<b><p style='color:red'> &#36; Error loading user defined settings. Please use appropriate model, image, and landmarks. </p></b>")
+            # self.error_message_box()
         
 
     def thread_function(self):
         """Run on secondary thread"""
 
         pred = OfflinePredictor(PredictConfig(
-            model=Model(IMAGE_SIZE, FRAME_HISTORY, self.METHOD, self.NUM_ACTIONS, GAMMA),
+            model=Model(IMAGE_SIZE, FRAME_HISTORY, self.METHOD, self.NUM_ACTIONS, GAMMA, ""),
             session_init=get_model_loader(self.fname_model.name),
             input_names=['state'],
             output_names=['Qvalue']))
@@ -532,8 +545,16 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.window = None
         self.thread = WorkerThread(None)
         self.thread.pause = False
+        self.mounted = False
+        self.data_type = "BrainMRI" # TODO
 
-        # Widgets
+        # initialise widgets
+        self.next_img = QPushButton('Next Image', self)
+        self.HITL_mode = QCheckBox('Enable HITL',self)
+        self.HITL_mode.setCheckable(True)
+        self.HITL_delete = QPushButton('Delete Episode', self)
+        self.HITL_delete.setDisabled(True)
+
         self.upButton = QToolButton(self)
         self.upButton.setArrowType(Qt.UpArrow)
 
@@ -590,6 +611,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
         # Initialise grid/set spacing
         grid = QGridLayout()
         grid.setSpacing(10)
+        grid.addWidget(self.HITL_mode, 2, 0)
+        grid.addWidget(self.HITL_delete, 3, 0)
+        grid.addWidget(self.next_img, 5, 0)
         grid.addLayout(gridArrows, 7, 0)
 
         gridNest = QGridLayout()
@@ -606,6 +630,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.outButton.clicked.connect(self.on_clicking_out)
         self.zoomInButton.clicked.connect(self.on_clicking_zoomIn)
         self.zoomOutButton.clicked.connect(self.on_clicking_zoomOut)
+        self.HITL_mode.clicked.connect(self.on_clicking_HITL)
+        self.next_img.clicked.connect(self.on_clicking_nextImg)
+        self.HITL_delete.clicked.connect(self.on_clicking_HITLDelete)
 
         self.show()
 
@@ -613,59 +640,118 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.setStyleSheet("background:white")
 
         self.testing = False
+        self.test_click = None
         self.env = None
+        self.HITL = False
+        self.HITL_logger = []
+
+    @pyqtSlot()
+    def on_clicking_nextImg(self):
+        self.env.reset()
+        self.move_img(-1)
+
+        # If doing HITL, 50/50 chance for the resultion to start on 2 or 3 (otherwise resolution=2 tends to get negleted)
+        if self.HITL and np.random.choice(2):
+            self.on_clicking_zoomIn()
+
+    @pyqtSlot()
+    def on_clicking_HITL(self):
+        ''' Activating HITL mode giv es following actions:
+            - Make HITL_delete button clickable
+            - Make HITL_mode button clickable
+
+            Deactivating HITL mode gives following actions:
+            - Save HITL episode
+            - Make HITL delete button un-clickable
+            - Un-click HITL mode check box
+        '''
+        if self.testing:
+            result = QMessageBox.Yes
+        else:
+            result = self.show_HITL_msg()
+
+        if result == QMessageBox.Yes and self.HITL:
+            self.save_HITL()
+
+        if result == QMessageBox.Yes and not self.HITL:
+            # Activate HITL mode button
+            self.HITL_mode.setChecked(True)
+            self.HITL_delete.setDisabled(False)
+
+        elif result == QMessageBox.No and self.HITL:
+            self.HITL_mode.setChecked(True)
+
+        elif (result == QMessageBox.No and not self.HITL) or \
+            (result == QMessageBox.Yes and self.HITL):
+            self.HITL_mode.setChecked(False)
+            self.HITL_delete.setDisabled(True)
+
+        if result == QMessageBox.Yes:
+            self.HITL = not self.HITL
+            self.env.HITL_logger.clear()
+
+    @pyqtSlot()
+    def on_clicking_HITLDelete(self):
+        if self.testing:
+            result = QMessageBox.Yes
+        else:
+            result = self.show_HITL_del_msg()
+
+        # Remove the current episode and load a new image
+        if result == QMessageBox.Yes:
+            self.on_clicking_nextImg()
+            self.env.HITL_logger.pop()
 
     @pyqtSlot()
     def on_clicking_up(self):
-        if not self.testing and self.env:
-            action = 1
+        if self.env:
+            action = 1 if self.data_type != 'FetalUS' else 3
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_down(self):
-        if not self.testing and self.env:
-            action = 4
+        if self.env:
+            action = 4 if self.data_type != 'FetalUS' else 2
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_left(self):
-        if not self.testing and self.env:
-            action = 3
+        if self.env:
+            action = 3 if self.data_type != 'FetalUS' else 4
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_right(self):
-        if not self.testing and self.env:
-            action = 2
+        if self.env:
+            action = 2 if self.data_type != 'FetalUS' else 1
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_in(self):
-        if not self.testing and self.env:
+        if self.env:
             action = 0
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_out(self):
-        if not self.testing and self.env:
+        if self.env:
             action = 5
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_zoomIn(self):
-        if not self.testing and self.env and self.env.xscale > 1:
+        if self.env and self.env.xscale > 1:
             self.env.adjustMultiScale(higherRes=True)
             self.move_img(-1)
 
     @pyqtSlot()
     def on_clicking_zoomOut(self):
-        if not self.testing and self.env and self.env.xscale < 3:
+        if self.env and self.env.xscale < 3:
             self.env.adjustMultiScale(higherRes=False)
             self.move_img(-1)
 
     def load_img(self):
         self.selected_list = [self.fname_images, self.fname_landmarks]
-
         self.env = get_player(files_list=self.selected_list, viz=0.01,
                         saveGif=False, saveVideo=False, task='browse',
                         data_type=self.default_use_case)
@@ -680,18 +766,21 @@ class RightWidgetSettingsBrowseMode(QFrame):
     
     def set_paths(self):
         self.default_use_case = self.which_usecase()
+
+        redir = '' if self.mounted else 'local/'
+
         if self.default_use_case == 'BrainMRI':
             # Default MRI
-            self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
-            self.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}brain_train_files_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}brain_train_landmarks_new_paths.txt"
         elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
-            self.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
-            self.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}cardiac_train_files_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}cardiac_train_landmarks_new_paths.txt"
         elif self.default_use_case == 'FetalUS':
             # Default fetal
-            self.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
-            self.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}fetalUS_train_files_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_train_landmarks_new_paths.txt"
         else:
             # User defined file selection
             self.fname_images.name = self.window.left_widget.fname_images
@@ -760,6 +849,121 @@ class RightWidgetSettingsBrowseMode(QFrame):
         # Else user specify
         else:
             return "UserDefined"
+
+    def show_HITL_msg(self):
+        self.HITL_msg = QMessageBox()
+        self.HITL_msg.setIcon(QMessageBox.Question)
+        if not self.HITL:
+            self.HITL_msg.setText("Human-In-The-Loop mode enabled")
+            self.HITL_msg.setInformativeText(("In Human-In-The-Loop mode, your "
+                "interactions will now be saved and used to train the reinforcement "
+                "learning algorithm faster. \n Do you want to proceed?"))
+        else:
+            self.HITL_msg.setText("Human-In-The-Loop mode disabled")
+            self.HITL_msg.setInformativeText(("Human-In-The-Loop mode "
+                "will now be disabled. \n Do you want to proceed?"))
+        self.HITL_msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        self.HITL_msg.setDefaultButton(QMessageBox.Yes)
+        result = self.HITL_msg.exec_()
+        return result
+
+    def show_HITL_del_msg(self):
+        self.HITL_del_msg = QMessageBox()
+        self.HITL_del_msg.setIcon(QMessageBox.Warning)
+        self.HITL_del_msg.setText("Delete button clicked")
+        self.HITL_del_msg.setInformativeText(("\n This will delete the current "
+            "episode. \nDo you want to proceed?"))
+        self.HITL_del_msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        self.HITL_del_msg.setDefaultButton(QMessageBox.Yes)
+        result = self.HITL_del_msg.exec_()
+        return result
+
+    def save_HITL(self):
+        # Record current HITL loop
+        if len(self.env._loc_history) > 1:
+            self.env.reset()
+
+        # Create pickle file
+        now = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
+        device_name = platform.node()
+        path = f'./data/HITL/log_{self.data_type}_{str(now)}_{device_name}.pickle'
+        with open(path, 'wb') as f:
+            pickle.dump(self.env.HITL_logger, f)
+
+
+# class Controller:
+    # def __init__(self, display=True, data_type='FetalUS', mounted=False):
+    #     self.data_type = data_type
+    #     self.mounted = mounted
+
+    #     self.window1, self.window2 = None, None
+    #     self.app = QApplication(sys.argv)
+    #     self.viewer_param = get_viewer_data()
+    #     self.show_defaultMode()
+    #     # self.show_browseMode()
+
+    # def show_defaultMode(self):
+    #     self.save_HITL()
+    #     # Init the window
+    #     self.app_settings = AppSettings()
+    #     self.window1 = Window(self.viewer_param, self.app_settings, self.data_type)
+    #     self.app_settings.window = self.window1
+    #     self.set_paths()
+
+    #     # Close previous window
+    #     if self.window2:
+    #         self.window2.hide()
+
+    #     # Open new window with new app_settings
+    #     self.window1.right_widget.SWITCH_WINDOW.connect(self.show_browseMode)
+    #     self.window1.show()
+
+    # def show_browseMode(self):
+    #     # Init the window
+    #     self.app_settings = AppSettingsBrowseMode()
+    #     self.window2 = Window(self.viewer_param, self.app_settings, self.data_type)
+    #     self.app_settings.window = self.window2
+    #     self.app_settings.data_type = self.data_type
+    #     self.load_defaults()
+
+    #     # Close previous window
+    #     if self.window1:
+    #         self.window1.hide()
+
+    #     # Open new window with new app_settings
+    #     self.window2.right_widget.SWITCH_WINDOW.connect(self.show_defaultMode)
+    #     self.window2.show()
+
+    # def save_HITL(self):
+    #     ''' Method to save HITL if appropriate '''
+    #     try:
+    #         if self.app_settings.env and self.app_settings.HITL:
+    #             self.app_settings.save_HITL()
+    #     except AttributeError:
+    #         pass
+
+    # def load_defaults(self):
+    #     self.set_paths()
+    #     self.app_settings.load_img()
+
+    # def set_paths(self):
+    #     assert self.data_type in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
+    #     self.app_settings.dtype.name = self.data_type
+
+    #     redir = '' if self.mounted else 'local/'
+
+    #     if self.data_type == 'BrainMRI':
+    #         self.app_settings.fname_images.name = f"./data/filenames/{redir}brain_train_files_new_paths.txt"
+    #         self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}brain_train_landmarks_new_paths.txt"
+    #         self.app_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+    #     elif self.data_type == 'CardiacMRI':
+    #         self.app_settings.fname_images.name = f"./data/filenames/{redir}cardiac_train_files_new_paths.txt"
+    #         self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}cardiac_train_landmarks_new_paths.txt"
+    #         self.app_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
+    #     elif self.data_type == 'FetalUS':
+    #         self.app_settings.fname_images.name = f"./data/filenames/{redir}fetalUS_train_files_new_paths.txt"
+    #         self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_train_landmarks_new_paths.txt"
+    #         self.app_settings.fname_model = './data/models/DQN_ultrasound/model-600000.data-00000-of-00001'
 
 
 ################################################################################
