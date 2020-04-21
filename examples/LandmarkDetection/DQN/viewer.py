@@ -72,7 +72,8 @@ class Window(QMainWindow):
         self.grid = QGridLayout()
         self.grid.addWidget(self.left_widget, 0, 0, 1, 1)
         self.grid.addWidget(self.widget, 0, 1, 1, 10)
-        self.grid.addWidget(self.right_widget, 0, 11, 1, 1)
+        if app_settings:
+            self.grid.addWidget(self.right_widget, 0, 11, 1, 1)
         # self.grid.setColumnStretch(1, 2) # default (later there will be event to change this when screen size change)
         # self.grid.setColumnStretch(0, 1) # default
         # if app_settings:

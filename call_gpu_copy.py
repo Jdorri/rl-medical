@@ -106,4 +106,4 @@ with open(job_file, 'w') as fh:
                                                             f"--name {data_type}{case_number}")
 
 
-subprocess.call(f"(. {venv_path}bin/activate && sbatch {job_file})", shell=True)
+subprocess.call(f"(. {venv_path}bin/activate && sbatch -w kingfisher {job_file})", shell=True)

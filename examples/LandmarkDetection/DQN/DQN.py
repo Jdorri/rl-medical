@@ -33,7 +33,7 @@ from thread import WorkerThread
 import pickle
 
 from PyQt5.QtWidgets import QApplication
-
+from freeze_variables import freeze_variables
 ###############################################################################
 # BATCH SIZE USED IN NATURE PAPER IS 32 - MEDICAL IS 256
 BATCH_SIZE = 48
@@ -83,8 +83,11 @@ def get_player(directory=None, files_list= None, data_type=None, viz=False,
 ###############################################################################
 
 class Model(DQNModel):
-    def __init__(self,IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA):
+    def __init__(self,IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA, trainable_variables):
         super(Model, self).__init__(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA)
+        self.conv_freeze = "CNN" not in trainable_variables
+        self.fc_freeze = "DQN" not in trainable_variables
+        self.final_layer_freeze = "LAST" not in trainable_variables
 
     def _get_DQN_prediction(self, image):
         """ image: [0,255]
@@ -95,41 +98,47 @@ class Model(DQNModel):
 
         with argscope(Conv3D, nl=PReLU.symbolic_function, use_bias=True):
             # core layers of the network
-            conv = (LinearWrap(image)
-                 .Conv3D('conv0', out_channel=32,
-                         kernel_shape=[5,5,5], stride=[1,1,1])
-                 .MaxPooling3D('pool0',2)
-                 .Conv3D('conv1', out_channel=32,
-                         kernel_shape=[5,5,5], stride=[1,1,1])
-                 .MaxPooling3D('pool1',2)
-                 .Conv3D('conv2', out_channel=64,
-                         kernel_shape=[4,4,4], stride=[1,1,1])
-                 .MaxPooling3D('pool2',2)
-                 .Conv3D('conv3', out_channel=64,
-                         kernel_shape=[3,3,3], stride=[1,1,1])
-                 # .MaxPooling3D('pool3',2)
-                 )
+            with freeze_variables(stop_gradient=False, skip_collection=self.conv_freeze):#conv
+                conv = (LinearWrap(image)
+                    .Conv3D('conv0', out_channel=32,
+                            kernel_shape=[5,5,5], stride=[1,1,1])
+                    .MaxPooling3D('pool0',2)
+                    .Conv3D('conv1', out_channel=32,
+                            kernel_shape=[5,5,5], stride=[1,1,1])
+                    .MaxPooling3D('pool1',2)
+                    .Conv3D('conv2', out_channel=64,
+                            kernel_shape=[4,4,4], stride=[1,1,1])
+                    .MaxPooling3D('pool2',2)
+                    .Conv3D('conv3', out_channel=64,
+                            kernel_shape=[3,3,3], stride=[1,1,1])
+                    # .MaxPooling3D('pool3',2)
+                    )
 
         if 'Dueling' not in self.method:
-            lq = (conv
-                 .FullyConnected('fc0', 512).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc1', 256).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc2', 128).tf.nn.leaky_relu(alpha=0.01)())
-            Q = FullyConnected('fct', lq, self.num_actions, nl=tf.identity)
+            with freeze_variables(stop_gradient=False, skip_collection=self.fc_freeze):#fc
+                lq = (conv
+                    .FullyConnected('fc0', 512).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc1', 256).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc2', 128).tf.nn.leaky_relu(alpha=0.01)())
+            with freeze_variables(stop_gradient=False, skip_collection=self.final_layer_freeze):#fclast
+                Q = FullyConnected('fct', lq, self.num_actions, nl=tf.identity)
         else:
             # Dueling DQN or Double Dueling
             # state value function
-            lv = (conv
-                 .FullyConnected('fc0V', 512).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc1V', 256).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc2V', 128).tf.nn.leaky_relu(alpha=0.01)())
-            V = FullyConnected('fctV', lv, 1, nl=tf.identity)
-            # advantage value function
-            la = (conv
-                 .FullyConnected('fc0A', 512).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc1A', 256).tf.nn.leaky_relu(alpha=0.01)
-                 .FullyConnected('fc2A', 128).tf.nn.leaky_relu(alpha=0.01)())
-            As = FullyConnected('fctA', la, self.num_actions, nl=tf.identity)
+            with freeze_variables(stop_gradient=False, skip_collection=self.fc_freeze):#fc
+                lv = (conv
+                    .FullyConnected('fc0V', 512).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc1V', 256).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc2V', 128).tf.nn.leaky_relu(alpha=0.01)())
+            with freeze_variables(stop_gradient=False, skip_collection=self.final_layer_freeze):#fclast
+                V = FullyConnected('fctV', lv, 1, nl=tf.identity)
+                # advantage value function
+                la = (conv
+                    .FullyConnected('fc0A', 512).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc1A', 256).tf.nn.leaky_relu(alpha=0.01)
+                    .FullyConnected('fc2A', 128).tf.nn.leaky_relu(alpha=0.01)())
+            with freeze_variables(stop_gradient=False, skip_collection=self.final_layer_freeze):#fclast
+                As = FullyConnected('fctA', la, self.num_actions, nl=tf.identity)
 
             Q = tf.add(As, V - tf.reduce_mean(As, 1, keepdims=True))
 
@@ -137,7 +146,7 @@ class Model(DQNModel):
 
 ###############################################################################
 
-def get_config(files_list, data_type):
+def get_config(files_list, data_type, trainable_variables):
     """This is only used during training."""
     expreplay = ExpReplay(
         predictor_io_names=(['state'], ['Qvalue']),
@@ -162,7 +171,7 @@ def get_config(files_list, data_type):
     return TrainConfig(
         # dataflow=expreplay,
         data=QueueInput(expreplay),
-        model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA),
+        model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA, trainable_variables),
         callbacks=[
             ModelSaver(),
             PeriodicTrigger(
@@ -226,6 +235,7 @@ if __name__ == '__main__':
     parser.add_argument('--gpu', help='comma separated list of GPU(s) to use.')
     parser.add_argument('--load', help='load model to resume traning')
     parser.add_argument('--transferModel',  nargs='+', help='load model for transfer learning' , type=str)
+    parser.add_argument('--trainable',  nargs='+', help='list of trainable variables' , type=str, default=['CNN', 'DQN', 'LAST'])
     parser.add_argument('--task', help='task to perform. Must load a pretrained model if task is "play" or "eval"',
                         choices=['play', 'eval', 'train'], default='train')
     parser.add_argument('--algo', help='algorithm',
@@ -319,10 +329,10 @@ if __name__ == '__main__':
         ########################################################################
 
     else:  # train model
+        print(f"TRAINABLE PARAMETERS: {args.trainable}")
         logger_dir = os.path.join(args.logDir, args.name)
         logger.set_logger_dir(logger_dir)
-        config = get_config(args.files, #files_list
-                            args.type)
+        config = get_config(args.files, args.type, args.trainable)
         not_ignore = None
         if args.load:  # resume training from a saved checkpoint
             session_init = get_model_loader(args.load)
@@ -350,15 +360,9 @@ if __name__ == '__main__':
 
             session_init = get_model_loader(args.transferModel[0])
             reader, variables = session_init._read_checkpoint_vars(args.transferModel[0])
-
-            #var = tf.stop_gradient(var) #use this to freeze layers later
-            #tensor = reader.get_tensor(var)
-            #tf.get_variable()
-
+           
             ignore = [var for var in variables if any([i in var for i in ignore_list])]
             not_ignore = (list(set(variables) - set(ignore)))#not ignored
             session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
             config.session_init = session_init
-        # print(r(not_ignore, args.transferModel, args.type))
-        # exit()
         launch_train_with_config(config, SimpleTrainer())
