@@ -77,13 +77,14 @@ EVAL_EPISODE = 50
 # Responsible to run the entire application
 
 class Controller:
-    def __init__(self, display=True):
+    def __init__(self, display=True, mounted=False):
         self.window = None # Application window
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
 
         # Initialise the right settings tab
         self.right_settings = Tab()
+        self.right_settings.mounted = mounted
 
         # Initialise the window
         self.window = Window(self.viewer_param, self.right_settings)
@@ -101,6 +102,7 @@ class Controller:
 class Tab(QFrame):
     def __init__(self):
         super().__init__()
+        self.mounted = False # by default mounted = false, will be updated later
 
         # Create tab widget that integrates automatic and browse mode
         self.tab_widget = QTabWidget()
@@ -108,6 +110,8 @@ class Tab(QFrame):
         # Right widgets initialisation
         self.automatic_mode = RightWidgetSettings()
         self.browse_mode = RightWidgetSettingsBrowseMode()
+        self.automatic_mode.mounted = self.mounted
+        self.browse_mode.mounted = self.mounted
 
         # Tab settings
         self.tab_widget.addTab(self.automatic_mode, "Automatic Mode")
@@ -125,10 +129,19 @@ class Tab(QFrame):
         self.setMaximumWidth(400)
         self.setStyleSheet("background:#EBEEEE")
     
+    def save_HITL(self):
+        ''' Method to save HITL if appropriate '''
+        try:
+            if self.browse_mode.env and self.browse_mode.HITL:
+                self.browse_mode.save_HITL()
+        except AttributeError:
+            pass
+    
     @pyqtSlot(int)
     def on_change(self, index):
         # If automatic mode is selected, reset image and other relevant flags
         if index == 0:
+            self.save_HITL()
             self.automatic_mode.thread.terminate = False
             self.automatic_mode.thread.pause = False
             self.automatic_mode.window.widget.reset()
@@ -186,8 +199,7 @@ class RightWidgetSettings(QFrame):
 
     def __init__(self, *args, **kwargs):
         super(RightWidgetSettings, self).__init__(*args, **kwargs)
-        # Responsive settings
-        # self.setMaximumWidth(400)
+        self.mounted = False
 
         # Thread and window object which will be used to gain access to primary
         # windows.
@@ -408,21 +420,23 @@ class RightWidgetSettings(QFrame):
         Used to set paths before running the code
         """
         self.default_use_case = default_use_case
+        redir = '' if self.mounted else 'local/'
+
         if self.default_use_case == 'BrainMRI':
             # Default MRI
-            self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}brain_test_files_new_paths.txt"
             self.fname_model.name = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-            self.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}brain_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
-            self.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}cardiac_test_files_new_paths.txt"
             self.fname_model.name = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
-            self.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}cardiac_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'FetalUS':
             # Default fetal
-            self.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}fetalUS_test_files_new_paths.txt"
             self.fname_model.name = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
-            self.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_test_landmarks_new_paths.txt"
         else:
             # User defined file selection
             self.fname_images.name = self.window.left_widget.fname_images
@@ -488,7 +502,7 @@ class RightWidgetSettings(QFrame):
         """Run on secondary thread"""
 
         pred = OfflinePredictor(PredictConfig(
-            model=Model(IMAGE_SIZE, FRAME_HISTORY, self.METHOD, self.NUM_ACTIONS, GAMMA),
+            model=Model(IMAGE_SIZE, FRAME_HISTORY, self.METHOD, self.NUM_ACTIONS, GAMMA, ""),
             session_init=get_model_loader(self.fname_model.name),
             input_names=['state'],
             output_names=['Qvalue']))
@@ -530,20 +544,11 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.window = None
         self.thread = WorkerThread(None)
         self.thread.pause = False
-
-        # initialise labels
-        # self.img_file = QLabel('Image file', self)
-        # self.mode = QLabel('Mode', self)
+        self.mounted = False
+        self.data_type = "BrainMRI" # TODO
 
         # initialise widgets
-        self.testMode = QPushButton('Test Mode', self)
-        self.browseMode = QPushButton('Browse Mode', self)
-        self.browseMode.setCheckable(True)
-        self.browseMode.setChecked(True)
-
-        self.img_file_edit = QPushButton('Upload Images', self)
         self.next_img = QPushButton('Next Image', self)
-        self.exit = QPushButton('Exit', self)
         self.HITL_mode = QCheckBox('Enable HITL',self)
         self.HITL_mode.setCheckable(True)
         self.HITL_delete = QPushButton('Delete Episode', self)
@@ -607,7 +612,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         grid.setSpacing(10)
         grid.addWidget(self.HITL_mode, 2, 0)
         grid.addWidget(self.HITL_delete, 3, 0)
-        grid.addWidget(self.img_file_edit, 4, 0)
         grid.addWidget(self.next_img, 5, 0)
         grid.addLayout(gridArrows, 7, 0)
 
@@ -761,18 +765,21 @@ class RightWidgetSettingsBrowseMode(QFrame):
     
     def set_paths(self):
         self.default_use_case = self.which_usecase()
+
+        redir = '' if self.mounted else 'local/'
+
         if self.default_use_case == 'BrainMRI':
             # Default MRI
-            self.fname_images.name = "./data/filenames/brain_test_files_new_paths.txt"
-            self.fname_landmarks.name = "./data/filenames/brain_test_landmarks_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}brain_test_files_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}brain_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
-            self.fname_images.name = "./data/filenames/cardiac_test_files_new_paths.txt"
-            self.fname_landmarks.name = "./data/filenames/cardiac_test_landmarks_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}cardiac_test_files_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}cardiac_test_landmarks_new_paths.txt"
         elif self.default_use_case == 'FetalUS':
             # Default fetal
-            self.fname_images.name = "./data/filenames/fetalUS_test_files_new_paths.txt"
-            self.fname_landmarks.name = "./data/filenames/fetalUS_test_landmarks_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}fetalUS_test_files_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_test_landmarks_new_paths.txt"
         else:
             # User defined file selection
             self.fname_images.name = self.window.left_widget.fname_images
@@ -883,79 +890,79 @@ class RightWidgetSettingsBrowseMode(QFrame):
             pickle.dump(self.env.HITL_logger, f)
 
 
-class Controller:
-    def __init__(self, display=True, data_type='FetalUS', mounted=False):
-        self.data_type = data_type
-        self.mounted = mounted
+# class Controller:
+    # def __init__(self, display=True, data_type='FetalUS', mounted=False):
+    #     self.data_type = data_type
+    #     self.mounted = mounted
 
-        self.window1, self.window2 = None, None
-        self.app = QApplication(sys.argv)
-        self.viewer_param = get_viewer_data()
-        self.show_defaultMode()
-        # self.show_browseMode()
+    #     self.window1, self.window2 = None, None
+    #     self.app = QApplication(sys.argv)
+    #     self.viewer_param = get_viewer_data()
+    #     self.show_defaultMode()
+    #     # self.show_browseMode()
 
-    def show_defaultMode(self):
-        self.save_HITL()
-        # Init the window
-        self.app_settings = AppSettings()
-        self.window1 = Window(self.viewer_param, self.app_settings, self.data_type)
-        self.app_settings.window = self.window1
-        self.set_paths()
+    # def show_defaultMode(self):
+    #     self.save_HITL()
+    #     # Init the window
+    #     self.app_settings = AppSettings()
+    #     self.window1 = Window(self.viewer_param, self.app_settings, self.data_type)
+    #     self.app_settings.window = self.window1
+    #     self.set_paths()
 
-        # Close previous window
-        if self.window2:
-            self.window2.hide()
+    #     # Close previous window
+    #     if self.window2:
+    #         self.window2.hide()
 
-        # Open new window with new app_settings
-        self.window1.right_widget.SWITCH_WINDOW.connect(self.show_browseMode)
-        self.window1.show()
+    #     # Open new window with new app_settings
+    #     self.window1.right_widget.SWITCH_WINDOW.connect(self.show_browseMode)
+    #     self.window1.show()
 
-    def show_browseMode(self):
-        # Init the window
-        self.app_settings = AppSettingsBrowseMode()
-        self.window2 = Window(self.viewer_param, self.app_settings, self.data_type)
-        self.app_settings.window = self.window2
-        self.app_settings.data_type = self.data_type
-        self.load_defaults()
+    # def show_browseMode(self):
+    #     # Init the window
+    #     self.app_settings = AppSettingsBrowseMode()
+    #     self.window2 = Window(self.viewer_param, self.app_settings, self.data_type)
+    #     self.app_settings.window = self.window2
+    #     self.app_settings.data_type = self.data_type
+    #     self.load_defaults()
 
-        # Close previous window
-        if self.window1:
-            self.window1.hide()
+    #     # Close previous window
+    #     if self.window1:
+    #         self.window1.hide()
 
-        # Open new window with new app_settings
-        self.window2.right_widget.SWITCH_WINDOW.connect(self.show_defaultMode)
-        self.window2.show()
+    #     # Open new window with new app_settings
+    #     self.window2.right_widget.SWITCH_WINDOW.connect(self.show_defaultMode)
+    #     self.window2.show()
 
-    def save_HITL(self):
-        ''' Method to save HITL if appropriate '''
-        try:
-            if self.app_settings.env and self.app_settings.HITL:
-                self.app_settings.save_HITL()
-        except AttributeError:
-            pass
+    # def save_HITL(self):
+    #     ''' Method to save HITL if appropriate '''
+    #     try:
+    #         if self.app_settings.env and self.app_settings.HITL:
+    #             self.app_settings.save_HITL()
+    #     except AttributeError:
+    #         pass
 
-    def load_defaults(self):
-        self.set_paths()
-        self.app_settings.load_img()
+    # def load_defaults(self):
+    #     self.set_paths()
+    #     self.app_settings.load_img()
 
-    def set_paths(self):
-        assert self.data_type in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
-        self.app_settings.dtype.name = self.data_type
+    # def set_paths(self):
+    #     assert self.data_type in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
+    #     self.app_settings.dtype.name = self.data_type
 
-        redir = '' if self.mounted else 'local/'
+    #     redir = '' if self.mounted else 'local/'
 
-        if self.data_type == 'BrainMRI':
-            self.app_settings.fname_images.name = f"./data/filenames/{redir}brain_train_files_new_paths.txt"
-            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}brain_train_landmarks_new_paths.txt"
-            self.app_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-        elif self.data_type == 'CardiacMRI':
-            self.app_settings.fname_images.name = f"./data/filenames/{redir}cardiac_train_files_new_paths.txt"
-            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}cardiac_train_landmarks_new_paths.txt"
-            self.app_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
-        elif self.data_type == 'FetalUS':
-            self.app_settings.fname_images.name = f"./data/filenames/{redir}fetalUS_train_files_new_paths.txt"
-            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_train_landmarks_new_paths.txt"
-            self.app_settings.fname_model = './data/models/DQN_ultrasound/model-600000.data-00000-of-00001'
+    #     if self.data_type == 'BrainMRI':
+    #         self.app_settings.fname_images.name = f"./data/filenames/{redir}brain_train_files_new_paths.txt"
+    #         self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}brain_train_landmarks_new_paths.txt"
+    #         self.app_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+    #     elif self.data_type == 'CardiacMRI':
+    #         self.app_settings.fname_images.name = f"./data/filenames/{redir}cardiac_train_files_new_paths.txt"
+    #         self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}cardiac_train_landmarks_new_paths.txt"
+    #         self.app_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
+    #     elif self.data_type == 'FetalUS':
+    #         self.app_settings.fname_images.name = f"./data/filenames/{redir}fetalUS_train_files_new_paths.txt"
+    #         self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_train_landmarks_new_paths.txt"
+    #         self.app_settings.fname_model = './data/models/DQN_ultrasound/model-600000.data-00000-of-00001'
 
 
 ################################################################################

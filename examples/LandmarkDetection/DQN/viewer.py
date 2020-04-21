@@ -73,9 +73,9 @@ class Window(QMainWindow):
 
         # Left Settings widget
         if right_settings:
-            self.left_widget = LeftWidgetSettings(self, True)
+            self.left_widget = LeftWidgetSettings(self)
         else:
-            self.left_widget = LeftWidgetSettings(self, False)
+            self.left_widget = LeftWidgetSettings(self)
         self.left_widget.setFrameShape(QFrame.StyledPanel)
 
         # Right Settings widget
@@ -386,7 +386,7 @@ class SimpleImageViewer(QWidget):
     """
     agent_signal = pyqtSignal(dict) # Signaling agent move (current location, status)
 
-    def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None, window=None, data_type):
+    def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None, window=None, data_type="BrainMRI"):
 
         super().__init__()
         self.arrs = [arr, arr_x, arr_y]
@@ -402,10 +402,10 @@ class SimpleImageViewer(QWidget):
         self.rotate = False
 
         # Set image formatting and get shape
-        cvImg, cvImg_x, cvImg_y = self.get_imgs(arrs)
+        cvImg, cvImg_x, cvImg_y = self.get_imgs(self.arrs)
 
         # initialize window with the input image
-        assert arrs[0].shape == (self.height, self.width, 3), "You passed in an image with the wrong shape"
+        assert self.arrs[0].shape == (self.height, self.width, 3), "You passed in an image with the wrong shape"
 
         # Convert image to correct format
         bytesPerLine = 3 * self.width
@@ -453,6 +453,8 @@ class SimpleImageViewer(QWidget):
         self.grid.addWidget(self.label_img_y, 1, 0)
         self.grid.addWidget(self.canvas, 1, 1)
         self.agent_signal.connect(self.agent_signal_handler)
+
+        self.setLayout(self.grid)
 
         # Stylesheet
         self.label_img.setStyleSheet("background: black; border:3px solid #DD2501; ")
