@@ -578,8 +578,6 @@ class AppSettingsBrowseMode(QFrame):
             self.HITL_msg.setText("Human-In-The-Loop mode disabled")
             self.HITL_msg.setInformativeText(("Human-In-The-Loop mode "
                 "will now be disabled. \n Do you want to proceed?"))
-        # self.HITL_msg.setWindowTitle("MessageBox demo")
-        # self.HITL_msg.setDetailedText("The details are as follows:")
         self.HITL_msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         self.HITL_msg.setDefaultButton(QMessageBox.Yes)
         result = self.HITL_msg.exec_()
@@ -668,28 +666,19 @@ class Controller:
         assert self.data_type in ['BrainMRI', 'CardiacMRI', 'FetalUS'], "Invalid default use case"
         self.app_settings.dtype.name = self.data_type
 
-        redir = '' if self.mounted else 'old/'
+        redir = '' if self.mounted else 'local/'
 
         if self.data_type == 'BrainMRI':
-            # Default MRI
             self.app_settings.fname_images.name = f"./data/filenames/{redir}brain_test_files_new_paths.txt"
             self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}brain_test_landmarks_new_paths.txt"
             self.app_settings.fname_model = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
         elif self.data_type == 'CardiacMRI':
-            # Default cardiac
-            self.app_settings.fname_images.name = f"./data/filenames/{redir}cardiac_test_files_new_paths.txt"
-            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}cardiac_test_landmarks_new_paths.txt"
-            # if self.mounted:
-            #     self.app_settings.fname_images.name = f"./data/filenames/cardiac_train_files_new_paths.txt"
-            #     self.app_settings.fname_landmarks.name = f"./data/filenames/cardiac_train_files_new_paths.txt"
+            self.app_settings.fname_images.name = f"./data/filenames/{redir}cardiac_train_files_new_paths.txt"
+            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}cardiac_train_landmarks_new_paths.txt"
             self.app_settings.fname_model = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
         elif self.data_type == 'FetalUS':
-            # Default fetal
-            self.app_settings.fname_images.name = f"./data/filenames/{redir}fetalUS_test_files_new_paths.txt"
-            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_test_landmarks_new_paths.txt"
-            if self.mounted:
-                self.app_settings.fname_images.name = f"./data/filenames/fetalUS_train_files_new_paths.txt"
-                self.app_settings.fname_landmarks.name = f"./data/filenames/fetalUS_train_landmarks_new_paths.txt"
+            self.app_settings.fname_images.name = f"./data/filenames/{redir}fetalUS_train_files_new_paths.txt"
+            self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_train_landmarks_new_paths.txt"
             self.app_settings.fname_model = './data/models/DQN_ultrasound/model-600000.data-00000-of-00001'
 
     @staticmethod

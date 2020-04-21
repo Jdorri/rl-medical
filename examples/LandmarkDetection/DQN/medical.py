@@ -254,25 +254,29 @@ class MedicalPlayer(gym.Env):
         # logger.info('starting point {}-{}-{}'.format(x,y,z))
         # ######################################################################
 
-        # # sample a new image
+        # sample a new image
         self._image, self._target_loc, self.filepath, self.spacing = next(self.sampled_files)
         self.filename = os.path.basename(self.filepath)
 
         # multiscale (e.g. start with 3 -> 2 -> 1)
         # scale can be thought of as sampling stride
         if self.multiscale:
-            #cardiac
-            if self.data_type == 'CardiacMRI':
-                self.action_step = 6
-                self.xscale = 2
-                self.yscale = 2
-                self.zscale = 2
-            #brain or fetal
-            else:
-                self.action_step = 9
-                self.xscale = 3
-                self.yscale = 3
-                self.zscale = 3
+            # #cardiac
+            # if self.data_type == 'CardiacMRI':
+            #     self.action_step = 6
+            #     self.xscale = 2
+            #     self.yscale = 2
+            #     self.zscale = 2
+            # #brain or fetal
+            # else:
+            #     self.action_step = 9
+            #     self.xscale = 3
+            #     self.yscale = 3
+            #     self.zscale = 3
+            self.action_step = 9
+            self.xscale = 3
+            self.yscale = 3
+            self.zscale = 3
 
         else:
             self.action_step = 1
@@ -722,7 +726,7 @@ class MedicalPlayer(gym.Env):
 
     def get_plane_z(self, z=0):
         im = self._image.data[:, :, z]
-        if self.data_type == 'BrainMRI':
+        if self.data_type in ['BrainMRI', 'CardiacMRI']:
             im = np.rot90(im, 1)                # Rotate 90 degrees ccw
         return im
 
@@ -823,9 +827,6 @@ class MedicalPlayer(gym.Env):
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)  # congvert to rgb
         img_x = cv2.cvtColor(img_x, cv2.COLOR_GRAY2RGB)  # congvert to rgb
         img_y = cv2.cvtColor(img_y, cv2.COLOR_GRAY2RGB)  # congvert to rgb
-
-        if self.data_type == 'CardiacMRI':
-            print(img_x.shape)
 
         ########################################################################
         # PyQt GUI Code Section

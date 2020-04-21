@@ -218,7 +218,6 @@ class Window(QMainWindow):
     #     recursiveSetChildFocusPolicy(self)
 
 
-
 ################################################################################
 ## Left Widget
 class SimpleImageViewerSettings(QFrame):
@@ -548,7 +547,7 @@ class SimpleImageViewer(QWidget):
         hw_ratio = abs(yLen / xLen)
 
         if self.task in ['eval','browse']:
-            w = 12 if self.data_type != 'FetalUS' else 16
+            w = 12 if self.data_type == 'BrainMRI' else 16
             self.draw_point(target, self.color_t, width=w)
 
         self.draw_point(agent_loc, self.color_a)
