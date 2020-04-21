@@ -1,3 +1,0 @@
-./data/images/iFIND00132_IM_0001.nii.gz
-./data/images/iFIND00133_IM_0054.nii.gz
-./data/images/iFIND00146_IM_0068.nii.gz
