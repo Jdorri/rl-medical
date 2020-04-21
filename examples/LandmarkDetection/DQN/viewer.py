@@ -40,26 +40,16 @@ class Window(QMainWindow):
     """
     Window used as the main window for the application which integrate different widgets.
     """
-<<<<<<< HEAD
     # Signal for browse/ manual mode
     # Captures key pressed that will be used to store data for Human-in-the loop
     key_pressed = pyqtSignal(QEvent)
 
-    def __init__(self, viewer_param, right_settings=None):
+    def __init__(self, viewer_param, right_settings=None, data_type="BrainMRI"):
         super().__init__()
-        self.initUI(viewer_param, right_settings)
+        self.initUI(viewer_param, right_settings, data_type)
         self.key_pressed.connect(self.on_key)
 
-    def initUI(self, viewer_param, right_settings):
-=======
-    KEY_PRESSED = pyqtSignal(QEvent)
-    def __init__(self, viewer_param, app_settings=None, data_type='BrainMRI'):
-        super().__init__()
-        self.initUI(viewer_param, app_settings, data_type)
-        self.KEY_PRESSED.connect(self.on_key)
-
-    def initUI(self, viewer_param, app_settings, data_type):
->>>>>>> HITL_extension
+    def initUI(self, viewer_param, right_settings, data_type):
         """
         Main UI init element.
         """
@@ -73,23 +63,20 @@ class Window(QMainWindow):
         # Menu Bar
         self.initMenu()
 
-<<<<<<< HEAD
         # Image widget (main widget)
         self.widget = SimpleImageViewer(arr=np.zeros(viewer_param["arrs"][0].shape),
                                    arr_x=np.zeros(viewer_param["arrs"][1].shape),
                                    arr_y=np.zeros(viewer_param["arrs"][2].shape),
                                    filepath=viewer_param["filepath"],
                                    window=self)
-=======
         # Image widget
-        arrs = (np.zeros(viewer_param["arrs"][0].shape),
-                np.zeros(viewer_param["arrs"][1].shape),
-                np.zeros(viewer_param["arrs"][2].shape))
+        # arrs = (np.zeros(viewer_param["arrs"][0].shape),
+        #         np.zeros(viewer_param["arrs"][1].shape),
+        #         np.zeros(viewer_param["arrs"][2].shape))
 
-        self.widget = SimpleImageViewer(arrs,
-                                   filepath=viewer_param["filepath"],
-                                   data_type=data_type)
->>>>>>> HITL_extension
+        # self.widget = SimpleImageViewer(arrs,
+        #                            filepath=viewer_param["filepath"],
+        #                            data_type=data_type)
 
         # Left Settings widget
         if right_settings:
@@ -188,7 +175,6 @@ class Window(QMainWindow):
         self.key_pressed.emit(event)
 
     def on_key(self, event):
-<<<<<<< HEAD
         """
         Event handler methods for manual browsing functionality.
         Different actions for different keyPressEvents.
@@ -227,74 +213,25 @@ class Window(QMainWindow):
             #     self.right_widget.on_clicking_zoomIn()
             # elif event.key() == Qt.Key_Minus:
             #     self.right_widget.on_clicking_zoomOut()
-=======
-        ''' Different actions for different keyPressEvents.
-            Allows the user to move through the image by using arrow keys
-        '''
-        if self.right_widget.MODE == 'BROWSE MODE' and self.right_widget.env:
-            # Browse mode key bindings
-            if event.key() == Qt.Key_S:
-                self.right_widget.on_clicking_in()
-            elif event.key() == Qt.Key_A:
-                self.right_widget.on_clicking_out()
-            elif event.key() == Qt.Key_Up:
-                self.right_widget.on_clicking_up()
-            elif event.key() == Qt.Key_Down:
-                self.right_widget.on_clicking_down()
-            elif event.key() == Qt.Key_Left:
-                self.right_widget.on_clicking_left()
-            elif event.key() == Qt.Key_Right:
-                self.right_widget.on_clicking_right()
-            elif event.key() == Qt.Key_Space:
-                self.right_widget.on_clicking_nextImg()
-            elif event.key() == Qt.Key_Equal:
-                self.right_widget.on_clicking_zoomIn()
-            elif event.key() == Qt.Key_Minus:
-                self.right_widget.on_clicking_zoomOut()
 
             # HITL mode additional key bindings
             if self.right_widget.HITL_mode.isChecked():
                 if event.key() == Qt.Key_Backspace:
                     self.right_widget.on_clicking_HITLDelete()
->>>>>>> HITL_extension
 
     def closeEvent(self, event):
         """
         Used to override close event and provide warning when closing application
         """
-<<<<<<< HEAD
         reply = QMessageBox.question(self, 'Message',
             "Are you sure to quit?", QMessageBox.Yes |
             QMessageBox.No, QMessageBox.Yes)
-=======
+        
         try:
             if self.right_widget.HITL and self.right_widget.env:
                 self.right_widget.save_HITL()
         except AttributeError:
             pass
-        event.accept()
-
-    # def closeEvent(self, event):
-    #     """
-    #     Used to override close event and provide warning when closing application
-    #     """
-    #     reply = QMessageBox.question(self, 'Message',
-    #         "Are you sure to quit?", QMessageBox.Yes |
-    #         QMessageBox.No, QMessageBox.Yes)
-    #
-    #     if reply == QMessageBox.Yes:
-    #         event.accept()
-    #     else:
-    #         event.ignore()
-
-    # def setChildrenFocusPolicy(self, policy):
-    #     '''Method to allow arrow keys to be caught in keyPressEvent()'''
-    #     def recursiveSetChildFocusPolicy(parentQWidget):
-    #         for childQWidget in parentQWidget.findChildren(QWidget):
-    #             childQWidget.setFocusPolicy(policy)
-    #             recursiveSetChildFocusPolicy(childQWidget)
-    #     recursiveSetChildFocusPolicy(self)
->>>>>>> HITL_extension
 
         if reply == QMessageBox.Yes:
             event.accept()
@@ -465,11 +402,9 @@ class SimpleImageViewer(QWidget):
     """
     agent_signal = pyqtSignal(dict) # Signaling agent move (current location, status)
 
-<<<<<<< HEAD
     def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None, window=None):
-=======
-    def __init__(self, arrs, data_type, scale_x=1, scale_y=1, filepath=None, display=None):
->>>>>>> HITL_extension
+    # def __init__(self, arrs, data_type, scale_x=1, scale_y=1, filepath=None, display=None):
+
         super().__init__()
         self.arrs = [arr, arr_x, arr_y]
         self.setStyleSheet("background: white")
@@ -479,12 +414,9 @@ class SimpleImageViewer(QWidget):
         self.display = display
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
-<<<<<<< HEAD
         self.window = window
-=======
-        self.data_type = data_type
-        self.rotate = False
->>>>>>> HITL_extension
+        # self.data_type = data_type
+        # self.rotate = False
 
         # Set image formatting and get shape
         cvImg, cvImg_x, cvImg_y = self.get_imgs(arrs)
@@ -502,32 +434,20 @@ class SimpleImageViewer(QWidget):
 
         # Initialise images with labels
         self.img = QPixmap(qImg)
-<<<<<<< HEAD
         self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.img_x = QPixmap(qImg_x)
         self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.img_y = QPixmap(qImg_y)
         self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-=======
-        self.img_x = QPixmap(qImg_x)
-        self.img_y = QPixmap(qImg_y)
-
-        self.resize_img()
->>>>>>> HITL_extension
 
         self.label_img = QLabel()
         self.label_img.setPixmap(self.img)
         self.label_img_x = QLabel()
         self.label_img_y = QLabel()
-<<<<<<< HEAD
         self.label_img_y.setPixmap(self.img_y)
         self.label_img.setMinimumSize(400, 400)
         self.label_img_x.setMinimumSize(400, 400)
         self.label_img_y.setMinimumSize(400, 400)
-=======
-
-        self.set_pixmap_and_alignment()
->>>>>>> HITL_extension
 
         # Set background color for images to Black
         self.label_img.setAutoFillBackground(True)
@@ -539,7 +459,6 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPalette(p)
         self.label_img_y.setPalette(p)
 
-<<<<<<< HEAD
         self.fig = plt.figure(figsize=(3, 6))
         self.ax = self.fig.add_subplot(111, projection='3d')
         self.canvas = FigureCanvas(self.fig)
@@ -551,9 +470,6 @@ class SimpleImageViewer(QWidget):
         self.grid.addWidget(self.label_img_y, 1, 0)
         self.grid.addWidget(self.canvas, 1, 1)
         self.agent_signal.connect(self.agent_signal_handler)
-=======
-        self.init_grid()
->>>>>>> HITL_extension
 
         self.agent_signal.connect(self.agent_signal_handler)
 
@@ -566,24 +482,8 @@ class SimpleImageViewer(QWidget):
         self.color_a = QColor(111, 230, 158)
         self.color_t = QColor(200, 100, 100)
         self.color_e = QColor(250, 250, 250)
-<<<<<<< HEAD
         self.size_e = 18 
         self.line_width = 1
-=======
-        self.size_e = 20
-        self.line_width = 2
-
-    def init_grid(self):
-        # Initiliase Grid
-        self.grid = QGridLayout()
-        self.grid.addWidget(self.label_img, 0, 0)
-        self.grid.addWidget(self.label_img_x, 0, 1)
-        self.grid.addWidget(self.label_img_y, 1, 0)
-
-        # Set Layout of GUI
-        self.setLayout(self.grid)
-        self.setWindowTitle("Landmark Detection Agent")
->>>>>>> HITL_extension
 
         # agent trajactories
         self.x_traj = []
@@ -668,17 +568,9 @@ class SimpleImageViewer(QWidget):
         if self.task in ['eval','browse']:
             self.draw_error()
 
-<<<<<<< HEAD
         self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-=======
-        # TODO: resolve scaled to width later during final iteration (responsive)
-        self.resize_img()
-        self.set_pixmap_and_alignment()
-
-    def set_pixmap_and_alignment(self):
->>>>>>> HITL_extension
         self.label_img.setPixmap(self.img)
         self.label_img.setAlignment(QtCore.Qt.AlignCenter)
         self.label_img_x.setPixmap(self.img_x)
@@ -826,49 +718,6 @@ class SimpleImageViewer(QWidget):
         else:
             self.draw_rects(rect_dims)
 
-<<<<<<< HEAD
-    def translate(self, agent_loc, rect, target):
-        """
-        Agent movement Calculator (return value is used to draw rectangle/cross hair + agent location)
-        """
-        _agent_loc = (agent_loc[0], self.height-agent_loc[1])
-        if target is not None:
-            _target = (target[0], self.height-target[1])
-        else:
-            _target = None
-        _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
-
-        return _agent_loc, _rect, _target
-
-    def translate_x(self, agent_loc, rect, target):
-        """
-        Agent movement Calculator
-        """
-        _agent_loc = (agent_loc[1], self.height_x-agent_loc[2])
-        if target is not None:
-            _target = (target[1], self.height_x-target[2])
-        else:
-            _target = None
-        _rect = (self.height_x-rect[4], self.height_x-rect[5]) + rect[2:4]
-
-        return _agent_loc, _rect, _target
-
-    def translate_y(self, agent_loc, rect, target):
-        """
-        Agent movement Calculator
-        """
-        _agent_loc = (agent_loc[0]*self.width_y//self.height_y, self.height_y-agent_loc[2])       # Rotate 90 degrees ccw
-        if target is not None:
-            _target = (target[0]*self.width_y//self.height_y, self.height_y-target[2])                # Rotate 90 degrees ccw
-        else:
-            _target = None
-        _rect = (self.height_y-rect[4], self.height_y-rect[5]) + \
-            (rect[0]*self.width_y//self.height_y, rect[1]*self.width_y//self.height_y)
-
-        return _agent_loc, _rect, _target
-
-=======
->>>>>>> HITL_extension
     def draw_point(self, point_loc, color, width=7):
         """
         Draw target location

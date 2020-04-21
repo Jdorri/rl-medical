@@ -215,14 +215,11 @@ class MedicalPlayer(gym.Env):
         self.cnt = 0 # counter to limit number of steps per episodes
         self.num_games.feed(1)
         self.current_episode_score.reset()  # reset the stat counter
-<<<<<<< HEAD
         self._loc_history = [(0,) * self.dims] * self._history_length
         print(self._loc_history)
         # list of q-value lists
         self._qvalues_history = [(0,) * self.actions] * self._history_length
-=======
         self._clear_history()
->>>>>>> HITL_extension
         self.new_random_game()
 
     def new_random_game(self):

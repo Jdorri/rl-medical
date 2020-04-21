@@ -535,9 +535,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.thread = WorkerThread(None)
         self.thread.pause = False
 
-<<<<<<< HEAD
-        # Widgets
-=======
         # initialise labels
         # self.img_file = QLabel('Image file', self)
         # self.mode = QLabel('Mode', self)
@@ -556,7 +553,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.HITL_delete = QPushButton('Delete Episode', self)
         self.HITL_delete.setDisabled(True)
 
->>>>>>> HITL_extension
         self.upButton = QToolButton(self)
         self.upButton.setArrowType(Qt.UpArrow)
 
@@ -613,13 +609,10 @@ class RightWidgetSettingsBrowseMode(QFrame):
         # Initialise grid/set spacing
         grid = QGridLayout()
         grid.setSpacing(10)
-<<<<<<< HEAD
-=======
         grid.addWidget(self.HITL_mode, 2, 0)
         grid.addWidget(self.HITL_delete, 3, 0)
         grid.addWidget(self.img_file_edit, 4, 0)
         grid.addWidget(self.next_img, 5, 0)
->>>>>>> HITL_extension
         grid.addLayout(gridArrows, 7, 0)
 
         gridNest = QGridLayout()
@@ -642,16 +635,11 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         self.show()
 
-<<<<<<< HEAD
         # Flags for testing and env
         self.setStyleSheet("background:white")
 
         self.testing = False
-=======
-        # Flags
-        self.testing = False
         self.test_click = None
->>>>>>> HITL_extension
         self.env = None
         self.HITL = False
         self.HITL_logger = []
@@ -774,7 +762,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.env.stepManual(action, self.window)
         QApplication.processEvents()
         self.window.update()
-<<<<<<< HEAD
     
     def set_paths(self):
         self.default_use_case = self.which_usecase()
@@ -858,7 +845,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         # Else user specify
         else:
             return "UserDefined"
-=======
 
     def show_HITL_msg(self):
         self.HITL_msg = QMessageBox()
@@ -974,7 +960,6 @@ class Controller:
             self.app_settings.fname_images.name = f"./data/filenames/{redir}fetalUS_train_files_new_paths.txt"
             self.app_settings.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_train_landmarks_new_paths.txt"
             self.app_settings.fname_model = './data/models/DQN_ultrasound/model-600000.data-00000-of-00001'
->>>>>>> HITL_extension
 
 
 ################################################################################

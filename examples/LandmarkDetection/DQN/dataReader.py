@@ -230,13 +230,8 @@ class filesListFetalUSLandmark(object):
                     landmark_file = self.landmark_files[idx]
                     all_landmarks = getLandmarksFromTXTFileUS(landmark_file)
                     # landmark point 12 csp - 11 leftCerebellar - 10 rightCerebellar
-<<<<<<< HEAD
-                    landmark = all_landmarks[12]
-          
-=======
                     landmark = all_landmarks[12] #0
 
->>>>>>> HITL_extension
 
                     # landmarks = [np.round(all_landmarks[(i*2 + 10) % 13]) for i in range(self.agents)]
                     # landmark = [np.round(all_landmarks[(i + 10) % 13]) for i in range(self.agents)]  # Apex + MV
