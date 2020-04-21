@@ -186,6 +186,26 @@ class Window(QMainWindow):
                 self.right_widget.browse_mode.on_clicking_zoomIn()
             elif event.key() == Qt.Key_Z:
                 self.right_widget.browse_mode.on_clicking_zoomOut()
+        
+        # Browse mode key bindings (original)
+            # if event.key() == Qt.Key_S:
+            #     self.right_widget.on_clicking_in()
+            # elif event.key() == Qt.Key_A:
+            #     self.right_widget.on_clicking_out()
+            # elif event.key() == Qt.Key_Up:
+            #     self.right_widget.on_clicking_up()
+            # elif event.key() == Qt.Key_Down:
+            #     self.right_widget.on_clicking_down()
+            # elif event.key() == Qt.Key_Left:
+            #     self.right_widget.on_clicking_left()
+            # elif event.key() == Qt.Key_Right:
+            #     self.right_widget.on_clicking_right()
+            # elif event.key() == Qt.Key_Space:
+            #     self.right_widget.on_clicking_nextImg()
+            # elif event.key() == Qt.Key_Equal:
+            #     self.right_widget.on_clicking_zoomIn()
+            # elif event.key() == Qt.Key_Minus:
+            #     self.right_widget.on_clicking_zoomOut()
 
     def closeEvent(self, event):
         """
