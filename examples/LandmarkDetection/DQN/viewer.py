@@ -68,15 +68,8 @@ class Window(QMainWindow):
                                    arr_x=np.zeros(viewer_param["arrs"][1].shape),
                                    arr_y=np.zeros(viewer_param["arrs"][2].shape),
                                    filepath=viewer_param["filepath"],
-                                   window=self)
-        # Image widget
-        # arrs = (np.zeros(viewer_param["arrs"][0].shape),
-        #         np.zeros(viewer_param["arrs"][1].shape),
-        #         np.zeros(viewer_param["arrs"][2].shape))
-
-        # self.widget = SimpleImageViewer(arrs,
-        #                            filepath=viewer_param["filepath"],
-        #                            data_type=data_type)
+                                   window=self,
+                                   data_type=data_type)
 
         # Left Settings widget
         if right_settings:
@@ -102,7 +95,6 @@ class Window(QMainWindow):
 
         # Geometric window position and general setting
         self.showMaximized()
-        # self.center()
         self.setWindowTitle('Anatomical Landmark Detection')
         self.menubar.setStyleSheet("background:#003E74; color:white; padding: 5px 0")
         self.statusbar.setStyleSheet("background:#003E74; color:white")
@@ -140,15 +132,6 @@ class Window(QMainWindow):
 
         # Help menu
         help_menu = self.menubar.addMenu("&Help")
-
-    def center(self):
-        """Used to center the window automatically
-        """
-        frameGm = self.frameGeometry()
-        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
-        centerPoint = QApplication.desktop().screenGeometry(screen).center()
-        frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())
 
     def nightMode(self):
         "CSS Styling for night mode app version"
@@ -194,7 +177,7 @@ class Window(QMainWindow):
             elif event.key() == Qt.Key_Z:
                 self.right_widget.browse_mode.on_clicking_zoomOut()
         
-        # Browse mode key bindings (original)
+            # Browse mode key bindings (original)
             # if event.key() == Qt.Key_S:
             #     self.right_widget.on_clicking_in()
             # elif event.key() == Qt.Key_A:
@@ -215,9 +198,9 @@ class Window(QMainWindow):
             #     self.right_widget.on_clicking_zoomOut()
 
             # HITL mode additional key bindings
-            if self.right_widget.HITL_mode.isChecked():
+            if self.right_widget.browse_mode.HITL_mode.isChecked():
                 if event.key() == Qt.Key_Backspace:
-                    self.right_widget.on_clicking_HITLDelete()
+                    self.right_widget.browse_mode.on_clicking_HITLDelete()
 
     def closeEvent(self, event):
         """
@@ -228,8 +211,9 @@ class Window(QMainWindow):
             QMessageBox.No, QMessageBox.Yes)
         
         try:
-            if self.right_widget.HITL and self.right_widget.env:
-                self.right_widget.save_HITL()
+            if self.right_widget.get_mode() == 'BROWSE':
+                if self.right_widget.browse_mode.HITL and self.right_widget.browse_mode.env:
+                    self.right_widget.browse_mode.save_HITL()
         except AttributeError:
             pass
 
@@ -247,7 +231,7 @@ class LeftWidgetSettings(QFrame):
     Left widget controlling GUI elements settings.
     """
 
-    def __init__(self, window, gui_launcher=False):
+    def __init__(self, window):
         super().__init__()
         # Window object to access windows components
         self.window = window # Store window object to enable control over windows functionality
@@ -281,7 +265,7 @@ class LeftWidgetSettings(QFrame):
         # Logo settings
         self.logo = QLabel()
         pixmap_logo = QPixmap("imperial_logo.png")
-        pixmap_logo = pixmap_logo.scaledToHeight(64)
+        pixmap_logo = pixmap_logo.scaledToHeight(50)
         self.logo.setPixmap(pixmap_logo)
         
         ## Manage layout
@@ -402,8 +386,7 @@ class SimpleImageViewer(QWidget):
     """
     agent_signal = pyqtSignal(dict) # Signaling agent move (current location, status)
 
-    def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None, window=None):
-    # def __init__(self, arrs, data_type, scale_x=1, scale_y=1, filepath=None, display=None):
+    def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None, window=None, data_type):
 
         super().__init__()
         self.arrs = [arr, arr_x, arr_y]
@@ -415,8 +398,8 @@ class SimpleImageViewer(QWidget):
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
         self.window = window
-        # self.data_type = data_type
-        # self.rotate = False
+        self.data_type = data_type
+        self.rotate = False
 
         # Set image formatting and get shape
         cvImg, cvImg_x, cvImg_y = self.get_imgs(arrs)
@@ -469,8 +452,6 @@ class SimpleImageViewer(QWidget):
         self.grid.addWidget(self.label_img_x, 0, 1)
         self.grid.addWidget(self.label_img_y, 1, 0)
         self.grid.addWidget(self.canvas, 1, 1)
-        self.agent_signal.connect(self.agent_signal_handler)
-
         self.agent_signal.connect(self.agent_signal_handler)
 
         # Stylesheet
@@ -531,8 +512,6 @@ class SimpleImageViewer(QWidget):
         """
         Main image drawer function
         """
-        self.arr = arrs[0]
-
         cvImg, cvImg_x, cvImg_y = self.get_imgs(arrs)
 
         bytesPerLine = 3 * self.width
@@ -548,7 +527,7 @@ class SimpleImageViewer(QWidget):
 
         # Draw rectangles and agent (overlay)
         self.painterInstance = QPainter(self.img)
-        # self.draw_point(point_loc=(10,30), color=self.color_a)
+        # For rotation purposes
         if self.data_type == 'FetalUS':
             self.rotate = True
         _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
@@ -619,23 +598,6 @@ class SimpleImageViewer(QWidget):
         self.height_y, self.width_y, self.channel_y = cvImg_y.shape
 
         return cvImg, cvImg_x, cvImg_y
-
-    def resize_img(self):
-        if self.data_type == 'BrainMRI':
-            self.img = self.img.scaledToWidth(350)
-            self.img_x = self.img_x.scaledToWidth(350)
-            self.img_y = self.img_y.scaledToWidth(350)
-        elif self.data_type == 'CardiacMRI':
-            self.img = self.img.scaledToWidth(350)
-            self.img_x = self.img_x.scaledToWidth(350)
-            self.img_y = self.img_y.scaledToWidth(350)
-            # self.img = self.img.scaledToWidth(350)
-            # self.img_x = self.img_x.scaledToHeight(150)
-            # self.img_y = self.img_y.scaledToWidth(150)
-        elif self.data_type == 'FetalUS':
-            self.img = self.img.scaledToHeight(350)
-            self.img_x = self.img_x.scaledToWidth(350)
-            self.img_y = self.img_y.scaledToHeight(350)
 
     def translate(self, agent_loc, rect, target):
         ''' 2 step process:
@@ -833,22 +795,6 @@ class SimpleImageViewer(QWidget):
             episode_end = self.is_terminal
         )
 
-    # def render(self):
-        # self.window.flip()
-
-    def saveGif(self,filename=None,arr=None,duration=0):
-        arr[0].save(filename, save_all=True,
-                    append_images=arr[1:],
-                    duration=500,
-                    quality=95) # duration milliseconds
-
-    def close(self):
-        if self.isopen:
-            self.window.close()
-            self.isopen = False
-
-    def __del__(self):
-        self.close()
 
 
 ################################################################################
