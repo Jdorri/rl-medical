@@ -1,0 +1,34 @@
+Instructions for using the HITL functionality to gather data for the
+Human Replay Buffer.
+
+- 1hr each should be enough
+
+To begin HITL:
+- Go to branch HITL_extension
+- DQN folder
+- Run functioning_UI_PyQt.py
+- Click browse mode button
+- Click on "Enable HITL" check box
+- Click "Yes" for pop up window
+Now HITL mode is enabled. States will be recorded from this point onward.
+
+While in HITL mode:
+- Move agent towards the target
+- Click next image once "Error" = 0.0
+- Can navigate by clicking arrows or using key bindings (much faster)
+- IF YOU MAKE A MISTAKE, CLICK DELETE EPISODE (only removes current episode)
+- Key bindings are as follows:
+  - U, D, L, R = arrow keys
+  - "a" / "s" = move in / move out (move along z-axis)
+  - Space = next image
+  - Backspace = delete episode
+  - "+" / "-" = zoom in / zoom out
+- Once finished, to save the HITL session, either: 1) close the GUI or 2) click on HITL check box (it will automatically save a pickle file in ./data/HITL)
+- Git add and commit to add your HITL session to github
+
+Additional points:
+- You do not need to do this continuously (i.e. 4 x 15 min sessions is fine)
+- To check how many HITL episodes you have done, end your HITL session (see line 27) and run "python3 -m inspect_HITL_buffer.py"
+  - This will tell you how many episodes and states you have done
+- There is a 50% chance the resolution will start on 2 or 3.  This is deliberate: otherwise resolution = 2 would occur often from the human.
+- Try to do horizontal axis first then vertical then z-axis (in/out)
