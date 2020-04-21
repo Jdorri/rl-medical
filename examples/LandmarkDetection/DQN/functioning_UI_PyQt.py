@@ -424,19 +424,19 @@ class RightWidgetSettings(QFrame):
 
         if self.default_use_case == 'BrainMRI':
             # Default MRI
-            self.fname_images.name = f"./data/filenames/{redir}brain_test_files_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}brain_train_files_new_paths.txt"
             self.fname_model.name = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-            self.fname_landmarks.name = f"./data/filenames/{redir}brain_test_landmarks_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}brain_train_landmarks_new_paths.txt"
         elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
-            self.fname_images.name = f"./data/filenames/{redir}cardiac_test_files_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}cardiac_train_files_new_paths.txt"
             self.fname_model.name = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
-            self.fname_landmarks.name = f"./data/filenames/{redir}cardiac_test_landmarks_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}cardiac_train_landmarks_new_paths.txt"
         elif self.default_use_case == 'FetalUS':
             # Default fetal
-            self.fname_images.name = f"./data/filenames/{redir}fetalUS_test_files_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}fetalUS_train_files_new_paths.txt"
             self.fname_model.name = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
-            self.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_test_landmarks_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_train_landmarks_new_paths.txt"
         else:
             # User defined file selection
             self.fname_images.name = self.window.left_widget.fname_images
@@ -478,24 +478,25 @@ class RightWidgetSettings(QFrame):
             self.selected_list = [self.fname_images, self.fname_landmarks]
 
         self.METHOD = "DQN"
+        
         # load files into env to set num_actions, num_validation_files
-        try:
-            init_player = MedicalPlayer(files_list=self.selected_list,
+        # try:
+        init_player = MedicalPlayer(files_list=self.selected_list,
                                         data_type=self.default_use_case,
                                         screen_dims=IMAGE_SIZE,
                                         task='play')
             
-            self.NUM_ACTIONS = init_player.action_space.n
-            self.num_files = init_player.files.num_files
-            # Create a thread to run background task
-            self.worker_thread = WorkerThread(target_function=self.thread_function)
-            self.worker_thread.window = self.window
-            self.worker_thread.start()
+        self.NUM_ACTIONS = init_player.action_space.n
+        self.num_files = init_player.files.num_files
+        # Create a thread to run background task
+        self.worker_thread = WorkerThread(target_function=self.thread_function)
+        self.worker_thread.window = self.window
+        self.worker_thread.start()
 
         # If there is a problem with the loader, then user incorrectly add file
-        except:
-            self.terminal.appendHtml(f"<b><p style='color:red'> &#36; Error loading user defined settings. Please use appropriate model, image, and landmarks. </p></b>")
-            self.error_message_box()
+        # except:
+            # self.terminal.appendHtml(f"<b><p style='color:red'> &#36; Error loading user defined settings. Please use appropriate model, image, and landmarks. </p></b>")
+            # self.error_message_box()
         
 
     def thread_function(self):
@@ -770,16 +771,16 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         if self.default_use_case == 'BrainMRI':
             # Default MRI
-            self.fname_images.name = f"./data/filenames/{redir}brain_test_files_new_paths.txt"
-            self.fname_landmarks.name = f"./data/filenames/{redir}brain_test_landmarks_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}brain_train_files_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}brain_train_landmarks_new_paths.txt"
         elif self.default_use_case == 'CardiacMRI':
             # Default cardiac
-            self.fname_images.name = f"./data/filenames/{redir}cardiac_test_files_new_paths.txt"
-            self.fname_landmarks.name = f"./data/filenames/{redir}cardiac_test_landmarks_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}cardiac_train_files_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}cardiac_train_landmarks_new_paths.txt"
         elif self.default_use_case == 'FetalUS':
             # Default fetal
-            self.fname_images.name = f"./data/filenames/{redir}fetalUS_test_files_new_paths.txt"
-            self.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_test_landmarks_new_paths.txt"
+            self.fname_images.name = f"./data/filenames/{redir}fetalUS_train_files_new_paths.txt"
+            self.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_train_landmarks_new_paths.txt"
         else:
             # User defined file selection
             self.fname_images.name = self.window.left_widget.fname_images
