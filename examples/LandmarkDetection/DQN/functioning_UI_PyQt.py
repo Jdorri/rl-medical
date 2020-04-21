@@ -1,6 +1,6 @@
 ################################################################################
 ## Doorway to launch application's GUI
-# Author: Jamie, Faidon, Alex, Maleakhi
+# Author: Maleakhi, Alex, Jamie, Faidon
 ################################################################################
 
 import sys
@@ -90,10 +90,6 @@ class Controller:
         self.right_settings.automatic_mode.window = self.window
         self.right_settings.browse_mode.window = self.window
         
-        # # Set paths and load image
-        # self.right_settings.browse_mode.set_paths()
-        # self.right_settings.browse_mode.load_img()
-
         # Show window
         self.window.show()
 
