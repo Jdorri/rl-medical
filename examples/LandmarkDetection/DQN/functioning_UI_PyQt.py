@@ -169,12 +169,13 @@ class Tab(QFrame):
             # Reset SimpleImageViewer widget
             self.browse_mode.set_paths()
             self.browse_mode.load_img()
+            self.browse_mode.window.widget.clear_3d()
 
             # Reset Left widget
             self.browse_mode.window.left_widget.model_file.hide()
             self.browse_mode.window.left_widget.model_file_edit.hide()
             self.browse_mode.window.left_widget.model_file_edit_text.hide()
-
+            
             # Pass loaded user data
             FilenamesGUI.copy(self.automatic_mode.fname_images, self.browse_mode.fname_images)
             FilenamesGUI.copy(self.automatic_mode.fname_landmarks, self.browse_mode.fname_landmarks)
@@ -667,8 +668,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.HITL_mode.clicked.connect(self.on_clicking_HITL)
         self.next_img.clicked.connect(self.on_clicking_nextImg)
         self.HITL_delete.clicked.connect(self.on_clicking_HITLDelete)
-
-        self.show()
 
         # Flags for testing and env
         self.setStyleSheet("background:white")

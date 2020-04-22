@@ -102,9 +102,6 @@ class Window(QMainWindow):
         self.statusbar.setStyleSheet("background:#003E74; color:white")
         self.setStyleSheet("background: white")
         
-        # Show window
-        self.show()
-
     def init_menu(self):
         """
         Used to initialise components related to menu bar.
@@ -342,7 +339,7 @@ class LeftWidgetSettings(QFrame):
         """
         if not self.testing:
             self.fname_images = QFileDialog.getOpenFileName(self, "Browse Image",
-                "./data/filenames/local/", filter="txt files (*test_files*.txt)")
+                "./data/filenames/local/", filter="txt files (*train_files*.txt)")
             # Set text to label
             filename = self.fname_images[0].split("/")
             self.img_file_edit_text.setText(filename[-1])
@@ -481,6 +478,13 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
         
+        self.clear_3d()
+    
+    def clear_3d(self):
+        """
+        Used to clear 3d trajectories
+        """
+
         # 3d plotting
         self.x_traj = []
         self.y_traj = []
@@ -508,7 +512,7 @@ class SimpleImageViewer(QWidget):
         # Draw rectangles and agent (overlay)
         self.painterInstance = QPainter(self.img)
         # Rotate if needed
-        if self.usecase == 'FetalUS':
+        if self.window.usecase == 'FetalUS':
             self.rotate = True
         _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
         self.drawer(_agent_loc, _rect, _target)
