@@ -8,6 +8,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from dataReader import *
 
+from DQN import get_player
+
 def warn(*args, **kwargs):
     pass
 import warnings
@@ -19,6 +21,33 @@ import pickle
 from thread import WorkerThread
 from datetime import datetime
 import platform
+
+from FilenamesGUI import FilenamesGUI
+
+
+###############################################################################
+
+# BATCH SIZE USED IN NATURE PAPER IS 32 - MEDICAL IS 256
+BATCH_SIZE = 48
+# BREAKOUT (84,84) - MEDICAL 2D (60,60) - MEDICAL 3D (26,26,26)
+IMAGE_SIZE = (45, 45, 45)
+# how many frames to keep
+# in other words, how many observations the network can see
+FRAME_HISTORY = 4
+# the frequency of updating the target network
+UPDATE_FREQ = 4
+# DISCOUNT FACTOR - NATURE (0.99) - MEDICAL (0.9)
+GAMMA = 0.9 #0.99
+# REPLAY MEMORY SIZE - NATURE (1e6) - MEDICAL (1e5 view-patches)
+MEMORY_SIZE = 1e5 #6
+# consume at least 1e6 * 27 * 27 * 27 bytes
+INIT_MEMORY_SIZE = MEMORY_SIZE // 20 #5e4
+# each epoch is 100k played frames
+STEPS_PER_EPOCH = 10000 // UPDATE_FREQ * 10
+# num training epochs in between model evaluations
+EPOCHS_PER_EVAL = 2
+# the number of episodes to run during evaluation
+EVAL_EPISODE = 50
 
 
 ###############################################################################
