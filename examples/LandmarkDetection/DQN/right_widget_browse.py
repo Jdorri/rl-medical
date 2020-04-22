@@ -85,7 +85,7 @@ class XMove(QFrame):
         self.label.setAlignment(Qt.AlignCenter)
         vbox.setAlignment(Qt.AlignCenter)
         self.setMaximumWidth(50)
-
+        self.label.setStyleSheet("border:None")
 
     @pyqtSlot()
     def on_clicking_up(self):
@@ -131,6 +131,7 @@ class YMove(QFrame):
         self.label.setAlignment(Qt.AlignCenter)
         vbox.setAlignment(Qt.AlignCenter)
         self.setMaximumWidth(50)
+        self.label.setStyleSheet("border:None")
 
 
     @pyqtSlot()
@@ -178,6 +179,7 @@ class ZMove(QFrame):
         self.label.setAlignment(Qt.AlignCenter)
         vbox.setAlignment(Qt.AlignCenter)
         self.setMaximumWidth(50)
+        self.label.setStyleSheet("border:None")
 
     @pyqtSlot()
     def on_clicking_in(self):
@@ -274,9 +276,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.HITL_delete.clicked.connect(self.on_clicking_HITLDelete)
 
         # CSS
-        self.x_action.setStyleSheet("border:2px solid #DD2501")
-        self.y_action.setStyleSheet("border:2px solid #66A40A")
-        self.z_action.setStyleSheet("border:2px solid #006EAF")
+        self.x_action.setStyleSheet("QFrame {border:2px solid #DD2501}")
+        self.y_action.setStyleSheet("QFrame {border:2px solid #66A40A}")
+        self.z_action.setStyleSheet("QFrame {border:2px solid #006EAF}")
         
         # Flags for testing and env
         self.setStyleSheet("background:white")
