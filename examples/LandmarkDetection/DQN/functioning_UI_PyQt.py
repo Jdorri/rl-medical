@@ -211,11 +211,14 @@ class FilenamesGUI:
 ## Right Widget (Automatic Mode)
 
 class RightWidgetSettings(QFrame):
+    PAUSE = "Pause"
+    START = "Start"
+    RESUME = "Resume"
     terminal_signal = pyqtSignal(dict)
 
     def __init__(self, *args, **kwargs):
         super(RightWidgetSettings, self).__init__(*args, **kwargs)
-        self.mounted = False
+        self.mounted = False # by default mounting is set to false
 
         # Thread and window object which will be used to gain access to primary
         # windows.
@@ -242,7 +245,7 @@ class RightWidgetSettings(QFrame):
         self.speed_slider.valueChanged[int].connect(self.changeValue)
 
         # Run and terminate
-        self.run_button = QPushButton('Start', self)
+        self.run_button = QPushButton(self.START, self)
         self.terminate_button = QPushButton('Terminate', self)
 
         # Terminal log
@@ -294,15 +297,13 @@ class RightWidgetSettings(QFrame):
         self.setStyleSheet("background:white")
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
         self.terminate_button.setStyleSheet("background-color:#f44336; color:white")
-
-        self.show()
     
     def restart(self):
         """
         Used to restart the start button
         """
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-        self.run_button.setText("Start")
+        self.run_button.setText(self.START)
     
     @pyqtSlot(int)
     def changeValue(self, value):
@@ -320,13 +321,13 @@ class RightWidgetSettings(QFrame):
     def on_clicking_terminate(self):
         self.thread.terminate = True # give signal to terminate thread
         self.thread.pause = False
-        self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Terminate </p></b>")
-        self.run_button.setText("Start")
-        self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-        
-        # Reset simple image viewer
-        self.window.widget.reset()
 
+        # Print in terminal and restart setup
+        self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Terminate </p></b>")        
+        self.restart()
+        
+        # Reset simple image viewer and windows
+        self.window.widget.reset()
         self.window.statusbar.showMessage("Ready")
     
     def which_task(self):
@@ -354,34 +355,51 @@ class RightWidgetSettings(QFrame):
                 return "FetalUS"
         # Else user specify
         else:
-            return "UserDefined"
+            return ""
 
     @pyqtSlot()
     def on_clicking_run(self):
         """
-        Event handler (slot) for when the button is clicked
+        Event handler (slot) for when the run button is clicked
         """
-        if self.run_button.text() == "Start":
+        if self.run_button.text() == self.START:
+            # Manage thread
             self.thread.terminate = False
+            
+            # Manage task
             self.task_value = self.which_task()
             self.GIF_value = False
             self.video_value = False
-            self.run_button.setText("Pause")
+            
+            # Manage run button
+            self.run_button.setText(self.PAUSE)
             self.window.statusbar.showMessage("Running")
             self.run_button.setStyleSheet("background-color:orange; color:white")
+            
+            # Get usecase and set paths, print to terminal
             self.default_use_case = self.which_usecase()
-            self.set_paths(self.default_use_case)
+            self.set_paths()
             self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Start {self.task_value} Mode ({self.default_use_case}) </p></b>")
+            
+            # Run using setup
             self.run_DQN()
-        elif self.run_button.text() == "Resume":
+        
+        # When resume is clicked
+        elif self.run_button.text() == self.RESUME:
+            # Manage threads
             self.thread.pause = False
-            self.run_button.setText("Pause")
+            
+            # Terminal logs and other details
+            self.run_button.setText(self.PAUSE)
             self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Resume </p></b>")
             self.run_button.setStyleSheet("background-color:orange; color:white")
             self.window.statusbar.showMessage("Running")
+
+        # When pause is clicked
         else:
             self.thread.pause = True
-            self.run_button.setText("Resume")
+
+            self.run_button.setText(self.RESUME)
             self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
             self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Pause </p></b>")
             self.window.statusbar.showMessage("Paused")
@@ -397,6 +415,7 @@ class RightWidgetSettings(QFrame):
         distance_error = value["distance_error"]
         q_values = value["q_values"]
 
+        # HTML value
         self.terminal.appendHtml(
             f"<b> Episode {current_episode}/{total_episode} </b>"
         )
@@ -417,7 +436,6 @@ class RightWidgetSettings(QFrame):
         """
         Check which usecase that the user wants
         """
-
         filename_model = filename_model.split("/")
         filename_img = filename_img.split("/")
         filename_landmark = filename_landmark.split("/")
@@ -438,11 +456,10 @@ class RightWidgetSettings(QFrame):
         else:
             return ""
     
-    def set_paths(self, default_use_case):
+    def set_paths(self):
         """
         Used to set paths before running the code
         """
-        self.default_use_case = default_use_case
         redir = '' if self.mounted else 'local/'
 
         if self.default_use_case == 'BrainMRI':
@@ -472,6 +489,9 @@ class RightWidgetSettings(QFrame):
         self.window.usecase = self.default_use_case # indicate which use case currently
 
     def error_message_box(self):
+        """
+        Display error when user incorrectly upload file
+        """
         msg = QMessageBox()
         msg.setWindowTitle("Error on user defined settings")
         msg.setText("Please use appropriate model, image, and landmarks.")
@@ -481,12 +501,12 @@ class RightWidgetSettings(QFrame):
         self.fname_landmarks.user_define = False
         self.fname_images.user_define = False
         self.fname_model.user_define = False
-        self.window.left_widget.model_file_edit_text.setText("Default data selected")
-        self.window.left_widget.landmark_file_edit_text.setText("Default data selected")
-        self.window.left_widget.img_file_edit_text.setText("Default data selected")
-        
-        self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-        self.run_button.setText("Start")
+
+        # Reset file path as user incorrectly input them
+        self.window.left_widget.reset_file_edit_text()
+
+        self.restart() # restart run button
+
         # Display pop up message
         msg.exec_()
 
@@ -503,28 +523,26 @@ class RightWidgetSettings(QFrame):
         self.METHOD = "DQN"
         
         # load files into env to set num_actions, num_validation_files
-        # try:
-        init_player = MedicalPlayer(files_list=self.selected_list,
+        try:
+            init_player = MedicalPlayer(files_list=self.selected_list,
                                         data_type=self.default_use_case,
                                         screen_dims=IMAGE_SIZE,
                                         task='play')
             
-        self.NUM_ACTIONS = init_player.action_space.n
-        self.num_files = init_player.files.num_files
-        # Create a thread to run background task
-        self.worker_thread = WorkerThread(target_function=self.thread_function)
-        self.worker_thread.window = self.window
-        self.worker_thread.start()
+            self.NUM_ACTIONS = init_player.action_space.n
+            self.num_files = init_player.files.num_files
+            # Create a thread to run background task
+            self.worker_thread = WorkerThread(target_function=self.thread_function)
+            self.worker_thread.window = self.window
+            self.worker_thread.start()
 
         # If there is a problem with the loader, then user incorrectly add file
-        # except:
-            # self.terminal.appendHtml(f"<b><p style='color:red'> &#36; Error loading user defined settings. Please use appropriate model, image, and landmarks. </p></b>")
-            # self.error_message_box()
+        except:
+            self.terminal.appendHtml(f"<b><p style='color:red'> &#36; Error loading user defined settings. Please use appropriate model, image, and landmarks. </p></b>")
+            self.error_message_box()
         
-
     def thread_function(self):
         """Run on secondary thread"""
-
         pred = OfflinePredictor(PredictConfig(
             model=Model(IMAGE_SIZE, FRAME_HISTORY, self.METHOD, self.NUM_ACTIONS, GAMMA, ""),
             session_init=get_model_loader(self.fname_model.name),
@@ -548,14 +566,6 @@ class RightWidgetSettings(QFrame):
                                              task='eval'),
                                 pred, self.num_files, viewer=self.window)
 
-    @property
-    def window(self):
-        return self._window
-
-    @window.setter
-    def window(self, window):
-        self._window = window
-
 
 ###############################################################################
 ## Right Widget (Browse Mode)
@@ -568,10 +578,11 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.window = None
         self.thread = WorkerThread(None)
         self.thread.pause = False
+        
+        # Mounting by default is false
         self.mounted = False
-        self.data_type = "BrainMRI" # TODO
 
-        # initialise widgets
+        # Initialise widgets
         self.next_img = QPushButton('Next Image', self)
         self.HITL_mode = QCheckBox('Enable HITL',self)
         self.HITL_mode.setCheckable(True)
@@ -619,7 +630,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.fname_images = FilenamesGUI()
         self.fname_landmarks = FilenamesGUI()
 
-        ## Layout
+        # Layout
         gridArrows = QGridLayout()
         gridArrows.setSpacing(5)
         gridArrows.addWidget(self.upButton, 0, 1)
@@ -662,8 +673,8 @@ class RightWidgetSettingsBrowseMode(QFrame):
         # Flags for testing and env
         self.setStyleSheet("background:white")
 
+        # HITL related variable
         self.testing = False
-        self.test_click = None
         self.env = None
         self.HITL = False
         self.HITL_logger = []
@@ -728,25 +739,25 @@ class RightWidgetSettingsBrowseMode(QFrame):
     @pyqtSlot()
     def on_clicking_up(self):
         if self.env:
-            action = 1 if self.data_type != 'FetalUS' else 3
+            action = 1 if self.window.usecase != 'FetalUS' else 3
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_down(self):
         if self.env:
-            action = 4 if self.data_type != 'FetalUS' else 2
+            action = 4 if self.window.usecase != 'FetalUS' else 2
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_left(self):
         if self.env:
-            action = 3 if self.data_type != 'FetalUS' else 4
+            action = 3 if self.window.usecase != 'FetalUS' else 4
             self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_right(self):
         if self.env:
-            action = 2 if self.data_type != 'FetalUS' else 1
+            action = 2 if self.window.usecase != 'FetalUS' else 1
             self.move_img(action)
 
     @pyqtSlot()
@@ -776,8 +787,8 @@ class RightWidgetSettingsBrowseMode(QFrame):
     def load_img(self):
         self.selected_list = [self.fname_images, self.fname_landmarks]
         self.env = get_player(files_list=self.selected_list, viz=0.01,
-                        saveGif=False, saveVideo=False, task='browse',
-                        data_type=self.default_use_case)
+                             saveGif=False, saveVideo=False, task='browse',
+                            data_type=self.default_use_case)
         
         self.env.stepManual(act=-1, viewer=self.window)
         self.env.display()
@@ -812,10 +823,10 @@ class RightWidgetSettingsBrowseMode(QFrame):
             # To tell the program which loader it should use
             self.default_use_case = self.check_user_define_usecase(self.fname_images.name, self.fname_landmarks.name)
 
+            # If usecase is wrong
             if not self.default_use_case:
                 self.error_message_box()
                 self.default_use_case = self.which_usecase()
-                return
 
         self.window.usecase = self.default_use_case # indicate which use case currently
     
@@ -823,7 +834,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         """
         Check which usecase that the user wants
         """
-
         filename_img = filename_img.split("/")
         filename_landmark = filename_landmark.split("/")
 
@@ -841,6 +851,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
             return ""
     
     def error_message_box(self):
+        """
+        Error message if user incorrectly upload file
+        """
         msg = QMessageBox()
         msg.setWindowTitle("Error on user defined settings")
         msg.setText("Please use appropriate model, image, and landmarks.")
@@ -849,9 +862,8 @@ class RightWidgetSettingsBrowseMode(QFrame):
         # Clean up
         self.fname_landmarks.user_define = False
         self.fname_images.user_define = False
-        self.window.left_widget.model_file_edit_text.setText("Default data selected")
-        self.window.left_widget.landmark_file_edit_text.setText("Default data selected")
-        self.window.left_widget.img_file_edit_text.setText("Default data selected")
+
+        self.window.left_widget.reset_file_edit_text()
         
         # Display pop up message
         msg.exec_()
@@ -871,7 +883,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
                 return "FetalUS"
         # Else user specify
         else:
-            return "UserDefined"
+            return ""
 
     def show_HITL_msg(self):
         self.HITL_msg = QMessageBox()
@@ -909,7 +921,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         # Create pickle file
         now = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
         device_name = platform.node()
-        path = f'./data/HITL/log_{self.data_type}_{str(now)}_{device_name}.pickle'
+        path = f'./data/HITL/log_{self.window.usecase}_{str(now)}_{device_name}.pickle'
         with open(path, 'wb') as f:
             pickle.dump(self.env.HITL_logger, f)
 

@@ -54,7 +54,8 @@ class Window(QMainWindow):
         Main UI init element.
         """
         # Indication of usecase (data_type)
-        self.usecase = None # can be BrainMRI, CardiacMRI, or FetalUS
+        # Default: BrainMRI
+        self.usecase = "BrainMRI" # can be BrainMRI, CardiacMRI, or FetalUS
 
         # Status Bar
         self.statusbar = self.statusBar()
@@ -188,6 +189,7 @@ class LeftWidgetSettings(QFrame):
     """
     Left widget controlling GUI elements settings.
     """
+    DEFAULT_DATA_NOTIFICATION = "Default data selected"
 
     def __init__(self, window):
         super().__init__()
@@ -208,17 +210,17 @@ class LeftWidgetSettings(QFrame):
         # Load model settings
         self.model_file = QLabel('Load Model', self)
         self.model_file_edit = QPushButton('Browse', self)
-        self.model_file_edit_text = QLabel("Default data selected")
+        self.model_file_edit_text = QLabel(self.DEFAULT_DATA_NOTIFICATION)
 
         # Load landmark settings
         self.landmark_file = QLabel('Load Landmark', self)
         self.landmark_file_edit = QPushButton('Browse', self)
-        self.landmark_file_edit_text = QLabel("Default data selected")
+        self.landmark_file_edit_text = QLabel(self.DEFAULT_DATA_NOTIFICATION)
 
         # Upload image settings
         self.img_file = QLabel('Upload Image', self)
         self.img_file_edit = QPushButton('Browse', self)
-        self.img_file_edit_text = QLabel("Default data selected")
+        self.img_file_edit_text = QLabel(self.DEFAULT_DATA_NOTIFICATION)
 
         # Logo settings
         self.logo = QLabel()
@@ -289,6 +291,14 @@ class LeftWidgetSettings(QFrame):
         self.img_file_edit.clicked.connect(self.on_clicking_browse_images)
 
         self.testing = False
+    
+    def reset_file_edit_text(self):
+        """
+        Used to reset file edit text
+        """
+        self.model_file_edit_text.setText(self.DEFAULT_DATA_NOTIFICATION)
+        self.landmark_file_edit_text.setText(self.DEFAULT_DATA_NOTIFICATION)
+        self.img_file_edit_text.setText(self.DEFAULT_DATA_NOTIFICATION)
 
     def on_clicking_browse_model(self):
         """
@@ -360,7 +370,6 @@ class SimpleImageViewer(QWidget):
         self.arrs = arrs
         self.scale_x = scale_x
         self.scale_y = scale_y
-        self.display = display
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
         self.window = window
@@ -556,11 +565,11 @@ class SimpleImageViewer(QWidget):
             self.size_e = 25
 
     def get_imgs(self, arrs):
-        if self.data_type in ['BrainMRI', 'CardiacMRI']:
+        if self.window.usecase in ['BrainMRI', 'CardiacMRI']:
             cvImg = arrs[0].astype(np.uint8)
             cvImg_x = arrs[1].astype(np.uint8)
             cvImg_y = arrs[2].astype(np.uint8)
-        elif self.data_type == 'FetalUS':
+        elif self.window.usecase == 'FetalUS':
             cvImg = arrs[0].astype(np.uint8)
             cvImg_x = arrs[2].astype(np.uint8)
             cvImg_y = arrs[1].astype(np.uint8)
@@ -578,7 +587,7 @@ class SimpleImageViewer(QWidget):
                 need to do (x,y) -> (y,x) for agent coords
                 - Perform relevant rotation (i.e. 90 degrees ccw)
         '''
-        if self.data_type in ['BrainMRI', 'CardiacMRI']:
+        if self.window.usecase in ['BrainMRI', 'CardiacMRI']:
             _agent_loc = (agent_loc[0], self.height-agent_loc[1])
             if target is not None:
                 _target = (target[0], self.height-target[1])
@@ -586,7 +595,7 @@ class SimpleImageViewer(QWidget):
                 _target = None
             _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
 
-        elif self.data_type == 'FetalUS':
+        elif self.window.usecase == 'FetalUS':
             _agent_loc = agent_loc[1::-1]
             if target is not None:
                 _target = target[1::-1]
@@ -644,7 +653,7 @@ class SimpleImageViewer(QWidget):
         hw_ratio = abs(yLen / xLen)
 
         if self.task in ['eval','browse']:
-            w = 12 if self.data_type == 'BrainMRI' else 16
+            w = 12 if self.window.usecase == 'BrainMRI' else 16
             self.draw_point(target, self.color_t, width=w)
 
         self.draw_point(agent_loc, self.color_a)
