@@ -83,13 +83,13 @@ class Controller:
         self.viewer_param = get_viewer_data()
 
         # Initialise the right settings tab
-        self.right_settings = Tab()
-        self.right_settings.mounted = mounted
+        self.right_widget = Tab()
+        self.right_widget.mounted = mounted
 
         # Initialise the window
-        self.window = Window(self.viewer_param, self.right_settings)
-        self.right_settings.automatic_mode.window = self.window
-        self.right_settings.browse_mode.window = self.window
+        self.window = Window(self.viewer_param, self.right_widget)
+        self.right_widget.automatic_mode.window = self.window
+        self.right_widget.browse_mode.window = self.window
         
         # Show window
         self.window.show()
@@ -900,12 +900,6 @@ if __name__ == "__main__":
     ########################################################################
     # PyQt GUI Code Section
     # Define application and viewer to run on the main thread
-    # app = QApplication(sys.argv)
-    # viewer_param = get_viewer_data()
-    # right_settings = RightWidgetSettings()
-    # window = Window(viewer_param, right_settings)
-    #
-    # # window.left_widget.thread = thread
     controller = Controller()
     sys.exit(controller.app.exec_())
 
