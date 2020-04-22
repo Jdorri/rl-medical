@@ -61,7 +61,7 @@ class XMove(QFrame):
         self.right_widget = right_widget # pointer to parent
 
         # Initialise button
-        self.label = QLabel("X")
+        self.label = QLabel("<i> X </i>")
         self.up_button = QToolButton(self)
         self.up_button.setArrowType(Qt.UpArrow)
 
@@ -107,7 +107,7 @@ class YMove(QFrame):
         self.right_widget = right_widget # pointer to parent
 
         # Initialise button
-        self.label = QLabel("Y")
+        self.label = QLabel("<i> Y </i>")
         self.left_button = QToolButton(self)
         self.left_button.setArrowType(Qt.DownArrow)
 
@@ -154,7 +154,7 @@ class ZMove(QFrame):
         self.right_widget = right_widget # pointer to parent
 
         # Initialise button
-        self.label = QLabel("Z")
+        self.label = QLabel("<i> Z </i>")
         self.in_button = QToolButton(self)
         self.in_button.setArrowType(Qt.UpArrow)
 
