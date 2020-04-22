@@ -61,6 +61,7 @@ class XMove(QFrame):
         self.right_widget = right_widget # pointer to parent
 
         # Initialise button
+        self.label = QLabel("X")
         self.up_button = QToolButton(self)
         self.up_button.setArrowType(Qt.UpArrow)
 
@@ -70,7 +71,7 @@ class XMove(QFrame):
         # Setup layout
         vbox = QVBoxLayout()
         vbox.setSpacing(10)
-        vbox.addWidget(QLabel("X"))
+        vbox.addWidget(self.label)
         vbox.addWidget(self.up_button)
         vbox.addWidget(self.down_button)
 
@@ -81,7 +82,10 @@ class XMove(QFrame):
         self.down_button.clicked.connect(self.on_clicking_down)
 
         # CSS Styling
-        # TODO
+        self.label.setAlignment(Qt.AlignCenter)
+        vbox.setAlignment(Qt.AlignCenter)
+        self.setMaximumWidth(50)
+
 
     @pyqtSlot()
     def on_clicking_up(self):
@@ -103,6 +107,7 @@ class YMove(QFrame):
         self.right_widget = right_widget # pointer to parent
 
         # Initialise button
+        self.label = QLabel("Y")
         self.left_button = QToolButton(self)
         self.left_button.setArrowType(Qt.UpArrow)
 
@@ -112,7 +117,7 @@ class YMove(QFrame):
         # Setup layout
         vbox = QVBoxLayout()
         vbox.setSpacing(10)
-        vbox.addWidget(QLabel("Y"))
+        vbox.addWidget(self.label)
         vbox.addWidget(self.right_button)
         vbox.addWidget(self.left_button)
 
@@ -123,7 +128,10 @@ class YMove(QFrame):
         self.right_button.clicked.connect(self.on_clicking_right)
 
         # CSS Styling
-        # TODO
+        self.label.setAlignment(Qt.AlignCenter)
+        vbox.setAlignment(Qt.AlignCenter)
+        self.setMaximumWidth(50)
+
 
     @pyqtSlot()
     def on_clicking_left(self):
@@ -145,18 +153,20 @@ class ZMove(QFrame):
         self.right_widget = right_widget # pointer to parent
 
         # Initialise button
+        self.label = QLabel("Z")
         self.in_button = QToolButton(self)
         self.in_button.setArrowType(Qt.UpArrow)
 
         self.out_button = QToolButton(self)
-        self.out_button.setText(Qt.DownArrow)
+        self.out_button.setArrowType(Qt.DownArrow)
 
         # Setup layout
         vbox = QVBoxLayout()
         vbox.setSpacing(10)
-        vbox.addWidget(QLabel("Z"))
+        vbox.addWidget(self.label)
         vbox.addWidget(self.in_button)
         vbox.addWidget(self.out_button)
+        # vbox.setAlignment(Qt.AlignCenter)
 
         self.setLayout(vbox)
 
@@ -165,7 +175,9 @@ class ZMove(QFrame):
         self.out_button.clicked.connect(self.on_clicking_out)
 
         # CSS Styling
-        # TODO
+        self.label.setAlignment(Qt.AlignCenter)
+        vbox.setAlignment(Qt.AlignCenter)
+        self.setMaximumWidth(50)
 
     @pyqtSlot()
     def on_clicking_in(self):
@@ -175,7 +187,7 @@ class ZMove(QFrame):
 
     @pyqtSlot()
     def on_clicking_out(self):
-        if self.env:
+        if self.right_widget.env:
             action = 5
             self.right_widget.move_img(action)
         
@@ -228,18 +240,10 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.fname_images = FilenamesGUI()
         self.fname_landmarks = FilenamesGUI()
 
-        # # Layout
-        # gridArrows = QGridLayout()
-        # gridArrows.setSpacing(5)
-        # gridArrows.addWidget(self.inButton, 0, 3)
-        # gridArrows.addWidget(self.outButton, 2, 3)
-        # gridArrows.addWidget(self.zoomInButton, 0, 4)
-        # gridArrows.addWidget(self.zoomOutButton, 2, 4)
-
         ## Initialise layout
         # Widget for move actions
         hbox_action = QHBoxLayout()
-        hbox_action.setSpacing(20)
+        # hbox_action.setSpacing(20)
         hbox_action.addWidget(self.x_action)
         hbox_action.addWidget(self.y_action)
         hbox_action.addWidget(self.z_action)
@@ -255,8 +259,12 @@ class RightWidgetSettingsBrowseMode(QFrame):
         vbox.addWidget(QLabel("<i> Agent Actions </i>"))
         vbox.addLayout(hbox_action)
         vbox.addWidget(QLabel("<hr />"))
+        vbox.addWidget(QLabel("<i> Human-in-the-loop Settings </i>"))
+        vbox.addItem(QSpacerItem(0,10))
         vbox.addWidget(self.HITL_mode)
+        vbox.addItem(QSpacerItem(0,20))
         vbox.addLayout(hbox_image)
+        vbox.addStretch()
 
         self.setLayout(vbox)
 
@@ -265,6 +273,11 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.next_img.clicked.connect(self.on_clicking_nextImg)
         self.HITL_delete.clicked.connect(self.on_clicking_HITLDelete)
 
+        # CSS
+        self.x_action.setStyleSheet("border:2px solid #DD2501")
+        self.y_action.setStyleSheet("border:2px solid #66A40A")
+        self.z_action.setStyleSheet("border:2px solid #006EAF")
+        
         # Flags for testing and env
         self.setStyleSheet("background:white")
 
