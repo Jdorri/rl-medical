@@ -409,11 +409,17 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPalette(p)
         self.label_img_y.setPalette(p)
 
+        # 3D Plot settings
         self.fig = plt.figure(figsize=(3, 6))
         self.ax = self.fig.add_subplot(111, projection='3d')
         self.canvas = FigureCanvas(self.fig)
 
-        # Initiliase Grid
+        # Agent trajactories storage
+        self.x_traj = []
+        self.y_traj = []
+        self.z_traj = []
+
+        # Setup layout
         self.grid = QGridLayout()
         self.grid.addWidget(self.label_img, 0, 0)
         self.grid.addWidget(self.label_img_x, 0, 1)
@@ -423,7 +429,7 @@ class SimpleImageViewer(QWidget):
 
         self.setLayout(self.grid)
 
-        # Stylesheet
+        # Stylesheet settings
         self.label_img.setStyleSheet("background: black; border:3px solid #DD2501; ")
         self.label_img_x.setStyleSheet("background: black; border:3px solid #66A40A; ")
         self.label_img_y.setStyleSheet("background: black; border:3px solid #006EAF; ")
@@ -435,15 +441,10 @@ class SimpleImageViewer(QWidget):
         self.color_e = QColor(250, 250, 250)
         self.size_e = 18 
         self.line_width = 1
-
-        # agent trajactories
-        self.x_traj = []
-        self.y_traj = []
-        self.z_traj = []
     
     def reset(self):
         """
-        Reset
+        Reset the gui to black image (initial)
         """
         # Draw background image (brain)
         cvImg = self.arrs[0].astype(np.uint8)
@@ -497,8 +498,8 @@ class SimpleImageViewer(QWidget):
 
         # Draw rectangles and agent (overlay)
         self.painterInstance = QPainter(self.img)
-        # For rotation purposes
-        if self.data_type == 'FetalUS':
+        # Rotate if needed
+        if self.usecase == 'FetalUS':
             self.rotate = True
         _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
         self.drawer(_agent_loc, _rect, _target)
@@ -514,9 +515,11 @@ class SimpleImageViewer(QWidget):
         self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
 
+        # Draw error in evaluation and browser mode
         if self.task in ['eval','browse']:
             self.draw_error()
 
+        # Set image that has been drawn
         self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
@@ -541,17 +544,16 @@ class SimpleImageViewer(QWidget):
         self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4")
         self.canvas.draw()
 
-    def which_size(self):
+    def which_size_error_text(self):
+        """
+        Determine size of text depending on usecase
+        """
         if self.window.usecase == "BrainMRI":
             self.size_e = 18
         elif self.window.usecase == "CardiacMRI":
             self.size_e = 25
         else:
             self.size_e = 25
-
-        self.label_img.setAlignment(Qt.AlignCenter)
-        self.label_img_x.setAlignment(Qt.AlignCenter)
-        self.label_img_y.setAlignment(Qt.AlignCenter)
 
     def get_imgs(self, arrs):
         if self.data_type in ['BrainMRI', 'CardiacMRI']:
@@ -619,8 +621,10 @@ class SimpleImageViewer(QWidget):
         self.painterInstance = QPainter(self.img)
         pen = QPen(self.color_e)
         self.painterInstance.setPen(pen)
-        self.which_size() # determine size of pen
+        self.which_size_error_text() # determine size of pen
         self.painterInstance.setFont(QFont("Arial", self.size_e))
+        
+        # Change positioning of error label depending on usecase
         if self.window.usecase in {"BrainMRI", "CardiacMRI"}:
             self.painterInstance.drawText(0, 30, f"Error: {self.error:.2f} mm")
         else:
@@ -738,7 +742,7 @@ class SimpleImageViewer(QWidget):
             self.painterInstance.drawLine(k['loc'], k['loc'] + corner_len * k['d1'])
             self.painterInstance.drawLine(k['loc'], k['loc'] + corner_len * k['d2'])
 
-        # # Annotate rectangle
+        # # Annotate rectangle (uncomment if wish to use this)
         # self.painterInstance.setFont(QFont('Decorative', max(abs(yLen)//12, 15)))
         # self.painterInstance.drawText(xPos, yPos-8, "Agent ROI")
 
@@ -751,7 +755,7 @@ class SimpleImageViewer(QWidget):
     @pyqtSlot(dict)
     def agent_signal_handler(self, value):
         """
-        Used to handle agent signal when it moves.
+        Used to handle agent signal when agent moves.
         """
         self.scale = value["scale"]
         self.task = value["task"]
