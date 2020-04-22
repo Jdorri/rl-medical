@@ -249,6 +249,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         hbox_action.addWidget(self.x_action)
         hbox_action.addWidget(self.y_action)
         hbox_action.addWidget(self.z_action)
+        hbox_action.addStretch()
 
         # Widget zoom in and zoom out
         hbox_zoom = QHBoxLayout()
