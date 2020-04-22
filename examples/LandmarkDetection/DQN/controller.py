@@ -18,7 +18,7 @@ warnings.simplefilter("ignore", category=PendingDeprecationWarning)
 
 import sys
 
-from viewer import SimpleImageViewer, Window
+from window import Window
 from right_widget_automatic import RightWidgetSettings
 from right_widget_browse import RightWidgetSettingsBrowseMode
 
