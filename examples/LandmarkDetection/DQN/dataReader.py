@@ -12,7 +12,7 @@ import SimpleITK as sitk
 from tensorpack import logger
 from IPython.core.debugger import set_trace
 import os
-# from scipy.spatial.transform import Rotation
+from scipy import ndimage
 
 __all__ = ['filesListBrainMRLandmark', 'filesListCardioLandmark', 'filesListFetalUSLandmark', 'NiftiImage']
 
@@ -329,15 +329,6 @@ class NiftiImage(object):
             sitk_image = sitk.ReadImage(image.name, sitk.sitkFloat32)
             np_image = sitk.GetArrayFromImage(sitk_image)
 
-            # vert_align = all(i < 0 for i in sitk_image.GetOrigin())
-            # if vert_align and is_cardiac:
-            #     print('Rotated')
-            #     # rot = Rotation.from_rotvec([0,0,np.pi/2])
-            #     rot = np.array([[ 0, 1, 0],
-            #                     [-1, 0, 0],
-            #                     [ 0, 0, 1]])
-            #     np_image = np_image @ rot
-
             # threshold image between p10 and p98 then re-scale [0-255]
             p0 = np_image.min().astype('float')
             p10 = np.percentile(np_image, 10)
@@ -358,6 +349,11 @@ class NiftiImage(object):
 
         # Convert from [depth, width, height] to [width, height, depth]
         image.data = sitk.GetArrayFromImage(sitk_image).transpose(2, 1, 0)  # .astype('uint8')
-        image.dims = np.shape(image.data)
+        image.dims = image.data.shape
 
+        # Align caridac images so all are horizontal
+        if is_cardiac and all(i < 0 for i in sitk_image.GetOrigin()):
+            image.data = ndimage.rotate(image.data, -90, axes=(0,1), reshape=True)
+            image.dims = image.data.shape
+        
         return sitk_image, image
