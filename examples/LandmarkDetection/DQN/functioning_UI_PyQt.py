@@ -158,8 +158,8 @@ class Tab(QFrame):
             self.browse_mode.window.left_widget.model_file_edit_text.show()
             
             # Pass loaded user data
-            filenames_GUI.copy(self.browse_mode.fname_images, self.automatic_mode.fname_images)
-            filenames_GUI.copy(self.browse_mode.fname_landmarks, self.automatic_mode.fname_landmarks)
+            FilenamesGUI.copy(self.browse_mode.fname_images, self.automatic_mode.fname_images)
+            FilenamesGUI.copy(self.browse_mode.fname_landmarks, self.automatic_mode.fname_landmarks)
 
         # If browse mode is selected, reset image and other relevant flags
         else:
@@ -176,8 +176,8 @@ class Tab(QFrame):
             self.browse_mode.window.left_widget.model_file_edit_text.hide()
 
             # Pass loaded user data
-            filenames_GUI.copy(self.automatic_mode.fname_images, self.browse_mode.fname_images)
-            filenames_GUI.copy(self.automatic_mode.fname_landmarks, self.browse_mode.fname_landmarks)
+            FilenamesGUI.copy(self.automatic_mode.fname_images, self.browse_mode.fname_images)
+            FilenamesGUI.copy(self.automatic_mode.fname_landmarks, self.browse_mode.fname_landmarks)
     
     def get_mode(self):
         """
@@ -190,12 +190,13 @@ class Tab(QFrame):
 
 
 ###############################################################################
-## Right Widget (Automatic Mode)
+## FilenamesGUI
+# Used to store file path
 
-class filenames_GUI:
+class FilenamesGUI:
     def __init__(self):
-        self.user_define = False
-        self.name = ""
+        self.user_define = False # indication whether user has load anything
+        self.name = "" # name of the file
     
     @staticmethod
     def copy(file1, file2):
@@ -204,6 +205,10 @@ class filenames_GUI:
         """
         file2.name = file1.name
         file2.user_define = file1.user_define
+
+
+###############################################################################
+## Right Widget (Automatic Mode)
 
 class RightWidgetSettings(QFrame):
     terminal_signal = pyqtSignal(dict)
@@ -218,9 +223,9 @@ class RightWidgetSettings(QFrame):
         self.window = None
 
         # Placeholder for GUI file names, status
-        self.fname_images = filenames_GUI()
-        self.fname_landmarks = filenames_GUI()
-        self.fname_model = filenames_GUI()
+        self.fname_images = FilenamesGUI()
+        self.fname_landmarks = FilenamesGUI()
+        self.fname_model = FilenamesGUI()
 
         # Task
         self.task = QLabel('<i> Task </i>', self)
@@ -611,8 +616,8 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.zoomOutButton.setFont(font)
 
         # Placeholder for GUI filenames
-        self.fname_images = filenames_GUI()
-        self.fname_landmarks = filenames_GUI()
+        self.fname_images = FilenamesGUI()
+        self.fname_landmarks = FilenamesGUI()
 
         ## Layout
         gridArrows = QGridLayout()
