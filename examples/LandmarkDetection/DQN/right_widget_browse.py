@@ -109,10 +109,10 @@ class YMove(QFrame):
         # Initialise button
         self.label = QLabel("Y")
         self.left_button = QToolButton(self)
-        self.left_button.setArrowType(Qt.UpArrow)
+        self.left_button.setArrowType(Qt.DownArrow)
 
         self.right_button = QToolButton(self)
-        self.right_button.setArrowType(Qt.DownArrow)
+        self.right_button.setArrowType(Qt.UpArrow)
 
         # Setup layout
         vbox = QVBoxLayout()
@@ -276,9 +276,33 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.HITL_delete.clicked.connect(self.on_clicking_HITLDelete)
 
         # CSS
-        self.x_action.setStyleSheet("QFrame {border:2px solid #DD2501}")
-        self.y_action.setStyleSheet("QFrame {border:2px solid #66A40A}")
-        self.z_action.setStyleSheet("QFrame {border:2px solid #006EAF}")
+        self.x_action.setStyleSheet("""
+        QFrame {
+            border:2px solid #DD2501
+        }
+
+        QToolButton {
+            background: white;
+            border: none;
+            color: black !important;
+        }
+        """)
+        self.y_action.setStyleSheet("""
+        QFrame {border:2px solid #66A40A}
+        QToolButton {
+            background: white;
+            border: none;
+            color: black !important;
+        }
+        """)
+        self.z_action.setStyleSheet("""
+        QFrame {border:2px solid #006EAF}
+        QToolButton {
+            background: white;
+            border: none;
+            color: black !important;
+        }
+        """)
         
         # Flags for testing and env
         self.setStyleSheet("background:white")
