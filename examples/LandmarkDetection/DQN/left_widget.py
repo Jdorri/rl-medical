@@ -116,9 +116,49 @@ class LeftWidgetSettings(QFrame):
         self.model_file_edit.clicked.connect(self.on_clicking_browse_model)
         self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
         self.img_file_edit.clicked.connect(self.on_clicking_browse_images)
+        self.brain_button.toggled.connect(self.on_clicking_brain)
+        self.cardiac_button.toggled.connect(self.on_clicking_cardiac)
+        self.ultrasound_button.toggled.connect(self.on_clicking_ultrasound)
 
         self.testing = False
     
+    def on_clicking_brain(self):
+        """
+        Handle event when brain button is clicked
+        """
+        # If browse mode, change picture
+        if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
+            # Save HITL status
+            self.window.right_widget.save_HITL()
+            self.window.right_widget.browse_mode.set_paths()
+            self.window.right_widget.browse_mode.load_img()
+            self.window.right_widget.browse_mode.window.widget.clear_3d()
+
+    
+    def on_clicking_ultrasound(self):
+        """
+        Handle event when ultrasound button is clicked
+        """
+        # If browse mode, change picture
+        if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
+            # Save HITL status
+            self.window.right_widget.save_HITL()
+            self.window.right_widget.browse_mode.set_paths()
+            self.window.right_widget.browse_mode.load_img()
+            self.window.right_widget.browse_mode.window.widget.clear_3d()
+    
+    def on_clicking_cardiac(self):
+        """
+        Handle event when brain button is clicked
+        """
+        # If browse mode, change picture
+        if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
+            # Save HITL status
+            self.window.right_widget.save_HITL()
+            self.window.right_widget.browse_mode.set_paths()
+            self.window.right_widget.browse_mode.load_img()
+            self.window.right_widget.browse_mode.window.widget.clear_3d()
+
     def reset_file_edit_text(self):
         """
         Used to reset file edit text
