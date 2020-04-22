@@ -77,14 +77,13 @@ EVAL_EPISODE = 50
 # Responsible to run the entire application
 
 class Controller:
-    def __init__(self, display=True, mounted=False):
+    def __init__(self, display=True):
         self.window = None # Application window
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
 
         # Initialise the right settings tab
         self.right_widget = Tab()
-        self.right_widget.mounted = mounted
 
         # Initialise the window
         self.window = Window(self.viewer_param, self.right_widget)
@@ -100,18 +99,17 @@ class Controller:
 # Responsible to integrate automatic mode and browse mode through tab functionality
 
 class Tab(QFrame):
+    AUTOMATIC_MODE = "AUTOMATIC"
+    BROWSE_MODE = "BROWSE"
+
     def __init__(self):
         super().__init__()
-        self.mounted = False # by default mounted = false, will be updated later
-
         # Create tab widget that integrates automatic and browse mode
         self.tab_widget = QTabWidget()
 
         # Right widgets initialisation
         self.automatic_mode = RightWidgetSettings()
         self.browse_mode = RightWidgetSettingsBrowseMode()
-        self.automatic_mode.mounted = self.mounted
-        self.browse_mode.mounted = self.mounted
 
         # Tab settings
         self.tab_widget.addTab(self.automatic_mode, "Automatic Mode")
@@ -141,30 +139,43 @@ class Tab(QFrame):
     def on_change(self, index):
         # If automatic mode is selected, reset image and other relevant flags
         if index == 0:
+            # Save HITL status
             self.save_HITL()
+
+            # Manage threading
             self.automatic_mode.thread.terminate = False
             self.automatic_mode.thread.pause = False
+            
+            # Reset SimpleImageViewer widget
             self.automatic_mode.window.widget.reset()
-            self.automatic_mode.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-            self.automatic_mode.run_button.setText("Start")
+
+            # Reset right widget
+            self.automatic_mode.restart()
+
+            # Reset left widget
             self.browse_mode.window.left_widget.model_file.show()
             self.browse_mode.window.left_widget.model_file_edit.show()
             self.browse_mode.window.left_widget.model_file_edit_text.show()
             
-            # Pass the data
+            # Pass loaded user data
             filenames_GUI.copy(self.browse_mode.fname_images, self.automatic_mode.fname_images)
             filenames_GUI.copy(self.browse_mode.fname_landmarks, self.automatic_mode.fname_landmarks)
 
         # If browse mode is selected, reset image and other relevant flags
         else:
+            # Manage threading
             self.automatic_mode.thread.terminate = True
+            
+            # Reset SimpleImageViewer widget
             self.browse_mode.set_paths()
             self.browse_mode.load_img()
+
+            # Reset Left widget
             self.browse_mode.window.left_widget.model_file.hide()
             self.browse_mode.window.left_widget.model_file_edit.hide()
             self.browse_mode.window.left_widget.model_file_edit_text.hide()
 
-            # Pass data
+            # Pass loaded user data
             filenames_GUI.copy(self.automatic_mode.fname_images, self.browse_mode.fname_images)
             filenames_GUI.copy(self.automatic_mode.fname_landmarks, self.browse_mode.fname_landmarks)
     
@@ -173,9 +184,9 @@ class Tab(QFrame):
         Used to find application mode (automatic or browse)
         """
         if self.tab_widget.currentIndex() == 0:
-            return "AUTOMATIC"
+            return self.AUTOMATIC_MODE
         else:
-            return "BROWSE"
+            return self.BROWSE_MODE
 
 
 ###############################################################################
@@ -280,6 +291,13 @@ class RightWidgetSettings(QFrame):
         self.terminate_button.setStyleSheet("background-color:#f44336; color:white")
 
         self.show()
+    
+    def restart(self):
+        """
+        Used to restart the start button
+        """
+        self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
+        self.run_button.setText("Start")
     
     @pyqtSlot(int)
     def changeValue(self, value):

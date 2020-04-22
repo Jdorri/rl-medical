@@ -134,7 +134,7 @@ class Window(QMainWindow):
         Different actions for different keyPressEvents.
         Allows the user to move through the image by using arrow keys.
         """
-        if self.right_widget.get_mode() == 'BROWSE' and self.right_widget.browse_mode.env:
+        if self.right_widget.get_mode() == self.right_widget.BROWSE_MODE and self.right_widget.browse_mode.env:
             if event.key() in {Qt.Key_W, Qt.Key_Up}:
                 self.right_widget.browse_mode.on_clicking_up()
             elif event.key() in {Qt.Key_S, Qt.Key_Down}:
@@ -169,7 +169,7 @@ class Window(QMainWindow):
         
         # Save HITL file
         try:
-            if self.right_widget.get_mode() == 'BROWSE':
+            if self.right_widget.get_mode() == self.right_widget.BROWSE_MODE:
                 if self.right_widget.browse_mode.HITL and self.right_widget.browse_mode.env:
                     self.right_widget.browse_mode.save_HITL()
         except AttributeError:
