@@ -13,8 +13,6 @@ from tensorpack.tfutils import (
 from tensorpack.tfutils.scope_utils import auto_reuse_variable_scope
 
 
-
-
 class Model2D(ModelDesc):
     def __init__(self, image_shape, channel, method, num_actions, gamma):
         """

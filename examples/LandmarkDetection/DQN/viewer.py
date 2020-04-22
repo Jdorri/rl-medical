@@ -221,7 +221,7 @@ class LeftWidgetSettings(QFrame):
 
         # Logo settings
         self.logo = QLabel()
-        pixmap_logo = QPixmap("imperial_logo.png")
+        pixmap_logo = QPixmap("./images/imperial_logo.png")
         pixmap_logo = pixmap_logo.scaledToHeight(50)
         self.logo.setPixmap(pixmap_logo)
         
