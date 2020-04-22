@@ -355,6 +355,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
     def on_clicking_nextImg(self):
         self.env.reset()
         self.move_img(-1)
+        self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Next Image </p></b>")        
 
         # If doing HITL, 50/50 chance for the resultion to start on 2 or 3 (otherwise resolution=2 tends to get negleted)
         if self.HITL and np.random.choice(2):
@@ -405,6 +406,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         # Remove the current episode and load a new image
         if result == QMessageBox.Yes:
+            self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Delete Episode </p></b>")        
             self.on_clicking_nextImg()
             self.env.HITL_logger.pop()
 

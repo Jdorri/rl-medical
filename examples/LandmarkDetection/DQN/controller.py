@@ -112,6 +112,7 @@ class Tab(QFrame):
             # Pass loaded user data
             FilenamesGUI.copy(self.browse_mode.fname_images, self.automatic_mode.fname_images)
             FilenamesGUI.copy(self.browse_mode.fname_landmarks, self.automatic_mode.fname_landmarks)
+            self.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Automatic Mode </p></b>")        
 
         # If browse mode is selected, reset image and other relevant flags
         else:
@@ -131,6 +132,7 @@ class Tab(QFrame):
             # Pass loaded user data
             FilenamesGUI.copy(self.automatic_mode.fname_images, self.browse_mode.fname_images)
             FilenamesGUI.copy(self.automatic_mode.fname_landmarks, self.browse_mode.fname_landmarks)
+            self.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Browse Mode </p></b>")        
 
     def get_mode(self):
         """
