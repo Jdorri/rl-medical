@@ -276,6 +276,27 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.HITL_delete.clicked.connect(self.on_clicking_HITLDelete)
 
         # CSS
+        self.setStyleSheet("""
+            QPushButton:disabled {
+                background: white;
+                color: grey;
+            }
+
+            QPushButton{
+                background: #f44336;
+                color: white;
+            }
+
+            QFrame {
+                background: white;
+            }
+
+            QCheckBox{
+                background: white
+            }
+        """)
+
+        self.next_img.setStyleSheet("background: orange; color:white")
         self.x_action.setStyleSheet("""
         QFrame {
             border:2px solid #DD2501
@@ -304,9 +325,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         }
         """)
         
-        # Flags for testing and env
-        self.setStyleSheet("background:white")
-
         # HITL related variable
         self.testing = False
         self.env = None
