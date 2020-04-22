@@ -15,8 +15,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys
-from thread import WorkerThread
-from functools import partial
 
 from matplotlib.backends.qt_compat import QtCore, QtWidgets
 from matplotlib.backends.backend_qt5agg import (
@@ -33,350 +31,6 @@ except ImportError as e:
 
 
 ################################################################################
-## Main Window
-# Integrate GUI application widgets and provide menus and windows functionalities.
-
-class Window(QMainWindow):
-    """
-    Window used as the main window for the application which integrate different widgets.
-    """
-    # Signal for browse/ manual mode
-    # Captures key pressed that will be used to store data for Human-in-the loop
-    key_pressed = pyqtSignal(QEvent)
-
-    def __init__(self, viewer_param, right_settings=None, data_type="BrainMRI"):
-        super().__init__()
-        self.initUI(viewer_param, right_settings, data_type)
-        self.key_pressed.connect(self.on_key)
-
-    def initUI(self, viewer_param, right_settings, data_type):
-        """
-        Main UI init element.
-        """
-        # Indication of usecase
-        self.usecase = None
-
-        # Status Bar
-        self.statusbar = self.statusBar()
-        self.statusbar.showMessage("Ready")
-
-        # Menu Bar
-        self.initMenu()
-
-        # Image widget (main widget)
-        self.widget = SimpleImageViewer(arr=np.zeros(viewer_param["arrs"][0].shape),
-                                   arr_x=np.zeros(viewer_param["arrs"][1].shape),
-                                   arr_y=np.zeros(viewer_param["arrs"][2].shape),
-                                   filepath=viewer_param["filepath"],
-                                   window=self,
-                                   data_type=data_type)
-
-        # Left Settings widget
-        if right_settings:
-            self.left_widget = LeftWidgetSettings(self)
-        else:
-            self.left_widget = LeftWidgetSettings(self)
-        self.left_widget.setFrameShape(QFrame.StyledPanel)
-
-        # Right Settings widget
-        if right_settings:
-            self.right_widget = right_settings
-        self.right_widget.setFrameShape(QFrame.StyledPanel)
-
-        # Manage layout
-        self.grid = QGridLayout()
-        self.grid.addWidget(self.right_widget, 0, 11, 1, 1)
-        self.grid.addWidget(self.left_widget, 0, 0, 1, 1) # (x, y, rowspan, colspan)
-        self.grid.addWidget(self.widget, 0, 1, 1, 10)
-
-        self.layout_widget = QWidget()
-        self.layout_widget.setLayout(self.grid)
-        self.setCentralWidget(self.layout_widget)
-
-        # Geometric window position and general setting
-        self.showMaximized()
-        self.setWindowTitle('Anatomical Landmark Detection')
-        self.menubar.setStyleSheet("background:#003E74; color:white; padding: 5px 0")
-        self.statusbar.setStyleSheet("background:#003E74; color:white")
-        self.setStyleSheet("background: white")
-        self.show()
-
-    def initMenu(self):
-        """
-        Used to initialise components related to menu bar.
-        """
-        # Menubar
-        self.menubar = self.menuBar()
-
-        # File menu
-        file_menu = self.menubar.addMenu('&File')
-        # Exit action in a file
-        exitAct = QAction('Exit', self)
-        exitAct.setShortcut('Ctrl+Q')
-        exitAct.setStatusTip('Exit application')
-        exitAct.triggered.connect(self.close)
-        file_menu.addAction(exitAct)
-
-        # TODO: Add additional functionalities to menu bar
-        # Terminal menu
-        terminal_menu = self.menubar.addMenu("&Terminal")
-
-        # View menu
-        view_menu = self.menubar.addMenu("&View")
-
-        # Night mode action
-        nightModeAct = QAction("Night mode", self, checkable=True)
-        nightModeAct.setStatusTip("Change layout to night mode")
-        nightModeAct.triggered.connect(self.toggleMenu)
-        view_menu.addAction(nightModeAct)
-
-        # Help menu
-        help_menu = self.menubar.addMenu("&Help")
-
-    def nightMode(self):
-        "CSS Styling for night mode app version"
-        # Overwrite widgets color
-        self.setStyleSheet("background-color:black; color:white")
-        self.left_widget.setStyleSheet("background-color:#1c1c1c")
-
-    def dayMode(self):
-        "CSS Styling for day mode app version"
-        # Overwrite widgets color
-        self.setStyleSheet("background-color:white; color:black")
-        self.left_widget.setStyleSheet("background-color:white")
-
-    def toggleMenu(self, state):
-        "Event handler for toggle menu"
-        if state:
-            self.nightMode()
-        else:
-            self.dayMode()
-
-    @pyqtSlot(QEvent)
-    def keyPressEvent(self, event):
-        super().keyPressEvent(event)
-        self.key_pressed.emit(event)
-
-    def on_key(self, event):
-        """
-        Event handler methods for manual browsing functionality.
-        Different actions for different keyPressEvents.
-        Allows the user to move through the image by using arrow keys.
-        """
-        if self.right_widget.get_mode() == 'BROWSE' and self.right_widget.browse_mode.env:
-            if event.key() in {Qt.Key_W, Qt.Key_Up}:
-                self.right_widget.browse_mode.on_clicking_up()
-            elif event.key() in {Qt.Key_S, Qt.Key_Down}:
-                self.right_widget.browse_mode.on_clicking_down()
-            elif event.key() in {Qt.Key_A, Qt.Key_Left}:
-                self.right_widget.browse_mode.on_clicking_left()
-            elif event.key() in {Qt.Key_D, Qt.Key_Right}:
-                self.right_widget.browse_mode.on_clicking_right()
-            elif event.key() == Qt.Key_X:
-                self.right_widget.browse_mode.on_clicking_zoomIn()
-            elif event.key() == Qt.Key_Z:
-                self.right_widget.browse_mode.on_clicking_zoomOut()
-        
-            # Browse mode key bindings (original)
-            # if event.key() == Qt.Key_S:
-            #     self.right_widget.on_clicking_in()
-            # elif event.key() == Qt.Key_A:
-            #     self.right_widget.on_clicking_out()
-            # elif event.key() == Qt.Key_Up:
-            #     self.right_widget.on_clicking_up()
-            # elif event.key() == Qt.Key_Down:
-            #     self.right_widget.on_clicking_down()
-            # elif event.key() == Qt.Key_Left:
-            #     self.right_widget.on_clicking_left()
-            # elif event.key() == Qt.Key_Right:
-            #     self.right_widget.on_clicking_right()
-            # elif event.key() == Qt.Key_Space:
-            #     self.right_widget.on_clicking_nextImg()
-            # elif event.key() == Qt.Key_Equal:
-            #     self.right_widget.on_clicking_zoomIn()
-            # elif event.key() == Qt.Key_Minus:
-            #     self.right_widget.on_clicking_zoomOut()
-
-            # HITL mode additional key bindings
-            if self.right_widget.browse_mode.HITL_mode.isChecked():
-                if event.key() == Qt.Key_Backspace:
-                    self.right_widget.browse_mode.on_clicking_HITLDelete()
-
-    def closeEvent(self, event):
-        """
-        Used to override close event and provide warning when closing application
-        """
-        reply = QMessageBox.question(self, 'Message',
-            "Are you sure to quit?", QMessageBox.Yes |
-            QMessageBox.No, QMessageBox.Yes)
-        
-        try:
-            if self.right_widget.get_mode() == 'BROWSE':
-                if self.right_widget.browse_mode.HITL and self.right_widget.browse_mode.env:
-                    self.right_widget.browse_mode.save_HITL()
-        except AttributeError:
-            pass
-
-        if reply == QMessageBox.Yes:
-            event.accept()
-        else:
-            event.ignore()
-
-################################################################################
-## Left Widget
-# Control several of main application functionalities (positioned on the left of image widget).
-
-class LeftWidgetSettings(QFrame):
-    """
-    Left widget controlling GUI elements settings.
-    """
-
-    def __init__(self, window):
-        super().__init__()
-        # Window object to access windows components
-        self.window = window # Store window object to enable control over windows functionality
-        
-        self.title = QLabel("<b> Settings </b>")
-
-        ## Default file mode
-        self.simple_title = QLabel("<i> Load Default Data </i>")
-        self.brain_button = QRadioButton("Brain")
-        self.cardiac_button = QRadioButton("Cardiac")
-        self.ultrasound_button = QRadioButton("Ultrasound")
-        self.brain_button.setChecked(True)
-
-        ## Advance file mode
-        self.advance_title = QLabel("<i> Load Custom Data </i>")
-        # Load model settings
-        self.model_file = QLabel('Load Model', self)
-        self.model_file_edit = QPushButton('Browse', self)
-        self.model_file_edit_text = QLabel("Default data selected")
-
-        # Load landmark settings
-        self.landmark_file = QLabel('Load Landmark', self)
-        self.landmark_file_edit = QPushButton('Browse', self)
-        self.landmark_file_edit_text = QLabel("Default data selected")
-
-        # Upload image settings
-        self.img_file = QLabel('Upload Image', self)
-        self.img_file_edit = QPushButton('Browse', self)
-        self.img_file_edit_text = QLabel("Default data selected")
-
-        # Logo settings
-        self.logo = QLabel()
-        pixmap_logo = QPixmap("imperial_logo.png")
-        pixmap_logo = pixmap_logo.scaledToHeight(50)
-        self.logo.setPixmap(pixmap_logo)
-        
-        ## Manage layout
-        # Default data settings layout
-        hbox_simple = QHBoxLayout()
-        hbox_simple.setSpacing(20)
-        hbox_simple.addWidget(self.brain_button)
-        hbox_simple.addWidget(self.cardiac_button)
-        hbox_simple.addWidget(self.ultrasound_button)
-
-        # Browse + Layout
-        hbox_model = QHBoxLayout()
-        hbox_model.setSpacing(20)
-        hbox_model.addWidget(self.model_file_edit)
-        hbox_model.addWidget(self.model_file_edit_text)
-        
-        hbox_image = QHBoxLayout()
-        hbox_image.setSpacing(20)
-        hbox_image.addWidget(self.img_file_edit)
-        hbox_image.addWidget(self.img_file_edit_text)
-
-        hbox_landmark = QHBoxLayout()
-        hbox_landmark.setSpacing(20)
-        hbox_landmark.addWidget(self.landmark_file_edit)
-        hbox_landmark.addWidget(self.landmark_file_edit_text)
-
-        # Main Layout
-        vbox = QVBoxLayout()
-        vbox.setSpacing(20)
-        vbox.addWidget(self.title)
-        vbox.addWidget(self.simple_title)
-        vbox.addLayout(hbox_simple)
-        vbox.addWidget(QLabel("<hr />"))
-        vbox.addWidget(self.advance_title)
-        vbox.addWidget(self.img_file)
-        vbox.addLayout(hbox_image)
-        vbox.addItem(QSpacerItem(300, 20))
-        vbox.addWidget(self.landmark_file)
-        vbox.addLayout(hbox_landmark)
-        vbox.addItem(QSpacerItem(300, 20))
-        vbox.addWidget(self.model_file)
-        vbox.addLayout(hbox_model)
-        vbox.addStretch()
-        vbox.addWidget(self.logo)
-
-        self.setLayout(vbox)
-        self.setStyleSheet("""
-            QPushButton {
-                background: #006EAF; 
-                color: white
-            }
-
-            QFrame, QRadioButton {
-                background: #EBEEEE;
-            }
-            """)
-
-        # Event handler connection
-        self.model_file_edit.clicked.connect(self.on_clicking_browse_model)
-        self.landmark_file_edit.clicked.connect(self.on_clicking_browse_landmarks)
-        self.img_file_edit.clicked.connect(self.on_clicking_browse_images)
-
-        self.testing = False
-
-    def on_clicking_browse_model(self):
-        if not self.testing:
-            self.fname_model = QFileDialog.getOpenFileName(self, "Browse Model",
-                "./data/models/", filter="*.data-*")
-            # Set text to label
-            filename = self.fname_model[0].split("/")
-            self.model_file_edit_text.setText(filename[-1])
-
-            # Indicate that user has make a selection
-            self.window.right_widget.automatic_mode.fname_model.user_define = True
-            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Model: {filename[-1]} </p></b>")
-
-            # Indicate appropriate path
-            self.fname_model = "./data/models/" + filename[-2] + "/" + filename[-1]
-
-    def on_clicking_browse_landmarks(self):
-        if not self.testing:
-            self.fname_landmarks = QFileDialog.getOpenFileName(self, "Browse Landmark",
-                "./data/filenames", filter="txt files (*landmark*.txt)")
-            # Set text to label
-            filename = self.fname_landmarks[0].split("/")
-            self.landmark_file_edit_text.setText(filename[-1])
-
-            # Indicate that user has make a selection
-            self.window.right_widget.automatic_mode.fname_landmarks.user_define = True
-            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
-
-            # Indicate appropriate path
-            self.fname_landmarks = "./data/filenames/" + filename[-1]
-
-    def on_clicking_browse_images(self):
-        if not self.testing:
-            self.fname_images = QFileDialog.getOpenFileName(self, "Browse Image",
-                "./data/filenames", filter="txt files (*test_files*.txt)")
-            # Set text to label
-            filename = self.fname_images[0].split("/")
-            self.img_file_edit_text.setText(filename[-1])
-
-            # Indicate that user has make a selection
-            self.window.right_widget.automatic_mode.fname_images.user_define = True
-            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
-
-            # Indicate appropriate path
-            self.fname_images = "./data/filenames/" + filename[-1]
-
-
-################################################################################
 ## Main Widget
 # Responsible to draw images specified by settings and visualise agent's movement.
 
@@ -386,19 +40,16 @@ class SimpleImageViewer(QWidget):
     """
     agent_signal = pyqtSignal(dict) # Signaling agent move (current location, status)
 
-    def __init__(self, arr, arr_x, arr_y, scale_x=1, scale_y=1, filepath=None, display=None, window=None, data_type="BrainMRI"):
-
+    def __init__(self, arrs, scale_x=1, scale_y=1, filepath=None, window=None):
         super().__init__()
-        self.arrs = [arr, arr_x, arr_y]
-        self.setStyleSheet("background: white")
-        self.isopen = False
+        self.arrs = arrs
         self.scale_x = scale_x
         self.scale_y = scale_y
-        self.display = display
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
         self.window = window
-        self.data_type = data_type
+        
+        # Rotation flag (mainly for fetal)
         self.rotate = False
 
         # Set image formatting and get shape
@@ -442,11 +93,17 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPalette(p)
         self.label_img_y.setPalette(p)
 
+        # 3D Plot settings
         self.fig = plt.figure(figsize=(3, 6))
         self.ax = self.fig.add_subplot(111, projection='3d')
         self.canvas = FigureCanvas(self.fig)
 
-        # Initiliase Grid
+        # Agent trajactories storage
+        self.x_traj = []
+        self.y_traj = []
+        self.z_traj = []
+
+        # Setup layout
         self.grid = QGridLayout()
         self.grid.addWidget(self.label_img, 0, 0)
         self.grid.addWidget(self.label_img_x, 0, 1)
@@ -456,10 +113,11 @@ class SimpleImageViewer(QWidget):
 
         self.setLayout(self.grid)
 
-        # Stylesheet
+        # Stylesheet settings
         self.label_img.setStyleSheet("background: black; border:3px solid #DD2501; ")
         self.label_img_x.setStyleSheet("background: black; border:3px solid #66A40A; ")
         self.label_img_y.setStyleSheet("background: black; border:3px solid #006EAF; ")
+        self.setStyleSheet("background: white")
 
         # Style settings
         self.color_a = QColor(111, 230, 158)
@@ -467,15 +125,10 @@ class SimpleImageViewer(QWidget):
         self.color_e = QColor(250, 250, 250)
         self.size_e = 18 
         self.line_width = 1
-
-        # agent trajactories
-        self.x_traj = []
-        self.y_traj = []
-        self.z_traj = []
     
     def reset(self):
         """
-        Reset
+        Reset the gui to black image (initial)
         """
         # Draw background image (brain)
         cvImg = self.arrs[0].astype(np.uint8)
@@ -503,6 +156,13 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
         
+        self.clear_3d()
+    
+    def clear_3d(self):
+        """
+        Used to clear 3d trajectories
+        """
+
         # 3d plotting
         self.x_traj = []
         self.y_traj = []
@@ -529,8 +189,8 @@ class SimpleImageViewer(QWidget):
 
         # Draw rectangles and agent (overlay)
         self.painterInstance = QPainter(self.img)
-        # For rotation purposes
-        if self.data_type == 'FetalUS':
+        # Rotate if needed
+        if self.window.usecase == 'FetalUS':
             self.rotate = True
         _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
         self.drawer(_agent_loc, _rect, _target)
@@ -546,9 +206,11 @@ class SimpleImageViewer(QWidget):
         self.drawer(_agent_loc, _rect, _target)
         self.painterInstance.end()
 
+        # Draw error in evaluation and browser mode
         if self.task in ['eval','browse']:
             self.draw_error()
 
+        # Set image that has been drawn
         self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
         self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
@@ -573,7 +235,10 @@ class SimpleImageViewer(QWidget):
         self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4")
         self.canvas.draw()
 
-    def which_size(self):
+    def which_size_error_text(self):
+        """
+        Determine size of text depending on usecase
+        """
         if self.window.usecase == "BrainMRI":
             self.size_e = 18
         elif self.window.usecase == "CardiacMRI":
@@ -581,16 +246,12 @@ class SimpleImageViewer(QWidget):
         else:
             self.size_e = 25
 
-        self.label_img.setAlignment(Qt.AlignCenter)
-        self.label_img_x.setAlignment(Qt.AlignCenter)
-        self.label_img_y.setAlignment(Qt.AlignCenter)
-
     def get_imgs(self, arrs):
-        if self.data_type in ['BrainMRI', 'CardiacMRI']:
+        if self.window.usecase in ['BrainMRI', 'CardiacMRI']:
             cvImg = arrs[0].astype(np.uint8)
             cvImg_x = arrs[1].astype(np.uint8)
             cvImg_y = arrs[2].astype(np.uint8)
-        elif self.data_type == 'FetalUS':
+        elif self.window.usecase == 'FetalUS':
             cvImg = arrs[0].astype(np.uint8)
             cvImg_x = arrs[2].astype(np.uint8)
             cvImg_y = arrs[1].astype(np.uint8)
@@ -608,7 +269,7 @@ class SimpleImageViewer(QWidget):
                 need to do (x,y) -> (y,x) for agent coords
                 - Perform relevant rotation (i.e. 90 degrees ccw)
         '''
-        if self.data_type in ['BrainMRI', 'CardiacMRI']:
+        if self.window.usecase in ['BrainMRI', 'CardiacMRI']:
             _agent_loc = (agent_loc[0], self.height-agent_loc[1])
             if target is not None:
                 _target = (target[0], self.height-target[1])
@@ -616,7 +277,7 @@ class SimpleImageViewer(QWidget):
                 _target = None
             _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
 
-        elif self.data_type == 'FetalUS':
+        elif self.window.usecase == 'FetalUS':
             _agent_loc = agent_loc[1::-1]
             if target is not None:
                 _target = target[1::-1]
@@ -651,8 +312,10 @@ class SimpleImageViewer(QWidget):
         self.painterInstance = QPainter(self.img)
         pen = QPen(self.color_e)
         self.painterInstance.setPen(pen)
-        self.which_size() # determine size of pen
+        self.which_size_error_text() # determine size of pen
         self.painterInstance.setFont(QFont("Arial", self.size_e))
+        
+        # Change positioning of error label depending on usecase
         if self.window.usecase in {"BrainMRI", "CardiacMRI"}:
             self.painterInstance.drawText(0, 30, f"Error: {self.error:.2f} mm")
         else:
@@ -672,7 +335,7 @@ class SimpleImageViewer(QWidget):
         hw_ratio = abs(yLen / xLen)
 
         if self.task in ['eval','browse']:
-            w = 12 if self.data_type == 'BrainMRI' else 16
+            w = 12 if self.window.usecase == 'BrainMRI' else 16
             self.draw_point(target, self.color_t, width=w)
 
         self.draw_point(agent_loc, self.color_a)
@@ -770,7 +433,7 @@ class SimpleImageViewer(QWidget):
             self.painterInstance.drawLine(k['loc'], k['loc'] + corner_len * k['d1'])
             self.painterInstance.drawLine(k['loc'], k['loc'] + corner_len * k['d2'])
 
-        # # Annotate rectangle
+        # # Annotate rectangle (uncomment if wish to use this)
         # self.painterInstance.setFont(QFont('Decorative', max(abs(yLen)//12, 15)))
         # self.painterInstance.drawText(xPos, yPos-8, "Agent ROI")
 
@@ -783,7 +446,7 @@ class SimpleImageViewer(QWidget):
     @pyqtSlot(dict)
     def agent_signal_handler(self, value):
         """
-        Used to handle agent signal when it moves.
+        Used to handle agent signal when agent moves.
         """
         self.scale = value["scale"]
         self.task = value["task"]
@@ -796,7 +459,3 @@ class SimpleImageViewer(QWidget):
             rect = value["rect"],
             episode_end = self.is_terminal
         )
-
-
-
-################################################################################

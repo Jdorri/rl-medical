@@ -216,7 +216,6 @@ class MedicalPlayer(gym.Env):
         self.num_games.feed(1)
         self.current_episode_score.reset()  # reset the stat counter
         self._loc_history = [(0,) * self.dims] * self._history_length
-        print(self._loc_history)
         # list of q-value lists
         self._qvalues_history = [(0,) * self.actions] * self._history_length
         self._clear_history()
@@ -430,14 +429,14 @@ class MedicalPlayer(gym.Env):
         # terminate if the distance is less than 1 during trainig
         if (self.task == 'train'):
             if self.cur_dist <= 1:
-                print('Terminal Condition DISTANCE')
+                # print('Terminal Condition DISTANCE')
                 self.terminal = True
                 self.num_success.feed(1)
 
         # terminate if maximum number of steps is reached
         self.cnt += 1
         if self.cnt >= self.max_num_frames:
-            print('Terminal Condition NUMBER OF FRAMES')
+            # print('Terminal Condition NUMBER OF FRAMES')
             self.terminal = True
 
         # update history buffer with new location and qvalues
@@ -463,12 +462,12 @@ class MedicalPlayer(gym.Env):
                 # terminate if scale is less than 1
                 else:
                     self.terminal = True
-                    print("TERMINAL OCCILATE")
+                    # print("TERMINAL OCCILATE")
                     if self.cur_dist <= 1:
                         self.num_success.feed(1)
             else:
                 self.terminal = True
-                print("TERMINAL OCCILATE")
+                # print("TERMINAL OCCILATE")
                 if self.cur_dist <= 1:
                     self.num_success.feed(1)
 

@@ -23,6 +23,5 @@ class WorkerThread(Thread):
 
     def run(self):
         self.target_function()
-        self.window.right_widget.automatic_mode.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-        self.window.right_widget.automatic_mode.run_button.setText("Start")
+        self.window.right_widget.automatic_mode.restart()
 
