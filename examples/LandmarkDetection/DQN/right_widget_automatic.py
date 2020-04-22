@@ -98,7 +98,7 @@ class RightWidgetSettings(QFrame):
         self.terminate_button = QPushButton('Terminate', self)
 
         # Terminal log
-        label_log = QLabel("Logs")
+        label_log = QLabel("<i>Logs</i>")
         label_log.setStyleSheet("margin-top: 10px")
         self.terminal = QPlainTextEdit(self)
         self.terminal.setReadOnly(True)

@@ -127,11 +127,11 @@ class Tab(QFrame):
             self.browse_mode.window.left_widget.model_file.hide()
             self.browse_mode.window.left_widget.model_file_edit.hide()
             self.browse_mode.window.left_widget.model_file_edit_text.hide()
-            
+
             # Pass loaded user data
             FilenamesGUI.copy(self.automatic_mode.fname_images, self.browse_mode.fname_images)
             FilenamesGUI.copy(self.automatic_mode.fname_landmarks, self.browse_mode.fname_landmarks)
-    
+
     def get_mode(self):
         """
         Used to find application mode (automatic or browse)

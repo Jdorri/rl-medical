@@ -122,6 +122,7 @@ class LeftWidgetSettings(QFrame):
 
         self.testing = False
     
+    
     def on_clicking_brain(self):
         """
         Handle event when brain button is clicked

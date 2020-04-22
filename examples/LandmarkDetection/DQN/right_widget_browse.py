@@ -210,6 +210,8 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.mounted = False
 
         # Initialise widgets (HITL related)
+        self.terminal_duplicate = QPlainTextEdit(self)
+        self.terminal_duplicate.setReadOnly(True)
         self.next_img = QPushButton('Next Image', self)
         self.HITL_mode = QCheckBox('Enable HITL',self)
         self.HITL_mode.setCheckable(True)
@@ -276,6 +278,10 @@ class RightWidgetSettingsBrowseMode(QFrame):
         vbox.addWidget(self.HITL_mode)
         vbox.addItem(QSpacerItem(0,20))
         vbox.addLayout(hbox_image)
+        vbox.addWidget(QLabel("<hr />"))
+        vbox.addItem(QSpacerItem(300, 10)) # spacer
+        vbox.addWidget(QLabel("<i> Logs </i>"))
+        vbox.addWidget(self.terminal_duplicate)
         vbox.addStretch()
 
         self.setLayout(vbox)
