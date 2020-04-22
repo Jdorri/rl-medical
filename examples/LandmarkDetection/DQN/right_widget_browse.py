@@ -51,6 +51,135 @@ EVAL_EPISODE = 50
 
 
 ###############################################################################
+##  Sub-Widgets
+# Used for agent action
+
+class XMove(QFrame):
+
+    def __init__(self, right_widget):
+        super().__init__()
+        self.right_widget = right_widget # pointer to parent
+
+        # Initialise button
+        self.up_button = QToolButton(self)
+        self.up_button.setArrowType(Qt.UpArrow)
+
+        self.down_button = QToolButton(self)
+        self.down_button.setArrowType(Qt.DownArrow)
+
+        # Setup layout
+        vbox = QVBoxLayout()
+        vbox.setSpacing(10)
+        vbox.addWidget(self.up_button)
+        vbox.addWidget(self.down_button)
+
+        self.setLayout(vbox)
+
+        # Connection
+        self.up_button.clicked.connect(self.on_clicking_up)
+        self.down_button.clicked.connect(self.on_clicking_down)
+
+        # CSS Styling
+        # TODO
+
+    @pyqtSlot()
+    def on_clicking_up(self):
+        if self.right_widget.env:
+            action = 1 if self.right_widget.window.usecase != 'FetalUS' else 3
+            self.right_widget.move_img(action)
+
+    @pyqtSlot()
+    def on_clicking_down(self):
+        if self.right_widget.env:
+            action = 4 if self.right_widget.window.usecase != 'FetalUS' else 2
+            self.right_widget.move_img(action)
+
+
+class YMove(QFrame):
+
+    def __init__(self, right_widget):
+        super().__init__()
+        self.right_widget = right_widget # pointer to parent
+
+        # Initialise button
+        self.left_button = QToolButton(self)
+        self.left_button.setArrowType(Qt.UpArrow)
+
+        self.right_button = QToolButton(self)
+        self.right_button.setArrowType(Qt.DownArrow)
+
+        # Setup layout
+        vbox = QVBoxLayout()
+        vbox.setSpacing(10)
+        vbox.addWidget(self.right_button)
+        vbox.addWidget(self.left_button)
+
+        self.setLayout(vbox)
+
+        # Connection
+        self.left_button.clicked.connect(self.on_clicking_left)
+        self.right_button.clicked.connect(self.on_clicking_right)
+
+        # CSS Styling
+        # TODO
+
+    @pyqtSlot()
+    def on_clicking_left(self):
+        if self.right_widget.env:
+            action = 3 if self.right_widget.window.usecase != 'FetalUS' else 4
+            self.right_widget.move_img(action)
+
+    @pyqtSlot()
+    def on_clicking_right(self):
+        if self.right_widget.env:
+            action = 2 if self.right_widget.window.usecase != 'FetalUS' else 1
+            self.right_widget.move_img(action)
+
+
+class ZMove(QFrame):
+
+    def __init__(self, right_widget):
+        super().__init__()
+        self.right_widget = right_widget # pointer to parent
+
+        # Initialise button
+        self.left_button = QToolButton(self)
+        self.left_button.setArrowType(Qt.LeftArrow)
+
+        self.right_button = QToolButton(self)
+        self.right_button.setArrowType(Qt.RightArrow)
+
+        # Setup layout
+        vbox = QVBoxLayout()
+        vbox.setSpacing(10)
+        vbox.addWidget(self.right_button)
+        vbox.addWidget(self.left_button)
+
+        self.setLayout(vbox)
+
+        # Connection
+        self.left_button.clicked.connect(self.on_clicking_left)
+        self.right_button.clicked.connect(self.on_clicking_right)
+
+        # CSS Styling
+        # TODO
+
+    @pyqtSlot()
+    def on_clicking_left(self):
+        if self.right_widget.env:
+            action = 3 if self.right_widget.window.usecase != 'FetalUS' else 4
+            self.right_widget.move_img(action)
+
+    @pyqtSlot()
+    def on_clicking_right(self):
+        if self.right_widget.env:
+            action = 2 if self.right_widget.window.usecase != 'FetalUS' else 1
+            self.right_widget.move_img(action)
+
+
+        
+
+###############################################################################
 ## Right Widget (Browse Mode)
 
 class RightWidgetSettingsBrowseMode(QFrame):
@@ -71,18 +200,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.HITL_mode.setCheckable(True)
         self.HITL_delete = QPushButton('Delete Episode', self)
         self.HITL_delete.setDisabled(True)
-
-        self.upButton = QToolButton(self)
-        self.upButton.setArrowType(Qt.UpArrow)
-
-        self.downButton = QToolButton(self)
-        self.downButton.setArrowType(Qt.DownArrow)
-
-        self.leftButton = QToolButton(self)
-        self.leftButton.setArrowType(Qt.LeftArrow)
-
-        self.rightButton = QToolButton(self)
-        self.rightButton.setArrowType(Qt.RightArrow)
 
         self.inButton = QToolButton(self)
         self.inButton.setText('+')
@@ -116,10 +233,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         # Layout
         gridArrows = QGridLayout()
         gridArrows.setSpacing(5)
-        gridArrows.addWidget(self.upButton, 0, 1)
-        gridArrows.addWidget(self.downButton, 2, 1)
-        gridArrows.addWidget(self.leftButton, 1, 0)
-        gridArrows.addWidget(self.rightButton, 1, 2)
         gridArrows.addWidget(self.inButton, 0, 3)
         gridArrows.addWidget(self.outButton, 2, 3)
         gridArrows.addWidget(self.zoomInButton, 0, 4)
@@ -139,10 +252,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.setLayout(gridNest)
 
         # Connections
-        self.upButton.clicked.connect(self.on_clicking_up)
-        self.downButton.clicked.connect(self.on_clicking_down)
-        self.leftButton.clicked.connect(self.on_clicking_left)
-        self.rightButton.clicked.connect(self.on_clicking_right)
+
         self.inButton.clicked.connect(self.on_clicking_in)
         self.outButton.clicked.connect(self.on_clicking_out)
         self.zoomInButton.clicked.connect(self.on_clicking_zoomIn)
@@ -216,30 +326,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         if result == QMessageBox.Yes:
             self.on_clicking_nextImg()
             self.env.HITL_logger.pop()
-
-    @pyqtSlot()
-    def on_clicking_up(self):
-        if self.env:
-            action = 1 if self.window.usecase != 'FetalUS' else 3
-            self.move_img(action)
-
-    @pyqtSlot()
-    def on_clicking_down(self):
-        if self.env:
-            action = 4 if self.window.usecase != 'FetalUS' else 2
-            self.move_img(action)
-
-    @pyqtSlot()
-    def on_clicking_left(self):
-        if self.env:
-            action = 3 if self.window.usecase != 'FetalUS' else 4
-            self.move_img(action)
-
-    @pyqtSlot()
-    def on_clicking_right(self):
-        if self.env:
-            action = 2 if self.window.usecase != 'FetalUS' else 1
-            self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_in(self):
