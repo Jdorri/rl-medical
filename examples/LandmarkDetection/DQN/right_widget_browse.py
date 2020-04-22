@@ -226,17 +226,18 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.y_action.setFrameShape(QFrame.StyledPanel)
         self.z_action.setFrameShape(QFrame.StyledPanel)
 
-        # self.zoomInButton = QToolButton(self)
-        # self.zoomInButton.setText('I')
-        # font = self.zoomInButton.font()
-        # font.setBold(True)
-        # self.zoomInButton.setFont(font)
+        # Zoom functionality
+        self.zoomInButton = QToolButton(self)
+        self.zoomInButton.setText('+')
+        font = self.zoomInButton.font()
+        font.setBold(True)
+        self.zoomInButton.setFont(font)
 
-        # self.zoomOutButton = QToolButton(self)
-        # self.zoomOutButton.setText('O')
-        # font = self.zoomOutButton.font()
-        # font.setBold(True)
-        # self.zoomOutButton.setFont(font)
+        self.zoomOutButton = QToolButton(self)
+        self.zoomOutButton.setText('-')
+        font = self.zoomOutButton.font()
+        font.setBold(True)
+        self.zoomOutButton.setFont(font)
 
         # Placeholder for GUI filenames
         self.fname_images = FilenamesGUI()
@@ -245,10 +246,15 @@ class RightWidgetSettingsBrowseMode(QFrame):
         ## Initialise layout
         # Widget for move actions
         hbox_action = QHBoxLayout()
-        # hbox_action.setSpacing(20)
         hbox_action.addWidget(self.x_action)
         hbox_action.addWidget(self.y_action)
         hbox_action.addWidget(self.z_action)
+
+        # Widget zoom in and zoom out
+        hbox_zoom = QHBoxLayout()
+        hbox_zoom.addWidget(self.zoomInButton)
+        hbox_zoom.addWidget(self.zoomOutButton)
+        hbox_zoom.addStretch()
 
         # Widget for Next image and Delete Episode
         hbox_image = QHBoxLayout()
@@ -260,6 +266,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
         vbox.setSpacing(20)
         vbox.addWidget(QLabel("<i> Agent Actions </i>"))
         vbox.addLayout(hbox_action)
+        vbox.addWidget(QLabel("<hr />"))
+        vbox.addWidget(QLabel("<i> Step Size Magnification </i>"))
+        vbox.addLayout(hbox_zoom)
         vbox.addWidget(QLabel("<hr />"))
         vbox.addWidget(QLabel("<i> Human-in-the-loop Settings </i>"))
         vbox.addItem(QSpacerItem(0,10))
@@ -274,8 +283,12 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.HITL_mode.clicked.connect(self.on_clicking_HITL)
         self.next_img.clicked.connect(self.on_clicking_nextImg)
         self.HITL_delete.clicked.connect(self.on_clicking_HITLDelete)
+        self.zoomOutButton.clicked.connect(self.on_clicking_zoomOut)
+        self.zoomInButton.clicked.connect(self.on_clicking_zoomIn)
 
         # CSS
+        self.zoomOutButton.setStyleSheet("background: white; color: black; border:none;")
+        self.zoomInButton.setStyleSheet("background: white; color: black; border: none")
         self.setStyleSheet("""
             QPushButton:disabled {
                 background: white;
