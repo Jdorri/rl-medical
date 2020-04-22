@@ -70,6 +70,7 @@ class XMove(QFrame):
         # Setup layout
         vbox = QVBoxLayout()
         vbox.setSpacing(10)
+        vbox.addWidget(QLabel("X"))
         vbox.addWidget(self.up_button)
         vbox.addWidget(self.down_button)
 
@@ -111,6 +112,7 @@ class YMove(QFrame):
         # Setup layout
         vbox = QVBoxLayout()
         vbox.setSpacing(10)
+        vbox.addWidget(QLabel("Y"))
         vbox.addWidget(self.right_button)
         vbox.addWidget(self.left_button)
 
@@ -143,40 +145,39 @@ class ZMove(QFrame):
         self.right_widget = right_widget # pointer to parent
 
         # Initialise button
-        self.left_button = QToolButton(self)
-        self.left_button.setArrowType(Qt.LeftArrow)
+        self.in_button = QToolButton(self)
+        self.in_button.setArrowType(Qt.UpArrow)
 
-        self.right_button = QToolButton(self)
-        self.right_button.setArrowType(Qt.RightArrow)
+        self.out_button = QToolButton(self)
+        self.out_button.setText(Qt.DownArrow)
 
         # Setup layout
         vbox = QVBoxLayout()
         vbox.setSpacing(10)
-        vbox.addWidget(self.right_button)
-        vbox.addWidget(self.left_button)
+        vbox.addWidget(QLabel("Z"))
+        vbox.addWidget(self.in_button)
+        vbox.addWidget(self.out_button)
 
         self.setLayout(vbox)
 
         # Connection
-        self.left_button.clicked.connect(self.on_clicking_left)
-        self.right_button.clicked.connect(self.on_clicking_right)
+        self.in_button.clicked.connect(self.on_clicking_in)
+        self.out_button.clicked.connect(self.on_clicking_out)
 
         # CSS Styling
         # TODO
 
     @pyqtSlot()
-    def on_clicking_left(self):
+    def on_clicking_in(self):
         if self.right_widget.env:
-            action = 3 if self.right_widget.window.usecase != 'FetalUS' else 4
+            action = 0
             self.right_widget.move_img(action)
 
     @pyqtSlot()
-    def on_clicking_right(self):
-        if self.right_widget.env:
-            action = 2 if self.right_widget.window.usecase != 'FetalUS' else 1
+    def on_clicking_out(self):
+        if self.env:
+            action = 5
             self.right_widget.move_img(action)
-
-
         
 
 ###############################################################################
@@ -194,69 +195,72 @@ class RightWidgetSettingsBrowseMode(QFrame):
         # Mounting by default is false
         self.mounted = False
 
-        # Initialise widgets
+        # Initialise widgets (HITL related)
         self.next_img = QPushButton('Next Image', self)
         self.HITL_mode = QCheckBox('Enable HITL',self)
         self.HITL_mode.setCheckable(True)
         self.HITL_delete = QPushButton('Delete Episode', self)
         self.HITL_delete.setDisabled(True)
 
-        self.inButton = QToolButton(self)
-        self.inButton.setText('+')
+        # Initialised widgets (movement widget)
+        self.x_action = XMove(self)
+        self.y_action = YMove(self)
+        self.z_action = ZMove(self)
 
-        font = self.inButton.font()
-        font.setBold(True)
-        self.inButton.setFont(font)
+        # Set frame
+        self.x_action.setFrameShape(QFrame.StyledPanel)
+        self.y_action.setFrameShape(QFrame.StyledPanel)
+        self.z_action.setFrameShape(QFrame.StyledPanel)
 
-        self.outButton = QToolButton(self)
-        self.outButton.setText('-')
-        font = self.outButton.font()
-        font.setBold(True)
-        self.outButton.setFont(font)
+        # self.zoomInButton = QToolButton(self)
+        # self.zoomInButton.setText('I')
+        # font = self.zoomInButton.font()
+        # font.setBold(True)
+        # self.zoomInButton.setFont(font)
 
-        self.zoomInButton = QToolButton(self)
-        self.zoomInButton.setText('I')
-        font = self.zoomInButton.font()
-        font.setBold(True)
-        self.zoomInButton.setFont(font)
-
-        self.zoomOutButton = QToolButton(self)
-        self.zoomOutButton.setText('O')
-        font = self.zoomOutButton.font()
-        font.setBold(True)
-        self.zoomOutButton.setFont(font)
+        # self.zoomOutButton = QToolButton(self)
+        # self.zoomOutButton.setText('O')
+        # font = self.zoomOutButton.font()
+        # font.setBold(True)
+        # self.zoomOutButton.setFont(font)
 
         # Placeholder for GUI filenames
         self.fname_images = FilenamesGUI()
         self.fname_landmarks = FilenamesGUI()
 
-        # Layout
-        gridArrows = QGridLayout()
-        gridArrows.setSpacing(5)
-        gridArrows.addWidget(self.inButton, 0, 3)
-        gridArrows.addWidget(self.outButton, 2, 3)
-        gridArrows.addWidget(self.zoomInButton, 0, 4)
-        gridArrows.addWidget(self.zoomOutButton, 2, 4)
+        # # Layout
+        # gridArrows = QGridLayout()
+        # gridArrows.setSpacing(5)
+        # gridArrows.addWidget(self.inButton, 0, 3)
+        # gridArrows.addWidget(self.outButton, 2, 3)
+        # gridArrows.addWidget(self.zoomInButton, 0, 4)
+        # gridArrows.addWidget(self.zoomOutButton, 2, 4)
 
-        # Initialise grid/set spacing
-        grid = QGridLayout()
-        grid.setSpacing(10)
-        grid.addWidget(self.HITL_mode, 2, 0)
-        grid.addWidget(self.HITL_delete, 3, 0)
-        grid.addWidget(self.next_img, 5, 0)
-        grid.addLayout(gridArrows, 7, 0)
+        ## Initialise layout
+        # Widget for move actions
+        hbox_action = QHBoxLayout()
+        hbox_action.setSpacing(20)
+        hbox_action.addWidget(self.x_action)
+        hbox_action.addWidget(self.y_action)
+        hbox_action.addWidget(self.z_action)
 
-        gridNest = QGridLayout()
-        gridNest.addLayout(grid, 1, 0, 10, 0)
+        # Widget for Next image and Delete Episode
+        hbox_image = QHBoxLayout()
+        hbox_image.setSpacing(30)
+        hbox_image.addWidget(self.next_img)
+        hbox_image.addWidget(self.HITL_delete)
 
-        self.setLayout(gridNest)
+        vbox = QVBoxLayout()
+        vbox.setSpacing(20)
+        vbox.addWidget(QLabel("<i> Agent Actions </i>"))
+        vbox.addLayout(hbox_action)
+        vbox.addWidget(QLabel("<hr />"))
+        vbox.addWidget(self.HITL_mode)
+        vbox.addLayout(hbox_image)
+
+        self.setLayout(vbox)
 
         # Connections
-
-        self.inButton.clicked.connect(self.on_clicking_in)
-        self.outButton.clicked.connect(self.on_clicking_out)
-        self.zoomInButton.clicked.connect(self.on_clicking_zoomIn)
-        self.zoomOutButton.clicked.connect(self.on_clicking_zoomOut)
         self.HITL_mode.clicked.connect(self.on_clicking_HITL)
         self.next_img.clicked.connect(self.on_clicking_nextImg)
         self.HITL_delete.clicked.connect(self.on_clicking_HITLDelete)
@@ -326,18 +330,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         if result == QMessageBox.Yes:
             self.on_clicking_nextImg()
             self.env.HITL_logger.pop()
-
-    @pyqtSlot()
-    def on_clicking_in(self):
-        if self.env:
-            action = 0
-            self.move_img(action)
-
-    @pyqtSlot()
-    def on_clicking_out(self):
-        if self.env:
-            action = 5
-            self.move_img(action)
 
     @pyqtSlot()
     def on_clicking_zoomIn(self):
