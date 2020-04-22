@@ -123,44 +123,47 @@ class LeftWidgetSettings(QFrame):
         self.testing = False
     
 
-    def on_clicking_brain(self):
+    def on_clicking_brain(self, enabled):
         """
         Handle event when brain button is clicked
         """
-        # If browse mode, change picture
-        if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
-            # Save HITL status
-            self.window.right_widget.save_HITL()
-            self.window.right_widget.browse_mode.set_paths()
-            self.window.right_widget.browse_mode.load_img()
-            self.window.right_widget.browse_mode.window.widget.clear_3d()
-            self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load BrainMRI </p></b>")        
+        if enabled:
+            # If browse mode, change picture
+            if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
+                # Save HITL status
+                self.window.right_widget.save_HITL()
+                self.window.right_widget.browse_mode.set_paths()
+                self.window.right_widget.browse_mode.load_img()
+                self.window.right_widget.browse_mode.window.widget.clear_3d()
+                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load BrainMRI </p></b>")        
     
-    def on_clicking_ultrasound(self):
+    def on_clicking_ultrasound(self, enabled):
         """
         Handle event when ultrasound button is clicked
         """
-        # If browse mode, change picture
-        if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
-            # Save HITL status
-            self.window.right_widget.save_HITL()
-            self.window.right_widget.browse_mode.set_paths()
-            self.window.right_widget.browse_mode.load_img()
-            self.window.right_widget.browse_mode.window.widget.clear_3d()
-            self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load FetalUS </p></b>")        
+        if enabled:
+            # If browse mode, change picture
+            if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
+                # Save HITL status
+                self.window.right_widget.save_HITL()
+                self.window.right_widget.browse_mode.set_paths()
+                self.window.right_widget.browse_mode.load_img()
+                self.window.right_widget.browse_mode.window.widget.clear_3d()
+                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load FetalUS </p></b>")        
 
-    def on_clicking_cardiac(self):
+    def on_clicking_cardiac(self, enabled):
         """
         Handle event when brain button is clicked
         """
-        # If browse mode, change picture
-        if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
-            # Save HITL status
-            self.window.right_widget.save_HITL()
-            self.window.right_widget.browse_mode.set_paths()
-            self.window.right_widget.browse_mode.load_img()
-            self.window.right_widget.browse_mode.window.widget.clear_3d()
-            self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load CardiacMRI </p></b>")        
+        if enabled:
+            # If browse mode, change picture
+            if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
+                # Save HITL status
+                self.window.right_widget.save_HITL()
+                self.window.right_widget.browse_mode.set_paths()
+                self.window.right_widget.browse_mode.load_img()
+                self.window.right_widget.browse_mode.window.widget.clear_3d()
+                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load CardiacMRI </p></b>")        
 
     def reset_file_edit_text(self):
         """
