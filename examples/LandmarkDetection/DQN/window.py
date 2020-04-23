@@ -114,21 +114,21 @@ class Window(QMainWindow):
         """
         if self.right_widget.get_mode() == self.right_widget.BROWSE_MODE and self.right_widget.browse_mode.env:
             if event.key() in {Qt.Key_W, Qt.Key_Up}:
-                self.right_widget.browse_mode.x_action.on_clicking_up()
+                self.right_widget.browse_mode.y_action.on_clicking_up()
             elif event.key() in {Qt.Key_S, Qt.Key_Down}:
-                self.right_widget.browse_mode.x_action.on_clicking_down()
+                self.right_widget.browse_mode.y_action.on_clicking_down()
             elif event.key() in {Qt.Key_A, Qt.Key_Left}:
-                self.right_widget.browse_mode.y_action.on_clicking_left()
+                self.right_widget.browse_mode.x_action.on_clicking_left()
             elif event.key() in {Qt.Key_D, Qt.Key_Right}:
-                self.right_widget.browse_mode.y_action.on_clicking_right()
+                self.right_widget.browse_mode.x_action.on_clicking_right()
             elif event.key() == Qt.Key_Equal:
                 self.right_widget.browse_mode.on_clicking_zoomIn()
             elif event.key() == Qt.Key_Minus:
                 self.right_widget.browse_mode.on_clicking_zoomOut()
-            elif event.key() == Qt.Key_S:
+            elif event.key() == Qt.Key_Z:
                 self.right_widget.browse_mode.z_action.on_clicking_in()
-            elif event.key() == Qt.Key_A:
-                self.right_widget.browse_mode.a_action.on_clicking_out()
+            elif event.key() == Qt.Key_X:
+                self.right_widget.browse_mode.z_action.on_clicking_out()
             elif event.key() == Qt.Key_Space:
                 self.right_widget.browse_mode.on_clicking_nextImg()
 

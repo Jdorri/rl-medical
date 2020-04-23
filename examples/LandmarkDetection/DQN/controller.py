@@ -123,6 +123,10 @@ class Tab(QFrame):
             self.browse_mode.set_paths()
             self.browse_mode.load_img()
             self.browse_mode.window.widget.clear_3d()
+            self.browse_mode.window.widget.set_3d_axes(self.browse_mode.window.widget.ax, \
+                        self.browse_mode.window.widget.width, self.browse_mode.window.widget.height, \
+                        self.browse_mode.window.widget.height_x)
+            self.browse_mode.window.widget.canvas.draw()
 
             # Reset Left widget
             self.browse_mode.window.left_widget.model_file.hide()

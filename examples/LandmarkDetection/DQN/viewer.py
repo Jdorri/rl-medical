@@ -48,7 +48,7 @@ class SimpleImageViewer(QWidget):
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
         self.window = window
-        
+
         # Rotation flag (mainly for fetal)
         self.rotate = False
 
@@ -102,6 +102,9 @@ class SimpleImageViewer(QWidget):
         self.x_traj = []
         self.y_traj = []
         self.z_traj = []
+        self.tgt_x = []
+        self.tgt_y = []
+        self.tgt_z = []
 
         # Setup layout
         self.grid = QGridLayout()
@@ -123,9 +126,9 @@ class SimpleImageViewer(QWidget):
         self.color_a = QColor(111, 230, 158)
         self.color_t = QColor(200, 100, 100)
         self.color_e = QColor(250, 250, 250)
-        self.size_e = 18 
+        self.size_e = 18
         self.line_width = 1
-    
+
     def reset(self):
         """
         Reset the gui to black image (initial)
@@ -155,18 +158,19 @@ class SimpleImageViewer(QWidget):
         self.label_img.setPixmap(self.img)
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
-        
+
         self.clear_3d()
-    
+
     def clear_3d(self):
         """
         Used to clear 3d trajectories
         """
-
-        # 3d plotting
         self.x_traj = []
         self.y_traj = []
         self.z_traj = []
+        self.tgt_x = []
+        self.tgt_y = []
+        self.tgt_z = []
         self.ax.clear()
         self.canvas.draw()
 
@@ -220,8 +224,16 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setAlignment(QtCore.Qt.AlignCenter)
         self.label_img_y.setPixmap(self.img_y)
         self.label_img_y.setAlignment(QtCore.Qt.AlignCenter)
-        
+
         # 3d plotting
+        self.x_lim = self.width
+        self.y_lim = self.height
+        self.z_lim = self.height_x
+        
+        if target != None:
+            self.tgt_x.append(target[0])
+            self.tgt_y.append(target[1])
+            self.tgt_z.append(target[2])
         if not episode_end:
             self.x_traj.append(agent_loc[0])
             self.y_traj.append(agent_loc[1])
@@ -230,10 +242,26 @@ class SimpleImageViewer(QWidget):
             self.x_traj = []
             self.y_traj = []
             self.z_traj = []
+            self.tgt_x = []
+            self.tgt_y = []
+            self.tgt_z = []
             self.ax.clear()
 
-        self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4")
+        self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4", linewidth=1.5)
+        self.ax.plot(self.tgt_x,self.tgt_y,self.tgt_z, marker='x', c='green', linewidth=1.5)
+        self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
         self.canvas.draw()
+
+    def set_3d_axes(self, ax, x_lim, y_lim, z_lim):
+        """
+        Sets the axis labels and limits.
+        """
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+        ax.set_xlim(0, x_lim)
+        ax.set_ylim(0, y_lim)
+        ax.set_zlim(0, z_lim)
 
     def which_size_error_text(self):
         """
@@ -314,7 +342,7 @@ class SimpleImageViewer(QWidget):
         self.painterInstance.setPen(pen)
         self.which_size_error_text() # determine size of pen
         self.painterInstance.setFont(QFont("Arial", self.size_e))
-        
+
         # Change positioning of error label depending on usecase
         if self.window.usecase in {"BrainMRI", "CardiacMRI"}:
             self.painterInstance.drawText(0, 30, f"Error: {self.error:.2f} mm")
