@@ -320,7 +320,7 @@ class NiftiImage(object):
         """
         image = ImageRecord()
         image.name = os.path.expanduser(filename)
-        # print(image.name)
+        print(image.name)
         assert self._is_nifti(image.name), "unknown image format for %r" % image.name
 
         if label:
