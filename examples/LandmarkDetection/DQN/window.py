@@ -125,10 +125,10 @@ class Window(QMainWindow):
                 self.right_widget.browse_mode.on_clicking_zoomIn()
             elif event.key() == Qt.Key_Minus:
                 self.right_widget.browse_mode.on_clicking_zoomOut()
-            elif event.key() == Qt.Key_S:
+            elif event.key() == Qt.Key_Z:
                 self.right_widget.browse_mode.z_action.on_clicking_in()
-            elif event.key() == Qt.Key_A:
-                self.right_widget.browse_mode.a_action.on_clicking_out()
+            elif event.key() == Qt.Key_X:
+                self.right_widget.browse_mode.z_action.on_clicking_out()
             elif event.key() == Qt.Key_Space:
                 self.right_widget.browse_mode.on_clicking_nextImg()
 
