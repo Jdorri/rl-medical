@@ -562,3 +562,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         path = f'./data/HITL/log_{self.window.usecase}_{str(now)}_{device_name}.pickle'
         with open(path, 'wb') as f:
             pickle.dump(self.env.HITL_logger, f)
+        
+            self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Saving HITL pickle </p></b>")        
+
+        
