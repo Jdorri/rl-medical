@@ -378,12 +378,14 @@ class RightWidgetSettingsBrowseMode(QFrame):
             result = self.show_HITL_msg()
 
         if result == QMessageBox.Yes and self.HITL:
+            self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Ending HITL mode </p></b>")        
             self.save_HITL()
 
         if result == QMessageBox.Yes and not self.HITL:
             # Activate HITL mode button
             self.HITL_mode.setChecked(True)
             self.HITL_delete.setDisabled(False)
+            self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Enable HITL mode </p></b>")        
 
         elif result == QMessageBox.No and self.HITL:
             self.HITL_mode.setChecked(True)
