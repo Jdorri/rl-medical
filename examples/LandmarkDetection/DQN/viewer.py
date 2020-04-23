@@ -229,6 +229,7 @@ class SimpleImageViewer(QWidget):
         self.x_lim = self.width
         self.y_lim = self.height
         self.z_lim = self.height_x
+        
         if target != None:
             self.tgt_x.append(target[0])
             self.tgt_y.append(target[1])
