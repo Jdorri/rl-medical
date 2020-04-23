@@ -64,8 +64,8 @@ class Tab(QFrame):
         self.browse_mode = RightWidgetSettingsBrowseMode()
 
         # Tab settings
-        self.tab_widget.addTab(self.automatic_mode, "Automatic Mode")
-        self.tab_widget.addTab(self.browse_mode, "Browse Mode")
+        self.tab_widget.addTab(self.automatic_mode, "<b> Automatic Mode </b>")
+        self.tab_widget.addTab(self.browse_mode, "<b> Browse Mode </b>")
 
         # Layout
         vbox = QVBoxLayout()
