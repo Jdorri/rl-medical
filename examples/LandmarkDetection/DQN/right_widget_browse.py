@@ -109,10 +109,10 @@ class YMove(QFrame):
         # Initialise button
         self.label = QLabel("<i> Y </i>")
         self.left_button = QToolButton(self)
-        self.left_button.setArrowType(Qt.DownArrow)
+        self.left_button.setArrowType(Qt.LeftArrow)
 
         self.right_button = QToolButton(self)
-        self.right_button.setArrowType(Qt.UpArrow)
+        self.right_button.setArrowType(Qt.RightArrow)
 
         # Setup layout
         vbox = QVBoxLayout()
