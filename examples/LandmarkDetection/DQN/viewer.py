@@ -226,6 +226,9 @@ class SimpleImageViewer(QWidget):
         self.label_img_y.setAlignment(QtCore.Qt.AlignCenter)
 
         # 3d plotting
+        self.x_lim = self.width
+        self.y_lim = self.height
+        self.z_lim = self.height_x
         if target != None:
             self.tgt_x.append(target[0])
             self.tgt_y.append(target[1])
@@ -245,6 +248,7 @@ class SimpleImageViewer(QWidget):
 
         self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4", linewidth=1.5)
         self.ax.plot(self.tgt_x,self.tgt_y,self.tgt_z, marker='x', c='green', linewidth=1.5)
+        self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
         self.canvas.draw()
 
     def set_3d_axes(self, ax, x_lim, y_lim, z_lim):
