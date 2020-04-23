@@ -136,7 +136,11 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
                 self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load BrainMRI </p></b>")        
-    
+
+                self.window.widget.set_3d_axes(self.window.widget.ax, \
+                        self.window.widget.width, self.window.widget.height, \
+                        self.window.widget.height_x)
+                self.window.widget.canvas.draw()
     def on_clicking_ultrasound(self, enabled):
         """
         Handle event when ultrasound button is clicked
@@ -151,6 +155,10 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
                 self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load FetalUS </p></b>")        
 
+                self.window.widget.set_3d_axes(self.window.widget.ax, \
+                        self.window.widget.width, self.window.widget.height, \
+                        self.window.widget.height_x)
+                self.window.widget.canvas.draw()
     def on_clicking_cardiac(self, enabled):
         """
         Handle event when brain button is clicked
@@ -165,6 +173,10 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
                 self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load CardiacMRI </p></b>")        
 
+                self.window.widget.set_3d_axes(self.window.widget.ax, \
+                        self.window.widget.width, self.window.widget.height, \
+                        self.window.widget.height_x)
+                self.window.widget.canvas.draw()
     def reset_file_edit_text(self):
         """
         Used to reset file edit text
