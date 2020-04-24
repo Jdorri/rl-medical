@@ -7,7 +7,7 @@ __pycache__/
 
 # mac-specific
 .DS_Store
-.icloud
+.icloud  
 
 # C extensions
 *.so
