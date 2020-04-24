@@ -1,3 +1,8 @@
+################################################################################
+## Script to evaluate multiple models on test dataset and store results
+# Author: Faidon
+################################################################################
+
 import subprocess
 import os
 import csv
