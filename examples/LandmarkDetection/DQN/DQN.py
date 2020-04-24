@@ -157,7 +157,7 @@ def get_config(files_list, data_type, trainable_variables):
         batch_size=BATCH_SIZE,
         memory_size=MEMORY_SIZE,
         init_memory_size=INIT_MEMORY_SIZE,
-        init_exploration=0.8, #0.0
+        init_exploration=0.6, #0.0
         #How my epsilon greedy steps to take before commiting to memory
         #An idea to encorporate the pre-training phase is to schedule the
         # the agent only to start taking steps after x amount of mini_batch
@@ -186,7 +186,7 @@ def get_config(files_list, data_type, trainable_variables):
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'exploration'),
                 # 1->0.1 in the first million steps
-                [(0, 0.8), (1000000, 0.1), (320000000, 0.01)], #[(0, 1.0), (10, 0.1), (320, 0.01)],
+                [(0, 0.8), (1000000, 0.1), (32000000, 0.01)], #[(0, 1.0), (10, 0.1), (320, 0.01)],
                 interp='linear',
                 step_based=True),
 ###############################################################################
