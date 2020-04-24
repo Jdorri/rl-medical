@@ -486,12 +486,14 @@ class MedicalPlayer(gym.Env):
 
         if self.terminal:
             # directory = logger.get_logger_dir()
+            # print(directory)
             self.csvfile = 'Reward_and_Q_log.csv'
             # path = os.path.join(directory, self.csvfile)
-            # with open(path, 'a') as outcsv:
-            #     fields= [info['score']]
-            #     writer = csv.writer(outcsv)
-            #     writer.writerow(map(lambda x: x, fields))
+            path = self.csvfile
+            with open(path, 'a') as outcsv:
+                fields= [info['filename'], info['score'], info['distError']]
+                writer = csv.writer(outcsv)
+                writer.writerow(map(lambda x: x, fields))
 
 
         # #######################################################################
