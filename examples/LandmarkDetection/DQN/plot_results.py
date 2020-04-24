@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-filename = "Reward_and_Q_log_dummy.csv"
+filename = "Reward_and_Q_log.csv"
 model_name = ""
 model_path = ""
 checkpoint = ""
@@ -28,7 +28,7 @@ with open(filename, newline='') as csvfile:
                 if details[0]=="MODEL":
                     folder = os.path.basename(os.path.dirname(details[1]))
                     model_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(details[1]))), 'input', folder+'.txt')
-                    with open(model_path, 'r') as file:
+                    with open(model_path.replace("/vol/","/volumes/"), 'r') as file:
                         model_name = file.read().replace('\n', '')
                     print(model_name)
                 else:
