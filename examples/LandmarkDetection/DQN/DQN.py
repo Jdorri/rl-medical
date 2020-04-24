@@ -46,10 +46,6 @@ FRAME_HISTORY = 4
 # number of steps to take with the episilon greedy policy before comitting it
 # memory.
 UPDATE_FREQ = 4
-###############################################################################
-# HITL UPDATE
-INIT_UPDATE_FREQ = 0
-###############################################################################
 # DISCOUNT FACTOR - NATURE (0.99) - MEDICAL (0.9)
 GAMMA = 0.9 #0.99
 # REPLAY MEMORY SIZE - NATURE (1e6) - MEDICAL (1e5 view-patches)
@@ -66,6 +62,8 @@ STEPS_PER_EVAL = 10000
 EVAL_EPISODE = 50
 # Max number of training epochs
 MAX_EPOCHS = 1000
+# Number of pretraining steps (only relevant for HITL)
+NUM_PRETRAIN = 100000
 
 ###############################################################################
 
@@ -200,9 +198,9 @@ def get_config(files_list, data_type, trainable_variables):
 
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'update_frequency'),
-                # 1->0.1 in the first million steps note should be 8 but put to
-                # 4 for faster training
-                [(0, int(0)), (100000, int(4))],
+                # 100k pretraining steps
+
+                [(0, INIT_UPDATE_FREQ), (NUM_PRETRAIN, UPDATE_FREQ)],
                 interp=None, step_based=True),
 
 ###############################################################################
@@ -259,6 +257,7 @@ if __name__ == '__main__':
                         default='train_log')
     parser.add_argument('--name', help='name of current experiment for logs',
                         default='experiment_1')
+    parser.add_argument('--HITL', help='perform HITL experiment', default=True)
     args = parser.parse_args()
 
     # f1 = filenames_GUI()
@@ -368,4 +367,9 @@ if __name__ == '__main__':
             not_ignore = (list(set(variables) - set(ignore)))#not ignored
             session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
             config.session_init = session_init
+        if args.HITL:
+            INIT_UPDATE_FREQ == 0
+        else:
+            INIT_UPDATE_FREQ == 4
+
         launch_train_with_config(config, SimpleTrainer())
