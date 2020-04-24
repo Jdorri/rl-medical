@@ -4,7 +4,7 @@ import glob
 
 
 
-user = 'aeg19' # put your username here
+user = 'hgc19' # put your username here
 type_ = 'LandmarkDetection'
 task = 'train'
 algo = 'DQN'
@@ -17,7 +17,7 @@ data_type ='FetalUS'
 # transferModel = "'/vol/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000'"#BrainMRI basecase
 # to_Transfer = "CNN DQN"
 
-discription = """HITL experimentation with init_exploration=0.6 and initial episilon=0.6 AG"""
+discription = """HITL experimentation with 50 50 sampling ratio HC"""
 
 home = os.environ['HOME']
 local_branch_path = os.path.join(home, 'Documents/rl-medical/')#path to where the code is
@@ -85,7 +85,7 @@ with open(job_file, 'w') as fh:
 
 
     fh.writelines("#!/bin/bash\n")
-    fh.writelines(f"#SBATCH --job-name=job_Fetal.job\n")
+    fh.writelines(f"#SBATCH --job-name=harrys_baby.job\n")
     fh.writelines(f"#SBATCH --output={output_path}{data_type}{case_number}.out\n")
     fh.writelines(f"#SBATCH --error={output_path}{data_type}{case_number}.err\n")
     fh.writelines("#SBATCH --mail-type=ALL\n")
