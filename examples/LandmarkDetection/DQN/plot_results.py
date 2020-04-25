@@ -18,18 +18,26 @@ entry = 0
 
 df_complete = pd.DataFrame(columns=['model_path', 'model_name',  'image_path', 'checkpoint', 'score', 'distance_error'])
 df_summary = pd.DataFrame(columns=['model_path', 'model_name',  'checkpoint', 'mean_score', 'mean_distance_error', 'std_distance_error'])
+mounted = os.path.exists("/volumes/projects/")
+print("it is mounted ________:", mounted)
+
 
 with open(filename, newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
     for row in spamreader:
         if row:
-            if row[0]=="START":
+            if row[0]=="FINISH":
+                continue
+            elif row[0]=="START":
                 details = row[1].split(',')
                 if details[0]=="MODEL":
                     folder = os.path.basename(os.path.dirname(details[1]))
                     model_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(details[1]))), 'input', folder+'.txt')
-                    with open(model_path.replace("/vol/","/volumes/"), 'r') as file:
-                        model_name = file.read().replace('\n', '')
+                    if mounted:
+                        with open(model_path.replace("/vol/","/volumes/"), 'r') as file:
+                            model_name = file.read().replace('\n', '')
+                    else:
+                        model_name = folder
                     print(model_name)
                 else:
                     checkpoint = int((os.path.basename(details[1])).split('-')[1])
