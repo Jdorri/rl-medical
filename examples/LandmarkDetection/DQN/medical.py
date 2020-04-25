@@ -118,6 +118,9 @@ class MedicalPlayer(gym.Env):
         self.multiscale = multiscale
         #Type of data
         self.data_type = data_type
+        #directory is file for logging evaluation
+        self.directory = directory
+        print(':::::::::::directory: ', self.directory)
 
         # init env dimensions
         if self.dims == 2:
@@ -487,9 +490,12 @@ class MedicalPlayer(gym.Env):
         if self.terminal:
             # directory = logger.get_logger_dir()
             # print(directory)
-            self.csvfile = 'Reward_and_Q_log.csv'
+            # list_of_files = glob.glob('results/eval_logs/*.csv')
+            # latest_file = max(list_of_files, key=os.path.getctime)
+            # self.csvfile = 'Reward_and_Q_log.csv'
             # path = os.path.join(directory, self.csvfile)
-            path = self.csvfile
+            # path = latest_file
+            path = self.directory
             with open(path, 'a') as outcsv:
                 fields= [info['filename'], info['score'], info['distError']]
                 writer = csv.writer(outcsv)

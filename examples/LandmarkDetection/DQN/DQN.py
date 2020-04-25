@@ -70,9 +70,15 @@ MAX_EPOCHS = 1000
 def get_player(directory=None, files_list= None, data_type=None, viz=False,
                task='play', saveGif=False, saveVideo=False):
     # in atari paper, max_num_frames = 30000
-    env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
-                        viz=viz, saveGif=saveGif, saveVideo=saveVideo,
-                        task=task, files_list=files_list, data_type=data_type, max_num_frames=1500)
+    if task=='eval':
+        env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
+                            viz=viz, saveGif=saveGif, saveVideo=saveVideo,
+                            task=task, files_list=files_list, data_type=data_type, max_num_frames=100)
+    else:
+        env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
+                            viz=viz, saveGif=saveGif, saveVideo=saveVideo,
+                            task=task, files_list=files_list, data_type=data_type, max_num_frames=1500)
+                        
     if task not in ['browse','train']:
         # in training, env will be decorated by ExpReplay, and history
         # is taken care of in expreplay buffer
@@ -256,6 +262,8 @@ if __name__ == '__main__':
                         default='train_log')
     parser.add_argument('--name', help='name of current experiment for logs',
                         default='experiment_1')
+    parser.add_argument('--directory', help='file name to store evaluation results',
+                        default=None)                        
     args = parser.parse_args()
 
     # f1 = filenames_GUI()
@@ -283,7 +291,6 @@ if __name__ == '__main__':
                                 task='play')
     NUM_ACTIONS = init_player.action_space.n
     num_files = init_player.files.num_files
-
 
     if args.task != 'train':
         ########################################################################
@@ -334,7 +341,7 @@ if __name__ == '__main__':
             output_names=['Qvalue']))
         # demo pretrained model one episode at a time
         if args.task == 'play':
-            play_n_episodes(get_player(files_list=args.files,
+            play_n_episodes(get_player( files_list=args.files,
                                         data_type=args.type,
                                         viz=0,
                                         saveGif=args.saveGif,
@@ -344,7 +351,8 @@ if __name__ == '__main__':
 
         # run episodes in parallel and evaluate pretrained model
         elif args.task == 'eval':
-            play_n_episodes(get_player(files_list=args.files,
+            play_n_episodes(get_player(directory=args.directory,
+                                        files_list=args.files,
                                         data_type=args.type,
                                         viz=0,
                                         saveGif=args.saveGif,

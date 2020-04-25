@@ -6,11 +6,11 @@
 import subprocess
 import os
 import csv
-
+from datetime import datetime
 
 data_type = "FetalUS"
 imperial_cluster = True
-csvfile = 'Reward_and_Q_log.csv'
+csvfile = f'results/eval_logs/log_eval_{data_type}_{datetime.now()}.csv'
 
 ################################################################################################
 # Step 1 - Set paths for model and test dataset
@@ -56,11 +56,11 @@ for filename in os.listdir(directory):
                 writer.writerow(map(lambda x: x, fields))        
  
         if imperial_cluster:
-            subprocess.run(["python3", "DQN.py", "--task", "eval", "--algo", "DQN", "--gpu", "0", "--load",
+            subprocess.run(["python3", "DQN.py", "--directory", csvfile, "--task", "eval", "--algo", "DQN", "--gpu", "0", "--load",
                             model, "--files", 
                             fname_images, fname_landmarks,  "--type", data_type ])
         else:
-            subprocess.run(["python", "DQN.py", "--task", "eval", "--algo", "DQN", "--gpu", "0", "--load",
+            subprocess.run(["python", "DQN.py", "--directory", csvfile, "--task", "eval", "--algo", "DQN", "--gpu", "0", "--load",
                             model, "--files", 
                             fname_images, fname_landmarks,  "--type", data_type ])                                        
 ################################################################################################
