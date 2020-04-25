@@ -17,7 +17,7 @@ csvfile = 'Reward_and_Q_log.csv'
 if imperial_cluster:
     redir = '/vol/biomedic/users/aa16914/shared/data/RL_data/' 
     # model = "/volumes/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000"
-    directory = "/vol/project/2019/545/g1954503/oen19/LandmarkDetection/FetalUS/001/output/FetalUS001/" 
+    directory = "/vol/project/2019/545/g1954503/fm1710/LandmarkDetection/FetalUS/001/output/FetalUS001/" 
 else:
     redir = 'data/filenames/'
     # model = "/volumes/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000"
