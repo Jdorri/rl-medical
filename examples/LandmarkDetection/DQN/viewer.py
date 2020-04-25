@@ -23,20 +23,13 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-try:
-    import pyglet
-    from pyglet.gl import *
-except ImportError as e:
-    reraise(suffix="HINT: you can install pyglet directly via 'pip install pyglet'. But if you really just want to install all Gym dependencies and not have to think about it, 'pip install -e .[all]' or 'pip install gym[all]' will do it.")
-
-
 ################################################################################
 ## Main Widget
 # Responsible to draw images specified by settings and visualise agent's movement.
 
 class SimpleImageViewer(QWidget):
     """
-    Simple image viewer class for rendering images using pyglet and pyqt
+    Simple image viewer class for rendering images using pyqt
     """
     agent_signal = pyqtSignal(dict) # Signaling agent move (current location, status)
 
