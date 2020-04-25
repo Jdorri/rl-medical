@@ -334,6 +334,10 @@ if __name__ == '__main__':
         print(f"TRAINABLE PARAMETERS: {args.trainable}")
         logger_dir = os.path.join(args.logDir, args.name)
         logger.set_logger_dir(logger_dir)
+        if args.HITL:
+            INIT_UPDATE_FREQ = 0
+        else:
+            INIT_UPDATE_FREQ = 4
         config = get_config(args.files, args.type, args.trainable)
         not_ignore = None
         if args.load:  # resume training from a saved checkpoint
@@ -367,9 +371,6 @@ if __name__ == '__main__':
             not_ignore = (list(set(variables) - set(ignore)))#not ignored
             session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
             config.session_init = session_init
-        if args.HITL:
-            INIT_UPDATE_FREQ == 0
-        else:
-            INIT_UPDATE_FREQ == 4
+
 
         launch_train_with_config(config, SimpleTrainer())

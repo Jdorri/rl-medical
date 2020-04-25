@@ -237,10 +237,11 @@ class ExpReplay(DataFlow, Callback):
         ###############################################################################
         # HITL UPDATE
         self.hmem_full = False
-        if self.update_frequency == 0:
+        if self.update_frequency < 4:
             self.hmem = HumanDemReplayMemory(memory_size, state_shape, history_len)
             self.hmem.load_experience()
             self.hmem_full = True
+            logger.info("HITL buffer full")
 
         ###############################################################################
         self._current_ob = self.player.reset()
@@ -363,11 +364,11 @@ class ExpReplay(DataFlow, Callback):
                 ex_idx = self.rng.randint(
                     self._populate_job_queue.maxsize * self.update_frequency,
                     len(self.mem) - self.history_len - 1,
-                    size=28)
+                    size=24)
                 hu_idx = self.rng.randint(
                     self._populate_job_queue.maxsize * 4,
                     len(self.hmem)- self.history_len - 1,
-                    size=20)
+                    size=24)
 
                 batch_exp = [self.mem.sample(i) for i in ex_idx]
                 for j in hu_idx:
