@@ -12,7 +12,7 @@ import seaborn as sns; sns.set()
 
 ############################################################################################################
 # Step 0 - Choose paths to plot
-filename = "./results/eval_logs/Reward_and_Q_log.csv"
+filename = "./results/eval_logs/log_eval_BrainMRI_1587856253.866857.csv"
 model_name = ""
 model_path = ""
 checkpoint = ""
@@ -36,8 +36,11 @@ with open(filename, newline='') as csvfile:
                     folder = os.path.basename(os.path.dirname(details[1]))
                     model_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(details[1]))), 'input', folder+'.txt')
                     if mounted:
-                        with open(model_path.replace("/vol/","/volumes/"), 'r') as file:
-                            model_name = file.read().replace('\n', '')
+                        if folder=="001":
+                            model_name="BrainMRI Baseline DQN"
+                        else:
+                            with open(model_path.replace("/vol/","/volumes/"), 'r') as file:
+                                model_name = file.read().replace('\n', '')
                     else:
                         model_name = folder
                 else:

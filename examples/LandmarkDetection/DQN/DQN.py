@@ -73,7 +73,7 @@ def get_player(directory=None, files_list= None, data_type=None, viz=False,
     if task=='eval':
         env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
                             viz=viz, saveGif=saveGif, saveVideo=saveVideo,
-                            task=task, files_list=files_list, data_type=data_type, max_num_frames=100)
+                            task=task, files_list=files_list, data_type=data_type, max_num_frames=1500)
     else:
         env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
                             viz=viz, saveGif=saveGif, saveVideo=saveVideo,

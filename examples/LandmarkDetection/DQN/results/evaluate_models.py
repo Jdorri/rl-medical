@@ -6,18 +6,18 @@
 import subprocess
 import os
 import csv
-from datetime import datetime
+import time
 
-data_type = "FetalUS"
+data_type = "BrainMRI"
 imperial_cluster = True
-csvfile = f'results/eval_logs/log_eval_{data_type}_{datetime.now()}.csv'
+csvfile = f"results/eval_logs/log_eval_{data_type}_{time.time()}.csv"
 
 ################################################################################################
 # Step 1 - Set paths for model and test dataset
 if imperial_cluster:
     redir = '/vol/biomedic/users/aa16914/shared/data/RL_data/' 
     # model = "/volumes/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000"
-    directory = "/vol/project/2019/545/g1954503/fm1710/LandmarkDetection/FetalUS/001/output/FetalUS001/" 
+    directory = "/vol/project/2019/545/g1954503/aeg19/LandmarkDetection/BrainMRI/005/output/BrainMRI005" 
 else:
     redir = 'data/filenames/'
     # model = "/volumes/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000"
@@ -49,20 +49,22 @@ with open(csvfile, 'a') as outcsv:
 for filename in os.listdir(directory):
     if (filename.endswith(".index")):
         model_name = os.path.splitext(filename)[0]
-        model = os.path.join(directory, model_name)
-        with open(csvfile, 'a') as outcsv:
-                fields= ['START CHECKPOINT', model]
-                writer = csv.writer(outcsv)
-                writer.writerow(map(lambda x: x, fields))        
- 
-        if imperial_cluster:
-            subprocess.run(["python3", "DQN.py", "--directory", csvfile, "--task", "eval", "--algo", "DQN", "--gpu", "0", "--load",
-                            model, "--files", 
-                            fname_images, fname_landmarks,  "--type", data_type ])
-        else:
-            subprocess.run(["python", "DQN.py", "--directory", csvfile, "--task", "eval", "--algo", "DQN", "--gpu", "0", "--load",
-                            model, "--files", 
-                            fname_images, fname_landmarks,  "--type", data_type ])                                        
+        checkpoint = int(model_name.split('-')[1])
+        if checkpoint >= 100000 or checkpoint==50000:
+            model = os.path.join(directory, model_name)
+            with open(csvfile, 'a') as outcsv:
+                    fields= ['START CHECKPOINT', model]
+                    writer = csv.writer(outcsv)
+                    writer.writerow(map(lambda x: x, fields))        
+    
+            if imperial_cluster:
+                subprocess.run(["python3", "DQN.py", "--directory", csvfile, "--task", "eval", "--algo", "DQN", "--gpu", "0", "--load",
+                                model, "--files", 
+                                fname_images, fname_landmarks,  "--type", data_type ])
+            else:
+                subprocess.run(["python", "DQN.py", "--directory", csvfile, "--task", "eval", "--algo", "DQN", "--gpu", "0", "--load",
+                                model, "--files", 
+                                fname_images, fname_landmarks,  "--type", data_type ])                                        
 ################################################################################################
 # Step 5 - Flag end of model assessment
 with open(csvfile, 'a') as outcsv:
