@@ -1,7 +1,7 @@
 import subprocess
 import glob
 
-username = 'hgc19'  # <--- CHANGE HERE
+username = 'aeg19'  # <--- CHANGE HERE
 
 subprocess.run(["scp", "-pr", "./call_gpu_copy.py", username + "@gpucluster.doc.ic.ac.uk:Documents/rl-medical"])
 
