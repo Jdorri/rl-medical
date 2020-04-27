@@ -15,8 +15,8 @@ data_type ='CardiacMRI'
 
 # model = "'/vol/project/2019/545/g1954503/oen19/LandmarkDetection/003/output/003/model-600000'"
 # transferModel = "'/vol/project/2019/545/g1954503/oen19/LandmarkDetection/003/output/003/model-600000'"#CardiacMRI basecase
-transferModel = "'/vol/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000'"#BrainMRI basecase
-to_Transfer = "CNN DQN"
+# transferModel = "'/vol/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000'"#BrainMRI basecase
+# to_Transfer = "CNN DQN"
 
 discription = """HITL + TL (from brain); eps=1.0 Cardiac AG"""
 
@@ -100,7 +100,7 @@ with open(job_file, 'w') as fh:
                                                             f"--algo {algo} "
                                                             f"--gpu 0 "
                                                             # f"--load {model} "
-                                                            f"--transferModel {transferModel} {to_Transfer} "
+                                                            # f"--transferModel {transferModel} {to_Transfer} "
                                                             f"--type {data_type} "
                                                             f"--files {files} "
                                                             f"--logDir {output_path} "
