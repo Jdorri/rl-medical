@@ -155,7 +155,7 @@ def get_config(files_list, data_type, trainable_variables):
         batch_size=BATCH_SIZE,
         memory_size=MEMORY_SIZE,
         init_memory_size=INIT_MEMORY_SIZE,
-        init_exploration=0.8, #0.0
+        init_exploration=1.0, #0.0
         #How my epsilon greedy steps to take before commiting to memory
         #An idea to encorporate the pre-training phase is to schedule the
         # the agent only to start taking steps after x amount of mini_batch
@@ -184,7 +184,7 @@ def get_config(files_list, data_type, trainable_variables):
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'exploration'),
                 # 1->0.1 in the first million steps
-                [(0, 0.8), (10, 0.1), (320, 0.01)], #[(0, 1.0), (10, 0.1), (320, 0.01)],
+                [(0, 1.0), (10, 0.1), (320, 0.01)], #[(0, 1.0), (10, 0.1), (320, 0.01)],
                 interp='linear'),
 ###############################################################################
 # HITL UPDATE
@@ -209,7 +209,7 @@ def get_config(files_list, data_type, trainable_variables):
                           output_names=['Qvalue'], files_list=files_list,
                           data_type=data_type,
                           get_player_fn=get_player),
-                every_k_epochs=EPOCHS_PER_EVAL),
+                every_k_steps=10000),
             HumanHyperParamSetter('learning_rate'),
         ],
         steps_per_epoch=STEPS_PER_EPOCH,
@@ -360,7 +360,7 @@ if __name__ == '__main__':
 
             session_init = get_model_loader(args.transferModel[0])
             reader, variables = session_init._read_checkpoint_vars(args.transferModel[0])
-           
+
             ignore = [var for var in variables if any([i in var for i in ignore_list])]
             not_ignore = (list(set(variables) - set(ignore)))#not ignored
             session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
