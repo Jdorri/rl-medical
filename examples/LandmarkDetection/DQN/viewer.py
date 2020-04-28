@@ -194,7 +194,7 @@ class SimpleImageViewer(QWidget):
         # Draw rectangles and agent (overlay)
         self.painterInstance = QPainter(self.img)
         # Rotate if needed
-        if self.window.usecase == 'FetalUS':
+        if self.window.usecase in ['FetalUS', 'CardiacMRI']:
             self.rotate = True
         _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
         self.drawer(_agent_loc, _rect, _target)
@@ -297,7 +297,7 @@ class SimpleImageViewer(QWidget):
                 need to do (x,y) -> (y,x) for agent coords
                 - Perform relevant rotation (i.e. 90 degrees ccw)
         '''
-        if self.window.usecase in ['BrainMRI', 'CardiacMRI']:
+        if self.window.usecase in ['BrainMRI']:
             _agent_loc = (agent_loc[0], self.height-agent_loc[1])
             if target is not None:
                 _target = (target[0], self.height-target[1])
@@ -305,7 +305,7 @@ class SimpleImageViewer(QWidget):
                 _target = None
             _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
 
-        elif self.window.usecase == 'FetalUS':
+        elif self.window.usecase in ['FetalUS', 'CardiacMRI']:
             _agent_loc = agent_loc[1::-1]
             if target is not None:
                 _target = target[1::-1]
@@ -344,7 +344,7 @@ class SimpleImageViewer(QWidget):
         self.painterInstance.setFont(QFont("Arial", self.size_e))
 
         # Change positioning of error label depending on usecase
-        if self.window.usecase in {"BrainMRI", "CardiacMRI"}:
+        if self.window.usecase in ["BrainMRI"]:
             self.painterInstance.drawText(0, 30, f"Error: {self.error:.2f} mm")
         else:
             self.painterInstance.drawText(0, 22, f"Error: {self.error:.2f} mm")

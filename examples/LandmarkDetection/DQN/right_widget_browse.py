@@ -90,13 +90,13 @@ class XMove(QFrame):
     @pyqtSlot()
     def on_clicking_up(self):
         if self.right_widget.env:
-            action = 1 if self.right_widget.window.usecase != 'FetalUS' else 3
+            action = 1 if self.right_widget.window.usecase == 'BrainMRI' else 3
             self.right_widget.move_img(action)
 
     @pyqtSlot()
     def on_clicking_down(self):
         if self.right_widget.env:
-            action = 4 if self.right_widget.window.usecase != 'FetalUS' else 2
+            action = 4 if self.right_widget.window.usecase == 'BrainMRI' else 2
             self.right_widget.move_img(action)
 
 
@@ -137,13 +137,13 @@ class YMove(QFrame):
     @pyqtSlot()
     def on_clicking_left(self):
         if self.right_widget.env:
-            action = 3 if self.right_widget.window.usecase != 'FetalUS' else 4
+            action = 3 if self.right_widget.window.usecase == 'BrainMRI' else 4
             self.right_widget.move_img(action)
 
     @pyqtSlot()
     def on_clicking_right(self):
         if self.right_widget.env:
-            action = 2 if self.right_widget.window.usecase != 'FetalUS' else 1
+            action = 2 if self.right_widget.window.usecase == 'BrainMRI' else 1
             self.right_widget.move_img(action)
 
 
