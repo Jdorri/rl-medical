@@ -80,7 +80,7 @@ ax = sns.lineplot(x="checkpoint", y="distance_error",
 #                 # hue="std_distance_error", style="std_distance_error",
 #                  markers=True, dashes=False, data=df_summary)
 # control x and y limits
-plt.ylim(0, 100)
+plt.ylim(0, 12)
 plt.xlim(0, None)
 plt.savefig('results/plots/plot.png')
 plt.show()
