@@ -12,7 +12,7 @@ import seaborn as sns; sns.set()
 
 ############################################################################################################
 # Step 0 - Choose paths to plot
-filename = "./results/eval_logs/logs_eval_CardiacMRI.csv"
+filename = "./results/eval_logs/log_eval_BrainMRI_rerunsbaseline.csv"
 model_name = ""
 model_path = ""
 checkpoint = ""
