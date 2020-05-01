@@ -45,8 +45,9 @@ def get_next_case_number(directories):
         return '001'
     max_case_nr = -float('inf')
     for directory in directories:
-        case_nr = int(directory)
-        max_case_nr = max(max_case_nr, case_nr)
+        if directory != 'archived':
+            case_nr = int(directory)
+            max_case_nr = max(max_case_nr, case_nr)
 
     next_case_nr = '0'*(3-len(str(max_case_nr + 1))) + str(max_case_nr + 1)
     return next_case_nr
