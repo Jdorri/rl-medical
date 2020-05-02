@@ -18,7 +18,7 @@ data_type ='CardiacMRI'
 # transferModel = "'/vol/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000'"#BrainMRI basecase
 # to_Transfer = "CNN DQN"
 
-discription = """HITL + TL (from brain); eps=1.0 Cardiac AG"""
+discription = """HITL (from brain); eps=1.0 Cardiac; 500kpre 60:40 split AG"""
 
 home = os.environ['HOME']
 local_branch_path = os.path.join(home, 'Documents/rl-medical/')#path to where the code is
@@ -87,7 +87,7 @@ with open(job_file, 'w') as fh:
 
 
     fh.writelines("#!/bin/bash\n")
-    fh.writelines(f"#SBATCH --job-name=Car_HITL_TL.job\n")
+    fh.writelines(f"#SBATCH --job-name=500_Car.job\n")
     fh.writelines(f"#SBATCH --output={output_path}{data_type}{case_number}.out\n")
     fh.writelines(f"#SBATCH --error={output_path}{data_type}{case_number}.err\n")
     fh.writelines("#SBATCH --mail-type=ALL\n")
