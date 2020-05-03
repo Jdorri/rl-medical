@@ -8,7 +8,7 @@ import os
 import csv
 import time
 
-data_type = "BrainMRI"
+data_type = "CardiacMRI"
 imperial_cluster = True
 csvfile = f"results/eval_logs/log_eval_{data_type}_{time.time()}.csv"
 
@@ -17,7 +17,8 @@ csvfile = f"results/eval_logs/log_eval_{data_type}_{time.time()}.csv"
 if imperial_cluster:
     redir = '/vol/biomedic/users/aa16914/shared/data/RL_data/' 
     # model = "/volumes/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000"
-    directory = "/vol/project/2019/545/g1954503/aeg19/LandmarkDetection/BrainMRI/005/output/BrainMRI005" 
+    # directory = "/vol/project/2019/545/g1954503/aeg19/LandmarkDetection/BrainMRI/005/output/BrainMRI005" 
+    directory = "/vol/project/2019/545/g1954503/oen19/LandmarkDetection/003/output/003/" 
 else:
     redir = 'data/filenames/'
     # model = "/volumes/project/2019/545/g1954503/oen19/LandmarkDetection/001/output/001/model-600000"
