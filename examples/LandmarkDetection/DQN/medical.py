@@ -120,7 +120,6 @@ class MedicalPlayer(gym.Env):
         self.data_type = data_type
         #directory is file for logging evaluation
         self.directory = directory
-        print(':::::::::::directory: ', self.directory)
 
         # init env dimensions
         if self.dims == 2:
@@ -495,11 +494,12 @@ class MedicalPlayer(gym.Env):
             # self.csvfile = 'Reward_and_Q_log.csv'
             # path = os.path.join(directory, self.csvfile)
             # path = latest_file
-            path = self.directory
-            with open(path, 'a') as outcsv:
-                fields= [info['filename'], info['score'], info['distError']]
-                writer = csv.writer(outcsv)
-                writer.writerow(map(lambda x: x, fields))
+            if self.directory:
+                path = self.directory
+                with open(path, 'a') as outcsv:
+                    fields= [info['filename'], info['score'], info['distError']]
+                    writer = csv.writer(outcsv)
+                    writer.writerow(map(lambda x: x, fields))
 
 
         # #######################################################################

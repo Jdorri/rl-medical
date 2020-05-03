@@ -12,7 +12,7 @@ import seaborn as sns; sns.set()
 
 ############################################################################################################
 # Step 0 - Choose paths to plot
-filename = "./results/eval_logs/log_eval_BrainMRI_1587856253.866857.csv"
+filename = "./results/eval_logs/log_eval_BrainMRI_rerunsbaseline.csv"
 model_name = ""
 model_path = ""
 checkpoint = ""
@@ -38,6 +38,14 @@ with open(filename, newline='') as csvfile:
                     if mounted:
                         if folder=="001":
                             model_name="BrainMRI Baseline DQN"
+                        elif folder=="002":
+                            model_name="Test local point"
+                        elif folder=="003":
+                            model_name="Cardiac Baseline DQN"                            
+                        elif folder=="004":
+                            model_name="Default model in DQN folder"    
+                        elif folder =="006":
+                            model_name = "BrainMRI Baseline DQN - RERUN"
                         else:
                             with open(model_path.replace("/vol/","/volumes/"), 'r') as file:
                                 model_name = file.read().replace('\n', '')
@@ -72,7 +80,7 @@ ax = sns.lineplot(x="checkpoint", y="distance_error",
 #                 # hue="std_distance_error", style="std_distance_error",
 #                  markers=True, dashes=False, data=df_summary)
 # control x and y limits
-plt.ylim(0, 20)
+plt.ylim(0, 12)
 plt.xlim(0, None)
 plt.savefig('results/plots/plot.png')
 plt.show()
