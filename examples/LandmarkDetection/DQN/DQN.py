@@ -11,7 +11,6 @@ import sys
 import time
 import argparse
 from collections import deque
-
 import tensorflow as tf
 from medical import MedicalPlayer, FrameStack
 from tensorpack.input_source import QueueInput

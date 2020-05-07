@@ -13,6 +13,7 @@ import glob
 import os
 import pickle
 import time
+import threading
 
 class RightWidgetTester(unittest.TestCase):
     ''' Class to perform unit tests on the buttons within the right widget of the
@@ -22,7 +23,6 @@ class RightWidgetTester(unittest.TestCase):
         '''Method run before every test. Use this to prepare the test fixture.'''
         self.controller = Controller()
         self.w = self.controller.window1.right_widget
-        self.w.testing = True
         Controller.allWidgets_setCheckable(self.controller.app)
 
     def tearDown(self):
@@ -319,49 +319,68 @@ class LeftWidgetTester(unittest.TestCase):
 
 
 class ControllerTester(unittest.TestCase):
-    ''' Tester for browse mode
+    ''' Tester for controller class
     '''
-    def _setUp_defaultMode(self):
+    def setUp(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
         self.controller = Controller()
         self.w = self.controller.right_widget.automatic_mode.window
         self.controller.testing = True
-        self.w.testing = True
-
-        # self.w = self.controller.window1.right_widget
-        # self.w.testing = True        
-        # Controller.allWidgets_setCheckable(self.controller.app)
-
-    # def _setUp_browseMode(self):
-    #     '''Method run before every test. Use this to prepare the test fixture.'''
-    #     self.controller = Controller()
-    #     self.controller.show_browseMode()
-    #     self.w = self.controller.window2.right_widget
-    #     self.w.testing = True
-    #     Controller.allWidgets_setCheckable(self.controller.app)
-
+        self.controller.right_widget.testing = True
+        Controller.allWidgets_setCheckable(self.controller.app)
+        
     def tearDown(self):
         ''' Method run after each test is run. Use this to reset the testing
-            environment.'''
+            environment.
+        '''
+        print(threading.enumerate())
+        # self.controller.right_widget.automatic_mode.thread.stop()
         self.w.close()
         self.controller.app.quit()
-        self.controller.app, self.w = None, None
+        self.controller.app.exit()
+        print('A')
+        del self.controller.app
+        # self.controller.app = None
+        print('B')
+        self.controller = None
+        print('C')
+        self.w = None
+        # self.controller.app, self.controller, self.w = None, None, None
+        print('D')
 
-    def test_switchBrowseMode(self):
-        self._setUp_defaultMode()
-        print('Done')
-        # QTest.mouseClick(self.w.browseMode, Qt.LeftButton)
-        # self.assertTrue(isinstance(self.controller.app_settings, AppSettingsBrowseMode))
+    def test_switchModes(self):
+        ''' Test to ensure moving between Default Mode and Browse Mode tabs work 
+            correctly
+        '''
+        # Test default mode is showing
+        self.assertEqual(self.controller.right_widget.tab_widget.currentIndex(), 0)
+
+        # Change to browse mode and test again
+        self.controller.right_widget.tab_widget.setCurrentIndex(1)
+        self.assertEqual(self.controller.right_widget.tab_widget.currentIndex(), 1)
+        
+        # Change back to default mode and test again
+        self.controller.right_widget.tab_widget.setCurrentIndex(0)
+        self.assertEqual(self.controller.right_widget.tab_widget.currentIndex(), 0)
 
     # def test_switchDefault(self):
     #     self._setUp_browseMode()
     #     QTest.mouseClick(self.w.testMode, Qt.LeftButton)
     #     self.assertTrue(isinstance(self.controller.app_settings, AppSettings))
 
-    # def test_load_defaults(self):
-    #     self._setUp_browseMode()
-    #     self.assertTrue(abs(np.sum(self.w.env.viewer.widget.arr)) > 1e-5)
+    def test_load_defaults_(self):
+        ''' Test to check browse mode loads an image as expected
+        '''
+        # Change to browse mode
+        self.controller.right_widget.tab_widget.setCurrentIndex(1)
+        self.assertTrue(abs(np.sum(self.w.widget.arr)) > 1e-5)
 
+    def test_load_defaults(self):
+        ''' Test to check browse mode loads an image as expected
+        '''
+        # Change to browse mode
+        self.controller.right_widget.tab_widget.setCurrentIndex(1)
+        self.assertTrue(abs(np.sum(self.w.widget.arr)) > 1e-5)
 
 if __name__ == '__main__':
     classes_to_test = [
