@@ -129,6 +129,7 @@ class LeftWidgetSettings(QFrame):
             }
             """)
         self.load_button.setStyleSheet("background: #4CAF50")
+        self.quick_help.setStyleSheet("background: white")
 
         # Event handler connection
         self.model_file_edit.clicked.connect(self.on_clicking_browse_model)
@@ -144,17 +145,27 @@ class LeftWidgetSettings(QFrame):
     def browse_mode_help_text(self):
         self.quick_help.clear()
         self.quick_help.appendHtml("""
-        <b>Browse Mode</b> <hr />
-        <p style='color:#006EAF'><i>For more information: Ctrl+H</i></p> <hr />
+        <b><p style='color:#003E74'>Browse Mode</p></b>
+        <p style='color:#006EAF'><i>(For more information: Ctrl+H)</i></p><br />
 
-        <p> Text </p>
+        <br /><b>1. Load data:</b> choose default or browse custom data.
+        <br /><b>2. Enable HITL:</b> toggle checkbox to notify to store user interaction data.
+        <br /><b>3. Navigation:</b> press <i>Human Actions</i> arrow to navigate agent until Error = 0.
+        <br /><b>4. Next Image:</b> press next image to annotate next sequence of image.
+        <br /><b>5. Save data:</b> toggle off <i>Enable HITL</i> checkbox or close GUI to save user interaction.
         """)
     
     def automatic_mode_help_text(self):
         self.quick_help.clear()
         self.quick_help.appendHtml("""
-        <b>Automatic Mode</b> <hr />
-        <p style='color:#006EAF'><i>For more information: Ctrl+H</i></p>
+        <b><p style='color:#003E74'>Automatic Mode</p></b>
+        <p style='color:#006EAF'><i>For more information: Ctrl+H</i></p><br />
+
+        <br /><b>1. Load data:</b> choose default or browse custom data.
+        <br /><b>2. Task selection: </b>select (Play|Evaluation) task.
+        <br /><b>3. Simulation: </b>start visualisation by pressing <i>Start</i> button, <i>Pause</i> to pause simulation
+        , <i>Terminate</i> to terminate simulation. After termination, you can run a new simulation using different settings.
+        <br /><b>4. Agent speed:</b> optionally change simulation speed using agent speed slider.
         """)
     
     def on_clicking_load(self):
