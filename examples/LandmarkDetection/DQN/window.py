@@ -126,6 +126,9 @@ class Window(QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction(exitAct)
 
+        self.help = ApplicationHelp()
+        self.help.show()
+
         ## Terminal menu
         terminal_menu = self.menubar.addMenu("&Terminal")
 
