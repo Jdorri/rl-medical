@@ -420,13 +420,19 @@ class RightWidgetSettingsBrowseMode(QFrame):
             self.move_img(-1)
 
     def load_img(self):
-        self.selected_list = [self.fname_images, self.fname_landmarks]
-        self.env = get_player(files_list=self.selected_list, viz=0.01,
+        try:
+            self.selected_list = [self.fname_images, self.fname_landmarks]
+            self.env = get_player(files_list=self.selected_list, viz=0.01,
                              saveGif=False, saveVideo=False, task='browse',
                             data_type=self.default_use_case)
         
-        self.env.stepManual(act=-1, viewer=self.window)
-        self.env.display()
+            self.env.stepManual(act=-1, viewer=self.window)
+            self.env.display()
+        except:
+            self.error_message_box()
+            self.default_use_case = self.which_usecase()
+            self.set_paths()
+
 
     def move_img(self, action):
         self.env.stepManual(action, self.window)
@@ -435,7 +441,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
     
     def set_paths(self):
         self.default_use_case = self.which_usecase()
-
         redir = '' if self.mounted else 'local/'
 
         if self.default_use_case == 'BrainMRI':
@@ -462,6 +467,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
             if not self.default_use_case:
                 self.error_message_box()
                 self.default_use_case = self.which_usecase()
+                self.set_paths()
 
         self.window.usecase = self.default_use_case # indicate which use case currently
     
