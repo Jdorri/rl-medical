@@ -141,9 +141,9 @@ class Window(QMainWindow):
         """
         Used to override close event and provide warning when closing application
         """
-        reply = QMessageBox.question(self, 'Message',
-            "Are you sure to quit?", QMessageBox.Yes |
-            QMessageBox.No, QMessageBox.Yes)
+        # reply = QMessageBox.question(self, 'Message',
+        #     "Are you sure to quit?", QMessageBox.Yes |
+        #     QMessageBox.No, QMessageBox.Yes)
         
         # Save HITL file
         try:
@@ -153,7 +153,7 @@ class Window(QMainWindow):
         except AttributeError:
             pass
 
-        if reply == QMessageBox.Yes:
-            event.accept()
-        else:
-            event.ignore()
+        # if reply == QMessageBox.Yes:
+        #     event.accept()
+        # else:
+        #     event.ignore()
