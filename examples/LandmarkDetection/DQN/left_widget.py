@@ -129,9 +129,22 @@ class LeftWidgetSettings(QFrame):
         self.brain_button.toggled.connect(self.on_clicking_brain)
         self.cardiac_button.toggled.connect(self.on_clicking_cardiac)
         self.ultrasound_button.toggled.connect(self.on_clicking_ultrasound)
+        self.load_button.clicked.connect(self.on_clicking_load)
 
         self.testing = False
     
+    def on_clicking_load(self):
+        """
+        Handle when user decide to load user default data on browse mode
+        """
+        # Reset SimpleImageViewer widget
+        self.window.right_widget.browse_mode.set_paths()
+        self.window.right_widget.browse_mode.load_img()
+        self.window.widget.clear_3d()
+        self.window.widget.set_3d_axes(self.window.widget.ax, \
+                self.window.widget.width, self.window.widget.height, \
+                self.window.widget.height_x)
+        self.window.widget.canvas.draw()
 
     def on_clicking_brain(self, enabled):
         """
@@ -228,6 +241,10 @@ class LeftWidgetSettings(QFrame):
             self.window.right_widget.automatic_mode.fname_landmarks.user_define = True
             self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
 
+            # Indicate that user has make a selection (browse mode)
+            self.window.right_widget.browse_mode.fname_landmarks.user_define = True
+            self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
+
             # Indicate appropriate path
             self.fname_landmarks = self.fname_landmarks[0]
 
@@ -237,7 +254,7 @@ class LeftWidgetSettings(QFrame):
         """
         if not self.testing:
             self.fname_images = QFileDialog.getOpenFileName(self, "Browse Image",
-                "./data/filenames/local/")
+                "./data/filenames")
             # Set text to label
             filename = self.fname_images[0].split("/")
             self.img_file_edit_text.setText(filename[-1])
@@ -245,6 +262,9 @@ class LeftWidgetSettings(QFrame):
             # Indicate that user has make a selection
             self.window.right_widget.automatic_mode.fname_images.user_define = True
             self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
+
+            self.window.right_widget.browse_mode.fname_images.user_define = True
+            self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
 
             # Indicate appropriate path
             self.fname_images = self.fname_images[0]
