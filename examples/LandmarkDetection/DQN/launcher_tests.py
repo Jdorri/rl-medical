@@ -14,6 +14,7 @@ import os
 import pickle
 import time
 import threading
+import sip
 
 class RightWidgetTester(unittest.TestCase):
     ''' Class to perform unit tests on the buttons within the right widget of the
@@ -323,6 +324,7 @@ class ControllerTester(unittest.TestCase):
     '''
     def setUp(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
+        # if not hasattr(self, 'controller'):
         self.controller = Controller()
         self.w = self.controller.right_widget.automatic_mode.window
         self.controller.testing = True
@@ -339,14 +341,14 @@ class ControllerTester(unittest.TestCase):
         self.controller.app.quit()
         self.controller.app.exit()
         print('A')
-        del self.controller.app
-        # self.controller.app = None
+        self.controller.app = None
         print('B')
         self.controller = None
         print('C')
         self.w = None
         # self.controller.app, self.controller, self.w = None, None, None
         print('D')
+        print(self.controller.app)
 
     def test_switchModes(self):
         ''' Test to ensure moving between Default Mode and Browse Mode tabs work 
