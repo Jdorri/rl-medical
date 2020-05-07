@@ -29,6 +29,12 @@ from thread import WorkerThread
 import os
 
 from FilenamesGUI import FilenamesGUI
+from matplotlib.backends.qt_compat import QtCore, QtWidgets
+from matplotlib.backends.backend_qt5agg import (
+        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 
 ###############################################################################
@@ -103,6 +109,19 @@ class RightWidgetSettings(QFrame):
         self.terminal = QPlainTextEdit(self)
         self.terminal.setReadOnly(True)
 
+        # 2D Matplotlib
+        self.fig = plt.figure(figsize=(4, 3))
+        self.ax = self.fig.add_subplot(111)
+        self.canvas = FigureCanvas(self.fig)
+        self.ax.set_xlabel("Steps", fontsize=8)
+        self.ax.set_ylabel("Mean Distance Error", fontsize=8)
+        self.fig.tight_layout()
+        self.ax.tick_params(axis="both", labelsize=6)
+
+        # Trajectory storage
+        self.x = []
+        self.y = []
+
         ## Layout
         # Task layout
         hbox_task = QHBoxLayout()
@@ -124,15 +143,20 @@ class RightWidgetSettings(QFrame):
         grid.addWidget(QLabel("<hr />"), 3, 0, 1, 2)
         grid.addWidget(label_speed, 4, 0, 1, 2)
         grid.addWidget(self.speed_slider, 5, 0, 1, 2)
-        grid.addItem(QSpacerItem(0, 50), 6, 0) # add space
         grid.addLayout(hbox_run, 7, 0)
 
         # Main layout
         vbox = QVBoxLayout()
         vbox.addLayout(grid)
-        vbox.addItem(QSpacerItem(300, 50)) # spacer
+        vbox.addItem(QSpacerItem(300, 20)) # spacer
+        vbox.addWidget(QLabel("<hr />"))
         vbox.addWidget(label_log)
         vbox.addWidget(self.terminal)
+        vbox.addItem(QSpacerItem(300, 20)) # spacer
+        vbox.addWidget(QLabel("<hr />"))
+        vbox.addItem(QSpacerItem(300, 20))
+        vbox.addWidget(QLabel("<i>Diagnostic Plot</i>"))
+        vbox.addWidget(self.canvas)
         vbox.addStretch()
 
         self.setLayout(vbox)
@@ -280,6 +304,18 @@ class RightWidgetSettings(QFrame):
         self.terminal.appendHtml(
             f"<i>Q Values:</i> {q_values} <hr />"
         )
+    
+    def clear_2d(self):
+        """
+        Used to clear 2d trajectories
+        """
+        self.x = []
+        self.y = []
+        self.ax.clear()
+        self.ax.set_xlabel("Steps", fontsize=8)
+        self.ax.set_ylabel("Mean Distance Error", fontsize=8)
+        self.ax.tick_params(axis="both", labelsize=6)
+        self.canvas.draw()
 
     def check_user_define_usecase(self, filename_model, filename_img, filename_landmark):
         """

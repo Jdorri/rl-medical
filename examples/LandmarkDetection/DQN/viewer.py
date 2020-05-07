@@ -153,6 +153,7 @@ class SimpleImageViewer(QWidget):
         self.label_img_y.setPixmap(self.img_y)
 
         self.clear_3d()
+        self.window.right_widget.automatic_mode.clear_2d()
 
     def clear_3d(self):
         """
@@ -165,7 +166,9 @@ class SimpleImageViewer(QWidget):
         self.tgt_y = []
         self.tgt_z = []
         self.ax.clear()
+        self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
         self.canvas.draw()
+
 
     def draw_image(self, arrs, agent_loc, target=None, rect=None, episode_end=False):
         """
@@ -231,19 +234,23 @@ class SimpleImageViewer(QWidget):
             self.x_traj.append(agent_loc[0])
             self.y_traj.append(agent_loc[1])
             self.z_traj.append(agent_loc[2])
+
+            # 2D Trajectory
+            if self.window.right_widget.automatic_mode.which_task() != "Play":
+                self.window.right_widget.automatic_mode.x.append(self.cnt)
+                self.window.right_widget.automatic_mode.y.append(self.error)
         else:
-            self.x_traj = []
-            self.y_traj = []
-            self.z_traj = []
-            self.tgt_x = []
-            self.tgt_y = []
-            self.tgt_z = []
-            self.ax.clear()
+            self.clear_3d()
+            self.window.right_widget.automatic_mode.clear_2d()
 
         self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4", linewidth=1.5)
         self.ax.plot(self.tgt_x,self.tgt_y,self.tgt_z, marker='x', c='green', linewidth=1.5)
         self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
         self.canvas.draw()
+
+        if self.window.right_widget.automatic_mode.which_task() != "Play":
+            self.window.right_widget.automatic_mode.ax.plot(self.window.right_widget.automatic_mode.x, self.window.right_widget.automatic_mode.y, c="orange")
+            self.window.right_widget.automatic_mode.canvas.draw()
 
     def set_3d_axes(self, ax, x_lim, y_lim, z_lim):
         """
@@ -473,6 +480,7 @@ class SimpleImageViewer(QWidget):
         self.task = value["task"]
         self.error = value["error"]
         self.is_terminal = value["is_terminal"]
+        self.cnt = value["cnt"]
         self.draw_image(
             arrs = value["arrs"],
             agent_loc = value["agent_loc"],
