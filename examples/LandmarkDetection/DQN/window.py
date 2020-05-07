@@ -73,7 +73,7 @@ class Window(QMainWindow):
 
         # Geometric window position and general setting
         self.showMaximized()
-        self.setWindowTitle('Anatomical Landmark Detection')
+        self.setWindowTitle('RL Medical GUI')
 
         # Menu Bar
         self.init_menu()

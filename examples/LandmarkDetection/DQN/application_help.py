@@ -78,9 +78,22 @@ class ApplicationHelp(QWidget):
         hbox_layout.addWidget(self.welcome_text)
 
         self.welcome_text.appendHtml("""
-        <h1 style='color:#003E74'> Welcome </h1>
-        <br /><br />
-        <p>Text here</p>
+        <h1 style='color:#003E74'> Welcome! </h1>
+        <br />
+        <p>Welcome to <b>RL Medical GUI</b>! Reinforcement Learning (RL) Medical GUI is a GUI application for finding established standard views 
+        and landmarks in the image (for <i>Brain</i>, <i>Cardiac</i>, and <i>Fetal</i>). The GUI has two main features: 
+        (1) visualisation of trained agent's trajectories, (2) platform for collecting data (user interaction) 
+        for Human-in-the-loop (HITL) experiments.</p><br /> 
+
+        <h2 style='color:#009CBC'>Application Modes</h2>
+        <br />
+        <ul>
+            <li><b>Automatic Mode:</b> allow visualisation of trained agent's trajectories.</li>
+            <li><b>Browse Mode:</b> allow simple user interaction with RL agent, enabling collection of data for HITL experiments.</li>
+        </ul>
+
+        <br />
+        <p><b>Notes:</b> For more information about installation, problem specification, and paper references, please visit <a href="https://github.com/ollenilsson19/rl-medical">https://github.com/ollenilsson19/rl-medical</a></p>
         """)
 
         self.welcome_stack.setLayout(hbox_layout)
@@ -93,7 +106,7 @@ class ApplicationHelp(QWidget):
 
         self.automatic_text.appendHtml("""
         <h1 style='color:#003E74'> Automatic Mode Help </h1>
-        <br /><br />
+        <br />
         <p>Text here</p>
         """)
 
