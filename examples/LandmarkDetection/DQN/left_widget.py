@@ -201,7 +201,7 @@ class LeftWidgetSettings(QFrame):
             self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Model: {filename[-1]} </p></b>")
 
             # Indicate appropriate path
-            self.fname_model = "./data/models/" + filename[-2] + "/" + filename[-1]
+            self.fname_model = self.fname_model[0]
 
     def on_clicking_browse_landmarks(self):
         """
@@ -219,7 +219,7 @@ class LeftWidgetSettings(QFrame):
             self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
 
             # Indicate appropriate path
-            self.fname_landmarks = "./data/filenames/" + filename[-1]
+            self.fname_landmarks = self.fname_landmarks[0]
 
     def on_clicking_browse_images(self):
         """
@@ -227,7 +227,7 @@ class LeftWidgetSettings(QFrame):
         """
         if not self.testing:
             self.fname_images = QFileDialog.getOpenFileName(self, "Browse Image",
-                "./data/filenames/local/", filter="txt files (*train_files*.txt)")
+                "./data/filenames/local/")
             # Set text to label
             filename = self.fname_images[0].split("/")
             self.img_file_edit_text.setText(filename[-1])
@@ -237,4 +237,4 @@ class LeftWidgetSettings(QFrame):
             self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
 
             # Indicate appropriate path
-            self.fname_images = "./data/filenames/local/" + filename[-1]
+            self.fname_images = self.fname_images[0]

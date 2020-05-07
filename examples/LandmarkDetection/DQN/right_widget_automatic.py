@@ -303,7 +303,7 @@ class RightWidgetSettings(QFrame):
             and "fetal" in filename_landmark[-1]:
             return "FetalUS"
         else:
-            return ""
+            return "UserDefined"
     
     def set_paths(self):
         """
