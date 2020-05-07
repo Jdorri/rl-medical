@@ -41,9 +41,6 @@ class Window(QMainWindow):
         self.statusbar = self.statusBar()
         self.statusbar.showMessage("Ready")
 
-        # Menu Bar
-        self.init_menu()
-
         # Initialise main widget
         arrs = [
             np.zeros(viewer_param["arrs"][0].shape),
@@ -77,11 +74,21 @@ class Window(QMainWindow):
         self.showMaximized()
         self.setWindowTitle('Anatomical Landmark Detection')
 
-        # CSS Styling for windows
-        self.menubar.setStyleSheet("background:#003E74; color:white; padding: 5px 0")
-        self.statusbar.setStyleSheet("background:#003E74; color:white")
-        self.setStyleSheet("background: white")
+        # Menu Bar
+        self.init_menu()
         
+        # CSS Styling for windows
+        self.statusbar.setStyleSheet("background:#003E74; color:white")
+        self.setStyleSheet("""
+            QMenuBar {
+                background:#003E74; color: white; padding: 5px 0 
+            }
+
+            QMenuBar::item::disabled {
+                color: grey !important;
+            }
+        """)
+
     def init_menu(self):
         """
         Used to initialise components related to menu bar.
@@ -89,14 +96,66 @@ class Window(QMainWindow):
         # Menubar
         self.menubar = self.menuBar()
 
-        # File menu
+        ## File menu
         file_menu = self.menubar.addMenu('&File')
+
+        # Load action
+        self.load_model_action = QAction("Load Model", self)
+        self.load_model_action.setShortcut("Ctrl+M")
+        self.load_model_action.triggered.connect(self.left_widget.on_clicking_browse_model)
+
+        self.load_image_action = QAction("Load Image(s)", self)
+        self.load_image_action.setShortcut("Ctrl+I")
+        self.load_image_action.triggered.connect(self.left_widget.on_clicking_browse_images)
+
+        self.load_landmark_action = QAction("Load Landmark(s)", self)
+        self.load_landmark_action.setShortcut("Ctrl+L")
+        self.load_landmark_action.triggered.connect(self.left_widget.on_clicking_browse_landmarks)
+
         # Exit action in a file
         exitAct = QAction('Exit', self)
         exitAct.setShortcut('Ctrl+Q')
         exitAct.setStatusTip('Exit application')
         exitAct.triggered.connect(self.close)
+
+        # Integrate into menu bar
+        file_menu.addAction(self.load_model_action)
+        file_menu.addAction(self.load_image_action)
+        file_menu.addAction(self.load_landmark_action)
+        file_menu.addSeparator()
         file_menu.addAction(exitAct)
+
+        ## Terminal menu
+        terminal_menu = self.menubar.addMenu("&Terminal")
+
+        # Load action
+        show_terminal_action = QAction("Show Terminal", self, checkable=True)
+        show_terminal_action.setChecked(True)
+        show_terminal_action.triggered.connect(self.on_show_terminal)
+
+        terminal_menu.addAction(show_terminal_action)
+
+        ## Help menu
+        help_menu = self.menubar.addMenu("&Help")
+
+        # Help action
+        help_action = QAction("Application Help", self)
+        help_action.setShortcut("Ctrl+H")
+        help_action.triggered.connect(self.show_full_help)
+
+        help_menu.addAction(help_action)
+
+    def show_full_help(self):
+        # Will open a new help window
+        pass
+
+    def on_show_terminal(self, state):
+        if state:
+            # Show terminal
+            pass
+        else:
+            # Dont show terminal
+            pass
 
     @pyqtSlot(QEvent)
     def keyPressEvent(self, event):
