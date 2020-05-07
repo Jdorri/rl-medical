@@ -143,7 +143,7 @@ class RightWidgetSettings(QFrame):
         grid.addWidget(QLabel("<hr />"), 3, 0, 1, 2)
         grid.addWidget(label_speed, 4, 0, 1, 2)
         grid.addWidget(self.speed_slider, 5, 0, 1, 2)
-        grid.addLayout(hbox_run, 7, 0)
+        grid.addLayout(hbox_run, 7, 0, 1, 2)
 
         self.log = label_log
         self.separator = QLabel("<hr />")

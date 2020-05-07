@@ -85,7 +85,10 @@ class LeftWidgetSettings(QFrame):
 
         hbox_load = QHBoxLayout()
         hbox_load.addWidget(self.load_button)
-        hbox_load.addStretch()
+        hbox_load.addWidget(QLabel(""))
+
+        self.quick_help = QPlainTextEdit()
+        self.quick_help.setReadOnly(True)
 
         # Main Layout
         vbox = QVBoxLayout()
@@ -104,18 +107,26 @@ class LeftWidgetSettings(QFrame):
         vbox.addWidget(self.model_file)
         vbox.addLayout(hbox_model)
         vbox.addLayout(hbox_load)
+        vbox.addWidget(QLabel("<hr />"))
+        vbox.addItem(QSpacerItem(300, 20))
+        vbox.addWidget(QLabel("<i> Quick Help </i>"))
+        vbox.addWidget(self.quick_help)
         vbox.addStretch()
         vbox.addWidget(self.logo)
 
         self.setLayout(vbox)
 
+        # Temporary quick help for browse mode
+        self.quick_help.appendHtml("""
+        <b>Automatic Mode</b> <hr />
+        <p style='color:#006EAF'><i>For more information: Ctrl+H</i></p>
+        """)
         # CSS styling
         self.setStyleSheet("""
             QPushButton {
                 background: #006EAF; 
                 color: white
             }
-
             QFrame, QRadioButton {
                 background: #EBEEEE;
             }
