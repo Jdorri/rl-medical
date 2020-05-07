@@ -115,12 +115,9 @@ class LeftWidgetSettings(QFrame):
         vbox.addWidget(self.logo)
 
         self.setLayout(vbox)
-
-        # Temporary quick help for browse mode
-        self.quick_help.appendHtml("""
-        <b>Automatic Mode</b> <hr />
-        <p style='color:#006EAF'><i>For more information: Ctrl+H</i></p>
-        """)
+        
+        self.automatic_mode_help_text()
+        
         # CSS styling
         self.setStyleSheet("""
             QPushButton {
@@ -143,6 +140,22 @@ class LeftWidgetSettings(QFrame):
         self.load_button.clicked.connect(self.on_clicking_load)
 
         self.testing = False
+    
+    def browse_mode_help_text(self):
+        self.quick_help.clear()
+        self.quick_help.appendHtml("""
+        <b>Browse Mode</b> <hr />
+        <p style='color:#006EAF'><i>For more information: Ctrl+H</i></p> <hr />
+
+        <p> Text </p>
+        """)
+    
+    def automatic_mode_help_text(self):
+        self.quick_help.clear()
+        self.quick_help.appendHtml("""
+        <b>Automatic Mode</b> <hr />
+        <p style='color:#006EAF'><i>For more information: Ctrl+H</i></p>
+        """)
     
     def on_clicking_load(self):
         """
