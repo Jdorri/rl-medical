@@ -30,9 +30,10 @@ from FilenamesGUI import FilenamesGUI
 # Responsible to run the entire application
 
 class Controller:
-    def __init__(self, display=True):
+    def __init__(self):
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
+        self.testing = False
 
         # Initialise the right settings tab
         self.right_widget = Tab()
@@ -43,6 +44,7 @@ class Controller:
         self.right_widget.browse_mode.window = self.window
         
         # Show window
+        # if not self.testing:
         self.window.show()
 
 
@@ -78,6 +80,8 @@ class Tab(QFrame):
         # Responsive
         self.setMaximumWidth(400)
         self.setStyleSheet("background:#EBEEEE")
+
+        self.testing = False
     
     def save_HITL(self):
         ''' Method to save HITL if appropriate '''
@@ -105,6 +109,7 @@ class Tab(QFrame):
             self.automatic_mode.restart()
 
             # Reset left widget
+            # if not self.testing:
             self.browse_mode.window.left_widget.model_file.show()
             self.browse_mode.window.left_widget.model_file_edit.show()
             self.browse_mode.window.left_widget.model_file_edit_text.show()
