@@ -265,6 +265,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
         hbox_image.addWidget(self.next_img)
         hbox_image.addWidget(self.HITL_delete)
 
+        self.log = QLabel("<i> Logs </i>")
+        self.separator = QLabel("<hr />")
+
         vbox = QVBoxLayout()
         vbox.setSpacing(20)
         vbox.addWidget(QLabel("<i> Human Actions </i>"))
@@ -278,9 +281,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
         vbox.addWidget(self.HITL_mode)
         vbox.addItem(QSpacerItem(0,20))
         vbox.addLayout(hbox_image)
-        vbox.addWidget(QLabel("<hr />"))
+        vbox.addWidget(self.separator)
         vbox.addItem(QSpacerItem(300, 10)) # spacer
-        vbox.addWidget(QLabel("<i> Logs </i>"))
+        vbox.addWidget(self.log)
         vbox.addWidget(self.terminal_duplicate)
         vbox.addStretch()
 

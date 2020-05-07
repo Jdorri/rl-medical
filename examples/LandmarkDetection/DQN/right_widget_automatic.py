@@ -145,12 +145,15 @@ class RightWidgetSettings(QFrame):
         grid.addWidget(self.speed_slider, 5, 0, 1, 2)
         grid.addLayout(hbox_run, 7, 0)
 
+        self.log = label_log
+        self.separator = QLabel("<hr />")
+
         # Main layout
         vbox = QVBoxLayout()
         vbox.addLayout(grid)
         vbox.addItem(QSpacerItem(300, 20)) # spacer
-        vbox.addWidget(QLabel("<hr />"))
-        vbox.addWidget(label_log)
+        vbox.addWidget(self.separator)
+        vbox.addWidget(self.log)
         vbox.addWidget(self.terminal)
         vbox.addItem(QSpacerItem(300, 20)) # spacer
         vbox.addWidget(QLabel("<hr />"))
