@@ -22,7 +22,7 @@ class LeftWidgetSettings(QFrame):
         super().__init__()
         # Window object to access windows components
         self.window = window # Store window object to enable control over windows functionality
-        
+        self.setMaximumWidth(350)
         self.title = QLabel("<b> Settings </b>")
 
         ## Default file mode
@@ -54,6 +54,10 @@ class LeftWidgetSettings(QFrame):
         pixmap_logo = QPixmap("./images/imperial_logo.png")
         pixmap_logo = pixmap_logo.scaledToHeight(50)
         self.logo.setPixmap(pixmap_logo)
+
+        # Load button (HITL mode)
+        self.load_button = QPushButton("Load", self)
+        self.load_button.hide()
         
         ## Manage layout
         # Default data settings layout
@@ -79,6 +83,10 @@ class LeftWidgetSettings(QFrame):
         hbox_landmark.addWidget(self.landmark_file_edit)
         hbox_landmark.addWidget(self.landmark_file_edit_text)
 
+        hbox_load = QHBoxLayout()
+        hbox_load.addWidget(self.load_button)
+        hbox_load.addStretch()
+
         # Main Layout
         vbox = QVBoxLayout()
         vbox.setSpacing(20)
@@ -95,6 +103,7 @@ class LeftWidgetSettings(QFrame):
         vbox.addItem(QSpacerItem(300, 20))
         vbox.addWidget(self.model_file)
         vbox.addLayout(hbox_model)
+        vbox.addLayout(hbox_load)
         vbox.addStretch()
         vbox.addWidget(self.logo)
 
@@ -111,6 +120,7 @@ class LeftWidgetSettings(QFrame):
                 background: #EBEEEE;
             }
             """)
+        self.load_button.setStyleSheet("background: #4CAF50")
 
         # Event handler connection
         self.model_file_edit.clicked.connect(self.on_clicking_browse_model)

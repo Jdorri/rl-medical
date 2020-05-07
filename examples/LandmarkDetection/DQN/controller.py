@@ -108,6 +108,7 @@ class Tab(QFrame):
             self.browse_mode.window.left_widget.model_file.show()
             self.browse_mode.window.left_widget.model_file_edit.show()
             self.browse_mode.window.left_widget.model_file_edit_text.show()
+            self.browse_mode.window.left_widget.load_button.hide()
             
             # Pass loaded user data
             FilenamesGUI.copy(self.browse_mode.fname_images, self.automatic_mode.fname_images)
@@ -132,6 +133,7 @@ class Tab(QFrame):
             self.browse_mode.window.left_widget.model_file.hide()
             self.browse_mode.window.left_widget.model_file_edit.hide()
             self.browse_mode.window.left_widget.model_file_edit_text.hide()
+            self.browse_mode.window.left_widget.load_button.show()
 
             # Pass loaded user data
             FilenamesGUI.copy(self.automatic_mode.fname_images, self.browse_mode.fname_images)
