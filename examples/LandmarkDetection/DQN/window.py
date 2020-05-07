@@ -9,6 +9,7 @@ from PyQt5.QtCore import *
 
 from viewer import SimpleImageViewer
 from left_widget import LeftWidgetSettings
+from application_help import ApplicationHelp
 
 import numpy as np
 
@@ -147,7 +148,8 @@ class Window(QMainWindow):
 
     def show_full_help(self):
         # Will open a new help window
-        pass
+        self.help = ApplicationHelp()
+        self.help.show()
 
     def on_show_terminal(self, state):
         if state:
