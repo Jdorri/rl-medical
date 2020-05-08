@@ -737,7 +737,7 @@ class MedicalPlayer(gym.Env):
 
     def get_plane_z(self, z=0):
         im = self._image.data[:, :, z]
-        if self.data_type in ['BrainMRI', 'CardiacMRI']:
+        if self.data_type in ['BrainMRI']:
             im = np.rot90(im, 1)                # Rotate 90 degrees ccw
         return im
 
@@ -874,7 +874,8 @@ class MedicalPlayer(gym.Env):
             "scale": self.xscale,
             "rect": self.rectangle,
             "task": self.task,
-            "is_terminal": self.terminal
+            "is_terminal": self.terminal,
+            "cnt": self.cnt
         })
 
         if self.task != 'browse':

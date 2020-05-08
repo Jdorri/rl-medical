@@ -60,6 +60,8 @@ INIT_MEMORY_SIZE = MEMORY_SIZE // 20 #5e4
 STEPS_PER_EPOCH = 10000 // UPDATE_FREQ * 10
 # num training epochs in between model evaluations
 EPOCHS_PER_EVAL = 2
+# or
+STEPS_PER_EVAL = 10000
 # the number of episodes to run during evaluation
 EVAL_EPISODE = 50
 # Max number of training epochs
@@ -190,8 +192,9 @@ def get_config(files_list, data_type, trainable_variables):
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'exploration'),
                 # 1->0.1 in the first million steps
-                [(0, 0.6), (10, 0.1), (320, 0.01)], #[(0, 1.0), (10, 0.1), (320, 0.01)],
-                interp='linear'),
+                [(0, 0.8), (1000000, 0.1), (32000000, 0.01)], #[(0, 1.0), (10, 0.1), (320, 0.01)],
+                interp='linear',
+                step_based=True),
 ###############################################################################
 # HITL UPDATE
 # Here the number of steps taken in the environment is increased from 0, during
@@ -205,7 +208,7 @@ def get_config(files_list, data_type, trainable_variables):
                 ObjAttrParam(expreplay, 'update_frequency'),
                 # 1->0.1 in the first million steps note should be 8 but put to
                 # 4 for faster training
-                [(0, int(0)), (100000, int(4))],
+                [(0, int(0)), (500000, int(4))],
                 interp=None, step_based=True),
 
 ###############################################################################
@@ -215,7 +218,7 @@ def get_config(files_list, data_type, trainable_variables):
                           output_names=['Qvalue'], files_list=files_list,
                           data_type=data_type,
                           get_player_fn=get_player),
-                every_k_epochs=EPOCHS_PER_EVAL),
+                every_k_steps=STEPS_PER_EVAL),
             HumanHyperParamSetter('learning_rate'),
         ],
         steps_per_epoch=STEPS_PER_EPOCH,
@@ -394,7 +397,7 @@ if __name__ == '__main__':
 
             session_init = get_model_loader(args.transferModel[0])
             reader, variables = session_init._read_checkpoint_vars(args.transferModel[0])
-           
+
             ignore = [var for var in variables if any([i in var for i in ignore_list])]
             not_ignore = (list(set(variables) - set(ignore)))#not ignored
             session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
