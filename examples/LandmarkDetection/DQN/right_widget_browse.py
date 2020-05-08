@@ -358,7 +358,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_HITL(self):
-        ''' Activating HITL mode giv es following actions:
+        ''' Activating HITL mode gives following actions:
             - Make HITL_delete button clickable
             - Make HITL_mode button clickable
 
@@ -396,6 +396,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_HITLDelete(self):
+        ''' Helper function to remove lates HITL episode '''
         if self.testing:
             result = QMessageBox.Yes
         else:

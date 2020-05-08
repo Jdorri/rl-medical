@@ -11,17 +11,13 @@ import numpy as np
 import glob
 import os
 import pickle
-import time
-import threading
-import gc
 
 class RightWidgetTester(unittest.TestCase):
-    ''' Class to perform unit tests on the buttons within the right widget of the
-        GUI Launcher.
+    ''' Class to perform unit tests on the buttons and functionatlity within 
+        the right widget of the GUI Launcher.
     '''
     def setUp(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
-        # if not hasattr(self, 'controller'):
         self.controller = Controller()
         self.m = self.controller.right_widget.automatic_mode
         self.w = self.m.window
@@ -106,95 +102,102 @@ class RightWidgetTester(unittest.TestCase):
 
 
 class RightWidgetBrowseModeTester(unittest.TestCase):
-    ''' Tester for browse mode
+    ''' Class to perform unit tests on the buttons and functionatlity within 
+        the right widget of the GUI Launcher while browse mode is activated.
     '''
     def setUp(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
         self.controller = Controller()
-        self.controller.show_browseMode()
-        self.w = self.controller.window2.right_widget
-        self.w.testing = True
+        self.m = self.controller.right_widget.browse_mode
+        self.w = self.m.window
+        self.controller.right_widget.tab_widget.setCurrentIndex(1)      # Change to browse mode
         Controller.allWidgets_setCheckable(self.controller.app)
-
+        
     def tearDown(self):
         ''' Method run after each test is run. Use this to reset the testing
             environment.
+
+            Raises ValueError to progress onto next test as unittest doesn't
+            work correctly with threading & PyQt.
         '''
-        self.w.close()
-        self.controller.app.quit()
-        self.controller.app, self.w = None, None
+        try:
+            test_results[self.id()] = self._outcome.errors[1][1][1]
+        except TypeError:
+            test_results[self.id()] = 'success'
 
-    def test_exitButton(self):
-        QTest.mouseClick(self.w.exit, Qt.LeftButton)
-        self.assertTrue(self.w.exit.isChecked())
+        raise ValueError('Stop test here')
 
-    def test_browseImgsButton(self):
-        QTest.mouseClick(self.w.img_file_edit, Qt.LeftButton)
-        self.assertTrue(self.w.img_file_edit.isChecked())
+    # def test_browseImgsButton(self):
+    #     QTest.mouseClick(self.w.img_file_edit, Qt.LeftButton)
+    #     self.assertTrue(self.w.img_file_edit.isChecked())
 
     def test_upButton(self):
-        init_loc = self.w.env._location
-        QTest.mouseClick(self.w.upButton, Qt.LeftButton)
-        self.assertTrue(self.w.upButton.isChecked())
-        self.assertNotEqual(init_loc, self.w.env._location)
+        ''' Check clicking the up button moves the agent '''
+        init_loc = self.m.env._location
+        QTest.mouseClick(self.m.y_action.up_button, Qt.LeftButton)
+        self.assertTrue(self.m.y_action.up_button.isChecked())
+        self.assertNotEqual(init_loc, self.m.env._location)
 
     def test_downButton(self):
-        init_loc = self.w.env._location
-        QTest.mouseClick(self.w.downButton, Qt.LeftButton)
-        self.assertTrue(self.w.downButton.isChecked())
-        self.assertNotEqual(init_loc, self.w.env._location)
+        ''' Check clicking the down button moves the agent '''
+        init_loc = self.m.env._location
+        QTest.mouseClick(self.m.y_action.down_button, Qt.LeftButton)
+        self.assertTrue(self.m.y_action.down_button.isChecked())
+        self.assertNotEqual(init_loc, self.m.env._location)
 
     def test_leftButton(self):
-        init_loc = self.w.env._location
-        QTest.mouseClick(self.w.leftButton, Qt.LeftButton)
-        self.assertTrue(self.w.leftButton.isChecked())
-        self.assertNotEqual(init_loc, self.w.env._location)
+        ''' Check clicking the left button moves the agent '''
+        init_loc = self.m.env._location
+        QTest.mouseClick(self.m.x_action.left_button, Qt.LeftButton)
+        self.assertTrue(self.m.x_action.left_button.isChecked())
+        self.assertNotEqual(init_loc, self.m.env._location)
 
     def test_rightButton(self):
-        init_loc = self.w.env._location
-        QTest.mouseClick(self.w.rightButton, Qt.LeftButton)
-        self.assertTrue(self.w.rightButton.isChecked())
-        self.assertNotEqual(init_loc, self.w.env._location)
+        ''' Check clicking the left button moves the agent '''
+        init_loc = self.m.env._location
+        QTest.mouseClick(self.m.x_action.right_button, Qt.LeftButton)
+        self.assertTrue(self.m.x_action.right_button.isChecked())
+        self.assertNotEqual(init_loc, self.m.env._location)
 
-    def test_inButton(self):
-        init_loc = self.w.env._location
-        QTest.mouseClick(self.w.inButton, Qt.LeftButton)
-        self.assertTrue(self.w.inButton.isChecked())
-        self.assertNotEqual(init_loc, self.w.env._location)
+    def test_zInButton(self):
+        ''' Check clicking the z in button moves the agent '''
+        init_loc = self.m.env._location
+        QTest.mouseClick(self.m.z_action.in_button, Qt.LeftButton)
+        self.assertTrue(self.m.z_action.in_button.isChecked())
+        self.assertNotEqual(init_loc, self.m.env._location)
 
-    def test_outButton(self):
-        init_loc = self.w.env._location
-        QTest.mouseClick(self.w.outButton, Qt.LeftButton)
-        self.assertTrue(self.w.outButton.isChecked())
-        self.assertNotEqual(init_loc, self.w.env._location)
+    def test_zOutButton(self):
+        ''' Check clicking the z out button moves the agent '''
+        init_loc = self.m.env._location
+        QTest.mouseClick(self.m.z_action.out_button, Qt.LeftButton)
+        self.assertTrue(self.m.z_action.out_button.isChecked())
+        self.assertNotEqual(init_loc, self.m.env._location)
 
     def test_zoomInButton(self):
-        # init_res = 3
-        # self.w.env.xscale = init_res
-        QTest.mouseClick(self.w.zoomInButton, Qt.LeftButton)
-        self.assertTrue(self.w.zoomInButton.isChecked())
-        # self.assertEqual(self.w.env.xscale, 2)
+        ''' Check clicking the zoom in button registers '''
+        QTest.mouseClick(self.m.zoomInButton, Qt.LeftButton)
+        self.assertTrue(self.m.zoomInButton.isChecked())
 
     def test_zoomOutButton(self):
-        # init_res = 2
-        # self.w.env.xscale = init_res
-        QTest.mouseClick(self.w.zoomOutButton, Qt.LeftButton)
-        self.assertTrue(self.w.zoomOutButton.isChecked())
-        # self.assertEqual(self.w.env.xscale, 3)
+        ''' Check clicking the zoom in button registers '''
+        QTest.mouseClick(self.m.zoomOutButton, Qt.LeftButton)
+        self.assertTrue(self.m.zoomOutButton.isChecked())
 
     def test_nextImgButton(self):
-        ''' Compare the intensity of the initial img to new img'''
-        init_intensity = np.sum(self.w.env.viewer.widget.arr)
-        QTest.mouseClick(self.w.next_img, Qt.LeftButton)
-        self.assertTrue(self.w.next_img.isChecked())
-        self.assertTrue(init_intensity - np.sum(self.w.env.viewer.widget.arr) > 1e-5)
+        ''' Check clicking next image loads a new image by comparing 
+            the intensity of the initial img to new img
+        '''
+        init_intensity = np.sum(self.m.env.viewer.widget.arr)
+        QTest.mouseClick(self.m.next_img, Qt.LeftButton)
+        self.assertTrue(self.m.next_img.isChecked())
+        self.assertTrue(init_intensity - np.sum(self.m.env.viewer.widget.arr) > 1e-5)
 
     def test_delHITLButton_notClickable(self):
         ''' Check the HITL delete button is not clickable if
             HITL mode is not enabled.
         '''
-        QTest.mouseClick(self.w.HITL_delete, Qt.LeftButton)
-        self.assertTrue(not self.w.HITL_delete.isChecked())
+        QTest.mouseClick(self.m.HITL_delete, Qt.LeftButton)
+        self.assertTrue(not self.m.HITL_delete.isChecked())
 
 
 class RightWidgetHITLTester(unittest.TestCase):
@@ -372,7 +375,6 @@ class ControllerTester(unittest.TestCase):
     '''
     def setUp(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
-        # if not hasattr(self, 'controller'):
         self.controller = Controller()
         self.w = self.controller.right_widget.automatic_mode.window
         Controller.allWidgets_setCheckable(self.controller.app)
@@ -418,11 +420,11 @@ if __name__ == '__main__':
     test_results = {}
 
     classes_to_test = [
-        RightWidgetTester,
+        # RightWidgetTester,
         # RightWidgetBrowseModeTester,
-        # RightWidgetHITLTester,
+        RightWidgetHITLTester,
         # LeftWidgetTester,
-        ControllerTester,
+        # ControllerTester,
     ]
 
     loader = unittest.TestLoader()
