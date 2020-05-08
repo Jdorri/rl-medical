@@ -82,5 +82,5 @@ ax = sns.lineplot(x="checkpoint", y="distance_error",
 # control x and y limits
 plt.ylim(0, 12)
 plt.xlim(0, None)
-plt.savefig('results/plots/plot.png')
+# plt.savefig('results/plots/plot.png', dpi=500)
 plt.show()
