@@ -108,7 +108,6 @@ class LeftWidgetSettings(QFrame):
         vbox.addLayout(hbox_model)
         vbox.addLayout(hbox_load)
         vbox.addWidget(QLabel("<hr />"))
-        vbox.addItem(QSpacerItem(300, 20))
         vbox.addWidget(QLabel("<i> Quick Help </i>"))
         vbox.addWidget(self.quick_help)
         vbox.addStretch()
@@ -240,6 +239,7 @@ class LeftWidgetSettings(QFrame):
                         self.window.widget.width, self.window.widget.height, \
                         self.window.widget.height_x)
                 self.window.widget.canvas.draw()
+
     def reset_file_edit_text(self):
         """
         Used to reset file edit text
