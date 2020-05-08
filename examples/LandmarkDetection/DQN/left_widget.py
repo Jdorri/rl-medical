@@ -85,7 +85,10 @@ class LeftWidgetSettings(QFrame):
 
         hbox_load = QHBoxLayout()
         hbox_load.addWidget(self.load_button)
-        hbox_load.addStretch()
+        hbox_load.addWidget(QLabel(""))
+
+        self.quick_help = QPlainTextEdit()
+        self.quick_help.setReadOnly(True)
 
         # Main Layout
         vbox = QVBoxLayout()
@@ -104,23 +107,28 @@ class LeftWidgetSettings(QFrame):
         vbox.addWidget(self.model_file)
         vbox.addLayout(hbox_model)
         vbox.addLayout(hbox_load)
+        vbox.addWidget(QLabel("<hr />"))
+        vbox.addWidget(QLabel("<i> Quick Help </i>"))
+        vbox.addWidget(self.quick_help)
         vbox.addStretch()
         vbox.addWidget(self.logo)
 
         self.setLayout(vbox)
-
+        
+        self.automatic_mode_help_text()
+        
         # CSS styling
         self.setStyleSheet("""
             QPushButton {
                 background: #006EAF; 
                 color: white
             }
-
             QFrame, QRadioButton {
                 background: #EBEEEE;
             }
             """)
         self.load_button.setStyleSheet("background: #4CAF50")
+        self.quick_help.setStyleSheet("background: white")
 
         # Event handler connection
         self.model_file_edit.clicked.connect(self.on_clicking_browse_model)
@@ -132,6 +140,32 @@ class LeftWidgetSettings(QFrame):
         self.load_button.clicked.connect(self.on_clicking_load)
 
         self.testing = False
+    
+    def browse_mode_help_text(self):
+        self.quick_help.clear()
+        self.quick_help.appendHtml("""
+        <b><p style='color:#003E74'>Browse Mode</p></b>
+        <p style='color:#006EAF'><i>(For more information: Ctrl+H)</i></p><br />
+
+        <br /><b>1. Load data:</b> choose default or browse custom data.
+        <br /><b>2. Enable HITL:</b> toggle checkbox to notify to store user interaction data.
+        <br /><b>3. Navigation:</b> press <i>Human Actions</i> arrow to navigate agent until Error = 0.
+        <br /><b>4. Next Image:</b> press next image to annotate next sequence of image.
+        <br /><b>5. Save data:</b> toggle off <i>Enable HITL</i> checkbox or close GUI to save user interaction.
+        """)
+    
+    def automatic_mode_help_text(self):
+        self.quick_help.clear()
+        self.quick_help.appendHtml("""
+        <b><p style='color:#003E74'>Automatic Mode</p></b>
+        <p style='color:#006EAF'><i>For more information: Ctrl+H</i></p><br />
+
+        <br /><b>1. Load data:</b> choose default or browse custom data.
+        <br /><b>2. Task selection: </b>select (Play|Evaluation) task.
+        <br /><b>3. Simulation: </b>start visualisation by pressing <i>Start</i> button, <i>Pause</i> to pause simulation
+        , <i>Terminate</i> to terminate simulation. After termination, you can run a new simulation using different settings.
+        <br /><b>4. Agent speed:</b> optionally change simulation speed using agent speed slider.
+        """)
     
     def on_clicking_load(self):
         """
@@ -155,6 +189,7 @@ class LeftWidgetSettings(QFrame):
             if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
                 # Save HITL status
                 self.window.right_widget.save_HITL()
+                # self.window.widget.change_layout("BrainMRI")
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
@@ -175,6 +210,7 @@ class LeftWidgetSettings(QFrame):
             if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
                 # Save HITL status
                 self.window.right_widget.save_HITL()
+                # self.window.widget.change_layout("FetalUS")
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
@@ -195,6 +231,7 @@ class LeftWidgetSettings(QFrame):
             if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
                 # Save HITL status
                 self.window.right_widget.save_HITL()
+                # self.window.widget.change_layout("CardiacMRI")
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
@@ -205,7 +242,7 @@ class LeftWidgetSettings(QFrame):
                         self.window.widget.width, self.window.widget.height, \
                         self.window.widget.height_x)
                 self.window.widget.canvas.draw()
-                
+
     def reset_file_edit_text(self):
         """
         Used to reset file edit text

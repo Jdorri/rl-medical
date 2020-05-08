@@ -125,11 +125,14 @@ class Tab(QFrame):
             self.browse_mode.window.left_widget.model_file.show()
             self.browse_mode.window.left_widget.model_file_edit.show()
             self.browse_mode.window.left_widget.model_file_edit_text.show()
+            self.browse_mode.window.left_widget.load_button.hide()
+            self.browse_mode.window.left_widget.automatic_mode_help_text()
             
             # Pass loaded user data
             FilenamesGUI.copy(self.browse_mode.fname_images, self.automatic_mode.fname_images)
             FilenamesGUI.copy(self.browse_mode.fname_landmarks, self.automatic_mode.fname_landmarks)
             self.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Automatic Mode </p></b>")        
+            self.automatic_mode.window.load_model_action.setEnabled(True)
 
         # If browse mode is selected, reset image and other relevant flags
         else:
@@ -149,11 +152,14 @@ class Tab(QFrame):
             self.browse_mode.window.left_widget.model_file.hide()
             self.browse_mode.window.left_widget.model_file_edit.hide()
             self.browse_mode.window.left_widget.model_file_edit_text.hide()
+            self.browse_mode.window.left_widget.load_button.show()
+            self.browse_mode.window.left_widget.browse_mode_help_text()
 
             # Pass loaded user data
             FilenamesGUI.copy(self.automatic_mode.fname_images, self.browse_mode.fname_images)
             FilenamesGUI.copy(self.automatic_mode.fname_landmarks, self.browse_mode.fname_landmarks)
             self.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Browse Mode </p></b>")        
+            self.browse_mode.window.load_model_action.setEnabled(False)
 
     def get_mode(self):
         """
