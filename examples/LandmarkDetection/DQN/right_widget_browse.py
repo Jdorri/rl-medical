@@ -213,7 +213,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.terminal_duplicate = QPlainTextEdit(self)
         self.terminal_duplicate.setReadOnly(True)
         self.next_img = QPushButton('Next Image', self)
-        self.HITL_mode = QCheckBox('Enable HITL',self)
+        self.HITL_mode = QCheckBox('Enable HITL', self)
         self.HITL_mode.setCheckable(True)
         self.HITL_delete = QPushButton('Delete Episode', self)
         self.HITL_delete.setDisabled(True)
@@ -433,7 +433,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
             self.error_message_box()
             self.default_use_case = self.which_usecase()
             self.set_paths()
-
 
     def move_img(self, action):
         self.env.stepManual(action, self.window)

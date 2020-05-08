@@ -201,49 +201,61 @@ class RightWidgetBrowseModeTester(unittest.TestCase):
 
 
 class RightWidgetHITLTester(unittest.TestCase):
-    ''' Tester for HITL mode
+    ''' Tester for the functionality of HITL mode within browse mode on right
+        widget.
     '''
     def setUp(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
         self.controller = Controller()
-        self.controller.show_browseMode()
-        self.w = self.controller.window2.right_widget
-        self.w.testing = True
+        self.m = self.controller.right_widget.browse_mode
+        self.w = self.m.window
+        self.controller.right_widget.on_change(1)
         Controller.allWidgets_setCheckable(self.controller.app)
-        self.w.HITL = True
+
+        self.m.testing = True
+        self.m.HITL = True
 
     def tearDown(self):
         ''' Method run after each test is run. Use this to reset the testing
-            environment.'''
-        self.w.close()
-        self.controller.app.quit()
-        self.controller.app, self.w = None, None
+            environment.
+
+            Raises ValueError to progress onto next test as unittest doesn't
+            work correctly with threading & PyQt.
+        '''
+        try:
+            test_results[self.id()] = self._outcome.errors[1][1][1]
+        except (TypeError, IndexError):
+            test_results[self.id()] = 'success'
+
+        raise ValueError('Stop test here')
 
     def test_enableHITLCheckBox(self):
         ''' Test the HITL checkbox works '''
-        self.w.HITL = False
-        QTest.mouseClick(self.w.HITL_mode, Qt.LeftButton)
-        self.assertTrue(self.w.HITL_mode.isChecked())
+        self.m.HITL = False
+        QTest.mouseClick(self.m.HITL_mode, Qt.LeftButton)
+        self.assertTrue(self.m.HITL_mode.isChecked())
 
     def test_delHITLButton(self):
-        ''' Test the HITL delete episode button works '''
+        ''' Test the HITL delete episode deletes the latest episode as expected.
+        '''
         # Move to fill location history
-        QTest.mouseClick(self.w.upButton, Qt.LeftButton)
-        QTest.mouseClick(self.w.downButton, Qt.LeftButton)
+        QTest.mouseClick(self.m.y_action.down_button, Qt.LeftButton)
+        QTest.mouseClick(self.m.y_action.up_button, Qt.LeftButton)
 
         # Delete episode
-        QTest.mouseClick(self.w.HITL_delete, Qt.LeftButton)
-        self.assertEqual(len(self.w.HITL_logger), 0)
+        QTest.mouseClick(self.m.HITL_delete, Qt.LeftButton)
+        self.assertEqual(self.m.HITL_logger, [])
 
     def test_saveHITL(self):
-        ''' Test the HITL session is saved when HITL mode is disabled '''
+        ''' Test the HITL session is saved when HITL mode is disabled 
+        '''
         # Move to fill location history
-        QTest.mouseClick(self.w.upButton, Qt.LeftButton)
-        QTest.mouseClick(self.w.downButton, Qt.LeftButton)
+        QTest.mouseClick(self.m.y_action.down_button, Qt.LeftButton)
+        QTest.mouseClick(self.m.y_action.up_button, Qt.LeftButton)
 
         # End HITL mode (as this calls save_HITL())
-        QTest.mouseClick(self.w.HITL_mode, Qt.LeftButton)
-        self.assertTrue(not self.w.HITL_mode.isChecked())
+        QTest.mouseClick(self.m.HITL_mode, Qt.LeftButton)
+        self.assertTrue(not self.m.HITL_mode.isChecked())
 
         # Load the created file
         list_of_files = glob.glob('./data/HITL/*.pickle')
@@ -267,35 +279,23 @@ class RightWidgetHITLTester(unittest.TestCase):
         # Delete the log file
         os.remove(latest_file)
 
-    def test_bufferFillsCorrectly(self):
-        ''' Test HITL buffer fills as desired when moving the agent'''
-        for i in range(6):
-            pairings = {
-                0: self.w.inButton,
-                1: self.w.upButton,
-                2: self.w.rightButton,
-                3: self.w.leftButton,
-                4: self.w.downButton,
-                5: self.w.outButton,
-            }
-            self.bufferChecker(i, pairings[i])
-            self.tearDown()
-            self.setUp()
-
     def test_checkHITLZoom(self):
         ''' Check that changing resolution doesn't make an action '''
-        buttons = [self.w.zoomInButton, self.w.zoomOutButton]
+        buttons = [self.m.zoomInButton, self.m.zoomOutButton]
         for button in buttons:
             QTest.mouseClick(button, Qt.LeftButton)
-            self.assertEqual(self.w.HITL_logger, [])
+            self.assertEqual(self.m.HITL_logger, [])
 
-    def bufferChecker(self, action, button):
-        ''' Helper function for the buffer fills correctly '''
+    def test_bufferFillsCorrectly(self):
+        ''' Check that the buffer fills correctly with the agent's movement.
+        '''
         # Move to fill location history
-        QTest.mouseClick(button, Qt.LeftButton)
+        QTest.mouseClick(self.m.y_action.up_button, Qt.LeftButton)
+        QTest.mouseClick(self.m.x_action.left_button, Qt.LeftButton)
+        QTest.mouseClick(self.m.z_action.out_button, Qt.LeftButton)
 
         # End HITL mode (as this calls save_HITL())
-        QTest.mouseClick(self.w.HITL_mode, Qt.LeftButton)
+        QTest.mouseClick(self.m.HITL_mode, Qt.LeftButton)
 
         # Load the created file
         list_of_files = glob.glob('./data/HITL/*.pickle')
@@ -305,8 +305,8 @@ class RightWidgetHITLTester(unittest.TestCase):
 
         # Check contents of the log are correct
         self.assertEqual(len(log), 1)
-        self.assertEqual(len(log[0]['actions']), 2)
-        self.assertEqual(log[0]['actions'][1], action)
+        self.assertEqual(len(log[0]['actions']), 4)
+        self.assertEqual(log[0]['actions'][1:], [1, 3, 5])
 
         # Delete the log file
         os.remove(latest_file)
@@ -422,8 +422,8 @@ if __name__ == '__main__':
     classes_to_test = [
         # RightWidgetTester,
         # RightWidgetBrowseModeTester,
-        RightWidgetHITLTester,
-        # LeftWidgetTester,
+        # RightWidgetHITLTester,
+        LeftWidgetTester,
         # ControllerTester,
     ]
 
