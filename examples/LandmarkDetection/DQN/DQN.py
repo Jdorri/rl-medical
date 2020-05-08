@@ -60,6 +60,8 @@ INIT_MEMORY_SIZE = MEMORY_SIZE // 20 #5e4
 STEPS_PER_EPOCH = 10000 // UPDATE_FREQ * 10
 # num training epochs in between model evaluations
 EPOCHS_PER_EVAL = 2
+# or
+STEPS_PER_EVAL = 10000
 # the number of episodes to run during evaluation
 EVAL_EPISODE = 50
 # Max number of training epochs
@@ -155,7 +157,7 @@ def get_config(files_list, data_type, trainable_variables):
         batch_size=BATCH_SIZE,
         memory_size=MEMORY_SIZE,
         init_memory_size=INIT_MEMORY_SIZE,
-        init_exploration=1.0, #0.0
+        init_exploration=0.6, #0.0
         #How my epsilon greedy steps to take before commiting to memory
         #An idea to encorporate the pre-training phase is to schedule the
         # the agent only to start taking steps after x amount of mini_batch
@@ -184,8 +186,9 @@ def get_config(files_list, data_type, trainable_variables):
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'exploration'),
                 # 1->0.1 in the first million steps
-                [(0, 1.0), (400000,1.0),(1400000, 0.1), (8000000, 0.01)],
-                interp='linear'),
+                [(0, 0.8), (1000000, 0.1), (32000000, 0.01)], #[(0, 1.0), (10, 0.1), (320, 0.01)],
+                interp='linear',
+                step_based=True),
 ###############################################################################
 # HITL UPDATE
 # Here the number of steps taken in the environment is increased from 0, during
@@ -209,7 +212,7 @@ def get_config(files_list, data_type, trainable_variables):
                           output_names=['Qvalue'], files_list=files_list,
                           data_type=data_type,
                           get_player_fn=get_player),
-                every_k_steps=10000),
+                every_k_steps=STEPS_PER_EVAL),
             HumanHyperParamSetter('learning_rate'),
         ],
         steps_per_epoch=STEPS_PER_EPOCH,

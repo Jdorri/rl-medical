@@ -265,6 +265,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
         hbox_image.addWidget(self.next_img)
         hbox_image.addWidget(self.HITL_delete)
 
+        self.log = QLabel("<i> Logs </i>")
+        self.separator = QLabel("<hr />")
+
         vbox = QVBoxLayout()
         vbox.setSpacing(20)
         vbox.addWidget(QLabel("<i> Agent Actions </i>"))
@@ -278,9 +281,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
         vbox.addWidget(self.HITL_mode)
         vbox.addItem(QSpacerItem(0,20))
         vbox.addLayout(hbox_image)
-        vbox.addWidget(QLabel("<hr />"))
+        vbox.addWidget(self.separator)
         vbox.addItem(QSpacerItem(300, 10)) # spacer
-        vbox.addWidget(QLabel("<i> Logs </i>"))
+        vbox.addWidget(self.log)
         vbox.addWidget(self.terminal_duplicate)
         vbox.addStretch()
 
@@ -425,13 +428,19 @@ class RightWidgetSettingsBrowseMode(QFrame):
             self.move_img(-1)
 
     def load_img(self):
-        self.selected_list = [self.fname_images, self.fname_landmarks]
-        self.env = get_player(files_list=self.selected_list, viz=0.01,
+        try:
+            self.selected_list = [self.fname_images, self.fname_landmarks]
+            self.env = get_player(files_list=self.selected_list, viz=0.01,
                              saveGif=False, saveVideo=False, task='browse',
                             data_type=self.default_use_case)
         
-        self.env.stepManual(act=-1, viewer=self.window)
-        self.env.display()
+            self.env.stepManual(act=-1, viewer=self.window)
+            self.env.display()
+        except:
+            self.error_message_box()
+            self.default_use_case = self.which_usecase()
+            self.set_paths()
+
 
     def move_img(self, action):
         self.env.stepManual(action, self.window)
@@ -440,7 +449,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
     
     def set_paths(self):
         self.default_use_case = self.which_usecase()
-
         redir = '' if self.mounted else 'local/'
 
         if self.default_use_case == 'BrainMRI':
@@ -467,7 +475,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
             if not self.default_use_case:
                 self.error_message_box()
                 self.default_use_case = self.which_usecase()
+                self.set_paths()
 
+        self.window.widget.change_layout(self.default_use_case)
         self.window.usecase = self.default_use_case # indicate which use case currently
     
     def check_user_define_usecase(self, filename_img, filename_landmark):
