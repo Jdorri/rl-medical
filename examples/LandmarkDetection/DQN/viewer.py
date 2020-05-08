@@ -72,9 +72,6 @@ class SimpleImageViewer(QWidget):
         self.label_img_x = QLabel()
         self.label_img_y = QLabel()
         self.label_img_y.setPixmap(self.img_y)
-        self.label_img.setMinimumSize(400, 400)
-        self.label_img_x.setMinimumSize(400, 400)
-        self.label_img_y.setMinimumSize(400, 400)
 
         # Set background color for images to Black
         self.label_img.setAutoFillBackground(True)
@@ -100,14 +97,13 @@ class SimpleImageViewer(QWidget):
         self.tgt_z = []
 
         # Setup layout
-        self.grid = QGridLayout()
-        self.grid.addWidget(self.label_img, 0, 0)
-        self.grid.addWidget(self.label_img_x, 0, 1)
-        self.grid.addWidget(self.label_img_y, 1, 0)
-        self.grid.addWidget(self.canvas, 1, 1)
+        self.grid = self.generate_layout("BrainMRI") # generate default
+
         self.agent_signal.connect(self.agent_signal_handler)
 
-        self.setLayout(self.grid)
+        self.main_layout = QHBoxLayout()
+        self.main_layout.addLayout(self.grid)
+        self.setLayout(self.main_layout)
 
         # Stylesheet settings
         self.label_img.setStyleSheet("background: black; border:3px solid #DD2501; ")
@@ -121,11 +117,49 @@ class SimpleImageViewer(QWidget):
         self.color_e = QColor(250, 250, 250)
         self.size_e = 18
         self.line_width = 1
+    
+    def change_layout(self, usecase_after):
+        self.main_layout.removeItem(self.grid)
+        self.grid = self.generate_layout(usecase_after)
+        self.main_layout.addLayout(self.grid)
+    
+    def generate_layout(self, usecase):
+        """
+        Return appropriate layout according to usecase (Brain|Cardiac|Fetal)
+        """
+        # Generate layout for brain and fetal
+        if usecase in {"BrainMRI", "FetalUS"}:
+            grid = QGridLayout()
+            grid.addWidget(self.label_img, 0, 0)
+            grid.addWidget(self.label_img_x, 0, 1)
+            grid.addWidget(self.label_img_y, 1, 0)
+            grid.addWidget(self.canvas, 1, 1)
+
+            # Set Min size
+            self.label_img.setMinimumSize(400, 400)
+            self.label_img_x.setMinimumSize(400, 400)
+            self.label_img_y.setMinimumSize(400, 400)
+
+            return grid
+        else:
+            grid = QGridLayout()
+            grid.addWidget(self.label_img, 0, 0)
+            grid.addWidget(self.label_img_x, 1, 0, 1, 2)
+            grid.addWidget(self.label_img_y, 2, 0, 1, 2)
+            grid.addWidget(self.canvas, 0, 1)
+
+            self.label_img.setMinimumSize(400, 400)
+            self.label_img_x.setMinimumSize(800, 200)
+            self.label_img_y.setMinimumSize(800, 200)
+
+            return grid
 
     def reset(self):
         """
         Reset the gui to black image (initial)
         """
+        self.change_layout(self.window.usecase)
+
         # Draw background image (brain)
         cvImg = self.arrs[0].astype(np.uint8)
         self.height, self.width, self.channel = cvImg.shape
@@ -145,9 +179,15 @@ class SimpleImageViewer(QWidget):
         qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
         self.img_y = QPixmap(qImg_y)
 
-        self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-        self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-        self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        if self.window.usecase != "CardiacMRI":
+            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        else:
+            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
+
         self.label_img.setPixmap(self.img)
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
@@ -211,9 +251,15 @@ class SimpleImageViewer(QWidget):
             self.draw_error()
 
         # Set image that has been drawn
-        self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-        self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-        self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        if self.window.usecase != "CardiacMRI":
+            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        else:
+            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
+
         self.label_img.setPixmap(self.img)
         self.label_img.setAlignment(QtCore.Qt.AlignCenter)
         self.label_img_x.setPixmap(self.img_x)

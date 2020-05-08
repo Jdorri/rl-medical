@@ -422,6 +422,7 @@ class RightWidgetSettings(QFrame):
             # Create a thread to run background task
             self.worker_thread = WorkerThread(target_function=self.thread_function)
             self.worker_thread.window = self.window
+            self.window.widget.change_layout(self.default_use_case)
             self.worker_thread.start()
 
         # If there is a problem with the loader, then user incorrectly add file
