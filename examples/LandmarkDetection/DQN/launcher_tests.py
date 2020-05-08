@@ -313,65 +313,45 @@ class RightWidgetHITLTester(unittest.TestCase):
 
 
 class LeftWidgetTester(unittest.TestCase):
-    '''Same as above but for the left widget'''
+    ''' Class to perform unit tests on the buttons and functionatlity within 
+        the right widget of the GUI Launcher.
+    '''
     def setUp(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
         self.controller = Controller()
-        self.w = self.controller.window1.left_widget
-        self.w.testing = True
+        self.w = self.controller.window.left_widget
         Controller.allWidgets_setCheckable(self.controller.app)
-
+        
     def tearDown(self):
         ''' Method run after each test is run. Use this to reset the testing
-            environment.'''
-        self.w.close()
-        self.controller.app.quit()
-        self.controller.app, self.w = None, None
+            environment.
 
-    def test_startButton(self):
-        QTest.mouseClick(self.w.run_button, Qt.LeftButton)
-        self.assertTrue(self.w.run_button.isChecked())
+            Raises ValueError to progress onto next test as unittest doesn't
+            work correctly with threading & PyQt.
+        '''
+        try:
+            test_results[self.id()] = self._outcome.errors[1][1][1]
+        except TypeError:
+            test_results[self.id()] = 'success'
 
-    def test_agentSpeedSlider(self):
-        '''Checks if the slider works and if it adjusts the thread speed'''
-        # Check initial position is correct
-        self.slider_checker()
+        raise ValueError('Stop test here')
 
-        # Change to min value
-        self.w.speed_slider.setValue(self.w.speed_slider.minimum())
-        self.assertEqual(self.w.speed_slider.value(), self.w.speed_slider.minimum())
-        self.slider_checker()
+    def test_browseModelsButton(self):
+        QTest.mouseClick(self.w.model_file_edit, Qt.LeftButton)
+        self.assertTrue(self.w.model_file_edit.isChecked())
 
-        # Change to medium value
-        self.w.speed_slider.setValue(round((self.w.speed_slider.maximum() - \
-            self.w.speed_slider.minimum()) / 2, 1) )
-        self.slider_checker()
+    def test_browseLandmarksButton(self):
+        QTest.mouseClick(self.w.landmark_file_edit, Qt.LeftButton)
+        self.assertTrue(self.w.landmark_file_edit.isChecked())
 
-    def slider_checker(self):
-        '''Helper function for checking slider position corresponds to correct
-        thread speed'''
-        if self.w.speed_slider.value() == self.w.speed_slider.maximum():
-            self.assertEqual(self.w.thread.speed, WorkerThread.FAST)
-        elif self.w.speed_slider.value() == self.w.speed_slider.minimum():
-            self.assertEqual(self.w.thread.speed, WorkerThread.SLOW)
-        else:
-            self.assertEqual(self.w.thread.speed, WorkerThread.MEDIUM)
-
-    # def test_browseModelsButton(self):
-    #     QTest.mouseClick(self.w.load_edit, Qt.LeftButton)
-    #     self.assertTrue(self.w.load_edit.isChecked())
-
-    # def test_browseLandmarksButton(self):
-    #     QTest.mouseClick(self.w.landmark_file_edit, Qt.LeftButton)
-    #     self.assertTrue(self.w.landmark_file_edit.isChecked())
-
-    # def test_browseModeButton(self):
-    #     QTest.mouseClick(self.w.browseMode, Qt.LeftButton)
-    #     self.assertTrue(self.w.browseMode.isChecked())
+    def test_browseModeButton(self):
+        QTest.mouseClick(self.w.model_file_edit, Qt.LeftButton)
+        self.assertTrue(self.w.model_file_edit.isChecked())
 
 
 class ControllerTester(unittest.TestCase):
-    ''' Tester for controller class
+    ''' Tester for functionality for the controller class, which is the
+        doorway into launching the GUI.
     '''
     def setUp(self):
         '''Method run before every test. Use this to prepare the test fixture.'''

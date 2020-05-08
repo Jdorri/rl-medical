@@ -200,6 +200,7 @@ class LeftWidgetSettings(QFrame):
                         self.window.widget.width, self.window.widget.height, \
                         self.window.widget.height_x)
                 self.window.widget.canvas.draw()
+                
     def reset_file_edit_text(self):
         """
         Used to reset file edit text
