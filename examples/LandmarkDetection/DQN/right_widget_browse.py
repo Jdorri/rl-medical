@@ -54,14 +54,14 @@ EVAL_EPISODE = 50
 ##  Sub-Widgets
 # Used for agent action
 
-class YMove(QFrame):
+class XMove(QFrame):
 
     def __init__(self, right_widget):
         super().__init__()
         self.right_widget = right_widget # pointer to parent
 
         # Initialise button
-        self.label = QLabel("<i> Y </i>")
+        self.label = QLabel("<i> X </i>")
         self.up_button = QToolButton(self)
         self.up_button.setArrowType(Qt.UpArrow)
 
@@ -90,24 +90,24 @@ class YMove(QFrame):
     @pyqtSlot()
     def on_clicking_up(self):
         if self.right_widget.env:
-            action = 1 if self.right_widget.window.usecase != 'FetalUS' else 3
+            action = 1 if self.right_widget.window.usecase == 'BrainMRI' else 3
             self.right_widget.move_img(action)
 
     @pyqtSlot()
     def on_clicking_down(self):
         if self.right_widget.env:
-            action = 4 if self.right_widget.window.usecase != 'FetalUS' else 2
+            action = 4 if self.right_widget.window.usecase == 'BrainMRI' else 2
             self.right_widget.move_img(action)
 
 
-class XMove(QFrame):
+class YMove(QFrame):
 
     def __init__(self, right_widget):
         super().__init__()
         self.right_widget = right_widget # pointer to parent
 
         # Initialise button
-        self.label = QLabel("<i> X </i>")
+        self.label = QLabel("<i> Y </i>")
         self.left_button = QToolButton(self)
         self.left_button.setArrowType(Qt.LeftArrow)
 
@@ -137,13 +137,13 @@ class XMove(QFrame):
     @pyqtSlot()
     def on_clicking_left(self):
         if self.right_widget.env:
-            action = 3 if self.right_widget.window.usecase != 'FetalUS' else 4
+            action = 3 if self.right_widget.window.usecase == 'BrainMRI' else 4
             self.right_widget.move_img(action)
 
     @pyqtSlot()
     def on_clicking_right(self):
         if self.right_widget.env:
-            action = 2 if self.right_widget.window.usecase != 'FetalUS' else 1
+            action = 2 if self.right_widget.window.usecase == 'BrainMRI' else 1
             self.right_widget.move_img(action)
 
 
@@ -207,7 +207,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.thread.pause = False
         
         # Mounting by default is false
-        self.mounted = False
+        self.mounted = True
 
         # Initialise widgets (HITL related)
         self.terminal_duplicate = QPlainTextEdit(self)
@@ -230,13 +230,13 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         # Zoom functionality
         self.zoomInButton = QToolButton(self)
-        self.zoomInButton.setText('-')
+        self.zoomInButton.setText('+')
         font = self.zoomInButton.font()
         font.setBold(True)
         self.zoomInButton.setFont(font)
 
         self.zoomOutButton = QToolButton(self)
-        self.zoomOutButton.setText('+')
+        self.zoomOutButton.setText('-')
         font = self.zoomOutButton.font()
         font.setBold(True)
         self.zoomOutButton.setFont(font)
@@ -270,7 +270,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         vbox = QVBoxLayout()
         vbox.setSpacing(20)
-        vbox.addWidget(QLabel("<i> Human Actions </i>"))
+        vbox.addWidget(QLabel("<i> Agent Actions </i>"))
         vbox.addLayout(hbox_action)
         vbox.addWidget(QLabel("<hr />"))
         vbox.addWidget(QLabel("<i> Step Size Magnification </i>"))
@@ -321,6 +321,10 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         self.next_img.setStyleSheet("background: orange; color:white")
         self.x_action.setStyleSheet("""
+        QFrame {
+            border:2px solid #DD2501
+        }
+
         QToolButton {
             background: white;
             border: none;
@@ -328,6 +332,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         }
         """)
         self.y_action.setStyleSheet("""
+        QFrame {border:2px solid #66A40A}
         QToolButton {
             background: white;
             border: none;
@@ -335,6 +340,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         }
         """)
         self.z_action.setStyleSheet("""
+        QFrame {border:2px solid #006EAF}
         QToolButton {
             background: white;
             border: none;
@@ -351,7 +357,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
     @pyqtSlot()
     def on_clicking_nextImg(self):
         self.env.reset()
-        self.window.widget.clear_3d()
         self.move_img(-1)
         self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Next Image </p></b>")        
 
