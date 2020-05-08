@@ -190,6 +190,7 @@ class LeftWidgetSettings(QFrame):
             if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
                 # Save HITL status
                 self.window.right_widget.save_HITL()
+                # self.window.widget.change_layout("BrainMRI")
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
@@ -199,6 +200,7 @@ class LeftWidgetSettings(QFrame):
                         self.window.widget.width, self.window.widget.height, \
                         self.window.widget.height_x)
                 self.window.widget.canvas.draw()
+
     def on_clicking_ultrasound(self, enabled):
         """
         Handle event when ultrasound button is clicked
@@ -208,6 +210,7 @@ class LeftWidgetSettings(QFrame):
             if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
                 # Save HITL status
                 self.window.right_widget.save_HITL()
+                # self.window.widget.change_layout("FetalUS")
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
@@ -217,6 +220,7 @@ class LeftWidgetSettings(QFrame):
                         self.window.widget.width, self.window.widget.height, \
                         self.window.widget.height_x)
                 self.window.widget.canvas.draw()
+
     def on_clicking_cardiac(self, enabled):
         """
         Handle event when brain button is clicked
@@ -226,6 +230,7 @@ class LeftWidgetSettings(QFrame):
             if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
                 # Save HITL status
                 self.window.right_widget.save_HITL()
+                # self.window.widget.change_layout("CardiacMRI")
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()

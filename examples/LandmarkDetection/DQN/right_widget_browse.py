@@ -472,6 +472,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
                 self.default_use_case = self.which_usecase()
                 self.set_paths()
 
+        self.window.widget.change_layout(self.default_use_case)
         self.window.usecase = self.default_use_case # indicate which use case currently
     
     def check_user_define_usecase(self, filename_img, filename_landmark):

@@ -121,6 +121,11 @@ class SimpleImageViewer(QWidget):
         self.size_e = 18
         self.line_width = 1
     
+    def change_layout(self, usecase_after):
+        self.main_layout.removeItem(self.grid)
+        self.grid = self.generate_layout(usecase_after)
+        self.main_layout.addLayout(self.grid)
+    
     def generate_layout(self, usecase):
         """
         Return appropriate layout according to usecase (Brain|Cardiac|Fetal)
@@ -147,6 +152,8 @@ class SimpleImageViewer(QWidget):
         """
         Reset the gui to black image (initial)
         """
+        self.change_layout("BrainMRI")
+
         # Draw background image (brain)
         cvImg = self.arrs[0].astype(np.uint8)
         self.height, self.width, self.channel = cvImg.shape
