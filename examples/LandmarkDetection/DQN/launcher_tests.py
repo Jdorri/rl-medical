@@ -1,4 +1,3 @@
-# Need to fix path so that it is local with respect to other files 
 import sys
 import unittest
 from PyQt5.QtTest import QTest
@@ -14,7 +13,7 @@ import os
 import pickle
 import time
 import threading
-import sip
+import gc
 
 class RightWidgetTester(unittest.TestCase):
     ''' Class to perform unit tests on the buttons within the right widget of the
@@ -22,51 +21,88 @@ class RightWidgetTester(unittest.TestCase):
     '''
     def setUp(self):
         '''Method run before every test. Use this to prepare the test fixture.'''
+        # if not hasattr(self, 'controller'):
         self.controller = Controller()
-        self.w = self.controller.window1.right_widget
+        self.m = self.controller.right_widget.automatic_mode
+        self.w = self.m.window
         Controller.allWidgets_setCheckable(self.controller.app)
-
+        
     def tearDown(self):
         ''' Method run after each test is run. Use this to reset the testing
             environment.
+
+            Raises ValueError to progress onto next test as unittest doesn't
+            work correctly with threading & PyQt.
         '''
-        self.w.close()
-        self.controller.app.quit()
-        self.controller.app, self.w = None, None
+        try:
+            test_results[self.id()] = self._outcome.errors[1][1][1]
+        except TypeError:
+            test_results[self.id()] = 'success'
 
-    def test_taskComboBox(self):
+        raise ValueError('Stop test here')
+
+    def test_taskRadioButton(self):
+        ''' Check the task button changes between play and eval modes
+        '''
         # Check default
-        self.assertEqual(self.w.task_edit.itemText(self.w.task_edit.currentIndex()), 'Play')
-        # Change value and check new
-        self.w.task_edit.setCurrentIndex(2)
-        self.assertEqual(self.w.task_edit.itemText(self.w.task_edit.currentIndex()), 'Train')
+        self.assertEqual(self.m.which_task(), 'Play')
+        # Change to eval mode and check
+        QTest.mouseClick(self.m.eval_button, Qt.LeftButton)
+        self.assertEqual(self.m.which_task(), 'Evaluation')
+        # Change back to play mode and check
+        QTest.mouseClick(self.m.play_button, Qt.LeftButton)
+        self.assertEqual(self.m.which_task(), 'Play')
 
-    def test_algorithmComboBox(self):
-        # Check default
-        self.assertEqual(self.w.algorithm_edit.itemText(self.w.algorithm_edit.currentIndex()), 'DQN')
-        # Change value and check new
-        self.w.algorithm_edit.setCurrentIndex(2)
-        self.assertEqual(self.w.algorithm_edit.itemText(self.w.algorithm_edit.currentIndex()), 'Dueling')
+    def test_agentSpeedSlider(self):
+        '''Checks if the slider works and if it adjusts the thread speed'''
+        # Check initial position is correct
+        self.slider_checker()
 
-    def test_exitButton(self):
-        QTest.mouseClick(self.w.exit, Qt.LeftButton)
-        self.assertTrue(self.w.exit.isChecked())
+        # Change to min value
+        self.m.speed_slider.setValue(self.m.speed_slider.minimum())
+        self.assertEqual(self.m.speed_slider.value(), self.m.speed_slider.minimum())
+        self.slider_checker()
 
-    def test_runButton(self):
-        QTest.mouseClick(self.w.run, Qt.LeftButton)
-        self.assertTrue(self.w.run.isChecked())
+        # Change to medium value
+        self.m.speed_slider.setValue(round((self.m.speed_slider.maximum() - \
+            self.m.speed_slider.minimum()) / 2, 1) )
+        self.slider_checker()
 
-    def test_browseModelsButton(self):
-        QTest.mouseClick(self.w.load_edit, Qt.LeftButton)
-        self.assertTrue(self.w.load_edit.isChecked())
+    def slider_checker(self):
+        ''' Helper function for checking slider position corresponds to correct
+            thread speed
+        '''
+        if self.m.speed_slider.value() == self.m.speed_slider.maximum():
+            self.assertEqual(self.m.thread.speed, WorkerThread.FAST)
+        elif self.m.speed_slider.value() == self.m.speed_slider.minimum():
+            self.assertEqual(self.m.thread.speed, WorkerThread.SLOW)
+        else:
+            self.assertEqual(self.m.thread.speed, WorkerThread.MEDIUM)
 
-    def test_browseLandmarksButton(self):
-        QTest.mouseClick(self.w.landmark_file_edit, Qt.LeftButton)
-        self.assertTrue(self.w.landmark_file_edit.isChecked())
+    def test_runTerminateButtons(self):
+        ''' Check if the run and terminate begin and end the RL loop as expected '''
+        # Check run button
+        QTest.mouseClick(self.m.run_button, Qt.LeftButton)
+        self.assertTrue(self.m.run_button.isChecked())
+        self.assertEqual(self.m.run_button.text(), self.m.PAUSE)
 
-    def test_browseModeButton(self):
-        QTest.mouseClick(self.w.browseMode, Qt.LeftButton)
-        self.assertTrue(self.w.browseMode.isChecked())
+        # Check pause button pauses thread
+        QTest.mouseClick(self.m.run_button, Qt.LeftButton)
+        self.assertTrue(self.m.thread.pause)
+        self.assertEqual(self.m.run_button.text(), self.m.RESUME)
+
+        # Check resume button reverses above
+        QTest.mouseClick(self.m.run_button, Qt.LeftButton)
+        self.assertTrue(not self.m.thread.pause)
+        self.assertEqual(self.m.run_button.text(), self.m.PAUSE)
+
+        # Check terminate button kills thread
+        QTest.mouseClick(self.m.terminate_button, Qt.LeftButton)
+        self.assertTrue(self.m.thread.terminate)
+
+        # Check logs displayed correctly
+        for msg in ['Terminate', 'Start', 'Pause', 'Resume']:
+            self.assertTrue(self.m.terminal.toPlainText().find(msg))
 
 
 class RightWidgetBrowseModeTester(unittest.TestCase):
@@ -318,6 +354,18 @@ class LeftWidgetTester(unittest.TestCase):
         else:
             self.assertEqual(self.w.thread.speed, WorkerThread.MEDIUM)
 
+    # def test_browseModelsButton(self):
+    #     QTest.mouseClick(self.w.load_edit, Qt.LeftButton)
+    #     self.assertTrue(self.w.load_edit.isChecked())
+
+    # def test_browseLandmarksButton(self):
+    #     QTest.mouseClick(self.w.landmark_file_edit, Qt.LeftButton)
+    #     self.assertTrue(self.w.landmark_file_edit.isChecked())
+
+    # def test_browseModeButton(self):
+    #     QTest.mouseClick(self.w.browseMode, Qt.LeftButton)
+    #     self.assertTrue(self.w.browseMode.isChecked())
+
 
 class ControllerTester(unittest.TestCase):
     ''' Tester for controller class
@@ -327,28 +375,21 @@ class ControllerTester(unittest.TestCase):
         # if not hasattr(self, 'controller'):
         self.controller = Controller()
         self.w = self.controller.right_widget.automatic_mode.window
-        self.controller.testing = True
-        self.controller.right_widget.testing = True
         Controller.allWidgets_setCheckable(self.controller.app)
         
     def tearDown(self):
         ''' Method run after each test is run. Use this to reset the testing
             environment.
+
+            Raises ValueError to progress onto next test as unittest doesn't
+            work correctly with threading & PyQt.
         '''
-        print(threading.enumerate())
-        # self.controller.right_widget.automatic_mode.thread.stop()
-        self.w.close()
-        self.controller.app.quit()
-        self.controller.app.exit()
-        print('A')
-        self.controller.app = None
-        print('B')
-        self.controller = None
-        print('C')
-        self.w = None
-        # self.controller.app, self.controller, self.w = None, None, None
-        print('D')
-        print(self.controller.app)
+        try:
+            test_results[self.id()] = self._outcome.errors[1][1][1]
+        except TypeError:
+            test_results[self.id()] = 'success'
+
+        raise ValueError('Stop test here')
 
     def test_switchModes(self):
         ''' Test to ensure moving between Default Mode and Browse Mode tabs work 
@@ -365,18 +406,6 @@ class ControllerTester(unittest.TestCase):
         self.controller.right_widget.tab_widget.setCurrentIndex(0)
         self.assertEqual(self.controller.right_widget.tab_widget.currentIndex(), 0)
 
-    # def test_switchDefault(self):
-    #     self._setUp_browseMode()
-    #     QTest.mouseClick(self.w.testMode, Qt.LeftButton)
-    #     self.assertTrue(isinstance(self.controller.app_settings, AppSettings))
-
-    def test_load_defaults_(self):
-        ''' Test to check browse mode loads an image as expected
-        '''
-        # Change to browse mode
-        self.controller.right_widget.tab_widget.setCurrentIndex(1)
-        self.assertTrue(abs(np.sum(self.w.widget.arr)) > 1e-5)
-
     def test_load_defaults(self):
         ''' Test to check browse mode loads an image as expected
         '''
@@ -384,9 +413,12 @@ class ControllerTester(unittest.TestCase):
         self.controller.right_widget.tab_widget.setCurrentIndex(1)
         self.assertTrue(abs(np.sum(self.w.widget.arr)) > 1e-5)
 
+
 if __name__ == '__main__':
+    test_results = {}
+
     classes_to_test = [
-        # RightWidgetTester,
+        RightWidgetTester,
         # RightWidgetBrowseModeTester,
         # RightWidgetHITLTester,
         # LeftWidgetTester,
@@ -405,4 +437,6 @@ if __name__ == '__main__':
     runner = unittest.TextTestRunner()
     results = runner.run(big_suite)
 
+    print(test_results)
+    print(f'\nTests passed: {list(test_results.values()).count("success")} / {len(test_results)}\n')
     # unittest.main()
