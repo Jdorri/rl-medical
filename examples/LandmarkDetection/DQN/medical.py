@@ -118,6 +118,8 @@ class MedicalPlayer(gym.Env):
         self.multiscale = multiscale
         #Type of data
         self.data_type = data_type
+        #directory is file for logging evaluation
+        self.directory = directory
 
         # init env dimensions
         if self.dims == 2:
@@ -485,13 +487,13 @@ class MedicalPlayer(gym.Env):
                 'distError': distance_error, 'filename': self.filename}
 
         if self.terminal:
-            # directory = logger.get_logger_dir()
-            self.csvfile = 'Reward_and_Q_log.csv'
-            # path = os.path.join(directory, self.csvfile)
-            # with open(path, 'a') as outcsv:
-            #     fields= [info['score']]
-            #     writer = csv.writer(outcsv)
-            #     writer.writerow(map(lambda x: x, fields))
+            # store results when batch evaluation
+            if self.directory:
+                path = self.directory
+                with open(path, 'a') as outcsv:
+                    fields= [info['filename'], info['score'], info['distError']]
+                    writer = csv.writer(outcsv)
+                    writer.writerow(map(lambda x: x, fields))
 
 
         # #######################################################################
