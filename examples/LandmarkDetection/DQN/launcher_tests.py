@@ -127,10 +127,6 @@ class RightWidgetBrowseModeTester(unittest.TestCase):
 
         raise ValueError('Stop test here')
 
-    # def test_browseImgsButton(self):
-    #     QTest.mouseClick(self.w.img_file_edit, Qt.LeftButton)
-    #     self.assertTrue(self.w.img_file_edit.isChecked())
-
     def test_upButton(self):
         ''' Check clicking the up button moves the agent '''
         init_loc = self.m.env._location
@@ -320,6 +316,8 @@ class LeftWidgetTester(unittest.TestCase):
         '''Method run before every test. Use this to prepare the test fixture.'''
         self.controller = Controller()
         self.w = self.controller.window.left_widget
+        self.m = self.controller.right_widget.automatic_mode
+        self.w.testing = True
         Controller.allWidgets_setCheckable(self.controller.app)
         
     def tearDown(self):
@@ -336,17 +334,59 @@ class LeftWidgetTester(unittest.TestCase):
 
         raise ValueError('Stop test here')
 
-    def test_browseModelsButton(self):
-        QTest.mouseClick(self.w.model_file_edit, Qt.LeftButton)
-        self.assertTrue(self.w.model_file_edit.isChecked())
+    def test_browseImagesButton(self):
+        ''' Test to check clicking browse image loads a correct (default 
+            in this instance) file of image paths.
+        '''
+        QTest.mouseClick(self.w.img_file_edit, Qt.LeftButton)
+        self.assertTrue(self.w.img_file_edit.isChecked())
+        self.assertEqual(self.w.fname_images, 
+            './data/filenames/brain_test_files_new_paths.txt')
 
     def test_browseLandmarksButton(self):
+        ''' Test to check clicking browse image loads a correct (default 
+            in this instance) file of landmark paths.
+        '''
         QTest.mouseClick(self.w.landmark_file_edit, Qt.LeftButton)
         self.assertTrue(self.w.landmark_file_edit.isChecked())
+        self.assertEqual(self.w.fname_landmarks, 
+            './data/filenames/brain_test_landmarks_new_paths.txt')
 
-    def test_browseModeButton(self):
+    def test_browseModelButton(self):
+        ''' Test to check clicking browse image loads a correct (default 
+            in this instance) file of model paths.
+        '''
         QTest.mouseClick(self.w.model_file_edit, Qt.LeftButton)
         self.assertTrue(self.w.model_file_edit.isChecked())
+        self.assertEqual(self.w.fname_model, './data/models/DQN_multiscale' +
+            '_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001')
+
+    def test_checkDefaultData(self):
+        ''' Confirm the default case opens brain data (and runs correctly).
+        '''
+        # Confirm default is on brain by running RL and checking the data type
+        QTest.mouseClick(self.m.run_button, Qt.LeftButton)
+        self.assertTrue(self.m.fname_images.name.find('brain'))
+        QTest.mouseClick(self.m.terminate_button, Qt.LeftButton)
+
+    def test_changeDataToggle(self):
+        ''' Test to toggling through the data type options changes settings as 
+            desired.
+        '''
+        # Change to cardiac and test
+        QTest.mouseClick(self.w.cardiac_button, Qt.LeftButton)
+        self.assertTrue(self.w.cardiac_button.isChecked())
+        self.assertTrue(self.m.fname_images.name.find('cardiac'))
+
+        # Change to fetal and test
+        QTest.mouseClick(self.w.ultrasound_button, Qt.LeftButton)
+        self.assertTrue(self.w.ultrasound_button.isChecked())
+        self.assertTrue(self.m.fname_images.name.find('fetal'))
+
+        # Change to brain and test
+        QTest.mouseClick(self.w.brain_button, Qt.LeftButton)
+        self.assertTrue(self.w.brain_button.isChecked())
+        self.assertTrue(self.m.fname_images.name.find('brain'))
 
 
 class ControllerTester(unittest.TestCase):
@@ -400,11 +440,11 @@ if __name__ == '__main__':
     test_results = {}
 
     classes_to_test = [
-        # RightWidgetTester,
-        # RightWidgetBrowseModeTester,
-        # RightWidgetHITLTester,
+        RightWidgetTester,
+        RightWidgetBrowseModeTester,
+        RightWidgetHITLTester,
         LeftWidgetTester,
-        # ControllerTester,
+        ControllerTester,
     ]
 
     loader = unittest.TestLoader()
