@@ -32,7 +32,7 @@ class Window(QMainWindow):
 
     def init_UI(self, viewer_param, right_widget):
         """
-        Main UI init element.
+        Main UI init element of the GUI.
         """
         # Indication of usecase (data_type)
         # Default: BrainMRI

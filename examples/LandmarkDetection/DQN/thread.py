@@ -3,7 +3,7 @@
 # Author: Maleakhi, Alex, Faidon, Jamie
 ################################################################################
 
-from threading import Thread
+from threading import Thread, Event
 
 ################################################################################
 ## Main Thread Class
@@ -24,4 +24,3 @@ class WorkerThread(Thread):
     def run(self):
         self.target_function()
         self.window.right_widget.automatic_mode.restart()
-

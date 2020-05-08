@@ -3,9 +3,7 @@ import itertools
 
 def warn(*args, **kwargs):
     pass
-
 import warnings
-
 warnings.warn = warn
 warnings.simplefilter("ignore", category=PendingDeprecationWarning)
 

@@ -213,7 +213,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.terminal_duplicate = QPlainTextEdit(self)
         self.terminal_duplicate.setReadOnly(True)
         self.next_img = QPushButton('Next Image', self)
-        self.HITL_mode = QCheckBox('Enable HITL',self)
+        self.HITL_mode = QCheckBox('Enable HITL', self)
         self.HITL_mode.setCheckable(True)
         self.HITL_delete = QPushButton('Delete Episode', self)
         self.HITL_delete.setDisabled(True)
@@ -366,7 +366,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_HITL(self):
-        ''' Activating HITL mode giv es following actions:
+        ''' Activating HITL mode gives following actions:
             - Make HITL_delete button clickable
             - Make HITL_mode button clickable
 
@@ -404,6 +404,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
     @pyqtSlot()
     def on_clicking_HITLDelete(self):
+        ''' Helper function to remove lates HITL episode '''
         if self.testing:
             result = QMessageBox.Yes
         else:
@@ -440,7 +441,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
             self.error_message_box()
             self.default_use_case = self.which_usecase()
             self.set_paths()
-
 
     def move_img(self, action):
         self.env.stepManual(action, self.window)

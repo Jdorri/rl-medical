@@ -215,6 +215,7 @@ class SimpleImageViewer(QWidget):
         Main image drawer function
         """
         cvImg, cvImg_x, cvImg_y = self.get_imgs(arrs)
+        self.arr = cvImg                            #(for testing purposes)
 
         bytesPerLine = 3 * self.width
         qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
