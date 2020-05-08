@@ -54,14 +54,14 @@ EVAL_EPISODE = 50
 ##  Sub-Widgets
 # Used for agent action
 
-class YMove(QFrame):
+class XMove(QFrame):
 
     def __init__(self, right_widget):
         super().__init__()
         self.right_widget = right_widget # pointer to parent
 
         # Initialise button
-        self.label = QLabel("<i> Y </i>")
+        self.label = QLabel("<i> X </i>")
         self.up_button = QToolButton(self)
         self.up_button.setArrowType(Qt.UpArrow)
 
@@ -90,24 +90,24 @@ class YMove(QFrame):
     @pyqtSlot()
     def on_clicking_up(self):
         if self.right_widget.env:
-            action = 1 if self.right_widget.window.usecase != 'FetalUS' else 3
+            action = 1 if self.right_widget.window.usecase == 'BrainMRI' else 3
             self.right_widget.move_img(action)
 
     @pyqtSlot()
     def on_clicking_down(self):
         if self.right_widget.env:
-            action = 4 if self.right_widget.window.usecase != 'FetalUS' else 2
+            action = 4 if self.right_widget.window.usecase == 'BrainMRI' else 2
             self.right_widget.move_img(action)
 
 
-class XMove(QFrame):
+class YMove(QFrame):
 
     def __init__(self, right_widget):
         super().__init__()
         self.right_widget = right_widget # pointer to parent
 
         # Initialise button
-        self.label = QLabel("<i> X </i>")
+        self.label = QLabel("<i> Y </i>")
         self.left_button = QToolButton(self)
         self.left_button.setArrowType(Qt.LeftArrow)
 
@@ -137,13 +137,13 @@ class XMove(QFrame):
     @pyqtSlot()
     def on_clicking_left(self):
         if self.right_widget.env:
-            action = 3 if self.right_widget.window.usecase != 'FetalUS' else 4
+            action = 3 if self.right_widget.window.usecase == 'BrainMRI' else 4
             self.right_widget.move_img(action)
 
     @pyqtSlot()
     def on_clicking_right(self):
         if self.right_widget.env:
-            action = 2 if self.right_widget.window.usecase != 'FetalUS' else 1
+            action = 2 if self.right_widget.window.usecase == 'BrainMRI' else 1
             self.right_widget.move_img(action)
 
 
@@ -207,7 +207,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.thread.pause = False
         
         # Mounting by default is false
-        self.mounted = False
+        self.mounted = True
 
         # Initialise widgets (HITL related)
         self.terminal_duplicate = QPlainTextEdit(self)
@@ -230,13 +230,13 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         # Zoom functionality
         self.zoomInButton = QToolButton(self)
-        self.zoomInButton.setText('-')
+        self.zoomInButton.setText('+')
         font = self.zoomInButton.font()
         font.setBold(True)
         self.zoomInButton.setFont(font)
 
         self.zoomOutButton = QToolButton(self)
-        self.zoomOutButton.setText('+')
+        self.zoomOutButton.setText('-')
         font = self.zoomOutButton.font()
         font.setBold(True)
         self.zoomOutButton.setFont(font)
@@ -265,9 +265,12 @@ class RightWidgetSettingsBrowseMode(QFrame):
         hbox_image.addWidget(self.next_img)
         hbox_image.addWidget(self.HITL_delete)
 
+        self.log = QLabel("<i> Logs </i>")
+        self.separator = QLabel("<hr />")
+
         vbox = QVBoxLayout()
         vbox.setSpacing(20)
-        vbox.addWidget(QLabel("<i> Human Actions </i>"))
+        vbox.addWidget(QLabel("<i> Agent Actions </i>"))
         vbox.addLayout(hbox_action)
         vbox.addWidget(QLabel("<hr />"))
         vbox.addWidget(QLabel("<i> Step Size Magnification </i>"))
@@ -278,9 +281,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
         vbox.addWidget(self.HITL_mode)
         vbox.addItem(QSpacerItem(0,20))
         vbox.addLayout(hbox_image)
-        vbox.addWidget(QLabel("<hr />"))
+        vbox.addWidget(self.separator)
         vbox.addItem(QSpacerItem(300, 10)) # spacer
-        vbox.addWidget(QLabel("<i> Logs </i>"))
+        vbox.addWidget(self.log)
         vbox.addWidget(self.terminal_duplicate)
         vbox.addStretch()
 
@@ -318,6 +321,10 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         self.next_img.setStyleSheet("background: orange; color:white")
         self.x_action.setStyleSheet("""
+        QFrame {
+            border:2px solid #DD2501
+        }
+
         QToolButton {
             background: white;
             border: none;
@@ -325,6 +332,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         }
         """)
         self.y_action.setStyleSheet("""
+        QFrame {border:2px solid #66A40A}
         QToolButton {
             background: white;
             border: none;
@@ -332,6 +340,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         }
         """)
         self.z_action.setStyleSheet("""
+        QFrame {border:2px solid #006EAF}
         QToolButton {
             background: white;
             border: none;
@@ -348,7 +357,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
     @pyqtSlot()
     def on_clicking_nextImg(self):
         self.env.reset()
-        self.window.widget.clear_3d()
         self.move_img(-1)
         self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Next Image </p></b>")        
 
@@ -420,13 +428,19 @@ class RightWidgetSettingsBrowseMode(QFrame):
             self.move_img(-1)
 
     def load_img(self):
-        self.selected_list = [self.fname_images, self.fname_landmarks]
-        self.env = get_player(files_list=self.selected_list, viz=0.01,
+        try:
+            self.selected_list = [self.fname_images, self.fname_landmarks]
+            self.env = get_player(files_list=self.selected_list, viz=0.01,
                              saveGif=False, saveVideo=False, task='browse',
                             data_type=self.default_use_case)
         
-        self.env.stepManual(act=-1, viewer=self.window)
-        self.env.display()
+            self.env.stepManual(act=-1, viewer=self.window)
+            self.env.display()
+        except:
+            self.error_message_box()
+            self.default_use_case = self.which_usecase()
+            self.set_paths()
+
 
     def move_img(self, action):
         self.env.stepManual(action, self.window)
@@ -435,7 +449,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
     
     def set_paths(self):
         self.default_use_case = self.which_usecase()
-
         redir = '' if self.mounted else 'local/'
 
         if self.default_use_case == 'BrainMRI':
@@ -462,7 +475,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
             if not self.default_use_case:
                 self.error_message_box()
                 self.default_use_case = self.which_usecase()
+                self.set_paths()
 
+        self.window.widget.change_layout(self.default_use_case)
         self.window.usecase = self.default_use_case # indicate which use case currently
     
     def check_user_define_usecase(self, filename_img, filename_landmark):

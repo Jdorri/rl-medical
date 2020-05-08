@@ -73,6 +73,7 @@ def get_player(directory=None, files_list= None, data_type=None, viz=False,
     env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
                         viz=viz, saveGif=saveGif, saveVideo=saveVideo,
                         task=task, files_list=files_list, data_type=data_type, max_num_frames=1500)
+                        
     if task not in ['browse','train']:
         # in training, env will be decorated by ExpReplay, and history
         # is taken care of in expreplay buffer
@@ -201,6 +202,7 @@ def get_config(files_list, data_type, trainable_variables):
                 # 100k pretraining steps
 
                 [(0, INIT_UPDATE_FREQ), (NUM_PRETRAIN, UPDATE_FREQ)],
+
                 interp=None, step_based=True),
 
 ###############################################################################
@@ -258,6 +260,9 @@ if __name__ == '__main__':
     parser.add_argument('--name', help='name of current experiment for logs',
                         default='experiment_1')
     parser.add_argument('--HITL', help='perform HITL experiment', default=True)
+
+    parser.add_argument('--directory', help='file name to store evaluation results',
+                        default=None)                        
     args = parser.parse_args()
 
     # f1 = filenames_GUI()
@@ -286,49 +291,35 @@ if __name__ == '__main__':
     NUM_ACTIONS = init_player.action_space.n
     num_files = init_player.files.num_files
 
-
     if args.task != 'train':
-        ########################################################################
-        # PyQt GUI Code Section
-        # Define application and viewer to run on the main thread
-        app = QApplication(sys.argv)
-        viewer_param = get_viewer_data()
-        window = Window(viewer_param)
+        assert args.load is not None
+        pred = OfflinePredictor(PredictConfig(
+            model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA, args.trainable ),
+            session_init=get_model_loader(args.load),
+            input_names=['state'],
+            output_names=['Qvalue']))
+        # demo pretrained model one episode at a time
+        if args.task == 'play':
+            play_n_episodes(get_player( files_list=args.files,
+                                        data_type=args.type,
+                                        viz=0,
+                                        saveGif=args.saveGif,
+                                        saveVideo=args.saveVideo,
+                                        task='play'),
+                            pred, num_files, viewer=None)
 
-        def thread_function():
-            """Run on secondary thread"""
-            assert args.load is not None
-            pred = OfflinePredictor(PredictConfig(
-                model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA ),
-                session_init=get_model_loader(args.load),
-                input_names=['state'],
-                output_names=['Qvalue']))
-            # demo pretrained model one episode at a time
-            if args.task == 'play':
-                play_n_episodes(get_player(files_list=args.files,
-                                           data_type=args.type,
-                                           viz=0.01,
-                                           saveGif=args.saveGif,
-                                           saveVideo=args.saveVideo,
-                                           task='play'),
-                                pred, num_files, viewer=window)
+        # run episodes in parallel and evaluate pretrained model
+        elif args.task == 'eval':
+            play_n_episodes(get_player(directory=args.directory,
+                                        files_list=args.files,
+                                        data_type=args.type,
+                                        viz=0,
+                                        saveGif=args.saveGif,
+                                        saveVideo=args.saveVideo,
+                                        task='eval'),
+                                        pred, num_files, viewer=None)
 
-            # run episodes in parallel and evaluate pretrained model
-            elif args.task == 'eval':
-                play_n_episodes(get_player(files_list=args.files,
-                                            data_type=args.type,
-                                            viz=0.01,
-                                           saveGif=args.saveGif,
-                                           saveVideo=args.saveVideo,
-                                           task='eval'),
-                                         pred, num_files, viewer=window)
-
-        # Create a thread to run background task
-        thread = WorkerThread(target_function=thread_function)
-        window.left_widget.thread = thread
-        app.exec_()
-
-        ########################################################################
+     ########################################################################
 
     else:  # train model
         print(f"TRAINABLE PARAMETERS: {args.trainable}")

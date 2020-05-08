@@ -23,20 +23,13 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-try:
-    import pyglet
-    from pyglet.gl import *
-except ImportError as e:
-    reraise(suffix="HINT: you can install pyglet directly via 'pip install pyglet'. But if you really just want to install all Gym dependencies and not have to think about it, 'pip install -e .[all]' or 'pip install gym[all]' will do it.")
-
-
 ################################################################################
 ## Main Widget
 # Responsible to draw images specified by settings and visualise agent's movement.
 
 class SimpleImageViewer(QWidget):
     """
-    Simple image viewer class for rendering images using pyglet and pyqt
+    Simple image viewer class for rendering images using pyqt
     """
     agent_signal = pyqtSignal(dict) # Signaling agent move (current location, status)
 
@@ -79,9 +72,6 @@ class SimpleImageViewer(QWidget):
         self.label_img_x = QLabel()
         self.label_img_y = QLabel()
         self.label_img_y.setPixmap(self.img_y)
-        self.label_img.setMinimumSize(400, 400)
-        self.label_img_x.setMinimumSize(400, 400)
-        self.label_img_y.setMinimumSize(400, 400)
 
         # Set background color for images to Black
         self.label_img.setAutoFillBackground(True)
@@ -107,14 +97,13 @@ class SimpleImageViewer(QWidget):
         self.tgt_z = []
 
         # Setup layout
-        self.grid = QGridLayout()
-        self.grid.addWidget(self.label_img, 0, 0)
-        self.grid.addWidget(self.label_img_x, 0, 1)
-        self.grid.addWidget(self.label_img_y, 1, 0)
-        self.grid.addWidget(self.canvas, 1, 1)
+        self.grid = self.generate_layout("BrainMRI") # generate default
+
         self.agent_signal.connect(self.agent_signal_handler)
 
-        self.setLayout(self.grid)
+        self.main_layout = QHBoxLayout()
+        self.main_layout.addLayout(self.grid)
+        self.setLayout(self.main_layout)
 
         # Stylesheet settings
         self.label_img.setStyleSheet("background: black; border:3px solid #DD2501; ")
@@ -128,11 +117,49 @@ class SimpleImageViewer(QWidget):
         self.color_e = QColor(250, 250, 250)
         self.size_e = 18
         self.line_width = 1
+    
+    def change_layout(self, usecase_after):
+        self.main_layout.removeItem(self.grid)
+        self.grid = self.generate_layout(usecase_after)
+        self.main_layout.addLayout(self.grid)
+    
+    def generate_layout(self, usecase):
+        """
+        Return appropriate layout according to usecase (Brain|Cardiac|Fetal)
+        """
+        # Generate layout for brain and fetal
+        if usecase in {"BrainMRI", "FetalUS"}:
+            grid = QGridLayout()
+            grid.addWidget(self.label_img, 0, 0)
+            grid.addWidget(self.label_img_x, 0, 1)
+            grid.addWidget(self.label_img_y, 1, 0)
+            grid.addWidget(self.canvas, 1, 1)
+
+            # Set Min size
+            self.label_img.setMinimumSize(400, 400)
+            self.label_img_x.setMinimumSize(400, 400)
+            self.label_img_y.setMinimumSize(400, 400)
+
+            return grid
+        else:
+            grid = QGridLayout()
+            grid.addWidget(self.label_img, 0, 0)
+            grid.addWidget(self.label_img_x, 1, 0, 1, 2)
+            grid.addWidget(self.label_img_y, 2, 0, 1, 2)
+            grid.addWidget(self.canvas, 0, 1)
+
+            self.label_img.setMinimumSize(400, 400)
+            self.label_img_x.setMinimumSize(800, 200)
+            self.label_img_y.setMinimumSize(800, 200)
+
+            return grid
 
     def reset(self):
         """
         Reset the gui to black image (initial)
         """
+        self.change_layout(self.window.usecase)
+
         # Draw background image (brain)
         cvImg = self.arrs[0].astype(np.uint8)
         self.height, self.width, self.channel = cvImg.shape
@@ -152,14 +179,21 @@ class SimpleImageViewer(QWidget):
         qImg_y = QImage(cvImg_y.data, self.width_y, self.height_y, bytesPerLine, QImage.Format_RGB888)
         self.img_y = QPixmap(qImg_y)
 
-        self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-        self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-        self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        if self.window.usecase != "CardiacMRI":
+            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        else:
+            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
+
         self.label_img.setPixmap(self.img)
         self.label_img_x.setPixmap(self.img_x)
         self.label_img_y.setPixmap(self.img_y)
 
         self.clear_3d()
+        self.window.right_widget.automatic_mode.clear_2d()
 
     def clear_3d(self):
         """
@@ -172,7 +206,9 @@ class SimpleImageViewer(QWidget):
         self.tgt_y = []
         self.tgt_z = []
         self.ax.clear()
+        self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
         self.canvas.draw()
+
 
     def draw_image(self, arrs, agent_loc, target=None, rect=None, episode_end=False):
         """
@@ -194,7 +230,7 @@ class SimpleImageViewer(QWidget):
         # Draw rectangles and agent (overlay)
         self.painterInstance = QPainter(self.img)
         # Rotate if needed
-        if self.window.usecase == 'FetalUS':
+        if self.window.usecase in ['FetalUS', 'CardiacMRI']:
             self.rotate = True
         _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
         self.drawer(_agent_loc, _rect, _target)
@@ -215,9 +251,15 @@ class SimpleImageViewer(QWidget):
             self.draw_error()
 
         # Set image that has been drawn
-        self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-        self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-        self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        if self.window.usecase != "CardiacMRI":
+            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        else:
+            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
+
         self.label_img.setPixmap(self.img)
         self.label_img.setAlignment(QtCore.Qt.AlignCenter)
         self.label_img_x.setPixmap(self.img_x)
@@ -238,19 +280,23 @@ class SimpleImageViewer(QWidget):
             self.x_traj.append(agent_loc[0])
             self.y_traj.append(agent_loc[1])
             self.z_traj.append(agent_loc[2])
-        else:
-            self.x_traj = []
-            self.y_traj = []
-            self.z_traj = []
-            self.tgt_x = []
-            self.tgt_y = []
-            self.tgt_z = []
-            self.ax.clear()
 
-        self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4", linewidth=1.5)
-        self.ax.plot(self.tgt_x,self.tgt_y,self.tgt_z, marker='x', c='green', linewidth=1.5)
-        self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
-        self.canvas.draw()
+            # 2D Trajectory
+            if self.window.right_widget.automatic_mode.which_task() != "Play":
+                self.window.right_widget.automatic_mode.x.append(self.cnt)
+                self.window.right_widget.automatic_mode.y.append(self.error)
+        else:
+            self.clear_3d()
+            self.window.right_widget.automatic_mode.clear_2d()
+
+        # self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4", linewidth=1.5)
+        # self.ax.plot(self.tgt_x,self.tgt_y,self.tgt_z, marker='x', c='green', linewidth=1.5)
+        # self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
+        # self.canvas.draw()
+
+        if self.window.right_widget.automatic_mode.which_task() != "Play":
+            self.window.right_widget.automatic_mode.ax.plot(self.window.right_widget.automatic_mode.x, self.window.right_widget.automatic_mode.y, c="orange")
+            self.window.right_widget.automatic_mode.canvas.draw()
 
     def set_3d_axes(self, ax, x_lim, y_lim, z_lim):
         """
@@ -297,7 +343,7 @@ class SimpleImageViewer(QWidget):
                 need to do (x,y) -> (y,x) for agent coords
                 - Perform relevant rotation (i.e. 90 degrees ccw)
         '''
-        if self.window.usecase in ['BrainMRI', 'CardiacMRI']:
+        if self.window.usecase in ['BrainMRI']:
             _agent_loc = (agent_loc[0], self.height-agent_loc[1])
             if target is not None:
                 _target = (target[0], self.height-target[1])
@@ -305,7 +351,7 @@ class SimpleImageViewer(QWidget):
                 _target = None
             _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
 
-        elif self.window.usecase == 'FetalUS':
+        elif self.window.usecase in ['FetalUS', 'CardiacMRI']:
             _agent_loc = agent_loc[1::-1]
             if target is not None:
                 _target = target[1::-1]
@@ -344,7 +390,7 @@ class SimpleImageViewer(QWidget):
         self.painterInstance.setFont(QFont("Arial", self.size_e))
 
         # Change positioning of error label depending on usecase
-        if self.window.usecase in {"BrainMRI", "CardiacMRI"}:
+        if self.window.usecase in ["BrainMRI"]:
             self.painterInstance.drawText(0, 30, f"Error: {self.error:.2f} mm")
         else:
             self.painterInstance.drawText(0, 22, f"Error: {self.error:.2f} mm")
@@ -480,6 +526,7 @@ class SimpleImageViewer(QWidget):
         self.task = value["task"]
         self.error = value["error"]
         self.is_terminal = value["is_terminal"]
+        self.cnt = value["cnt"]
         self.draw_image(
             arrs = value["arrs"],
             agent_loc = value["agent_loc"],

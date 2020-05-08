@@ -64,13 +64,14 @@ def play_n_episodes(player, predfunc, nr, render=False, viewer=None):
                                                                     viewer=viewer)
         
         # Emit signal for log
-        viewer.right_widget.automatic_mode.terminal_signal.emit({
-            "current_episode": k+1,
-            "total_episode": nr,
-            "score": score,
-            "distance_error": distance_error,
-            "q_values": q_values
-        })
+        if viewer!=None:
+            viewer.right_widget.automatic_mode.terminal_signal.emit({
+                "current_episode": k+1,
+                "total_episode": nr,
+                "score": score,
+                "distance_error": distance_error,
+                "q_values": q_values
+            })
 
         logger.info(
             "{}/{} - {} - score {} - distError {} - q_values {}".format(k + 1,
