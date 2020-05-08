@@ -72,14 +72,9 @@ MAX_EPOCHS = 1000
 def get_player(directory=None, files_list= None, data_type=None, viz=False,
                task='play', saveGif=False, saveVideo=False):
     # in atari paper, max_num_frames = 30000
-    if task=='eval':
-        env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
-                            viz=viz, saveGif=saveGif, saveVideo=saveVideo,
-                            task=task, files_list=files_list, data_type=data_type, max_num_frames=1500)
-    else:
-        env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
-                            viz=viz, saveGif=saveGif, saveVideo=saveVideo,
-                            task=task, files_list=files_list, data_type=data_type, max_num_frames=1500)
+    env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
+                        viz=viz, saveGif=saveGif, saveVideo=saveVideo,
+                        task=task, files_list=files_list, data_type=data_type, max_num_frames=1500)
                         
     if task not in ['browse','train']:
         # in training, env will be decorated by ExpReplay, and history
