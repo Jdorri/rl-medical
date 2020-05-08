@@ -215,6 +215,7 @@ class SimpleImageViewer(QWidget):
         Main image drawer function
         """
         cvImg, cvImg_x, cvImg_y = self.get_imgs(arrs)
+        self.arr = cvImg                            #(for testing purposes)
 
         bytesPerLine = 3 * self.width
         qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
@@ -230,7 +231,7 @@ class SimpleImageViewer(QWidget):
         # Draw rectangles and agent (overlay)
         self.painterInstance = QPainter(self.img)
         # Rotate if needed
-        if self.window.usecase in ['FetalUS', 'CardiacMRI']:
+        if self.window.usecase == 'FetalUS':
             self.rotate = True
         _agent_loc, _rect, _target = self.translate(agent_loc, rect, target)
         self.drawer(_agent_loc, _rect, _target)
@@ -289,10 +290,10 @@ class SimpleImageViewer(QWidget):
             self.clear_3d()
             self.window.right_widget.automatic_mode.clear_2d()
 
-        # self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4", linewidth=1.5)
-        # self.ax.plot(self.tgt_x,self.tgt_y,self.tgt_z, marker='x', c='green', linewidth=1.5)
-        # self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
-        # self.canvas.draw()
+        self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4", linewidth=1.5)
+        self.ax.plot(self.tgt_x,self.tgt_y,self.tgt_z, marker='x', c='green', linewidth=1.5)
+        self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
+        self.canvas.draw()
 
         if self.window.right_widget.automatic_mode.which_task() != "Play":
             self.window.right_widget.automatic_mode.ax.plot(self.window.right_widget.automatic_mode.x, self.window.right_widget.automatic_mode.y, c="orange")
@@ -343,7 +344,7 @@ class SimpleImageViewer(QWidget):
                 need to do (x,y) -> (y,x) for agent coords
                 - Perform relevant rotation (i.e. 90 degrees ccw)
         '''
-        if self.window.usecase in ['BrainMRI']:
+        if self.window.usecase in ['BrainMRI', 'CardiacMRI']:
             _agent_loc = (agent_loc[0], self.height-agent_loc[1])
             if target is not None:
                 _target = (target[0], self.height-target[1])
@@ -351,7 +352,7 @@ class SimpleImageViewer(QWidget):
                 _target = None
             _rect = (self.height-rect[2], self.height-rect[3]) + rect[:2]
 
-        elif self.window.usecase in ['FetalUS', 'CardiacMRI']:
+        elif self.window.usecase == 'FetalUS':
             _agent_loc = agent_loc[1::-1]
             if target is not None:
                 _target = target[1::-1]
@@ -390,7 +391,7 @@ class SimpleImageViewer(QWidget):
         self.painterInstance.setFont(QFont("Arial", self.size_e))
 
         # Change positioning of error label depending on usecase
-        if self.window.usecase in ["BrainMRI"]:
+        if self.window.usecase in {"BrainMRI", "CardiacMRI"}:
             self.painterInstance.drawText(0, 30, f"Error: {self.error:.2f} mm")
         else:
             self.painterInstance.drawText(0, 22, f"Error: {self.error:.2f} mm")

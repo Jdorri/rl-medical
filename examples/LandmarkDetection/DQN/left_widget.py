@@ -193,7 +193,8 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load BrainMRI </p></b>")        
+                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(
+                    f"<b><p style='color:blue'> &#36; Load BrainMRI </p></b>")        
 
                 self.window.widget.set_3d_axes(self.window.widget.ax, \
                         self.window.widget.width, self.window.widget.height, \
@@ -213,7 +214,8 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load FetalUS </p></b>")        
+                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(
+                    f"<b><p style='color:blue'> &#36; Load FetalUS </p></b>")        
 
                 self.window.widget.set_3d_axes(self.window.widget.ax, \
                         self.window.widget.width, self.window.widget.height, \
@@ -233,7 +235,8 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load CardiacMRI </p></b>")        
+                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(
+                    f"<b><p style='color:blue'> &#36; Load CardiacMRI </p></b>")        
 
                 self.window.widget.set_3d_axes(self.window.widget.ax, \
                         self.window.widget.width, self.window.widget.height, \
@@ -252,59 +255,77 @@ class LeftWidgetSettings(QFrame):
         """
         Handle when user select to browse model
         """
-        if not self.testing:
+        # Skip user input if unit-testing
+        if self.testing:
+            self.fname_model = ('./data/models/DQN_multiscale_brain_mri_point_pc' +
+                '_ROI_45_45_45/model-600000.data-00000-of-00001', '')
+        else:
             self.fname_model = QFileDialog.getOpenFileName(self, "Browse Model",
                 "./data/models/", filter="*.data-*")
-            # Set text to label
-            filename = self.fname_model[0].split("/")
-            self.model_file_edit_text.setText(filename[-1])
 
-            # Indicate that user has make a selection
-            self.window.right_widget.automatic_mode.fname_model.user_define = True
-            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Model: {filename[-1]} </p></b>")
+        # Set text to label
+        filename = self.fname_model[0].split("/")
+        self.model_file_edit_text.setText(filename[-1])
 
-            # Indicate appropriate path
-            self.fname_model = self.fname_model[0]
+        # Indicate that user has make a selection
+        self.window.right_widget.automatic_mode.fname_model.user_define = True
+        self.window.right_widget.automatic_mode.terminal.appendHtml(
+            f"<b><p style='color:blue'> &#36; Load Model: {filename[-1]} </p></b>")
+
+        # Indicate appropriate path
+        self.fname_model = self.fname_model[0]
 
     def on_clicking_browse_landmarks(self):
         """
         Handle when user select to browse landmarks
         """
-        if not self.testing:
+        # Skip user input if unit-testing
+        if self.testing:
+            self.fname_landmarks = ('./data/filenames/brain_test_landmarks_new_paths.txt', '')
+        else:
             self.fname_landmarks = QFileDialog.getOpenFileName(self, "Browse Landmark",
                 "./data/filenames", filter="txt files (*landmark*.txt)")
-            # Set text to label
-            filename = self.fname_landmarks[0].split("/")
-            self.landmark_file_edit_text.setText(filename[-1])
+            
+        # Set text to label
+        filename = self.fname_landmarks[0].split("/")
+        self.landmark_file_edit_text.setText(filename[-1])
 
-            # Indicate that user has make a selection
-            self.window.right_widget.automatic_mode.fname_landmarks.user_define = True
-            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
+        # Indicate that user has make a selection
+        self.window.right_widget.automatic_mode.fname_landmarks.user_define = True
+        self.window.right_widget.automatic_mode.terminal.appendHtml(
+            f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
 
-            # Indicate that user has make a selection (browse mode)
-            self.window.right_widget.browse_mode.fname_landmarks.user_define = True
-            self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
+        # Indicate that user has make a selection (browse mode)
+        self.window.right_widget.browse_mode.fname_landmarks.user_define = True
+        self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(
+            f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
 
-            # Indicate appropriate path
-            self.fname_landmarks = self.fname_landmarks[0]
+        # Indicate appropriate path
+        self.fname_landmarks = self.fname_landmarks[0]
 
     def on_clicking_browse_images(self):
         """
         Handle when user select to browse images
         """
-        if not self.testing:
+        # Skip user dialog if unit testing
+        if self.testing:
+            self.fname_images = ('./data/filenames/brain_test_files_new_paths.txt', '')
+        else:
             self.fname_images = QFileDialog.getOpenFileName(self, "Browse Image",
                 "./data/filenames")
-            # Set text to label
-            filename = self.fname_images[0].split("/")
-            self.img_file_edit_text.setText(filename[-1])
 
-            # Indicate that user has make a selection
-            self.window.right_widget.automatic_mode.fname_images.user_define = True
-            self.window.right_widget.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
+        # Set text to label
+        filename = self.fname_images[0].split("/")
+        self.img_file_edit_text.setText(filename[-1])
 
-            self.window.right_widget.browse_mode.fname_images.user_define = True
-            self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
+        # Indicate that user has make a selection
+        self.window.right_widget.automatic_mode.fname_images.user_define = True
+        self.window.right_widget.automatic_mode.terminal.appendHtml(
+            f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
 
-            # Indicate appropriate path
-            self.fname_images = self.fname_images[0]
+        self.window.right_widget.browse_mode.fname_images.user_define = True
+        self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(
+            f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
+
+        # Indicate appropriate path
+        self.fname_images = self.fname_images[0]

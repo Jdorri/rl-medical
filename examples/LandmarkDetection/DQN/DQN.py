@@ -11,7 +11,6 @@ import sys
 import time
 import argparse
 from collections import deque
-
 import tensorflow as tf
 from medical import MedicalPlayer, FrameStack
 from tensorpack.input_source import QueueInput
@@ -199,7 +198,6 @@ def get_config(files_list, data_type, trainable_variables):
 
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'update_frequency'),
-                # 100k pretraining steps
 
                 [(0, INIT_UPDATE_FREQ), (NUM_PRETRAIN, UPDATE_FREQ)],
 

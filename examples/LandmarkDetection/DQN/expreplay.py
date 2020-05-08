@@ -136,8 +136,8 @@ class HumanDemReplayMemory(ReplayMemory):
         ## Path for GPU cluster ##
         directory = "Documents/rl-medical/examples/LandmarkDetection/DQN/data/HITL"
         # TODO directory needs to be flexible for pulling images
-        image_directory = "/vol/project/2019/545/g1954503/aeg19/Cardiac_MRI/"
-        train_paths = "/vol/biomedic/users/aa16914/shared/data/RL_data/cardiac_train_files_new_paths.txt"
+        image_directory = "/vol/project/2019/545/g1954503/aeg19/Fetal_US/"
+        train_paths = "/vol/biomedic/users/aa16914/shared/data/RL_data/fetalUS_train_files_new_paths.txt"
         ## Paths for local testing ##
         # directory = "./data/HITL"
         # image_directory = '/Volumes/project/2019/545/g1954503/aeg19/Brain_MRI'
@@ -152,7 +152,7 @@ class HumanDemReplayMemory(ReplayMemory):
         ##
         # Loop 1: Loops through all log files in the directory
         for filename in os.listdir(directory):
-            if (filename.endswith(".pickle") or filename.endswith(".p")) and "CardiacMRI" in filename:
+            if (filename.endswith(".pickle") or filename.endswith(".p")) and "FetalUS" in filename:
                 log_file = os.path.join(directory, filename)
                 logger.info("Log filename: {}".format(log_file))
                 file_contents = pickle.load( open( log_file, "rb" ) )
@@ -376,7 +376,7 @@ class ExpReplay(DataFlow, Callback):
                     batch_exp.append(self.hmem.sample(j))
 
                 yield self._process_batch(batch_exp)
-                logger.info("Mixed batch 0.6agent 0.4human ...")
+                logger.info("Mixed batch 0.8agent 0.2human ...")
                 self._populate_job_queue.put(1)
             # HITL not implemented therefore only sample from agent buffer
             else:

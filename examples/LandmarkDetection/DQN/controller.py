@@ -12,11 +12,10 @@ from DQN import get_viewer_data
 
 def warn(*args, **kwargs):
     pass
+import sys
 import warnings
 warnings.warn = warn
 warnings.simplefilter("ignore", category=PendingDeprecationWarning)
-
-import sys
 
 from window import Window
 from right_widget_automatic import RightWidgetSettings
@@ -44,8 +43,22 @@ class Controller:
         self.right_widget.browse_mode.window = self.window
         
         # Show window
-        # if not self.testing:
         self.window.show()
+
+    @staticmethod
+    def allWidgets_setCheckable(parentQWidget):
+        ''' Method to set every widget to checkable for so the .isChecked()
+            method can by used in testing.
+        '''
+        for topLevel in QApplication.topLevelWidgets():
+            children = []
+            for QObj in {QPushButton, QToolButton}:
+                children.extend(topLevel.findChildren(QObj))
+            for child in children:
+                try:
+                    child.setCheckable(True)
+                except AttributeError:
+                    pass
 
 
 ###############################################################################
@@ -109,7 +122,6 @@ class Tab(QFrame):
             self.automatic_mode.restart()
 
             # Reset left widget
-            # if not self.testing:
             self.browse_mode.window.left_widget.model_file.show()
             self.browse_mode.window.left_widget.model_file_edit.show()
             self.browse_mode.window.left_widget.model_file_edit_text.show()
