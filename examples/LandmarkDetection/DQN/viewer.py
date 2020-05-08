@@ -100,14 +100,13 @@ class SimpleImageViewer(QWidget):
         self.tgt_z = []
 
         # Setup layout
-        self.grid = QGridLayout()
-        self.grid.addWidget(self.label_img, 0, 0)
-        self.grid.addWidget(self.label_img_x, 0, 1)
-        self.grid.addWidget(self.label_img_y, 1, 0)
-        self.grid.addWidget(self.canvas, 1, 1)
+        self.grid = self.generate_layout("BrainMRI") # generate default
+
         self.agent_signal.connect(self.agent_signal_handler)
 
-        self.setLayout(self.grid)
+        self.main_layout = QHBoxLayout()
+        self.main_layout.addLayout(self.grid)
+        self.setLayout(self.main_layout)
 
         # Stylesheet settings
         self.label_img.setStyleSheet("background: black; border:3px solid #DD2501; ")
@@ -121,6 +120,28 @@ class SimpleImageViewer(QWidget):
         self.color_e = QColor(250, 250, 250)
         self.size_e = 18
         self.line_width = 1
+    
+    def generate_layout(self, usecase):
+        """
+        Return appropriate layout according to usecase (Brain|Cardiac|Fetal)
+        """
+        # Generate layout for brain and fetal
+        if usecase in {"BrainMRI", "FetalUS"}:
+            grid = QGridLayout()
+            grid.addWidget(self.label_img, 0, 0)
+            grid.addWidget(self.label_img_x, 0, 1)
+            grid.addWidget(self.label_img_y, 1, 0)
+            grid.addWidget(self.canvas, 1, 1)
+
+            return grid
+        else:
+            grid = QGridLayout()
+            grid.addWidget(self.label_img, 1, 1)
+            grid.addWidget(self.label_img_x, 0, 1)
+            grid.addWidget(self.label_img_y, 1, 0)
+            grid.addWidget(self.canvas, 0, 0)
+
+            return grid
 
     def reset(self):
         """
