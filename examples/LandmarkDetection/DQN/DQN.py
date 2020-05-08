@@ -296,46 +296,6 @@ if __name__ == '__main__':
     num_files = init_player.files.num_files
 
     if args.task != 'train':
-        ########################################################################
-        # PyQt GUI Code Section
-        # Define application and viewer to run on the main thread
-        # app = QApplication(sys.argv)
-        # viewer_param = get_viewer_data()
-        # window = Window(viewer_param)
-
-        # def thread_function():
-        #     """Run on secondary thread"""
-        #     assert args.load is not None
-        #     pred = OfflinePredictor(PredictConfig(
-        #         model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA ),
-        #         session_init=get_model_loader(args.load),
-        #         input_names=['state'],
-        #         output_names=['Qvalue']))
-        #     # demo pretrained model one episode at a time
-        #     if args.task == 'play':
-        #         play_n_episodes(get_player(files_list=args.files,
-        #                                    data_type=args.type,
-        #                                    viz=0.01,
-        #                                    saveGif=args.saveGif,
-        #                                    saveVideo=args.saveVideo,
-        #                                    task='play'),
-        #                         pred, num_files, viewer=window)
-
-        #     # run episodes in parallel and evaluate pretrained model
-        #     elif args.task == 'eval':
-        #         play_n_episodes(get_player(files_list=args.files,
-        #                                     data_type=args.type,
-        #                                     viz=0.01,
-        #                                    saveGif=args.saveGif,
-        #                                    saveVideo=args.saveVideo,
-        #                                    task='eval'),
-        #                                  pred, num_files, viewer=window)
-
-        # # Create a thread to run background task
-        # thread = WorkerThread(target_function=thread_function)
-        # window.left_widget.thread = thread
-        # app.exec_()
-
         assert args.load is not None
         pred = OfflinePredictor(PredictConfig(
             model=Model(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA, args.trainable ),

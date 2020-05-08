@@ -487,13 +487,7 @@ class MedicalPlayer(gym.Env):
                 'distError': distance_error, 'filename': self.filename}
 
         if self.terminal:
-            # directory = logger.get_logger_dir()
-            # print(directory)
-            # list_of_files = glob.glob('results/eval_logs/*.csv')
-            # latest_file = max(list_of_files, key=os.path.getctime)
-            # self.csvfile = 'Reward_and_Q_log.csv'
-            # path = os.path.join(directory, self.csvfile)
-            # path = latest_file
+            # store results when batch evaluation
             if self.directory:
                 path = self.directory
                 with open(path, 'a') as outcsv:
