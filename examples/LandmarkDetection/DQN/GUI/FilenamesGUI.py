@@ -27,3 +27,11 @@ class FilenamesGUI:
         """
         file2.name = file1.name
         file2.user_define = file1.user_define
+    
+    def clear(self):
+        """
+        Clear state
+        """
+
+        self.name = ""
+        self.user_define = False

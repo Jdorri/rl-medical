@@ -1,6 +1,6 @@
 ################################################################################
 ## Doorway to launch application's GUI
-# Author: Maleakhi, Alex, Jamie, Faidon
+# Author: Maleakhi, Alex, Jamie, Faidon, Olle, Harry
 ################################################################################
 
 from PyQt5.QtWidgets import *
@@ -135,18 +135,19 @@ class Tab(QFrame):
         self.browse_mode.window.widget.canvas.draw()
 
         # Reset right widget
-        self.browse_mode.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Browse Mode </p></b>")        
+        self.browse_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Browse Mode </p></b>")        
 
         # Reset left widget
         self.browse_mode.window.left_widget.model_file.hide()
         self.browse_mode.window.left_widget.model_file_edit.hide()
         self.browse_mode.window.left_widget.model_file_edit_text.hide()
         self.browse_mode.window.left_widget.load_button.show()
-        self.browse_mode.window.left_widget.browse_mode_help_text()
+        self.browse_mode.window.left_widget.quick_help.browse_mode_help_text()
 
-        # Pass loaded user data
-        FilenamesGUI.copy(self.automatic_mode.fname_images, self.browse_mode.fname_images)
-        FilenamesGUI.copy(self.automatic_mode.fname_landmarks, self.browse_mode.fname_landmarks)
+        # Reset data
+        self.browse_mode.clear_custom_load()
+        self.automatic_mode.clear_custom_load()
+        self.browse_mode.window.left_widget.space.hide()
         self.browse_mode.window.load_model_action.setEnabled(False)
     
     def setup_automatic(self):
@@ -173,11 +174,12 @@ class Tab(QFrame):
         self.automatic_mode.window.left_widget.model_file_edit.show()
         self.automatic_mode.window.left_widget.model_file_edit_text.show()
         self.automatic_mode.window.left_widget.load_button.hide()
-        self.automatic_mode.window.left_widget.automatic_mode_help_text()
+        self.automatic_mode.window.left_widget.space.show()
+        self.automatic_mode.window.left_widget.quick_help.automatic_mode_help_text()
             
-        # Pass user data from browse mode to automatic mode
-        FilenamesGUI.copy(self.browse_mode.fname_images, self.automatic_mode.fname_images)
-        FilenamesGUI.copy(self.browse_mode.fname_landmarks, self.automatic_mode.fname_landmarks)
+        # Reset data
+        self.browse_mode.clear_custom_load()
+        self.automatic_mode.clear_custom_load()
         self.automatic_mode.window.load_model_action.setEnabled(True)
     
     @pyqtSlot(int)

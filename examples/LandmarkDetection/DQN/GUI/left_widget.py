@@ -1,6 +1,6 @@
 ################################################################################
 ## Left widget file 
-# Author: Maleakhi, Alex, Jamie, Faidon
+# Author: Maleakhi, Alex, Jamie, Faidon, Olle, Harry
 ################################################################################
 
 from PyQt5.QtWidgets import *
@@ -9,6 +9,50 @@ from PyQt5.QtCore import *
 
 
 ################################################################################
+## QuickHelp Widget
+# Used to display quick help on left side
+
+class QuickHelp(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+        # Initialise text edit
+        self.quick_help = QPlainTextEdit()
+        self.quick_help.setReadOnly(True)
+        self.automatic_mode_help_text()
+
+        # Manage layout
+        vbox = QVBoxLayout()
+        vbox.addWidget(QLabel("<hr />"))
+        vbox.addItem(QSpacerItem(300, 20))
+        vbox.addWidget(QLabel("<i> Quick Help </i>"))
+        vbox.addWidget(self.quick_help)
+        self.setLayout(vbox)
+
+        # Stylesheet
+        self.quick_help.setStyleSheet("background: white")
+    
+    def browse_mode_help_text(self):
+        """
+        Content of browse mode quick help.
+        """
+
+        self.quick_help.clear()
+        with open("GUI/text/quick_browse_text.html", "r") as f:
+            self.quick_help.appendHtml(f.read())
+    
+    def automatic_mode_help_text(self):
+        """
+        Content of automatic mode quick help
+        """
+        self.quick_help.clear()
+
+        with open("GUI/text/quick_automatic_text.html", "r") as f:
+            self.quick_help.appendHtml(f.read())
+
+    
+################################################################################
 ## Left Widget
 # Control several of main application functionalities (positioned on the left of image widget).
 
@@ -16,13 +60,20 @@ class LeftWidgetSettings(QFrame):
     """
     Left widget controlling GUI elements settings.
     """
+    # Constant
     DEFAULT_DATA_NOTIFICATION = "Default data selected"
 
     def __init__(self, window):
+        """
+        Constructor for left widget.
+
+        :param window: instance of Window object
+        """
+
         super().__init__()
         # Window object to access windows components
         self.window = window # Store window object to enable control over windows functionality
-        self.setMaximumWidth(350)
+        
         self.title = QLabel("<b> Settings </b>")
 
         ## Default file mode
@@ -37,17 +88,17 @@ class LeftWidgetSettings(QFrame):
         # Load model settings
         self.model_file = QLabel('Load Model', self)
         self.model_file_edit = QPushButton('Browse', self)
-        self.model_file_edit_text = QLabel(self.DEFAULT_DATA_NOTIFICATION)
+        self.model_file_edit_text = QLabel(LeftWidgetSettings.DEFAULT_DATA_NOTIFICATION)
 
         # Load landmark settings
         self.landmark_file = QLabel('Load Landmark', self)
         self.landmark_file_edit = QPushButton('Browse', self)
-        self.landmark_file_edit_text = QLabel(self.DEFAULT_DATA_NOTIFICATION)
+        self.landmark_file_edit_text = QLabel(LeftWidgetSettings.DEFAULT_DATA_NOTIFICATION)
 
         # Upload image settings
         self.img_file = QLabel('Upload Image', self)
         self.img_file_edit = QPushButton('Browse', self)
-        self.img_file_edit_text = QLabel(self.DEFAULT_DATA_NOTIFICATION)
+        self.img_file_edit_text = QLabel(LeftWidgetSettings.DEFAULT_DATA_NOTIFICATION)
 
         # Logo settings
         self.logo = QLabel()
@@ -55,9 +106,13 @@ class LeftWidgetSettings(QFrame):
         pixmap_logo = pixmap_logo.scaledToHeight(50)
         self.logo.setPixmap(pixmap_logo)
 
-        # Load button (HITL mode)
+        # Load and clear button (for custom data)
         self.load_button = QPushButton("Load", self)
+        self.clear_button = QPushButton("Clear", self)
         self.load_button.hide()
+
+        # Quick help
+        self.quick_help = QuickHelp()
         
         ## Manage layout
         # Default data settings layout
@@ -84,12 +139,13 @@ class LeftWidgetSettings(QFrame):
         hbox_landmark.addWidget(self.landmark_file_edit_text)
 
         hbox_load = QHBoxLayout()
+        # Note: space is used as placeholder for GUI consistency
+        self.space = QLabel("")
+        self.space.show()
         hbox_load.addWidget(self.load_button)
-        hbox_load.addWidget(QLabel(""))
-
-        self.quick_help = QPlainTextEdit()
-        self.quick_help.setReadOnly(True)
-
+        hbox_load.addWidget(self.clear_button)
+        hbox_load.addWidget(self.space)
+        
         # Main Layout
         vbox = QVBoxLayout()
         vbox.setSpacing(20)
@@ -100,35 +156,25 @@ class LeftWidgetSettings(QFrame):
         vbox.addWidget(self.advance_title)
         vbox.addWidget(self.img_file)
         vbox.addLayout(hbox_image)
-        vbox.addItem(QSpacerItem(300, 20))
+        vbox.addItem(QSpacerItem(300, 10))
         vbox.addWidget(self.landmark_file)
         vbox.addLayout(hbox_landmark)
-        vbox.addItem(QSpacerItem(300, 20))
+        vbox.addItem(QSpacerItem(300, 10))
         vbox.addWidget(self.model_file)
         vbox.addLayout(hbox_model)
         vbox.addLayout(hbox_load)
-        vbox.addWidget(QLabel("<hr />"))
-        vbox.addWidget(QLabel("<i> Quick Help </i>"))
         vbox.addWidget(self.quick_help)
         vbox.addStretch()
         vbox.addWidget(self.logo)
 
         self.setLayout(vbox)
         
-        self.automatic_mode_help_text()
-        
         # CSS styling
-        self.setStyleSheet("""
-            QPushButton {
-                background: #006EAF; 
-                color: white
-            }
-            QFrame, QRadioButton {
-                background: #EBEEEE;
-            }
-            """)
-        self.load_button.setStyleSheet("background: #4CAF50")
-        self.quick_help.setStyleSheet("background: white")
+        with open("GUI/css/left_widget.css", "r") as f:
+            self.setStyleSheet(f.read())
+        self.load_button.setStyleSheet("background: #4CAF50; color: white")
+        self.clear_button.setStyleSheet("background: orange; color: white")
+        self.setMaximumWidth(300)
 
         # Event handler connection
         self.model_file_edit.clicked.connect(self.on_clicking_browse_model)
@@ -138,52 +184,37 @@ class LeftWidgetSettings(QFrame):
         self.cardiac_button.toggled.connect(self.on_clicking_cardiac)
         self.ultrasound_button.toggled.connect(self.on_clicking_ultrasound)
         self.load_button.clicked.connect(self.on_clicking_load)
+        self.clear_button.clicked.connect(self.on_clicking_clear)
 
+        # Flag for unit testing
         self.testing = False
     
-    def browse_mode_help_text(self):
-        self.quick_help.clear()
-        self.quick_help.appendHtml("""
-        <b><p style='color:#003E74'>Browse Mode</p></b>
-        <p style='color:#006EAF'><i>(For more information: Ctrl+H)</i></p><br />
+    def on_clicking_clear(self):
+        """
+        Handle event when user decide to clear load custom data selection
+        """
 
-        <br /><b>1. Load data:</b> choose default or browse custom data.
-        <br /><b>2. Enable HITL:</b> toggle checkbox to notify to store user interaction data.
-        <br /><b>3. Navigation:</b> press <i>Human Actions</i> arrow to navigate agent until Error = 0.
-        <br /><b>4. Next Image:</b> press next image to annotate next sequence of image.
-        <br /><b>5. Save data:</b> toggle off <i>Enable HITL</i> checkbox or close GUI to save user interaction.
-        """)
-    
-    def automatic_mode_help_text(self):
-        self.quick_help.clear()
-        self.quick_help.appendHtml("""
-        <b><p style='color:#003E74'>Automatic Mode</p></b>
-        <p style='color:#006EAF'><i>For more information: Ctrl+H</i></p><br />
-
-        <br /><b>1. Load data:</b> choose default or browse custom data.
-        <br /><b>2. Task selection: </b>select (Play|Evaluation) task.
-        <br /><b>3. Simulation: </b>start visualisation by pressing <i>Start</i> button, <i>Pause</i> to pause simulation
-        , <i>Terminate</i> to terminate simulation. After termination, you can run a new simulation using different settings.
-        <br /><b>4. Agent speed:</b> optionally change simulation speed using agent speed slider.
-        """)
+        if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
+            self.window.right_widget.browse_mode.clear_custom_load()
+        else:
+            self.window.right_widget.automatic_mode.clear_custom_load()
     
     def on_clicking_load(self):
         """
         Handle when user decide to load user default data on browse mode
         """
+
         # Reset SimpleImageViewer widget
         self.window.right_widget.browse_mode.set_paths()
         self.window.right_widget.browse_mode.load_img()
         self.window.widget.clear_3d()
-        self.window.widget.set_3d_axes(self.window.widget.ax, \
-                self.window.widget.width, self.window.widget.height, \
-                self.window.widget.height_x)
         self.window.widget.canvas.draw()
 
     def on_clicking_brain(self, enabled):
         """
         Handle event when brain button is clicked
         """
+
         if enabled:
             # If browse mode, change picture
             if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
@@ -193,18 +224,15 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(
+                self.window.right_widget.browse_mode.terminal.appendHtml(
                     f"<b><p style='color:blue'> &#36; Load BrainMRI </p></b>")        
-
-                self.window.widget.set_3d_axes(self.window.widget.ax, \
-                        self.window.widget.width, self.window.widget.height, \
-                        self.window.widget.height_x)
                 self.window.widget.canvas.draw()
 
     def on_clicking_ultrasound(self, enabled):
         """
         Handle event when ultrasound button is clicked
         """
+
         if enabled:
             # If browse mode, change picture
             if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
@@ -214,12 +242,8 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(
+                self.window.right_widget.browse_mode.terminal.appendHtml(
                     f"<b><p style='color:blue'> &#36; Load FetalUS </p></b>")        
-
-                self.window.widget.set_3d_axes(self.window.widget.ax, \
-                        self.window.widget.width, self.window.widget.height, \
-                        self.window.widget.height_x)
                 self.window.widget.canvas.draw()
 
     def on_clicking_cardiac(self, enabled):
@@ -235,18 +259,15 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(
+                self.window.right_widget.browse_mode.terminal.appendHtml(
                     f"<b><p style='color:blue'> &#36; Load CardiacMRI </p></b>")        
-
-                self.window.widget.set_3d_axes(self.window.widget.ax, \
-                        self.window.widget.width, self.window.widget.height, \
-                        self.window.widget.height_x)
                 self.window.widget.canvas.draw()
 
     def reset_file_edit_text(self):
         """
         Used to reset file edit text
         """
+
         self.model_file_edit_text.setText(self.DEFAULT_DATA_NOTIFICATION)
         self.landmark_file_edit_text.setText(self.DEFAULT_DATA_NOTIFICATION)
         self.img_file_edit_text.setText(self.DEFAULT_DATA_NOTIFICATION)
@@ -255,6 +276,7 @@ class LeftWidgetSettings(QFrame):
         """
         Handle when user select to browse model
         """
+
         # Skip user input if unit-testing
         if self.testing:
             self.fname_model = ('./data/models/DQN_multiscale_brain_mri_point_pc' +
@@ -279,6 +301,7 @@ class LeftWidgetSettings(QFrame):
         """
         Handle when user select to browse landmarks
         """
+
         # Skip user input if unit-testing
         if self.testing:
             self.fname_landmarks = ('./data/filenames/brain_test_landmarks_new_paths.txt', '')
@@ -290,14 +313,14 @@ class LeftWidgetSettings(QFrame):
         filename = self.fname_landmarks[0].split("/")
         self.landmark_file_edit_text.setText(filename[-1])
 
-        # Indicate that user has make a selection
+        # Indicate that user has make a selection (automatic mode)
         self.window.right_widget.automatic_mode.fname_landmarks.user_define = True
         self.window.right_widget.automatic_mode.terminal.appendHtml(
             f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
 
         # Indicate that user has make a selection (browse mode)
         self.window.right_widget.browse_mode.fname_landmarks.user_define = True
-        self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(
+        self.window.right_widget.browse_mode.terminal.appendHtml(
             f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
 
         # Indicate appropriate path
@@ -324,7 +347,7 @@ class LeftWidgetSettings(QFrame):
             f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
 
         self.window.right_widget.browse_mode.fname_images.user_define = True
-        self.window.right_widget.browse_mode.terminal_duplicate.appendHtml(
+        self.window.right_widget.browse_mode.terminal.appendHtml(
             f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
 
         # Indicate appropriate path

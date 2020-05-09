@@ -208,7 +208,7 @@ class SimpleImageViewer(QWidget):
         self.tgt_y = []
         self.tgt_z = []
         self.ax.clear()
-        self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
+        self.set_3d_axes(self.ax, self.width, self.height, self.height_x)
 
 
     def draw_image(self, arrs, agent_loc, target=None, rect=None, episode_end=False):
@@ -268,11 +268,6 @@ class SimpleImageViewer(QWidget):
         self.label_img_x.setAlignment(QtCore.Qt.AlignCenter)
         self.label_img_y.setPixmap(self.img_y)
         self.label_img_y.setAlignment(QtCore.Qt.AlignCenter)
-
-        # 3d plotting
-        self.x_lim = self.width
-        self.y_lim = self.height
-        self.z_lim = self.height_x
         
         if target != None:
             self.tgt_x.append(target[0])
@@ -293,7 +288,7 @@ class SimpleImageViewer(QWidget):
 
         self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4", linewidth=1.5)
         self.ax.plot(self.tgt_x,self.tgt_y,self.tgt_z, marker='x', c='green', linewidth=1.5)
-        self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
+        self.set_3d_axes(self.ax,self.width,self.height,self.height_x)
         self.canvas.draw()
 
         if self.window.right_widget.automatic_mode.which_task() != "Play":

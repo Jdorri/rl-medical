@@ -210,8 +210,8 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.mounted = False
 
         # Initialise widgets (HITL related)
-        self.terminal_duplicate = QPlainTextEdit(self)
-        self.terminal_duplicate.setReadOnly(True)
+        self.terminal = QPlainTextEdit(self)
+        self.terminal.setReadOnly(True)
         self.next_img = QPushButton('Next Image', self)
         self.HITL_mode = QCheckBox('Enable HITL', self)
         self.HITL_mode.setCheckable(True)
@@ -284,7 +284,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         vbox.addWidget(self.separator)
         vbox.addItem(QSpacerItem(300, 10)) # spacer
         vbox.addWidget(self.log)
-        vbox.addWidget(self.terminal_duplicate)
+        vbox.addWidget(self.terminal)
         vbox.addStretch()
 
         self.setLayout(vbox)
@@ -353,7 +353,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.env.reset()
         self.window.widget.clear_3d()
         self.move_img(-1)
-        self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Next Image </p></b>")        
+        self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Next Image </p></b>")        
 
         # If doing HITL, 50/50 chance for the resultion to start on 2 or 3 (otherwise resolution=2 tends to get negleted)
         if self.HITL and np.random.choice(2):
@@ -376,14 +376,14 @@ class RightWidgetSettingsBrowseMode(QFrame):
             result = self.show_HITL_msg()
 
         if result == QMessageBox.Yes and self.HITL:
-            self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Ending HITL mode </p></b>")        
+            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Ending HITL mode </p></b>")        
             self.save_HITL()
 
         if result == QMessageBox.Yes and not self.HITL:
             # Activate HITL mode button
             self.HITL_mode.setChecked(True)
             self.HITL_delete.setDisabled(False)
-            self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Enable HITL mode </p></b>")        
+            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Enable HITL mode </p></b>")        
 
         elif result == QMessageBox.No and self.HITL:
             self.HITL_mode.setChecked(True)
@@ -407,7 +407,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         # Remove the current episode and load a new image
         if result == QMessageBox.Yes:
-            self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Delete Episode </p></b>")        
+            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Delete Episode </p></b>")        
             self.on_clicking_nextImg()
             self.env.HITL_logger.pop()
 
@@ -436,6 +436,12 @@ class RightWidgetSettingsBrowseMode(QFrame):
             self.error_message_box()
             self.default_use_case = self.which_usecase()
             self.set_paths()
+    
+    def clear_custom_load(self):
+        self.fname_images.clear()
+        self.fname_landmarks.clear()
+
+        self.window.left_widget.reset_file_edit_text()
 
     def move_img(self, action):
         self.env.stepManual(action, self.window)
@@ -570,6 +576,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         with open(path, 'wb') as f:
             pickle.dump(self.env.HITL_logger, f)
         
-            self.terminal_duplicate.appendHtml(f"<b><p style='color:blue'> &#36; Saving HITL pickle </p></b>")        
+            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Saving HITL pickle </p></b>")        
 
         

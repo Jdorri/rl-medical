@@ -174,6 +174,13 @@ class RightWidgetSettings(QFrame):
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
         self.terminate_button.setStyleSheet("background-color:#f44336; color:white")
     
+    def clear_custom_load(self):
+        self.fname_images.clear()
+        self.fname_landmarks.clear()
+        self.fname_model.clear()
+        
+        self.window.left_widget.reset_file_edit_text()
+
     def restart(self):
         """
         Used to restart the start button

@@ -86,8 +86,6 @@ class Window(QMainWindow):
         self.init_menu()
         
         # CSS Styling for windows
-        self.statusbar.setStyleSheet("background:#003E74; color:white")
-        
         with open("GUI/css/window.css", "r") as f:
             self.setStyleSheet(f.read())
 
@@ -173,8 +171,11 @@ class Window(QMainWindow):
         self.help.show()
 
     def on_show_quick_help(self, state):
-        # TODO
-        pass
+        if state:
+            # Show quick help
+            self.left_widget.quick_help.show()
+        else:
+            self.left_widget.quick_help.hide()
     
     def on_show_plot(self, state):
         # TODO
@@ -185,7 +186,7 @@ class Window(QMainWindow):
         if state:
             # Show terminal
             self.right_widget.automatic_mode.terminal.show()
-            self.right_widget.browse_mode.terminal_duplicate.show()
+            self.right_widget.browse_mode.terminal.show()
             self.right_widget.automatic_mode.separator.show()
             self.right_widget.browse_mode.separator.show()
             self.right_widget.automatic_mode.log.show()
@@ -193,7 +194,7 @@ class Window(QMainWindow):
         else:
             # Dont show terminal
             self.right_widget.automatic_mode.terminal.hide()
-            self.right_widget.browse_mode.terminal_duplicate.hide()
+            self.right_widget.browse_mode.terminal.hide()
             self.right_widget.automatic_mode.separator.hide()
             self.right_widget.browse_mode.separator.hide()
             self.right_widget.automatic_mode.log.hide()
