@@ -2,11 +2,11 @@ import sys
 import unittest
 from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
-from thread import WorkerThread
+from GUI.thread import WorkerThread
 from controller import Controller, Tab
-from right_widget_automatic import RightWidgetSettings
-from right_widget_browse import RightWidgetSettingsBrowseMode, XMove, YMove, ZMove
-from left_widget import LeftWidgetSettings
+from GUI.right_widget_automatic import RightWidgetSettings
+from GUI.right_widget_browse import RightWidgetSettingsBrowseMode, XMove, YMove, ZMove
+from GUI.left_widget import LeftWidgetSettings
 import numpy as np
 import glob
 import os
