@@ -24,7 +24,7 @@ class ApplicationHelp(QWidget):
         self.shortcut_close = QShortcut(QKeySequence('Ctrl+Q'), self)
         self.shortcut_close.activated.connect(self.close)
 	    
-        ## Left part of help window
+        # Left part of help window
         self.leftlist = QListWidget()
         self.leftlist.insertItem(0, 'Welcome')
         self.leftlist.insertItem(1, 'Automatic Mode')
@@ -40,14 +40,14 @@ class ApplicationHelp(QWidget):
         self.automatic_UI()
         self.browse_UI()
 		
-        ## Right part of help window
+        # Right part of help window
         # Stack (tabbing)
         self.Stack = QStackedWidget(self)
         self.Stack.addWidget(self.welcome_stack)
         self.Stack.addWidget(self.automatic_stack)
         self.Stack.addWidget(self.browse_stack)
 
-        ## Manage overall widget layout
+        # Manage overall widget layout
         hbox = QHBoxLayout(self)
         hbox.addWidget(self.leftlist)
         hbox.addWidget(self.Stack)
@@ -56,7 +56,7 @@ class ApplicationHelp(QWidget):
         # Event handler
         self.leftlist.currentRowChanged.connect(self.display)
 
-        ## Responsive design 
+        # Responsive design 
         self.leftlist.setMaximumWidth(300)
         self.resize(1000, 800)
         self.center()

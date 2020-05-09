@@ -193,6 +193,8 @@ class SimpleImageViewer(QWidget):
         self.label_img_y.setPixmap(self.img_y)
 
         self.clear_3d()
+        self.canvas.draw()
+
         self.window.right_widget.automatic_mode.clear_2d()
 
     def clear_3d(self):
@@ -207,7 +209,6 @@ class SimpleImageViewer(QWidget):
         self.tgt_z = []
         self.ax.clear()
         self.set_3d_axes(self.ax,self.x_lim,self.y_lim,self.z_lim)
-        self.canvas.draw()
 
 
     def draw_image(self, arrs, agent_loc, target=None, rect=None, episode_end=False):

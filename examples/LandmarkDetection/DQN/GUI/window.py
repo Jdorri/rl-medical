@@ -1,6 +1,6 @@
 ################################################################################
 ## Window GUI file used to integrate various widgets 
-# Author: Maleakhi, Alex, Jamie, Faidon
+# Author: Maleakhi, Alex, Jamie, Faidon, Olle, Harry
 ################################################################################
 
 from PyQt5.QtWidgets import *
@@ -13,6 +13,7 @@ from GUI.application_help import ApplicationHelp
 
 import numpy as np
 
+
 ################################################################################
 ## Main Window
 # Integrate GUI application widgets and provide menus and windows functionalities.
@@ -21,11 +22,15 @@ class Window(QMainWindow):
     """
     Window used as the main window for the application which integrate different widgets.
     """
+
     # Signal for browse/ manual mode
     # Captures key pressed that will be used to store data for Human-in-the loop
     key_pressed = pyqtSignal(QEvent)
 
     def __init__(self, viewer_param, right_widget=None):
+        """
+        
+        """
         super().__init__()
         self.init_UI(viewer_param, right_widget)
         self.key_pressed.connect(self.on_key)
