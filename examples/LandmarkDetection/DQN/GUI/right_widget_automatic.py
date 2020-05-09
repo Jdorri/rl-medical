@@ -70,6 +70,10 @@ class RightWidgetSettings(QFrame):
     PAUSE = "Pause"
     START = "Start"
     RESUME = "Resume"
+    
+    # Constant task indication
+    TASK_PLAY = "Play"
+    TASK_EVAL = "Evaluation"
 
     # Signal
     terminal_signal = pyqtSignal(dict)
@@ -208,9 +212,9 @@ class RightWidgetSettings(QFrame):
         """
 
         if self.play_button.isChecked():
-            return "Play"
+            return RightWidgetSettings.TASK_PLAY
         else:
-            return "Evaluation"
+            return RightWidgetSettings.TASK_EVAL
     
     def which_usecase(self):
         """
@@ -323,7 +327,7 @@ class RightWidgetSettings(QFrame):
             and "fetal" in filename_landmark[-1]:
             return Window.FETAL
         else:
-            return Window.USER_DEFINED
+            return Window.USER_DEFINED # Invalid mode
     
     def set_paths(self):
         """
@@ -354,38 +358,38 @@ class RightWidgetSettings(QFrame):
             self.fname_landmarks.name = self.window.left_widget.fname_landmarks
 
             # To tell the program which loader it should use
-            self.default_use_case = self.check_user_define_usecase(self.fname_model.name, self.fname_images.name, self.fname_landmarks.name)
-
-        self.window.usecase = self.default_use_case # indicate which use case currently
+            self.window.usecase = self.check_user_define_usecase(self.fname_model.name, self.fname_images.name, self.fname_landmarks.name)
 
     def error_message_box(self):
         """
         Display error when user incorrectly upload file
         """
+
         msg = QMessageBox()
         msg.setWindowTitle("Error on user defined settings")
         msg.setText("Please use appropriate model, image, and landmarks.")
         msg.setIcon(QMessageBox.Critical)
 
         # Clean up
-        self.fname_landmarks.user_define = False
-        self.fname_images.user_define = False
-        self.fname_model.user_define = False
-
-        # Reset file path as user incorrectly input them
+        self.fname_landmarks.clear()
+        self.fname_images.clear()
+        self.fname_model.clear()
         self.window.left_widget.reset_file_edit_text()
-
-        self.restart() # restart run button
+        self.window.usecase = self.which_usecase()
+        self.restart() # restart right widget state
 
         # Display pop up message
         msg.exec_()
 
     def run_DQN(self):
+        """
+        Run DQN algorithm.
+        """
         # if self.GPU_value:
             # os.environ['CUDA_VISIBLE_DEVICES'] = self.GPU_value
 
         # check input files
-        if self.task_value == 'Play':
+        if self.task_value == RightWidgetSettings.TASK_PLAY:
             self.selected_list = [self.fname_images]
         else:
             self.selected_list = [self.fname_images, self.fname_landmarks]
@@ -395,25 +399,30 @@ class RightWidgetSettings(QFrame):
         # load files into env to set num_actions, num_validation_files
         try:
             init_player = MedicalPlayer(files_list=self.selected_list,
-                                        data_type=self.default_use_case,
+                                        data_type=self.window.usecase,
                                         screen_dims=IMAGE_SIZE,
                                         task='play')
             
             self.NUM_ACTIONS = init_player.action_space.n
             self.num_files = init_player.files.num_files
+            
             # Create a thread to run background task
             self.worker_thread = WorkerThread(target_function=self.thread_function)
             self.worker_thread.window = self.window
-            self.window.widget.change_layout(self.default_use_case)
+
+            # Change to appropriate layout
+            self.window.widget.change_layout(self.window.usecase)
             self.worker_thread.start()
 
         # If there is a problem with the loader, then user incorrectly add file
         except:
-            self.terminal.appendHtml(f"<b><p style='color:red'> &#36; Error loading user defined settings. Please use appropriate model, image, and landmarks. </p></b>")
+            self.terminal.add_log("red", "Error loading user defined settings. Please use appropriate model, image, and landmarks." )
             self.error_message_box()
         
     def thread_function(self):
-        """Run on secondary thread"""
+        """
+        Run on secondary thread
+        """
         pred = OfflinePredictor(PredictConfig(
             model=Model(IMAGE_SIZE, FRAME_HISTORY, self.METHOD, self.NUM_ACTIONS, GAMMA, ""),
             session_init=get_model_loader(self.fname_model.name),
