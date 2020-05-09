@@ -18,7 +18,6 @@ warnings.simplefilter("ignore", category=PendingDeprecationWarning)
 
 import numpy as np
 import pickle
-from GUI.thread import WorkerThread
 from datetime import datetime
 import platform
 
@@ -203,8 +202,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         super(RightWidgetSettingsBrowseMode, self).__init__(*args, **kwargs)
         # Window and thread object
         self.window = None
-        self.thread = WorkerThread(None)
-        self.thread.pause = False
         
         # Mounting by default is false
         self.mounted = False

@@ -33,6 +33,7 @@ class Controller:
     """
 
     def __init__(self):
+
         # Initialise the application
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
@@ -81,6 +82,7 @@ class Tab(QFrame):
     BROWSE_MODE = "BROWSE"
 
     def __init__(self):
+        
         super().__init__()
 
         # Create tab widget that integrates automatic and browse mode

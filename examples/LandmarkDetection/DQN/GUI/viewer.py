@@ -23,6 +23,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+
 ################################################################################
 ## Main Widget
 # Responsible to draw images specified by settings and visualise agent's movement.

@@ -1,6 +1,6 @@
 ################################################################################
 ## Right widget files for automatic mode
-# Author: Maleakhi, Alex, Faidon, Jamie
+# Author: Maleakhi, Alex, Faidon, Jamie, Olle, Harry
 ################################################################################
 
 from PyQt5.QtWidgets import *
@@ -66,12 +66,16 @@ EVAL_EPISODE = 50
 ## Right Widget (Automatic Mode)
 
 class RightWidgetSettings(QFrame):
+    # Constant (indication of simulation state)
     PAUSE = "Pause"
     START = "Start"
     RESUME = "Resume"
+
+    # Signal
     terminal_signal = pyqtSignal(dict)
 
     def __init__(self, *args, **kwargs):
+
         super(RightWidgetSettings, self).__init__(*args, **kwargs)
         self.mounted = False # by default mounting is set to false
 
@@ -178,7 +182,7 @@ class RightWidgetSettings(QFrame):
         self.fname_images.clear()
         self.fname_landmarks.clear()
         self.fname_model.clear()
-        
+
         self.window.left_widget.reset_file_edit_text()
 
     def restart(self):
