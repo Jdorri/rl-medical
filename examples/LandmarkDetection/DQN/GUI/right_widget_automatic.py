@@ -556,7 +556,7 @@ class Plot(QWidget):
 
         self.setLayout(vbox)
     
-    def add_trajectories(x, y):
+    def add_trajectories(self, x, y):
         """
         Add trajectories
 
