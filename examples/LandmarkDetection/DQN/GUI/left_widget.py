@@ -7,50 +7,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-
-################################################################################
-## QuickHelp Widget
-# Used to display quick help on left side
-
-class QuickHelp(QWidget):
-
-    def __init__(self):
-        super().__init__()
-
-        # Initialise text edit
-        self.quick_help = QPlainTextEdit()
-        self.quick_help.setReadOnly(True)
-        self.automatic_mode_help_text()
-
-        # Manage layout
-        vbox = QVBoxLayout()
-        vbox.addWidget(QLabel("<hr />"))
-        vbox.addItem(QSpacerItem(300, 20))
-        vbox.addWidget(QLabel("<i> Quick Help </i>"))
-        vbox.addWidget(self.quick_help)
-        self.setLayout(vbox)
-
-        # Stylesheet
-        self.quick_help.setStyleSheet("background: white")
-    
-    def browse_mode_help_text(self):
-        """
-        Content of browse mode quick help.
-        """
-
-        self.quick_help.clear()
-        with open("GUI/text/quick_browse_text.html", "r") as f:
-            self.quick_help.appendHtml(f.read())
-    
-    def automatic_mode_help_text(self):
-        """
-        Content of automatic mode quick help
-        """
-        self.quick_help.clear()
-
-        with open("GUI/text/quick_automatic_text.html", "r") as f:
-            self.quick_help.appendHtml(f.read())
-
     
 ################################################################################
 ## Left Widget
@@ -142,6 +98,7 @@ class LeftWidgetSettings(QFrame):
         # Note: space is used as placeholder for GUI consistency
         self.space = QLabel("")
         self.space.show()
+        self.space.setStyleSheet("margin-top:30px; margin-bottom: 0px")
         hbox_load.addWidget(self.load_button)
         hbox_load.addWidget(self.clear_button)
         hbox_load.addWidget(self.space)
@@ -352,3 +309,47 @@ class LeftWidgetSettings(QFrame):
 
         # Indicate appropriate path
         self.fname_images = self.fname_images[0]
+
+
+################################################################################
+## QuickHelp Widget
+# Used to display quick help on left side
+
+class QuickHelp(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+        # Initialise text edit
+        self.quick_help = QPlainTextEdit()
+        self.quick_help.setReadOnly(True)
+        self.automatic_mode_help_text()
+
+        # Manage layout
+        vbox = QVBoxLayout()
+        vbox.addWidget(QLabel("<hr />"))
+        vbox.addItem(QSpacerItem(300, 20))
+        vbox.addWidget(QLabel("<i> Quick Help </i>"))
+        vbox.addWidget(self.quick_help)
+        self.setLayout(vbox)
+
+        # Stylesheet
+        self.quick_help.setStyleSheet("background: white")
+    
+    def browse_mode_help_text(self):
+        """
+        Content of browse mode quick help.
+        """
+
+        self.quick_help.clear()
+        with open("GUI/text/quick_browse_text.html", "r") as f:
+            self.quick_help.appendHtml(f.read())
+    
+    def automatic_mode_help_text(self):
+        """
+        Content of automatic mode quick help
+        """
+        self.quick_help.clear()
+
+        with open("GUI/text/quick_automatic_text.html", "r") as f:
+            self.quick_help.appendHtml(f.read())

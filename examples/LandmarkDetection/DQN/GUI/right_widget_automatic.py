@@ -107,24 +107,11 @@ class RightWidgetSettings(QFrame):
         self.run_button = QPushButton(self.START, self)
         self.terminate_button = QPushButton('Terminate', self)
 
-        # Terminal log
-        label_log = QLabel("<i>Logs</i>")
-        label_log.setStyleSheet("margin-top: 10px")
-        self.terminal = QPlainTextEdit(self)
-        self.terminal.setReadOnly(True)
+        # Terminal
+        self.terminal = Terminal()
 
-        # 2D Matplotlib
-        self.fig = plt.figure(figsize=(4, 3))
-        self.ax = self.fig.add_subplot(111)
-        self.canvas = FigureCanvas(self.fig)
-        self.ax.set_xlabel("Steps", fontsize=8)
-        self.ax.set_ylabel("Mean Distance Error", fontsize=8)
-        self.fig.tight_layout()
-        self.ax.tick_params(axis="both", labelsize=6)
-
-        # Trajectory storage
-        self.x = []
-        self.y = []
+        # Plot
+        self.plot = Plot()
 
         ## Layout
         # Task layout
@@ -149,21 +136,12 @@ class RightWidgetSettings(QFrame):
         grid.addWidget(self.speed_slider, 5, 0, 1, 2)
         grid.addLayout(hbox_run, 7, 0, 1, 2)
 
-        self.log = label_log
-        self.separator = QLabel("<hr />")
-
         # Main layout
         vbox = QVBoxLayout()
         vbox.addLayout(grid)
         vbox.addItem(QSpacerItem(300, 20)) # spacer
-        vbox.addWidget(self.separator)
-        vbox.addWidget(self.log)
         vbox.addWidget(self.terminal)
-        vbox.addItem(QSpacerItem(300, 20)) # spacer
-        vbox.addWidget(QLabel("<hr />"))
-        vbox.addItem(QSpacerItem(300, 20))
-        vbox.addWidget(QLabel("<i>Diagnostic Plot</i>"))
-        vbox.addWidget(self.canvas)
+        vbox.addWidget(self.plot)
         vbox.addStretch()
 
         self.setLayout(vbox)
@@ -179,6 +157,9 @@ class RightWidgetSettings(QFrame):
         self.terminate_button.setStyleSheet("background-color:#f44336; color:white")
     
     def clear_custom_load(self):
+        """
+        Clear load custom data selection
+        """
         self.fname_images.clear()
         self.fname_landmarks.clear()
         self.fname_model.clear()
@@ -187,16 +168,17 @@ class RightWidgetSettings(QFrame):
 
     def restart(self):
         """
-        Used to restart the start button
+        Used to restart right widget state
         """
+
         self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
         self.run_button.setText(self.START)
     
-    @pyqtSlot(int)
     def changeValue(self, value):
         """
         Event handler for slider (adjusting agent speed)
         """
+
         if value >= 4:
             self.thread.speed = WorkerThread.FAST
         elif value >= 2:
@@ -204,13 +186,16 @@ class RightWidgetSettings(QFrame):
         else:
             self.thread.speed = WorkerThread.SLOW
     
-    @pyqtSlot()
     def on_clicking_terminate(self):
+        """
+        Event handler to terminate simulation.
+        """
+
         self.thread.terminate = True # give signal to terminate thread
-        self.thread.pause = False
+        self.thread.pause = False # indicate that thread should not be paused
 
         # Print in terminal and restart setup
-        self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Terminate </p></b>")        
+        self.terminal.add_log("blue", "Terminate")
         self.restart()
         
         # Reset simple image viewer and windows
@@ -221,6 +206,7 @@ class RightWidgetSettings(QFrame):
         """
         Determine which radio button task is checked
         """
+
         if self.play_button.isChecked():
             return "Play"
         else:
@@ -230,25 +216,27 @@ class RightWidgetSettings(QFrame):
         """
         Determine which radio button usecase is checked
         """
+
         # If user does not specify specific file to load
         if not self.fname_images.user_define or \
             not self.fname_landmarks.user_define or \
                 not self.fname_model.user_define:
             if self.window.left_widget.brain_button.isChecked():
-                return "BrainMRI"
+                return Window.BRAIN
             elif self.window.left_widget.cardiac_button.isChecked():
-                return "CardiacMRI"
+                return Window.CARDIAC
             else:
-                return "FetalUS"
+                return Window.FETAL
+        
         # Else user specify
         else:
-            return ""
+            return Window.USER_DEFINED
 
-    @pyqtSlot()
     def on_clicking_run(self):
         """
         Event handler (slot) for when the run button is clicked
         """
+
         if self.run_button.text() == self.START:
             # Manage thread
             self.thread.terminate = False
@@ -264,9 +252,9 @@ class RightWidgetSettings(QFrame):
             self.run_button.setStyleSheet("background-color:orange; color:white")
             
             # Get usecase and set paths, print to terminal
-            self.default_use_case = self.which_usecase()
+            self.window.usecase = self.which_usecase()
             self.set_paths()
-            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Start {self.task_value} Mode ({self.default_use_case}) </p></b>")
+            self.terminal.add_log("blue", f"Start {self.task_value} Mode ({self.window.usecase})")
             
             # Run using setup
             self.run_DQN()
@@ -278,7 +266,7 @@ class RightWidgetSettings(QFrame):
             
             # Terminal logs and other details
             self.run_button.setText(self.PAUSE)
-            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Resume </p></b>")
+            self.terminal.add_log("blue", "Resume")
             self.run_button.setStyleSheet("background-color:orange; color:white")
             self.window.statusbar.showMessage("Running")
 
@@ -288,53 +276,35 @@ class RightWidgetSettings(QFrame):
 
             self.run_button.setText(self.RESUME)
             self.run_button.setStyleSheet("background-color:#4CAF50; color:white")
-            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Pause </p></b>")
+            self.terminal.add_log("blue", "Pause")
             self.window.statusbar.showMessage("Paused")
 
     @pyqtSlot(dict)
     def terminal_signal_handler(self, value):
         """
         Used to handle agent signal when it moves.
+
+        :param value: dictionary from medical.py
         """
+
         current_episode = value["current_episode"]
         total_episode = value["total_episode"]
         score = value["score"]
         distance_error = value["distance_error"]
         q_values = value["q_values"]
 
-        # HTML value
-        self.terminal.appendHtml(
-            f"<b> Episode {current_episode}/{total_episode} </b>"
-        )
-
-        self.terminal.appendHtml(
-            f"<i>Score:</i> {score}"
-        )
-
-        self.terminal.appendHtml(
-            f"<i>Distance Error:</i> {distance_error}"
-        )
-
-        self.terminal.appendHtml(
-            f"<i>Q Values:</i> {q_values} <hr />"
-        )
-    
-    def clear_2d(self):
-        """
-        Used to clear 2d trajectories
-        """
-        self.x = []
-        self.y = []
-        self.ax.clear()
-        self.ax.set_xlabel("Steps", fontsize=8)
-        self.ax.set_ylabel("Mean Distance Error", fontsize=8)
-        self.ax.tick_params(axis="both", labelsize=6)
-        self.canvas.draw()
+        self.terminal.terminal_signal_handler(current_episode, total_episode, score, 
+                                    distance_error, q_values)
 
     def check_user_define_usecase(self, filename_model, filename_img, filename_landmark):
         """
-        Check which usecase that the user wants
+        Check which usecase that the user wants (in case of custom data loaded by user)
+
+        :param filename_model: string representing file name for model
+        :param filename_img: string representing file name for image
+        :param filename_landmark: string representing file name for landmark
         """
+
         filename_model = filename_model.split("/")
         filename_img = filename_img.split("/")
         filename_landmark = filename_landmark.split("/")
@@ -343,35 +313,36 @@ class RightWidgetSettings(QFrame):
         if "cardiac" in filename_model[-2] \
             and "cardiac" in filename_img[-1]\
             and "cardiac" in filename_landmark[-1] :
-            return "CardiacMRI"
+            return Window.CARDIAC
         elif "brain" in filename_model[-2] \
             and "brain" in filename_img[-1] \
             and "brain" in filename_landmark[-1]:
-            return "BrainMRI"
+            return Window.BRAIN
         elif "ultrasound" in filename_model[-2] \
             and "fetal" in filename_img[-1] \
             and "fetal" in filename_landmark[-1]:
-            return "FetalUS"
+            return Window.FETAL
         else:
-            return "UserDefined"
+            return Window.USER_DEFINED
     
     def set_paths(self):
         """
         Used to set paths before running the code
         """
+
         redir = '' if self.mounted else 'local/'
 
-        if self.default_use_case == 'BrainMRI':
+        if self.window.usecase == Window.BRAIN:
             # Default MRI
             self.fname_images.name = f"./data/filenames/{redir}brain_train_files_new_paths.txt"
             self.fname_model.name = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
             self.fname_landmarks.name = f"./data/filenames/{redir}brain_train_landmarks_new_paths.txt"
-        elif self.default_use_case == 'CardiacMRI':
+        elif self.window.usecase == Window.CARDIAC:
             # Default cardiac
             self.fname_images.name = f"./data/filenames/{redir}cardiac_train_files_new_paths.txt"
             self.fname_model.name = './data/models/DQN_cardiac_mri/model-600000.data-00000-of-00001'
             self.fname_landmarks.name = f"./data/filenames/{redir}cardiac_train_landmarks_new_paths.txt"
-        elif self.default_use_case == 'FetalUS':
+        elif self.window.usecase == Window.FETAL:
             # Default fetal
             self.fname_images.name = f"./data/filenames/{redir}fetalUS_train_files_new_paths.txt"
             self.fname_model.name = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
@@ -465,3 +436,140 @@ class RightWidgetSettings(QFrame):
                                              saveVideo=self.video_value,
                                              task='eval'),
                                 pred, self.num_files, viewer=self.window)
+
+
+###############################################################################
+## Terminal (Automatic Mode)
+# For logging automatic mode
+
+class Terminal(QWidget):
+    """
+    Class to log commands and other relevant simulation details.
+    """
+
+    def __init__(self):
+
+        super().__init__()
+
+        # Terminal log
+        self.terminal = QPlainTextEdit(self)
+        self.terminal.setReadOnly(True)
+
+        # Widget layout
+        vbox = QVBoxLayout()
+        vbox.addWidget(QLabel("<hr />"))
+        vbox.addItem(QSpacerItem(300, 20)) # spacer
+        vbox.addWidget(QLabel("<i>Logs</i>"))
+        vbox.addWidget(self.terminal)
+
+        self.setLayout(vbox)
+    
+    def terminal_signal_handler(self, current_episode, total_episode, score, 
+                                    distance_error, q_values):
+        """
+        When an episode ends, terminal needs to log details.
+
+        :param current_episode: current episode (int)
+        :param total_episode: total episodes that will be run
+        :param score: score reach at the end of an episode
+        :param distance_error: final error
+        :param q_values: final q_values
+        """
+
+        # HTML value
+        self.terminal.appendHtml(
+            f"<b> Episode {current_episode}/{total_episode} </b>"
+        )
+
+        self.terminal.appendHtml(
+            f"<i>Score:</i> {score}"
+        )
+
+        self.terminal.appendHtml(
+            f"<i>Distance Error:</i> {distance_error}"
+        )
+
+        self.terminal.appendHtml(
+            f"<i>Q Values:</i> {q_values} <hr />"
+        )
+    
+    def add_log(self, color, log):
+        """
+        Appending command to terminal
+
+        :param color: color in either hex numbers, rgb, or string
+        :param log: message to be appended to terminal
+        """
+
+        message = f"<b><p style='color:{color}'> &#36; {log}</p></b>"
+        self.terminal.appendHtml(message)
+
+
+###############################################################################
+## 2D Error Plot
+# Display distance error against steps
+
+class Plot(QWidget):
+    """
+    Class to plot distance error vs steps.
+    """
+
+    def __init__(self):
+        
+        super().__init__()
+
+        # Initialise matplotlib figure
+        self.fig = plt.figure(figsize=(4, 3))
+        self.ax = self.fig.add_subplot(111)
+        self.canvas = FigureCanvas(self.fig)
+        self.ax.set_xlabel("Steps", fontsize=8)
+        self.ax.set_ylabel("Distance Error", fontsize=8)
+        self.fig.tight_layout()
+        self.ax.tick_params(axis="both", labelsize=6)
+
+        # Trajectory storage
+        self.x = []
+        self.y = []
+
+        # Manage layout
+        vbox = QVBoxLayout()
+        vbox.addWidget(QLabel("<hr />"))
+        vbox.addItem(QSpacerItem(300, 20))
+        vbox.addWidget(QLabel("<i>Diagnostic Plot</i>"))
+        vbox.addWidget(self.canvas)
+
+        self.setLayout(vbox)
+    
+    def add_trajectories(x, y):
+        """
+        Add trajectories
+
+        :param x: x value to be added
+        :param y: y value to be added
+        """
+
+        self.x.append(x)
+        self.y.append(y)
+    
+    def clear_2d(self):
+        """
+        Used to clear 2d trajectories
+        """
+
+        self.x = []
+        self.y = []
+        self.ax.clear()
+        self.ax.set_xlabel("Steps", fontsize=8)
+        self.ax.set_ylabel("Distance Error", fontsize=8)
+        self.ax.tick_params(axis="both", labelsize=6)
+        self.canvas.draw()
+    
+    def draw(self):
+        """
+        Draw plots
+        """
+
+        self.ax.plot(self.x, self.y, c="orange")
+        self.canvas.draw()
+    
+

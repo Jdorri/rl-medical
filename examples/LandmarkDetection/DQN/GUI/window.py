@@ -27,6 +27,7 @@ class Window(QMainWindow):
     BRAIN = "BrainMRI"
     CARDIAC = "CardiacMRI"
     FETAL = "FetalUS"
+    USER_DEFINED = "Custom"
     
     # Signal for browse/ manual mode
     # Captures key pressed that will be used to store data for Human-in-the loop
@@ -171,6 +172,10 @@ class Window(QMainWindow):
         self.help.show()
 
     def on_show_quick_help(self, state):
+        """
+        Event handler for toggling quick help.
+        """
+
         if state:
             # Show quick help
             self.left_widget.quick_help.show()
@@ -200,7 +205,6 @@ class Window(QMainWindow):
             self.right_widget.automatic_mode.log.hide()
             self.right_widget.browse_mode.log.hide()
 
-    @pyqtSlot(QEvent)
     def keyPressEvent(self, event):
         """
         Capture and handle keyboard key press events
