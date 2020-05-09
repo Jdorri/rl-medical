@@ -183,26 +183,32 @@ class Window(QMainWindow):
             self.left_widget.quick_help.hide()
     
     def on_show_plot(self, state):
-        # TODO
-        pass
+        """
+        Event handler for toggling plot.
+        """
+
+        if state:
+            # Show plot
+            self.right_widget.automatic_mode.plot.show()
+        else:
+            self.right_widget.automatic_mode.plot.hide()
 
     def on_show_terminal(self, state):
-        # TODO
+        """
+        Event handler toggling terminal.
+        """
+
         if state:
             # Show terminal
             self.right_widget.automatic_mode.terminal.show()
             self.right_widget.browse_mode.terminal.show()
-            self.right_widget.automatic_mode.separator.show()
             self.right_widget.browse_mode.separator.show()
-            self.right_widget.automatic_mode.log.show()
             self.right_widget.browse_mode.log.show()
         else:
             # Dont show terminal
             self.right_widget.automatic_mode.terminal.hide()
             self.right_widget.browse_mode.terminal.hide()
-            self.right_widget.automatic_mode.separator.hide()
             self.right_widget.browse_mode.separator.hide()
-            self.right_widget.automatic_mode.log.hide()
             self.right_widget.browse_mode.log.hide()
 
     def keyPressEvent(self, event):

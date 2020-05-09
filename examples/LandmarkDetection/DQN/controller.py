@@ -82,7 +82,7 @@ class Tab(QFrame):
     BROWSE_MODE = "BROWSE"
 
     def __init__(self):
-        
+
         super().__init__()
 
         # Create tab widget that integrates automatic and browse mode
@@ -169,7 +169,7 @@ class Tab(QFrame):
 
         # Reset right widget
         self.automatic_mode.restart()
-        self.automatic_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Automatic Mode </p></b>")        
+        self.automatic_mode.terminal.add_log("blue", "Automatic Mode")       
 
         # Reset left widget
         self.automatic_mode.window.left_widget.model_file.show()

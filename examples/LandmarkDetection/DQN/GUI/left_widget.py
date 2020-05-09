@@ -113,10 +113,10 @@ class LeftWidgetSettings(QFrame):
         vbox.addWidget(self.advance_title)
         vbox.addWidget(self.img_file)
         vbox.addLayout(hbox_image)
-        vbox.addItem(QSpacerItem(300, 10))
+        vbox.addItem(QSpacerItem(350, 10))
         vbox.addWidget(self.landmark_file)
         vbox.addLayout(hbox_landmark)
-        vbox.addItem(QSpacerItem(300, 10))
+        vbox.addItem(QSpacerItem(350, 10))
         vbox.addWidget(self.model_file)
         vbox.addLayout(hbox_model)
         vbox.addLayout(hbox_load)
@@ -131,7 +131,7 @@ class LeftWidgetSettings(QFrame):
             self.setStyleSheet(f.read())
         self.load_button.setStyleSheet("background: #4CAF50; color: white")
         self.clear_button.setStyleSheet("background: orange; color: white")
-        self.setMaximumWidth(300)
+        self.setMaximumWidth(350)
 
         # Event handler connection
         self.model_file_edit.clicked.connect(self.on_clicking_browse_model)
@@ -248,8 +248,7 @@ class LeftWidgetSettings(QFrame):
 
         # Indicate that user has make a selection
         self.window.right_widget.automatic_mode.fname_model.user_define = True
-        self.window.right_widget.automatic_mode.terminal.appendHtml(
-            f"<b><p style='color:blue'> &#36; Load Model: {filename[-1]} </p></b>")
+        self.window.right_widget.automatic_mode.terminal.add_log("blue", f"Load Model: {filename[-1]}")
 
         # Indicate appropriate path
         self.fname_model = self.fname_model[0]
@@ -272,8 +271,7 @@ class LeftWidgetSettings(QFrame):
 
         # Indicate that user has make a selection (automatic mode)
         self.window.right_widget.automatic_mode.fname_landmarks.user_define = True
-        self.window.right_widget.automatic_mode.terminal.appendHtml(
-            f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
+        self.window.right_widget.automatic_mode.terminal.add_log("blue", f"Load Landmark: {filename[-1]}")
 
         # Indicate that user has make a selection (browse mode)
         self.window.right_widget.browse_mode.fname_landmarks.user_define = True
@@ -300,8 +298,7 @@ class LeftWidgetSettings(QFrame):
 
         # Indicate that user has make a selection
         self.window.right_widget.automatic_mode.fname_images.user_define = True
-        self.window.right_widget.automatic_mode.terminal.appendHtml(
-            f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
+        self.window.right_widget.automatic_mode.terminal.add_log("blue", f"Load Image: {filename[-1]}")
 
         self.window.right_widget.browse_mode.fname_images.user_define = True
         self.window.right_widget.browse_mode.terminal.appendHtml(
@@ -328,7 +325,7 @@ class QuickHelp(QWidget):
         # Manage layout
         vbox = QVBoxLayout()
         vbox.addWidget(QLabel("<hr />"))
-        vbox.addItem(QSpacerItem(300, 20))
+        vbox.addItem(QSpacerItem(350, 20))
         vbox.addWidget(QLabel("<i> Quick Help </i>"))
         vbox.addWidget(self.quick_help)
         self.setLayout(vbox)

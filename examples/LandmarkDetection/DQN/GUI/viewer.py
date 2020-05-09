@@ -196,7 +196,7 @@ class SimpleImageViewer(QWidget):
         self.clear_3d()
         self.canvas.draw()
 
-        self.window.right_widget.automatic_mode.clear_2d()
+        self.window.right_widget.automatic_mode.plot.clear_2d()
 
     def clear_3d(self):
         """
@@ -281,11 +281,10 @@ class SimpleImageViewer(QWidget):
 
             # 2D Trajectory
             if self.window.right_widget.automatic_mode.which_task() != "Play":
-                self.window.right_widget.automatic_mode.x.append(self.cnt)
-                self.window.right_widget.automatic_mode.y.append(self.error)
+                self.window.right_widget.automatic_mode.plot.add_trajectories(self.cnt, self.error)
         else:
             self.clear_3d()
-            self.window.right_widget.automatic_mode.clear_2d()
+            self.window.right_widget.automatic_mode.plot.clear_2d()
 
         self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4", linewidth=1.5)
         self.ax.plot(self.tgt_x,self.tgt_y,self.tgt_z, marker='x', c='green', linewidth=1.5)
@@ -293,8 +292,7 @@ class SimpleImageViewer(QWidget):
         self.canvas.draw()
 
         if self.window.right_widget.automatic_mode.which_task() != "Play":
-            self.window.right_widget.automatic_mode.ax.plot(self.window.right_widget.automatic_mode.x, self.window.right_widget.automatic_mode.y, c="orange")
-            self.window.right_widget.automatic_mode.canvas.draw()
+            self.window.right_widget.automatic_mode.plot.draw()
 
     def set_3d_axes(self, ax, x_lim, y_lim, z_lim):
         """

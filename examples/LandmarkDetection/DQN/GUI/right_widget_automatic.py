@@ -35,6 +35,7 @@ from matplotlib.backends.backend_qt5agg import (
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from GUI.window import Window
 
 
 ###############################################################################
@@ -356,6 +357,12 @@ class RightWidgetSettings(QFrame):
             self.fname_images.name = self.window.left_widget.fname_images
             self.fname_model.name = self.window.left_widget.fname_model
             self.fname_landmarks.name = self.window.left_widget.fname_landmarks
+            # self.fname_images.name = f"./data/filenames/{redir}brain_train_files_new_paths.txt"
+            # self.fname_model.name = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
+            # self.fname_landmarks.name = f"./data/filenames/{redir}brain_train_landmarks_new_paths.txt"
+            # print(self.fname_images.name)
+            # print(self.fname_model.name)
+            # print(self.fname_landmarks.name)
 
             # To tell the program which loader it should use
             self.window.usecase = self.check_user_define_usecase(self.fname_model.name, self.fname_images.name, self.fname_landmarks.name)
@@ -432,7 +439,7 @@ class RightWidgetSettings(QFrame):
         # demo pretrained model one episode at a time
         if self.task_value == 'Play':
             play_n_episodes(get_player(files_list=self.selected_list, viz=0.01,
-                                        data_type=self.default_use_case,
+                                        data_type=self.window.usecase,
                                         saveGif=self.GIF_value,
                                         saveVideo=self.video_value,
                                         task='play'),
@@ -440,7 +447,7 @@ class RightWidgetSettings(QFrame):
         # run episodes in parallel and evaluate pretrained model
         elif self.task_value == 'Evaluation':
             play_n_episodes(get_player(files_list=self.selected_list, viz=0.01,
-                                            data_type=self.default_use_case,
+                                            data_type=self.window.usecase,
                                              saveGif=self.GIF_value,
                                              saveVideo=self.video_value,
                                              task='eval'),
@@ -544,7 +551,7 @@ class Plot(QWidget):
         vbox = QVBoxLayout()
         vbox.addWidget(QLabel("<hr />"))
         vbox.addItem(QSpacerItem(300, 20))
-        vbox.addWidget(QLabel("<i>Diagnostic Plot</i>"))
+        vbox.addWidget(QLabel("<i>Error Plot</i>"))
         vbox.addWidget(self.canvas)
 
         self.setLayout(vbox)
