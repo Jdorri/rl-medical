@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from DQN import get_player, Model
+from RL.DQN import get_player, Model
 
 def warn(*args, **kwargs):
     pass
@@ -15,8 +15,8 @@ import warnings
 warnings.warn = warn
 warnings.simplefilter("ignore", category=PendingDeprecationWarning)
 
-from medical import MedicalPlayer
-from common import play_n_episodes
+from RL.medical import MedicalPlayer
+from RL.common import play_n_episodes
 
 from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         logger, TrainConfig, ModelSaver, PeriodicTrigger,
@@ -25,10 +25,10 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         FullyConnected, PReLU, SimpleTrainer,
                         launch_train_with_config)
 
-from thread import WorkerThread
+from GUI.thread import WorkerThread
 import os
 
-from FilenamesGUI import FilenamesGUI
+from GUI.FilenamesGUI import FilenamesGUI
 from matplotlib.backends.qt_compat import QtCore, QtWidgets
 from matplotlib.backends.backend_qt5agg import (
         FigureCanvas, NavigationToolbar2QT as NavigationToolbar)

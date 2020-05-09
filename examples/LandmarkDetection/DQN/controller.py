@@ -6,9 +6,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from dataReader import *
+from RL.dataReader import *
 
-from DQN import get_viewer_data
+from RL.DQN import get_viewer_data
 
 def warn(*args, **kwargs):
     pass
@@ -17,11 +17,10 @@ import warnings
 warnings.warn = warn
 warnings.simplefilter("ignore", category=PendingDeprecationWarning)
 
-from window import Window
-from right_widget_automatic import RightWidgetSettings
-from right_widget_browse import RightWidgetSettingsBrowseMode
-
-from FilenamesGUI import FilenamesGUI
+from GUI.window import Window
+from GUI.right_widget_automatic import RightWidgetSettings
+from GUI.right_widget_browse import RightWidgetSettingsBrowseMode
+from GUI.FilenamesGUI import FilenamesGUI
 
 
 ###############################################################################

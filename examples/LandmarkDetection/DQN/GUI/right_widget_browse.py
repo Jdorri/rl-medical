@@ -6,9 +6,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from dataReader import *
+from RL.dataReader import *
 
-from DQN import get_player
+from RL.DQN import get_player
 
 def warn(*args, **kwargs):
     pass
@@ -18,11 +18,11 @@ warnings.simplefilter("ignore", category=PendingDeprecationWarning)
 
 import numpy as np
 import pickle
-from thread import WorkerThread
+from GUI.thread import WorkerThread
 from datetime import datetime
 import platform
 
-from FilenamesGUI import FilenamesGUI
+from GUI.FilenamesGUI import FilenamesGUI
 
 
 ###############################################################################

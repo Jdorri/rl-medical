@@ -7,9 +7,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from viewer import SimpleImageViewer
-from left_widget import LeftWidgetSettings
-from application_help import ApplicationHelp
+from GUI.viewer import SimpleImageViewer
+from GUI.left_widget import LeftWidgetSettings
+from GUI.application_help import ApplicationHelp
 
 import numpy as np
 
