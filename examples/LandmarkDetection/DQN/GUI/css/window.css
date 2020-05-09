@@ -1,0 +1,7 @@
+QMenuBar {
+    background:#003E74; color: white; padding: 5px 0 
+}
+
+QMenuBar::item::disabled {
+    color: grey !important;
+}
