@@ -587,5 +587,3 @@ class Plot(QWidget):
 
         self.ax.plot(self.x, self.y, c="orange")
         self.canvas.draw()
-    
-

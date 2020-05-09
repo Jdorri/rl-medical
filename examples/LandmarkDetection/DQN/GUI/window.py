@@ -141,8 +141,13 @@ class Window(QMainWindow):
         show_plot_action.setChecked(True)
         show_plot_action.triggered.connect(self.on_show_plot)
 
+        quick_help_action = QAction("Show Quick Help", self, checkable=True)
+        quick_help_action.setChecked(True)
+        quick_help_action.triggered.connect(self.on_show_quick_help)
+
         view_menu.addAction(show_terminal_action)
         view_menu.addAction(show_plot_action)
+        view_menu.addAction(quick_help_action)
 
         ## Help menu
         help_menu = self.menubar.addMenu("&Help")
@@ -152,12 +157,7 @@ class Window(QMainWindow):
         help_action.setShortcut("Ctrl+H")
         help_action.triggered.connect(self.show_full_help)
 
-        quick_help_action = QAction("Show Quick Help", self, checkable=True)
-        quick_help_action.setChecked(True)
-        quick_help_action.triggered.connect(self.on_show_quick_help)
-
         help_menu.addAction(help_action)
-        help_menu.addAction(quick_help_action)
 
         # Pop-up help menu when application starts
         self.help = ApplicationHelp()
