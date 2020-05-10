@@ -193,7 +193,7 @@ class Window(QMainWindow):
             self.right_widget.browse_mode.plot.show()
         else:
             self.right_widget.automatic_mode.plot.hide()
-            self.right_widget.browse_mode.plot.show()
+            self.right_widget.browse_mode.plot.hide()
 
     def on_show_terminal(self, state):
         """

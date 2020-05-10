@@ -177,11 +177,12 @@ class LeftWidgetSettings(QFrame):
             if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
                 # Save HITL status
                 self.window.right_widget.save_HITL()
-                # self.window.widget.change_layout("BrainMRI")
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
-                self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.widget.canvas.draw()
+
+                # Clear 3d and 2d plot
+                self.window.widget.clear_3d()
+                self.window.right_widget.browse_mode.plot.clear_2d()
 
     def on_clicking_ultrasound(self, enabled):
         """
@@ -193,11 +194,12 @@ class LeftWidgetSettings(QFrame):
             if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
                 # Save HITL status
                 self.window.right_widget.save_HITL()
-                # self.window.widget.change_layout("FetalUS")
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
-                self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.widget.canvas.draw()
+
+                # Clear 3d and 2d plot
+                self.window.widget.clear_3d()
+                self.window.right_widget.browse_mode.plot.clear_2d()
 
     def on_clicking_cardiac(self, enabled):
         """
@@ -208,11 +210,12 @@ class LeftWidgetSettings(QFrame):
             if self.window.right_widget.get_mode() == self.window.right_widget.BROWSE_MODE:
                 # Save HITL status
                 self.window.right_widget.save_HITL()
-                # self.window.widget.change_layout("CardiacMRI")
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
-                self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.widget.canvas.draw()
+
+                # Clear 3d and 2d plot
+                self.window.widget.clear_3d()
+                self.window.right_widget.browse_mode.plot.clear_2d()
 
     def reset_file_edit_text(self):
         """

@@ -211,6 +211,7 @@ class SimpleImageViewer(QWidget):
         self.tgt_z = []
         self.ax.clear()
         self.set_3d_axes(self.ax, self.width, self.height, self.height_x)
+        self.canvas.draw()
 
 
     def draw_image(self, arrs, agent_loc, target=None, rect=None, episode_end=False):

@@ -137,6 +137,9 @@ class Tab(QFrame):
         self.browse_mode.window.widget.canvas.draw()
         self.browse_mode.window.widget.cnt_browse = 0
 
+        # Reset right widget
+        self.browse_mode.plot.clear_2d()
+
         # Reset left widget
         self.browse_mode.window.left_widget.model_file.hide()
         self.browse_mode.window.left_widget.model_file_edit.hide()
