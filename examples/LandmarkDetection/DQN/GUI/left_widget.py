@@ -332,6 +332,7 @@ class QuickHelp(QWidget):
 
         # Stylesheet
         self.quick_help.setStyleSheet("background: white")
+        self.quick_help.setMinimumHeight(200)
     
     def browse_mode_help_text(self):
         """

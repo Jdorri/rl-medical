@@ -160,8 +160,8 @@ class Window(QMainWindow):
         help_menu.addAction(help_action)
 
         # Pop-up help menu when application starts
-        self.help = ApplicationHelp()
-        self.help.show()
+        # self.help = ApplicationHelp()
+        # self.help.show()
 
     def show_full_help(self):
         """

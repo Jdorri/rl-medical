@@ -9,6 +9,7 @@ from PyQt5.QtCore import *
 
 from RL.DQN import get_player, Model
 
+import os
 def warn(*args, **kwargs):
     pass
 import warnings
@@ -26,7 +27,9 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         launch_train_with_config)
 
 from GUI.thread import WorkerThread
-import os
+from GUI.window import Window
+from GUI.terminal import Terminal
+from GUI.plot import Plot
 
 from GUI.FilenamesGUI import FilenamesGUI
 from matplotlib.backends.qt_compat import QtCore, QtWidgets
@@ -35,7 +38,6 @@ from matplotlib.backends.backend_qt5agg import (
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from GUI.window import Window
 
 
 ###############################################################################
@@ -357,12 +359,6 @@ class RightWidgetSettings(QFrame):
             self.fname_images.name = self.window.left_widget.fname_images
             self.fname_model.name = self.window.left_widget.fname_model
             self.fname_landmarks.name = self.window.left_widget.fname_landmarks
-            # self.fname_images.name = f"./data/filenames/{redir}brain_train_files_new_paths.txt"
-            # self.fname_model.name = "./data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001"
-            # self.fname_landmarks.name = f"./data/filenames/{redir}brain_train_landmarks_new_paths.txt"
-            # print(self.fname_images.name)
-            # print(self.fname_model.name)
-            # print(self.fname_landmarks.name)
 
             # To tell the program which loader it should use
             self.window.usecase = self.check_user_define_usecase(self.fname_model.name, self.fname_images.name, self.fname_landmarks.name)
@@ -454,136 +450,3 @@ class RightWidgetSettings(QFrame):
                                 pred, self.num_files, viewer=self.window)
 
 
-###############################################################################
-## Terminal (Automatic Mode)
-# For logging automatic mode
-
-class Terminal(QWidget):
-    """
-    Class to log commands and other relevant simulation details.
-    """
-
-    def __init__(self):
-
-        super().__init__()
-
-        # Terminal log
-        self.terminal = QPlainTextEdit(self)
-        self.terminal.setReadOnly(True)
-
-        # Widget layout
-        vbox = QVBoxLayout()
-        vbox.addWidget(QLabel("<hr />"))
-        vbox.addItem(QSpacerItem(300, 20)) # spacer
-        vbox.addWidget(QLabel("<i>Logs</i>"))
-        vbox.addWidget(self.terminal)
-
-        self.setLayout(vbox)
-    
-    def terminal_signal_handler(self, current_episode, total_episode, score, 
-                                    distance_error, q_values):
-        """
-        When an episode ends, terminal needs to log details.
-
-        :param current_episode: current episode (int)
-        :param total_episode: total episodes that will be run
-        :param score: score reach at the end of an episode
-        :param distance_error: final error
-        :param q_values: final q_values
-        """
-
-        # HTML value
-        self.terminal.appendHtml(
-            f"<b> Episode {current_episode}/{total_episode} </b>"
-        )
-
-        self.terminal.appendHtml(
-            f"<i>Score:</i> {score}"
-        )
-
-        self.terminal.appendHtml(
-            f"<i>Distance Error:</i> {distance_error}"
-        )
-
-        self.terminal.appendHtml(
-            f"<i>Q Values:</i> {q_values} <hr />"
-        )
-    
-    def add_log(self, color, log):
-        """
-        Appending command to terminal
-
-        :param color: color in either hex numbers, rgb, or string
-        :param log: message to be appended to terminal
-        """
-
-        message = f"<b><p style='color:{color}'> &#36; {log}</p></b>"
-        self.terminal.appendHtml(message)
-
-
-###############################################################################
-## 2D Error Plot
-# Display distance error against steps
-
-class Plot(QWidget):
-    """
-    Class to plot distance error vs steps.
-    """
-
-    def __init__(self):
-        
-        super().__init__()
-
-        # Initialise matplotlib figure
-        self.fig = plt.figure(figsize=(4, 3))
-        self.ax = self.fig.add_subplot(111)
-        self.canvas = FigureCanvas(self.fig)
-        self.ax.set_xlabel("Steps", fontsize=8)
-        self.ax.set_ylabel("Distance Error", fontsize=8)
-        self.fig.tight_layout()
-        self.ax.tick_params(axis="both", labelsize=6)
-
-        # Trajectory storage
-        self.x = []
-        self.y = []
-
-        # Manage layout
-        vbox = QVBoxLayout()
-        vbox.addWidget(QLabel("<hr />"))
-        vbox.addItem(QSpacerItem(300, 20))
-        vbox.addWidget(QLabel("<i>Error Plot</i>"))
-        vbox.addWidget(self.canvas)
-
-        self.setLayout(vbox)
-    
-    def add_trajectories(self, x, y):
-        """
-        Add trajectories
-
-        :param x: x value to be added
-        :param y: y value to be added
-        """
-
-        self.x.append(x)
-        self.y.append(y)
-    
-    def clear_2d(self):
-        """
-        Used to clear 2d trajectories
-        """
-
-        self.x = []
-        self.y = []
-        self.ax.clear()
-        self.ax.set_xlabel("Steps", fontsize=8)
-        self.ax.set_ylabel("Distance Error", fontsize=8)
-        self.ax.tick_params(axis="both", labelsize=6)
-        self.canvas.draw()
-    
-    def draw(self):
-        """
-        Draw plots
-        """
-
-        self.ax.plot(self.x, self.y, c="orange")
-        self.canvas.draw()
