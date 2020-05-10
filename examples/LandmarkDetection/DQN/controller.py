@@ -38,6 +38,8 @@ class Controller:
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
         self.testing = False
+        self.app.setWindowIcon(QIcon('images/aladding.png'))
+
 
         # Initialise the right settings tab
         self.right_widget = Tab()
