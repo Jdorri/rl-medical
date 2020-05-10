@@ -1,23 +1,24 @@
-<!-- 
+<!--
 # Simple HTML page for browse mode help.
-# Author: Maleakhi
+# Author: Maleakhi, Jamie
  -->
 
-<h1 style='color:#003E74'> Browse Mode Help </h1><br />
+<h1 style='color:#003E74'> Browse Mode</h1><br />
 
-<p>Browse mode allows simple user interaction with RL agent, 
-    enabling collection of data for HITL experiments.</p><br />
+<p>Browse mode allows users to navigate through the medical image environment. Its also
+    where HITL mode can be turned in order to collect data for experiments.</p><br />
 
-<h2 style='color:#009CBC'>How to Gather Human-in-the-Loop Data?</h2><br />
-<b>1. Load Data</b>: There are two options to load the data: <i>default</i> and
-    <i>custom</i>. To load default data, simply toggle the appropriate radio button (i.e. Brain|Cardiac|Fetal). This will 
-    prepare default image and landmark for the selected use-case. You can also load custom data by uploading your own image and landmark files
-    through <i>Browse</i> buttons. Then press <i>Load</i> to display your files. Please ensure that you select the correct combination of files.
-<br /><b>2. Enable HITL</b> To notify that you want to store HITL data, toggle <i>Enable HITL</i> checkbox. After toggling the checkbox, data (user-interaction)
-    will be stored on appropriate pickle file.
-<br /><b>3. Navigating in HITL mode</b> The task is to move agent towards the target (red dot). 
-    Press <i>Human Actions</i> arrows to navigate until you reach the red dot (Error ~ 0.0). You can control step size
-    using the <i>-</i> and <i>+</i> buttons to reduce or increase step size. Alternatively, navigate by pressing the following keyboard shortcut (w = +y, s = -y, a = -x, d = +x, z = +z, x = -z).
-<br /><b>4. Next Image</b> Press next image to annotate next sequence of image. Alternatively, you can delete previous annotation by clicking <i>Delete Episode</i>.
-<br /><b>5. Save data</b>  Once finished, to save the HITL session, either: (1) close the GUI or (2) click on <i>Enable HITL</i> checkbox again (it will
-    automatically save a pickle file in /data/HITL).
+<h2 style='color:#009CBC'>How to gather HITL data?</h2><br />
+Once Browse mode has been selected, users can additionally chose to enter HITL mode.
+<hr>
+<b>1. Loading data</b>. There are two options to load the data: <i>Default</i> and
+    <i>Custom</i>. To load default data, simply select the radio button from one of the three options. This will
+    prepare default model, image, and landmark data for the selected use-case. You can also load custom data by uploading your own model, image, and landmark files
+    through the <i>Browse</i> buttons. Then press <i>Load</i> to display your files. Please ensure that you select the correct combination of files.
+<br /><b>2. Enable HITL</b>. To notify ALADDIN that you want to store HITL data, toggle the <i>Enable HITL</i> checkbox. After toggling the checkbox, user data will be stored in a time-stamped pickle file.
+<br /><b>3. Navigating in HITL mode</b>. The task is to move towards the desired landmark.
+    Press one of the six <i>Human Actions</i> to navigate through the environment until you reach the landmark. You can control the step size
+    using the <i>-</i> and <i>+</i> buttons to respectively reduce or increase it. Alternatively, navigate by pressing the following keyboard shortcut (w = +y, s = -y, a = -x, d = +x, z = +z, x = -z).
+<br /><b>4. Next image</b>. Press <i>Next Image</i> to annotate the next image in the loaded batch. Alternatively, you can delete the previous annotation by clicking <i>Delete Episode</i>.
+<br /><b>5. Save data</b>. Once finished, to save the HITL session, either: (1) close the GUI, or (2) click on the <i>Enable HITL</i> checkbox again. Either action will
+    automatically save a pickle file in the directory /data/HITL.
