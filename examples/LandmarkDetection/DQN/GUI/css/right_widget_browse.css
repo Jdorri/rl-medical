@@ -1,3 +1,8 @@
+/*
+# CSS file for right widget browse mode
+# Author: Maleakhi 
+ */
+
 QPushButton:disabled {
     background: white;
     color: grey;
