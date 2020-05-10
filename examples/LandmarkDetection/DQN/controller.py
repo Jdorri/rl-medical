@@ -186,7 +186,6 @@ class Tab(QFrame):
         self.automatic_mode.window.left_widget.space.show()
         self.automatic_mode.window.left_widget.quick_help.automatic_mode_help_text()
     
-    @pyqtSlot(int)
     def on_change(self, index):
         """
         Event handler when tab changes
