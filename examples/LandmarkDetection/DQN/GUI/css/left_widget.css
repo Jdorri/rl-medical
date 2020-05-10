@@ -1,0 +1,7 @@
+QPushButton {
+    background: #006EAF; 
+    color: white
+}
+QFrame, QRadioButton {
+    background: #EBEEEE;
+}

@@ -1,17 +1,18 @@
 ################################################################################
 ## Window GUI file used to integrate various widgets 
-# Author: Maleakhi, Alex, Jamie, Faidon
+# Author: Maleakhi, Alex, Jamie, Faidon, Olle, Harry
 ################################################################################
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from viewer import SimpleImageViewer
-from left_widget import LeftWidgetSettings
-from application_help import ApplicationHelp
+from GUI.viewer import SimpleImageViewer
+from GUI.left_widget import LeftWidgetSettings
+from GUI.application_help import ApplicationHelp
 
 import numpy as np
+
 
 ################################################################################
 ## Main Window
@@ -21,22 +22,29 @@ class Window(QMainWindow):
     """
     Window used as the main window for the application which integrate different widgets.
     """
+    
+    # Constant for usecase
+    BRAIN = "BrainMRI"
+    CARDIAC = "CardiacMRI"
+    FETAL = "FetalUS"
+    USER_DEFINED = "Custom"
+    
     # Signal for browse/ manual mode
     # Captures key pressed that will be used to store data for Human-in-the loop
     key_pressed = pyqtSignal(QEvent)
 
     def __init__(self, viewer_param, right_widget=None):
-        super().__init__()
-        self.init_UI(viewer_param, right_widget)
-        self.key_pressed.connect(self.on_key)
+        """
+        Window Constructor
 
-    def init_UI(self, viewer_param, right_widget):
+        :params viewer_param: parameter for SimpleImageViewer
+        :param right_widget: object of type Tab
         """
-        Main UI init element of the GUI.
-        """
+
+        super().__init__()
         # Indication of usecase (data_type)
         # Default: BrainMRI
-        self.usecase = "BrainMRI" # can be BrainMRI, CardiacMRI, or FetalUS
+        self.usecase = Window.BRAIN # can be BrainMRI, CardiacMRI, or FetalUS
 
         # Status Bar
         self.statusbar = self.statusBar()
@@ -73,22 +81,17 @@ class Window(QMainWindow):
 
         # Geometric window position and general setting
         self.showMaximized()
-        self.setWindowTitle('RL Medical GUI')
+        self.setWindowTitle('ALADDIN - Anatomical Landmark Detection Interface')
 
         # Menu Bar
         self.init_menu()
         
         # CSS Styling for windows
-        self.statusbar.setStyleSheet("background:#003E74; color:white")
-        self.setStyleSheet("""
-            QMenuBar {
-                background:#003E74; color: white; padding: 5px 0 
-            }
+        with open("GUI/css/window.css", "r") as f:
+            self.setStyleSheet(f.read())
 
-            QMenuBar::item::disabled {
-                color: grey !important;
-            }
-        """)
+        # Connection with event handlers
+        self.key_pressed.connect(self.on_key)
 
     def init_menu(self):
         """
@@ -113,7 +116,7 @@ class Window(QMainWindow):
         self.load_landmark_action.setShortcut("Ctrl+L")
         self.load_landmark_action.triggered.connect(self.left_widget.on_clicking_browse_landmarks)
 
-        # Exit action in a file
+        # Exit action
         exitAct = QAction('Exit', self)
         exitAct.setShortcut('Ctrl+Q')
         exitAct.setStatusTip('Exit application')
@@ -126,18 +129,25 @@ class Window(QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction(exitAct)
 
-        self.help = ApplicationHelp()
-        self.help.show()
-
-        ## Terminal menu
-        terminal_menu = self.menubar.addMenu("&Terminal")
+        ## View menu
+        view_menu = self.menubar.addMenu("&View")
 
         # Load action
         show_terminal_action = QAction("Show Terminal", self, checkable=True)
         show_terminal_action.setChecked(True)
         show_terminal_action.triggered.connect(self.on_show_terminal)
 
-        terminal_menu.addAction(show_terminal_action)
+        show_plot_action = QAction("Show Error Plot", self, checkable=True)
+        show_plot_action.setChecked(True)
+        show_plot_action.triggered.connect(self.on_show_plot)
+
+        quick_help_action = QAction("Show Quick Help", self, checkable=True)
+        quick_help_action.setChecked(True)
+        quick_help_action.triggered.connect(self.on_show_quick_help)
+
+        view_menu.addAction(show_terminal_action)
+        view_menu.addAction(show_plot_action)
+        view_menu.addAction(quick_help_action)
 
         ## Help menu
         help_menu = self.menubar.addMenu("&Help")
@@ -149,30 +159,54 @@ class Window(QMainWindow):
 
         help_menu.addAction(help_action)
 
+        # Pop-up help menu when application starts
+        # self.help = ApplicationHelp()
+        # self.help.show()
+
     def show_full_help(self):
-        # Will open a new help window
+        """
+        Event handler displaying help window.
+        """
+
         self.help = ApplicationHelp()
         self.help.show()
 
+    def on_show_quick_help(self, state):
+        """
+        Event handler for toggling quick help.
+        """
+
+        if state:
+            # Show quick help
+            self.left_widget.quick_help.show()
+        else:
+            self.left_widget.quick_help.hide()
+    
+    def on_show_plot(self, state):
+        """
+        Event handler for toggling plot.
+        """
+
+        if state:
+            # Show plot
+            self.right_widget.automatic_mode.plot.show()
+            self.right_widget.browse_mode.plot.show()
+        else:
+            self.right_widget.automatic_mode.plot.hide()
+            self.right_widget.browse_mode.plot.hide()
+
     def on_show_terminal(self, state):
+        """
+        Event handler toggling terminal.
+        """
+
         if state:
             # Show terminal
             self.right_widget.automatic_mode.terminal.show()
-            self.right_widget.browse_mode.terminal_duplicate.show()
-            self.right_widget.automatic_mode.separator.show()
-            self.right_widget.browse_mode.separator.show()
-            self.right_widget.automatic_mode.log.show()
-            self.right_widget.browse_mode.log.show()
         else:
             # Dont show terminal
             self.right_widget.automatic_mode.terminal.hide()
-            self.right_widget.browse_mode.terminal_duplicate.hide()
-            self.right_widget.automatic_mode.separator.hide()
-            self.right_widget.browse_mode.separator.hide()
-            self.right_widget.automatic_mode.log.hide()
-            self.right_widget.browse_mode.log.hide()
 
-    @pyqtSlot(QEvent)
     def keyPressEvent(self, event):
         """
         Capture and handle keyboard key press events
@@ -186,6 +220,8 @@ class Window(QMainWindow):
         Different actions for different keyPressEvents.
         Allows the user to move through the image by using arrow keys.
         """
+
+        # Keyboard shortcut for HITL
         if self.right_widget.get_mode() == self.right_widget.BROWSE_MODE and self.right_widget.browse_mode.env:
             if event.key() in {Qt.Key_W, Qt.Key_Up}:
                 self.right_widget.browse_mode.y_action.on_clicking_up()
@@ -215,19 +251,10 @@ class Window(QMainWindow):
         """
         Used to override close event and provide warning when closing application
         """
-        # reply = QMessageBox.question(self, 'Message',
-        #     "Are you sure to quit?", QMessageBox.Yes |
-        #     QMessageBox.No, QMessageBox.Yes)
-        
+
         # Save HITL file
         try:
             if self.right_widget.get_mode() == self.right_widget.BROWSE_MODE:
-                if self.right_widget.browse_mode.HITL and self.right_widget.browse_mode.env:
-                    self.right_widget.browse_mode.save_HITL()
+                self.right_widget.save_HITL()
         except AttributeError:
             pass
-
-        # if reply == QMessageBox.Yes:
-        #     event.accept()
-        # else:
-        #     event.ignore()

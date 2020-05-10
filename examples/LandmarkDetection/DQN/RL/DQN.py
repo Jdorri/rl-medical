@@ -12,13 +12,13 @@ import time
 import argparse
 from collections import deque
 import tensorflow as tf
-from medical import MedicalPlayer, FrameStack
+from RL.medical import MedicalPlayer, FrameStack
 from tensorpack.input_source import QueueInput
 from tensorpack_medical.models.conv3d import Conv3D
 from tensorpack_medical.models.pool3d import MaxPooling3D
-from common import Evaluator, eval_model_multithread, play_n_episodes
-from DQNModel import Model3D as DQNModel
-from expreplay import ExpReplay
+from RL.common import Evaluator, eval_model_multithread, play_n_episodes
+from RL.DQNModel import Model3D as DQNModel
+from RL.expreplay import ExpReplay
 
 from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         logger, TrainConfig, ModelSaver, PeriodicTrigger,
@@ -27,12 +27,13 @@ from tensorpack import (PredictConfig, OfflinePredictor, get_model_loader,
                         FullyConnected, PReLU, SimpleTrainer,
                         launch_train_with_config)
 
-from thread import WorkerThread
+from GUI.thread import WorkerThread
 # from viewer import SimpleImageViewer, Window # This wont work on GPU cluster so uncomment for now
 import pickle
 
 from PyQt5.QtWidgets import QApplication
-from freeze_variables import freeze_variables
+from RL.freeze_variables import freeze_variables
+
 ###############################################################################
 # BATCH SIZE USED IN NATURE PAPER IS 32 - MEDICAL IS 256
 BATCH_SIZE = 48
