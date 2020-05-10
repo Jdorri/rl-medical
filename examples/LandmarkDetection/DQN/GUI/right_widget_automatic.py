@@ -69,6 +69,10 @@ EVAL_EPISODE = 50
 ## Right Widget (Automatic Mode)
 
 class RightWidgetSettings(QFrame):
+    """
+    Class representing right widget for automatic.
+    """
+
     # Constant (indication of simulation state)
     PAUSE = "Pause"
     START = "Start"
@@ -286,7 +290,6 @@ class RightWidgetSettings(QFrame):
             self.terminal.add_log("blue", "Pause")
             self.window.statusbar.showMessage("Paused")
 
-    @pyqtSlot(dict)
     def terminal_signal_handler(self, value):
         """
         Used to handle agent signal when it moves.

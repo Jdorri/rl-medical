@@ -55,6 +55,9 @@ EVAL_EPISODE = 50
 ## Right Widget (Browse Mode)
 
 class RightWidgetSettingsBrowseMode(QFrame):
+    """
+    Class representing right widget for browse mode.
+    """
 
     def __init__(self, *args, **kwargs):
 
@@ -160,7 +163,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.HITL = False
         self.HITL_logger = []
 
-    @pyqtSlot()
     def on_clicking_nextImg(self):
         """
         Event handler for clicking next image
@@ -180,7 +182,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         if self.HITL and np.random.choice(2):
             self.on_clicking_zoomIn()
 
-    @pyqtSlot()
     def on_clicking_HITL(self):
         """ 
         Activating HITL mode gives following actions:
@@ -218,7 +219,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
             self.HITL = not self.HITL
             self.env.HITL_logger.clear()
 
-    @pyqtSlot()
     def on_clicking_HITLDelete(self):
         """
         Helper function to remove lates HITL episode.
@@ -234,7 +234,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
             self.on_clicking_nextImg()
             self.env.HITL_logger.pop()
 
-    @pyqtSlot()
     def on_clicking_zoomIn(self):
         """
         Event handler for zoom in.
@@ -244,7 +243,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
             self.env.adjustMultiScale(higherRes=True)
             self.move_img(-1)
 
-    @pyqtSlot()
     def on_clicking_zoomOut(self):
         """
         Event handler for zoom out.
@@ -480,7 +478,6 @@ class YMove(QFrame):
         self.setMaximumWidth(50)
         self.label.setStyleSheet("border:None")
 
-    @pyqtSlot()
     def on_clicking_up(self):
         """
         Event handler when up arrow or keyboard shortcut is pressed.
@@ -490,7 +487,6 @@ class YMove(QFrame):
             action = 1
             self.right_widget.move_img(action)
 
-    @pyqtSlot()
     def on_clicking_down(self):
         """
         Event handler when down arrow or keyboard shortcut is pressed.
@@ -538,8 +534,6 @@ class XMove(QFrame):
         self.setMaximumWidth(50)
         self.label.setStyleSheet("border:None")
 
-
-    @pyqtSlot()
     def on_clicking_left(self):
         """
         Event handler when left arrow or keyboard shortcut is pressed.
@@ -549,7 +543,6 @@ class XMove(QFrame):
             action = 3 
             self.right_widget.move_img(action)
 
-    @pyqtSlot()
     def on_clicking_right(self):
         """
         Event handler when right arrow or keyboard shortcut is pressed.
@@ -598,7 +591,6 @@ class ZMove(QFrame):
         self.setMaximumWidth(50)
         self.label.setStyleSheet("border:None")
 
-    @pyqtSlot()
     def on_clicking_in(self):
         """
         Event handler to go in the Z direction.
@@ -608,7 +600,6 @@ class ZMove(QFrame):
             action = 0
             self.right_widget.move_img(action)
 
-    @pyqtSlot()
     def on_clicking_out(self):
         """
         Event handler to go in the Z direction.

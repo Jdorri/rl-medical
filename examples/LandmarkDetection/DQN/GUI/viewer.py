@@ -522,7 +522,6 @@ class SimpleImageViewer(QWidget):
 
         return [[1,0],[0,-1],[-1,0],[0,1]]
 
-    @pyqtSlot(dict)
     def agent_signal_handler(self, value):
         """
         Used to handle agent signal when agent moves.
