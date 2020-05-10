@@ -374,10 +374,7 @@ class RightWidgetSettings(QFrame):
         msg.setIcon(QMessageBox.Critical)
 
         # Clean up
-        self.fname_landmarks.clear()
-        self.fname_images.clear()
-        self.fname_model.clear()
-        self.window.left_widget.reset_file_edit_text()
+        self.clear_custom_load()
         self.window.usecase = self.which_usecase()
         self.restart() # restart right widget state
 

@@ -1,0 +1,23 @@
+QPushButton:disabled {
+    background: white;
+    color: grey;
+}
+
+QPushButton{
+    background: #f44336;
+    color: white;
+}
+
+QFrame {
+    background: white;
+}
+
+QCheckBox{
+    background: white
+}
+
+QToolButton {
+    background: white;
+    border: none;
+    color: black !important;
+}
