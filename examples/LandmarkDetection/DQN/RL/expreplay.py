@@ -20,7 +20,7 @@ from tensorpack.utils.concurrency import LoopThread, ShareSessionThread
 
 import os
 import pickle
-from medical import MedicalPlayer
+from RL.medical import MedicalPlayer
 
 __all__ = ['ExpReplay']
 

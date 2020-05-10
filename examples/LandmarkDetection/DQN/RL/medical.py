@@ -27,7 +27,7 @@ import shutil
 import gym
 from gym import spaces
 
-from thread import WorkerThread
+from GUI.thread import WorkerThread
 import pickle
 
 try:
@@ -39,8 +39,8 @@ from tensorpack.utils.utils import get_rng
 from tensorpack.utils.stats import StatCounter
 
 from IPython.core.debugger import set_trace
-from dataReader import *
-from dataReader import fileHITL
+from RL.dataReader import *
+from RL.dataReader import fileHITL
 
 _ALE_LOCK = threading.Lock()
 
