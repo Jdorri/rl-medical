@@ -169,7 +169,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         self.env.reset()
         
         # Reset 2d and 3d plot
-        self.window.widget.clear_3d()
+        self.window.widget.plot_3d.clear_3d()
         self.plot.clear_2d()
         self.window.widget.cnt_browse = 0
         

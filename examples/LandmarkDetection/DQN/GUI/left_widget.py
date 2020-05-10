@@ -164,7 +164,7 @@ class LeftWidgetSettings(QFrame):
         # Reset SimpleImageViewer widget
         self.window.right_widget.browse_mode.set_paths()
         self.window.right_widget.browse_mode.load_img()
-        self.window.widget.clear_3d()
+        self.window.widget.plot_3d.clear_3d()
         self.window.right_widget.browse_mode.plot.clear_2d()
         self.window.widget.cnt_browse = 0
 
@@ -182,7 +182,7 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.load_img()
 
                 # Clear 3d and 2d plot
-                self.window.widget.clear_3d()
+                self.window.widget.plot_3d.clear_3d()
                 self.window.right_widget.browse_mode.plot.clear_2d()
 
     def on_clicking_ultrasound(self, enabled):
@@ -199,7 +199,7 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.load_img()
 
                 # Clear 3d and 2d plot
-                self.window.widget.clear_3d()
+                self.window.widget.plot_3d.clear_3d()
                 self.window.right_widget.browse_mode.plot.clear_2d()
 
     def on_clicking_cardiac(self, enabled):
@@ -215,7 +215,7 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.load_img()
 
                 # Clear 3d and 2d plot
-                self.window.widget.clear_3d()
+                self.window.widget.plot_3d.clear_3d()
                 self.window.right_widget.browse_mode.plot.clear_2d()
 
     def reset_file_edit_text(self):

@@ -133,7 +133,7 @@ class Tab(QFrame):
         # Reset SimpleImageViewer widget (black image)
         self.browse_mode.set_paths()
         self.browse_mode.load_img()
-        self.browse_mode.window.widget.clear_3d()
+        self.browse_mode.window.widget.plot_3d.clear_3d()
         self.browse_mode.window.widget.cnt_browse = 0
 
         # Reset right widget
