@@ -75,31 +75,6 @@ class RightWidgetTester(unittest.TestCase):
         else:
             self.assertEqual(self.m.thread.speed, WorkerThread.MEDIUM)
 
-    # def test_runTerminateButtons(self):
-    #     ''' Check if the run and terminate begin and end the RL loop as expected '''
-    #     # Check run button
-    #     QTest.mouseClick(self.m.run_button, Qt.LeftButton)
-    #     self.assertTrue(self.m.run_button.isChecked())
-    #     self.assertEqual(self.m.run_button.text(), self.m.PAUSE)
-
-    #     # Check pause button pauses thread
-    #     QTest.mouseClick(self.m.run_button, Qt.LeftButton)
-    #     self.assertTrue(self.m.thread.pause)
-    #     self.assertEqual(self.m.run_button.text(), self.m.RESUME)
-
-    #     # Check resume button reverses above
-    #     QTest.mouseClick(self.m.run_button, Qt.LeftButton)
-    #     self.assertTrue(not self.m.thread.pause)
-    #     self.assertEqual(self.m.run_button.text(), self.m.PAUSE)
-
-    #     # Check terminate button kills thread
-    #     QTest.mouseClick(self.m.terminate_button, Qt.LeftButton)
-    #     self.assertTrue(self.m.thread.terminate)
-
-    #     # Check logs displayed correctly
-    #     for msg in ['Terminate', 'Start', 'Pause', 'Resume']:
-    #         self.assertTrue(self.m.terminal.toPlainText().find(msg))
-
 
 class RightWidgetBrowseModeTester(unittest.TestCase):
     ''' Class to perform unit tests on the buttons and functionatlity within 
@@ -110,7 +85,7 @@ class RightWidgetBrowseModeTester(unittest.TestCase):
         self.controller = Controller()
         self.m = self.controller.right_widget.browse_mode
         self.w = self.m.window
-        self.v = self.controller.window.widget
+        self.v = self.controller.window.widget.plot_3d
         self.controller.right_widget.tab_widget.setCurrentIndex(1)      # Change to browse mode
         Controller.allWidgets_setCheckable(self.controller.app)
         
@@ -381,14 +356,6 @@ class LeftWidgetTester(unittest.TestCase):
         self.assertEqual(self.w.fname_model, './data/models/DQN_multiscale' +
             '_brain_mri_point_pc_ROI_45_45_45/model-600000.data-00000-of-00001')
 
-    # def test_checkDefaultData(self):
-    #     ''' Confirm the default case opens brain data (and runs correctly).
-    #     '''
-    #     # Confirm default is on brain by running RL and checking the data type
-    #     QTest.mouseClick(self.m.run_button, Qt.LeftButton)
-    #     self.assertTrue(self.m.fname_images.name.find('brain'))
-    #     QTest.mouseClick(self.m.terminate_button, Qt.LeftButton)
-
     def test_changeDataToggle(self):
         ''' Test to toggling through the data type options changes settings as 
             desired.
@@ -481,5 +448,3 @@ if __name__ == '__main__':
 
     print(test_results)
     print(f'\nTests passed: {list(test_results.values()).count("success")} / {len(test_results)}\n')
-
-    # unittest.main()
