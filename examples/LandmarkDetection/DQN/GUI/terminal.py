@@ -29,7 +29,7 @@ class Terminal(QWidget):
         vbox = QVBoxLayout()
         vbox.addWidget(QLabel("<hr />"))
         vbox.addItem(QSpacerItem(300, 20)) # spacer
-        vbox.addWidget(QLabel("<i>Logs</i>"))
+        vbox.addWidget(QLabel("Logs"))
         vbox.addWidget(self.terminal)
 
         self.setLayout(vbox)

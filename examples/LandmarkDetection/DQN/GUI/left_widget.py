@@ -17,7 +17,7 @@ class LeftWidgetSettings(QFrame):
     Left widget controlling GUI elements settings.
     """
     # Constant
-    DEFAULT_DATA_NOTIFICATION = "Default data selected"
+    DEFAULT_DATA_NOTIFICATION = "<i> Default data selected </i>"
 
     def __init__(self, window):
         """
@@ -30,17 +30,17 @@ class LeftWidgetSettings(QFrame):
         # Window object to access windows components
         self.window = window # Store window object to enable control over windows functionality
         
-        self.title = QLabel("<b> Settings </b>")
+        self.title = QLabel("<b> Data Manager </b>")
 
         ## Default file mode
-        self.simple_title = QLabel("<i> Load Default Data </i>")
+        self.simple_title = QLabel("Default Data")
         self.brain_button = QRadioButton("Brain")
         self.cardiac_button = QRadioButton("Cardiac")
         self.ultrasound_button = QRadioButton("Fetal")
         self.brain_button.setChecked(True)
 
         ## Advance file mode
-        self.advance_title = QLabel("<i> Load Custom Data </i>")
+        self.advance_title = QLabel("Custom Data")
         # Load model settings
         self.model_file = QLabel('Load Model', self)
         self.model_file_edit = QPushButton('Browse', self)
@@ -52,7 +52,7 @@ class LeftWidgetSettings(QFrame):
         self.landmark_file_edit_text = QLabel(LeftWidgetSettings.DEFAULT_DATA_NOTIFICATION)
 
         # Upload image settings
-        self.img_file = QLabel('Upload Image', self)
+        self.img_file = QLabel('Load Image', self)
         self.img_file_edit = QPushButton('Browse', self)
         self.img_file_edit_text = QLabel(LeftWidgetSettings.DEFAULT_DATA_NOTIFICATION)
 
@@ -113,10 +113,10 @@ class LeftWidgetSettings(QFrame):
         vbox.addWidget(self.advance_title)
         vbox.addWidget(self.img_file)
         vbox.addLayout(hbox_image)
-        vbox.addItem(QSpacerItem(350, 10))
+        vbox.addItem(QSpacerItem(300, 10))
         vbox.addWidget(self.landmark_file)
         vbox.addLayout(hbox_landmark)
-        vbox.addItem(QSpacerItem(350, 10))
+        vbox.addItem(QSpacerItem(300, 10))
         vbox.addWidget(self.model_file)
         vbox.addLayout(hbox_model)
         vbox.addLayout(hbox_load)
@@ -131,7 +131,7 @@ class LeftWidgetSettings(QFrame):
             self.setStyleSheet(f.read())
         self.load_button.setStyleSheet("background: #4CAF50; color: white")
         self.clear_button.setStyleSheet("background: orange; color: white")
-        self.setMaximumWidth(350)
+        self.setMaximumWidth(300)
 
         # Event handler connection
         self.model_file_edit.clicked.connect(self.on_clicking_browse_model)
@@ -242,7 +242,7 @@ class LeftWidgetSettings(QFrame):
 
         # Set text to label
         filename = self.fname_model[0].split("/")
-        self.model_file_edit_text.setText(filename[-1])
+        self.model_file_edit_text.setText(f"<i> {filename[-1]} </i>")
 
         # Indicate that user has make a selection
         self.window.right_widget.automatic_mode.fname_model.user_define = True
@@ -265,7 +265,7 @@ class LeftWidgetSettings(QFrame):
             
         # Set text to label
         filename = self.fname_landmarks[0].split("/")
-        self.landmark_file_edit_text.setText(filename[-1])
+        self.landmark_file_edit_text.setText(f"<i> {filename[-1]} </i>")
 
         # Indicate that user has make a selection (automatic mode)
         self.window.right_widget.automatic_mode.fname_landmarks.user_define = True
@@ -290,7 +290,7 @@ class LeftWidgetSettings(QFrame):
 
         # Set text to label
         filename = self.fname_images[0].split("/")
-        self.img_file_edit_text.setText(filename[-1])
+        self.img_file_edit_text.setText(f"<i> {filename[-1]} </i>")
 
         # Indicate that user has make a selection
         self.window.right_widget.automatic_mode.fname_images.user_define = True
@@ -319,8 +319,8 @@ class QuickHelp(QWidget):
         # Manage layout
         vbox = QVBoxLayout()
         vbox.addWidget(QLabel("<hr />"))
-        vbox.addItem(QSpacerItem(350, 20))
-        vbox.addWidget(QLabel("<i> Quick Help </i>"))
+        vbox.addItem(QSpacerItem(300, 20))
+        vbox.addWidget(QLabel("Quick Help"))
         vbox.addWidget(self.quick_help)
         self.setLayout(vbox)
 

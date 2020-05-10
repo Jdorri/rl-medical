@@ -97,13 +97,13 @@ class RightWidgetSettings(QFrame):
         self.fname_model = FilenamesGUI()
 
         # Task
-        self.task = QLabel('<i> Task </i>', self)
+        self.task = QLabel('Task', self)
         self.play_button = QRadioButton("Play")
         self.play_button.setChecked(True)
         self.eval_button = QRadioButton("Evaluation")
 
         # Agent speed
-        label_speed = QLabel("<i> Agent Speed </i>")
+        label_speed = QLabel("Agent Speed")
         self.speed_slider = QSlider(Qt.Horizontal, self)
         self.speed_slider.setMinimum(0)
         self.speed_slider.setMaximum(5)

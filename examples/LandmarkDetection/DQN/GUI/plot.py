@@ -45,7 +45,7 @@ class Plot(QWidget):
         vbox = QVBoxLayout()
         vbox.addWidget(QLabel("<hr />"))
         vbox.addItem(QSpacerItem(300, 20))
-        vbox.addWidget(QLabel("<i>Error Plot</i>"))
+        vbox.addWidget(QLabel("Error Plot"))
         vbox.addWidget(self.canvas)
 
         self.setLayout(vbox)

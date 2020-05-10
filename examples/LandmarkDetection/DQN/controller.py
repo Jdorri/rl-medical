@@ -38,7 +38,7 @@ class Controller:
         self.app = QApplication(sys.argv)
         self.viewer_param = get_viewer_data()
         self.testing = False
-        self.app.setWindowIcon(QIcon('images/aladding.png'))
+        self.app.setWindowIcon(QIcon('images/aladdin.png'))
 
 
         # Initialise the right settings tab
