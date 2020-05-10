@@ -181,8 +181,6 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.right_widget.browse_mode.terminal.appendHtml(
-                    f"<b><p style='color:blue'> &#36; Load BrainMRI </p></b>")        
                 self.window.widget.canvas.draw()
 
     def on_clicking_ultrasound(self, enabled):
@@ -199,8 +197,6 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.right_widget.browse_mode.terminal.appendHtml(
-                    f"<b><p style='color:blue'> &#36; Load FetalUS </p></b>")        
                 self.window.widget.canvas.draw()
 
     def on_clicking_cardiac(self, enabled):
@@ -216,8 +212,6 @@ class LeftWidgetSettings(QFrame):
                 self.window.right_widget.browse_mode.set_paths()
                 self.window.right_widget.browse_mode.load_img()
                 self.window.right_widget.browse_mode.window.widget.clear_3d()
-                self.window.right_widget.browse_mode.terminal.appendHtml(
-                    f"<b><p style='color:blue'> &#36; Load CardiacMRI </p></b>")        
                 self.window.widget.canvas.draw()
 
     def reset_file_edit_text(self):
@@ -275,8 +269,6 @@ class LeftWidgetSettings(QFrame):
 
         # Indicate that user has make a selection (browse mode)
         self.window.right_widget.browse_mode.fname_landmarks.user_define = True
-        self.window.right_widget.browse_mode.terminal.appendHtml(
-            f"<b><p style='color:blue'> &#36; Load Landmark: {filename[-1]} </p></b>")
 
         # Indicate appropriate path
         self.fname_landmarks = self.fname_landmarks[0]
@@ -301,8 +293,6 @@ class LeftWidgetSettings(QFrame):
         self.window.right_widget.automatic_mode.terminal.add_log("blue", f"Load Image: {filename[-1]}")
 
         self.window.right_widget.browse_mode.fname_images.user_define = True
-        self.window.right_widget.browse_mode.terminal.appendHtml(
-            f"<b><p style='color:blue'> &#36; Load Image: {filename[-1]} </p></b>")
 
         # Indicate appropriate path
         self.fname_images = self.fname_images[0]

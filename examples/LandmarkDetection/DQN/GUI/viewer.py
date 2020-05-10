@@ -42,6 +42,7 @@ class SimpleImageViewer(QWidget):
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
         self.window = window
+        self.cnt_browse = 0
 
         # Rotation flag (mainly for fetal)
         self.rotate = False
@@ -217,7 +218,8 @@ class SimpleImageViewer(QWidget):
         Main image drawer function
         """
         cvImg, cvImg_x, cvImg_y = self.get_imgs(arrs)
-        self.arr = cvImg                            #(for testing purposes)
+        self.arr = cvImg     
+        self.cnt_browse += 1                       #(for testing purposes)
 
         bytesPerLine = 3 * self.width
         qImg = QImage(cvImg.data, self.width, self.height, bytesPerLine, QImage.Format_RGB888)
@@ -282,9 +284,14 @@ class SimpleImageViewer(QWidget):
             # 2D Trajectory
             if self.window.right_widget.automatic_mode.which_task() != "Play":
                 self.window.right_widget.automatic_mode.plot.add_trajectories(self.cnt, self.error)
+            
+            if self.window.right_widget.get_mode() == "BROWSE":
+                self.window.right_widget.browse_mode.plot.add_trajectories(self.cnt_browse, self.error)
         else:
             self.clear_3d()
             self.window.right_widget.automatic_mode.plot.clear_2d()
+            self.window.right_widget.browse_mode.plot.clear_2d()
+            self.cnt_browse = 0
 
         self.ax.plot(self.x_traj,self.y_traj,self.z_traj, c="#0091D4", linewidth=1.5)
         self.ax.plot(self.tgt_x,self.tgt_y,self.tgt_z, marker='x', c='green', linewidth=1.5)
@@ -293,6 +300,8 @@ class SimpleImageViewer(QWidget):
 
         if self.window.right_widget.automatic_mode.which_task() != "Play":
             self.window.right_widget.automatic_mode.plot.draw()
+        if self.window.right_widget.get_mode() == "BROWSE":
+            self.window.right_widget.browse_mode.plot.draw()
 
     def set_3d_axes(self, ax, x_lim, y_lim, z_lim):
         """

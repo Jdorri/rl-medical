@@ -135,9 +135,7 @@ class Tab(QFrame):
         self.browse_mode.load_img()
         self.browse_mode.window.widget.clear_3d()
         self.browse_mode.window.widget.canvas.draw()
-
-        # Reset right widget
-        self.browse_mode.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Browse Mode </p></b>")        
+        self.browse_mode.window.widget.cnt_browse = 0
 
         # Reset left widget
         self.browse_mode.window.left_widget.model_file.hide()

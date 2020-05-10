@@ -190,8 +190,10 @@ class Window(QMainWindow):
         if state:
             # Show plot
             self.right_widget.automatic_mode.plot.show()
+            self.right_widget.browse_mode.plot.show()
         else:
             self.right_widget.automatic_mode.plot.hide()
+            self.right_widget.browse_mode.plot.show()
 
     def on_show_terminal(self, state):
         """
@@ -201,15 +203,9 @@ class Window(QMainWindow):
         if state:
             # Show terminal
             self.right_widget.automatic_mode.terminal.show()
-            self.right_widget.browse_mode.terminal.show()
-            self.right_widget.browse_mode.separator.show()
-            self.right_widget.browse_mode.log.show()
         else:
             # Dont show terminal
             self.right_widget.automatic_mode.terminal.hide()
-            self.right_widget.browse_mode.terminal.hide()
-            self.right_widget.browse_mode.separator.hide()
-            self.right_widget.browse_mode.log.hide()
 
     def keyPressEvent(self, event):
         """

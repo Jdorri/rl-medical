@@ -22,6 +22,7 @@ from datetime import datetime
 import platform
 
 from GUI.FilenamesGUI import FilenamesGUI
+from GUI.plot import Plot
 
 
 ###############################################################################
@@ -47,150 +48,6 @@ STEPS_PER_EPOCH = 10000 // UPDATE_FREQ * 10
 EPOCHS_PER_EVAL = 2
 # the number of episodes to run during evaluation
 EVAL_EPISODE = 50
-
-
-###############################################################################
-##  Sub-Widgets
-# Used for agent action
-
-class YMove(QFrame):
-
-    def __init__(self, right_widget):
-        super().__init__()
-        self.right_widget = right_widget # pointer to parent
-
-        # Initialise button
-        self.label = QLabel("<i> Y </i>")
-        self.up_button = QToolButton(self)
-        self.up_button.setArrowType(Qt.UpArrow)
-
-        self.down_button = QToolButton(self)
-        self.down_button.setArrowType(Qt.DownArrow)
-
-        # Setup layout
-        vbox = QVBoxLayout()
-        vbox.setSpacing(10)
-        vbox.addWidget(self.label)
-        vbox.addWidget(self.up_button)
-        vbox.addWidget(self.down_button)
-
-        self.setLayout(vbox)
-
-        # Connection
-        self.up_button.clicked.connect(self.on_clicking_up)
-        self.down_button.clicked.connect(self.on_clicking_down)
-
-        # CSS Styling
-        self.label.setAlignment(Qt.AlignCenter)
-        vbox.setAlignment(Qt.AlignCenter)
-        self.setMaximumWidth(50)
-        self.label.setStyleSheet("border:None")
-
-    @pyqtSlot()
-    def on_clicking_up(self):
-        if self.right_widget.env:
-            action = 1 if self.right_widget.window.usecase != 'FetalUS' else 3
-            self.right_widget.move_img(action)
-
-    @pyqtSlot()
-    def on_clicking_down(self):
-        if self.right_widget.env:
-            action = 4 if self.right_widget.window.usecase != 'FetalUS' else 2
-            self.right_widget.move_img(action)
-
-
-class XMove(QFrame):
-
-    def __init__(self, right_widget):
-        super().__init__()
-        self.right_widget = right_widget # pointer to parent
-
-        # Initialise button
-        self.label = QLabel("<i> X </i>")
-        self.left_button = QToolButton(self)
-        self.left_button.setArrowType(Qt.LeftArrow)
-
-        self.right_button = QToolButton(self)
-        self.right_button.setArrowType(Qt.RightArrow)
-
-        # Setup layout
-        vbox = QVBoxLayout()
-        vbox.setSpacing(10)
-        vbox.addWidget(self.label)
-        vbox.addWidget(self.right_button)
-        vbox.addWidget(self.left_button)
-
-        self.setLayout(vbox)
-
-        # Connection
-        self.left_button.clicked.connect(self.on_clicking_left)
-        self.right_button.clicked.connect(self.on_clicking_right)
-
-        # CSS Styling
-        self.label.setAlignment(Qt.AlignCenter)
-        vbox.setAlignment(Qt.AlignCenter)
-        self.setMaximumWidth(50)
-        self.label.setStyleSheet("border:None")
-
-
-    @pyqtSlot()
-    def on_clicking_left(self):
-        if self.right_widget.env:
-            action = 3 if self.right_widget.window.usecase != 'FetalUS' else 4
-            self.right_widget.move_img(action)
-
-    @pyqtSlot()
-    def on_clicking_right(self):
-        if self.right_widget.env:
-            action = 2 if self.right_widget.window.usecase != 'FetalUS' else 1
-            self.right_widget.move_img(action)
-
-
-class ZMove(QFrame):
-
-    def __init__(self, right_widget):
-        super().__init__()
-        self.right_widget = right_widget # pointer to parent
-
-        # Initialise button
-        self.label = QLabel("<i> Z </i>")
-        self.in_button = QToolButton(self)
-        self.in_button.setArrowType(Qt.UpArrow)
-
-        self.out_button = QToolButton(self)
-        self.out_button.setArrowType(Qt.DownArrow)
-
-        # Setup layout
-        vbox = QVBoxLayout()
-        vbox.setSpacing(10)
-        vbox.addWidget(self.label)
-        vbox.addWidget(self.in_button)
-        vbox.addWidget(self.out_button)
-        # vbox.setAlignment(Qt.AlignCenter)
-
-        self.setLayout(vbox)
-
-        # Connection
-        self.in_button.clicked.connect(self.on_clicking_in)
-        self.out_button.clicked.connect(self.on_clicking_out)
-
-        # CSS Styling
-        self.label.setAlignment(Qt.AlignCenter)
-        vbox.setAlignment(Qt.AlignCenter)
-        self.setMaximumWidth(50)
-        self.label.setStyleSheet("border:None")
-
-    @pyqtSlot()
-    def on_clicking_in(self):
-        if self.right_widget.env:
-            action = 0
-            self.right_widget.move_img(action)
-
-    @pyqtSlot()
-    def on_clicking_out(self):
-        if self.right_widget.env:
-            action = 5
-            self.right_widget.move_img(action)
         
 
 ###############################################################################
@@ -199,16 +56,13 @@ class ZMove(QFrame):
 class RightWidgetSettingsBrowseMode(QFrame):
 
     def __init__(self, *args, **kwargs):
+
         super(RightWidgetSettingsBrowseMode, self).__init__(*args, **kwargs)
-        # Window and thread object
         self.window = None
-        
-        # Mounting by default is false
         self.mounted = False
 
+        ## Initialise widgets
         # Initialise widgets (HITL related)
-        self.terminal = QPlainTextEdit(self)
-        self.terminal.setReadOnly(True)
         self.next_img = QPushButton('Next Image', self)
         self.HITL_mode = QCheckBox('Enable HITL', self)
         self.HITL_mode.setCheckable(True)
@@ -238,6 +92,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
         font.setBold(True)
         self.zoomOutButton.setFont(font)
 
+        # Error plot
+        self.plot = Plot()
+
         # Placeholder for GUI filenames
         self.fname_images = FilenamesGUI()
         self.fname_landmarks = FilenamesGUI()
@@ -262,9 +119,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         hbox_image.addWidget(self.next_img)
         hbox_image.addWidget(self.HITL_delete)
 
-        self.log = QLabel("<i> Logs </i>")
-        self.separator = QLabel("<hr />")
-
         vbox = QVBoxLayout()
         vbox.setSpacing(20)
         vbox.addWidget(QLabel("<i> Human Actions </i>"))
@@ -278,10 +132,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         vbox.addWidget(self.HITL_mode)
         vbox.addItem(QSpacerItem(0,20))
         vbox.addLayout(hbox_image)
-        vbox.addWidget(self.separator)
-        vbox.addItem(QSpacerItem(300, 10)) # spacer
-        vbox.addWidget(self.log)
-        vbox.addWidget(self.terminal)
+        vbox.addWidget(self.plot)
         vbox.addStretch()
 
         self.setLayout(vbox)
@@ -349,8 +200,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
     def on_clicking_nextImg(self):
         self.env.reset()
         self.window.widget.clear_3d()
+        self.window.right_widget.browse_mode.plot.clear_2d()
+        self.window.widget.cnt_browse = 0
         self.move_img(-1)
-        self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Next Image </p></b>")        
 
         # If doing HITL, 50/50 chance for the resultion to start on 2 or 3 (otherwise resolution=2 tends to get negleted)
         if self.HITL and np.random.choice(2):
@@ -373,14 +225,12 @@ class RightWidgetSettingsBrowseMode(QFrame):
             result = self.show_HITL_msg()
 
         if result == QMessageBox.Yes and self.HITL:
-            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Ending HITL mode </p></b>")        
             self.save_HITL()
 
         if result == QMessageBox.Yes and not self.HITL:
             # Activate HITL mode button
             self.HITL_mode.setChecked(True)
             self.HITL_delete.setDisabled(False)
-            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Enable HITL mode </p></b>")        
 
         elif result == QMessageBox.No and self.HITL:
             self.HITL_mode.setChecked(True)
@@ -404,7 +254,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         # Remove the current episode and load a new image
         if result == QMessageBox.Yes:
-            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Delete Episode </p></b>")        
             self.on_clicking_nextImg()
             self.env.HITL_logger.pop()
 
@@ -573,6 +422,148 @@ class RightWidgetSettingsBrowseMode(QFrame):
         with open(path, 'wb') as f:
             pickle.dump(self.env.HITL_logger, f)
         
-            self.terminal.appendHtml(f"<b><p style='color:blue'> &#36; Saving HITL pickle </p></b>")        
+
+###############################################################################
+##  Sub-Widgets
+# Used for agent action
+
+class YMove(QFrame):
+
+    def __init__(self, right_widget):
+        super().__init__()
+        self.right_widget = right_widget # pointer to parent
+
+        # Initialise button
+        self.label = QLabel("<i> Y </i>")
+        self.up_button = QToolButton(self)
+        self.up_button.setArrowType(Qt.UpArrow)
+
+        self.down_button = QToolButton(self)
+        self.down_button.setArrowType(Qt.DownArrow)
+
+        # Setup layout
+        vbox = QVBoxLayout()
+        vbox.setSpacing(10)
+        vbox.addWidget(self.label)
+        vbox.addWidget(self.up_button)
+        vbox.addWidget(self.down_button)
+
+        self.setLayout(vbox)
+
+        # Connection
+        self.up_button.clicked.connect(self.on_clicking_up)
+        self.down_button.clicked.connect(self.on_clicking_down)
+
+        # CSS Styling
+        self.label.setAlignment(Qt.AlignCenter)
+        vbox.setAlignment(Qt.AlignCenter)
+        self.setMaximumWidth(50)
+        self.label.setStyleSheet("border:None")
+
+    @pyqtSlot()
+    def on_clicking_up(self):
+        if self.right_widget.env:
+            action = 1 if self.right_widget.window.usecase != 'FetalUS' else 3
+            self.right_widget.move_img(action)
+
+    @pyqtSlot()
+    def on_clicking_down(self):
+        if self.right_widget.env:
+            action = 4 if self.right_widget.window.usecase != 'FetalUS' else 2
+            self.right_widget.move_img(action)
+
+
+class XMove(QFrame):
+
+    def __init__(self, right_widget):
+        super().__init__()
+        self.right_widget = right_widget # pointer to parent
+
+        # Initialise button
+        self.label = QLabel("<i> X </i>")
+        self.left_button = QToolButton(self)
+        self.left_button.setArrowType(Qt.LeftArrow)
+
+        self.right_button = QToolButton(self)
+        self.right_button.setArrowType(Qt.RightArrow)
+
+        # Setup layout
+        vbox = QVBoxLayout()
+        vbox.setSpacing(10)
+        vbox.addWidget(self.label)
+        vbox.addWidget(self.right_button)
+        vbox.addWidget(self.left_button)
+
+        self.setLayout(vbox)
+
+        # Connection
+        self.left_button.clicked.connect(self.on_clicking_left)
+        self.right_button.clicked.connect(self.on_clicking_right)
+
+        # CSS Styling
+        self.label.setAlignment(Qt.AlignCenter)
+        vbox.setAlignment(Qt.AlignCenter)
+        self.setMaximumWidth(50)
+        self.label.setStyleSheet("border:None")
+
+
+    @pyqtSlot()
+    def on_clicking_left(self):
+        if self.right_widget.env:
+            action = 3 if self.right_widget.window.usecase != 'FetalUS' else 4
+            self.right_widget.move_img(action)
+
+    @pyqtSlot()
+    def on_clicking_right(self):
+        if self.right_widget.env:
+            action = 2 if self.right_widget.window.usecase != 'FetalUS' else 1
+            self.right_widget.move_img(action)
+
+
+class ZMove(QFrame):
+
+    def __init__(self, right_widget):
+        super().__init__()
+        self.right_widget = right_widget # pointer to parent
+
+        # Initialise button
+        self.label = QLabel("<i> Z </i>")
+        self.in_button = QToolButton(self)
+        self.in_button.setArrowType(Qt.UpArrow)
+
+        self.out_button = QToolButton(self)
+        self.out_button.setArrowType(Qt.DownArrow)
+
+        # Setup layout
+        vbox = QVBoxLayout()
+        vbox.setSpacing(10)
+        vbox.addWidget(self.label)
+        vbox.addWidget(self.in_button)
+        vbox.addWidget(self.out_button)
+        # vbox.setAlignment(Qt.AlignCenter)
+
+        self.setLayout(vbox)
+
+        # Connection
+        self.in_button.clicked.connect(self.on_clicking_in)
+        self.out_button.clicked.connect(self.on_clicking_out)
+
+        # CSS Styling
+        self.label.setAlignment(Qt.AlignCenter)
+        vbox.setAlignment(Qt.AlignCenter)
+        self.setMaximumWidth(50)
+        self.label.setStyleSheet("border:None")
+
+    @pyqtSlot()
+    def on_clicking_in(self):
+        if self.right_widget.env:
+            action = 0
+            self.right_widget.move_img(action)
+
+    @pyqtSlot()
+    def on_clicking_out(self):
+        if self.right_widget.env:
+            action = 5
+            self.right_widget.move_img(action)
 
         
