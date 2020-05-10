@@ -295,7 +295,7 @@ class SimpleImageViewer(QWidget):
         self.plot_3d.draw()
         
         # Plot 2D plots
-        if self.window.right_widget.automatic_mode.which_task() != "Play":
+        if self.window.right_widget.automatic_mode.which_task() != "Play" and (self.error != 0):
             self.window.right_widget.automatic_mode.plot.draw()
         if self.window.right_widget.get_mode() == "BROWSE":
             self.window.right_widget.browse_mode.plot.draw()
