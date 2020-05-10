@@ -69,6 +69,7 @@ class LeftWidgetSettings(QFrame):
 
         # Quick help
         self.quick_help = QuickHelp()
+        self.quick_help.hide() # by default hide
         
         ## Manage layout
         # Default data settings layout

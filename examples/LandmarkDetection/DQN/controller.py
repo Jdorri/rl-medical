@@ -129,6 +129,12 @@ class Tab(QFrame):
         Reset and setup browse mode (useful for setup when tab changes).
         """
 
+        # Reset data
+        self.browse_mode.clear_custom_load()
+        self.automatic_mode.clear_custom_load()
+        self.browse_mode.window.left_widget.space.hide()
+        self.browse_mode.window.load_model_action.setEnabled(False)
+
         # Manage thread flags
         self.automatic_mode.thread.terminate = True
             
@@ -147,12 +153,6 @@ class Tab(QFrame):
         self.browse_mode.window.left_widget.model_file_edit_text.hide()
         self.browse_mode.window.left_widget.load_button.show()
         self.browse_mode.window.left_widget.quick_help.browse_mode_help_text()
-
-        # Reset data
-        self.browse_mode.clear_custom_load()
-        self.automatic_mode.clear_custom_load()
-        self.browse_mode.window.left_widget.space.hide()
-        self.browse_mode.window.load_model_action.setEnabled(False)
     
     def setup_automatic(self):
         """
@@ -161,6 +161,11 @@ class Tab(QFrame):
         
         # Save HITL status
         self.save_HITL()
+
+        # Reset data
+        self.browse_mode.clear_custom_load()
+        self.automatic_mode.clear_custom_load()
+        self.automatic_mode.window.load_model_action.setEnabled(True)
 
         # Manage thread flags
         self.automatic_mode.thread.terminate = False
@@ -180,11 +185,6 @@ class Tab(QFrame):
         self.automatic_mode.window.left_widget.load_button.hide()
         self.automatic_mode.window.left_widget.space.show()
         self.automatic_mode.window.left_widget.quick_help.automatic_mode_help_text()
-            
-        # Reset data
-        self.browse_mode.clear_custom_load()
-        self.automatic_mode.clear_custom_load()
-        self.automatic_mode.window.load_model_action.setEnabled(True)
     
     @pyqtSlot(int)
     def on_change(self, index):

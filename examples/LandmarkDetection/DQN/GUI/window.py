@@ -97,6 +97,7 @@ class Window(QMainWindow):
         """
         Used to initialise components related to menu bar.
         """
+
         # Menubar
         self.menubar = self.menuBar()
 
@@ -142,7 +143,7 @@ class Window(QMainWindow):
         show_plot_action.triggered.connect(self.on_show_plot)
 
         quick_help_action = QAction("Show Quick Help", self, checkable=True)
-        quick_help_action.setChecked(True)
+        quick_help_action.setChecked(False)
         quick_help_action.triggered.connect(self.on_show_quick_help)
 
         view_menu.addAction(show_terminal_action)
@@ -160,8 +161,8 @@ class Window(QMainWindow):
         help_menu.addAction(help_action)
 
         # Pop-up help menu when application starts
-        # self.help = ApplicationHelp()
-        # self.help.show()
+        self.help = ApplicationHelp()
+        self.help.show()
 
     def show_full_help(self):
         """
@@ -170,7 +171,7 @@ class Window(QMainWindow):
 
         self.help = ApplicationHelp()
         self.help.show()
-
+    
     def on_show_quick_help(self, state):
         """
         Event handler for toggling quick help.
@@ -211,6 +212,7 @@ class Window(QMainWindow):
         """
         Capture and handle keyboard key press events
         """
+
         super().keyPressEvent(event)
         self.key_pressed.emit(event)
 
