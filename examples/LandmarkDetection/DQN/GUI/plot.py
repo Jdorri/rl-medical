@@ -25,7 +25,7 @@ class Plot(QWidget):
     """
 
     def __init__(self):
-        
+
         super().__init__()
 
         # Initialise matplotlib figure
@@ -45,11 +45,11 @@ class Plot(QWidget):
         vbox = QVBoxLayout()
         vbox.addWidget(QLabel("<hr />"))
         vbox.addItem(QSpacerItem(300, 20))
-        vbox.addWidget(QLabel("Error Plot"))
+        vbox.addWidget(QLabel("Mean Error"))
         vbox.addWidget(self.canvas)
 
         self.setLayout(vbox)
-    
+
     def add_trajectories(self, x, y):
         """
         Add trajectories
@@ -60,7 +60,7 @@ class Plot(QWidget):
 
         self.x.append(x)
         self.y.append(y)
-    
+
     def clear_2d(self):
         """
         Used to clear 2d trajectories
@@ -73,7 +73,7 @@ class Plot(QWidget):
         self.ax.set_ylabel("Distance Error", fontsize=8)
         self.ax.tick_params(axis="both", labelsize=6)
         self.canvas.draw()
-    
+
     def draw(self):
         """
         Draw plots
