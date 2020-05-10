@@ -81,7 +81,7 @@ class Window(QMainWindow):
 
         # Geometric window position and general setting
         self.showMaximized()
-        self.setWindowTitle('ALADDIN - Anatomical Landmark Detection Interface')
+        self.setWindowTitle('ALADDIN - Anatomical Landmark Detection and Demonstration Interface')
 
         # Menu Bar
         self.init_menu()

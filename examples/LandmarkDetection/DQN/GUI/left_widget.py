@@ -59,7 +59,7 @@ class LeftWidgetSettings(QFrame):
         # Logo settings
         self.logo = QLabel()
         pixmap_logo = QPixmap("./images/image.png")
-        pixmap_logo = pixmap_logo.scaledToHeight(50)
+        pixmap_logo = pixmap_logo.scaledToHeight(40)
         self.logo.setPixmap(pixmap_logo)
 
         # Load and clear button (for custom data)
