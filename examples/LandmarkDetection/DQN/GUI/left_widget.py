@@ -165,6 +165,8 @@ class LeftWidgetSettings(QFrame):
         self.window.right_widget.browse_mode.set_paths()
         self.window.right_widget.browse_mode.load_img()
         self.window.widget.clear_3d()
+        self.window.right_widget.browse_mode.plot.clear_2d()
+        self.window.widget.cnt_browse = 0
 
     def on_clicking_brain(self, enabled):
         """

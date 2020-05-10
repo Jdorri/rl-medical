@@ -258,7 +258,6 @@ class RightWidgetSettingsBrowseMode(QFrame):
         """
         Load appropriate image to display on viewer object.
         """
-
         try:
             self.selected_list = [self.fname_images, self.fname_landmarks]
             self.env = get_player(files_list=self.selected_list, viz=0.01,
@@ -268,10 +267,9 @@ class RightWidgetSettingsBrowseMode(QFrame):
             self.env.stepManual(act=-1, viewer=self.window)
             self.env.display()
         except:
-            # Warn userr about error, set default data, load default data
+            # Warn user about error, set default data, load default data
             self.error_message_box()
             self.set_paths()
-            self.load_img()
     
     def clear_custom_load(self):
         """
