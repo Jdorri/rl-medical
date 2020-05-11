@@ -39,6 +39,11 @@ class LeftWidgetSettings(QFrame):
         self.ultrasound_button = QRadioButton("Fetal")
         self.brain_button.setChecked(True)
 
+        # Disable cardiac and ultrasound since data is private
+        # For demo purposes we won't disable
+        # self.cardiac_button.setEnabled(False)
+        # self.ultrasound_button.setEnabled(False)
+
         ## Advance file mode
         self.advance_title = QLabel("Custom Data")
         # Load model settings
