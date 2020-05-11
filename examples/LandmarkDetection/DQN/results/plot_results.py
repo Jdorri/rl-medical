@@ -12,7 +12,7 @@ import seaborn as sns; sns.set()
 
 ############################################################################################################
 # Step 0 - Choose paths to plot
-filename = "./results/eval_logs/log_eval_BrainMRI.csv"
+filename = "./results/eval_logs/logs_eval_CardiacMRI_TL2.csv"
 model_name = ""
 model_path = ""
 checkpoint = ""
@@ -69,7 +69,7 @@ for model in df_complete.model_name.unique():
                                 df_check.std()['distance_error']]
         entry += 1
 
-df_final = df_summary[df_summary['checkpoint']==575000]
+df_final = df_summary[df_summary['checkpoint']==600000]
 print(df_final[['model_name', 'checkpoint', 'mean_distance_error', 'std_distance_error']])        
 
 ############################################################################################################
@@ -84,7 +84,7 @@ ax = sns.lineplot(x="checkpoint", y="distance_error",
 #                 # hue="std_distance_error", style="std_distance_error",
 #                  markers=True, dashes=False, data=df_summary)
 # control x and y limits figsize=(10,6)
-plt.ylim(0, 10)
+plt.ylim(0, 12)
 plt.xlim(0, None)
-plt.savefig('results/plots/fetal_all_results.png', dpi=500)
+# plt.savefig('results/plots/cardiac_TL1_results.png', dpi=500)
 plt.show()

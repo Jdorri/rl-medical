@@ -156,7 +156,7 @@ def get_config(files_list, data_type, trainable_variables):
         batch_size=BATCH_SIZE,
         memory_size=MEMORY_SIZE,
         init_memory_size=INIT_MEMORY_SIZE,
-        init_exploration=0.6, #0.0
+        init_exploration=0.8, #0.0
         #How my epsilon greedy steps to take before commiting to memory
         #An idea to encorporate the pre-training phase is to schedule the
         # the agent only to start taking steps after x amount of mini_batch
@@ -227,6 +227,16 @@ def get_viewer_data():
 
     return viewer_param
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 ###############################################################################
 ###############################################################################
 
@@ -258,7 +268,7 @@ if __name__ == '__main__':
                         default='train_log')
     parser.add_argument('--name', help='name of current experiment for logs',
                         default='experiment_1')
-    parser.add_argument('--HITL', help='perform HITL experiment', default=True)
+    parser.add_argument('--HITL', help='perform HITL experiment', default=False, type=str2bool)
 
     parser.add_argument('--directory', help='file name to store evaluation results',
                         default=None)                        
