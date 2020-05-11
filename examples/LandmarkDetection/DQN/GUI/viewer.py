@@ -110,7 +110,7 @@ class SimpleImageViewer(QWidget):
         self.color_t = QColor(200, 100, 100)
         self.color_e = QColor(250, 250, 250)
         self.size_e = 18
-        self.line_width = 1
+        self.line_width = 2
     
     def change_layout(self, usecase_after):
         """
