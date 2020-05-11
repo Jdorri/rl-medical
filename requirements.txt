@@ -6,3 +6,6 @@ opencv-python
 pillow
 gym
 SimpleITK
+PyQt5
+ipython
+matplotlib
