@@ -1,5 +1,5 @@
 ################################################################################
-## Script to plot evaluation results from multiple models
+## Script to plot evaluation results from all model checkpoints during training
 # Author: Faidon
 ################################################################################
 
@@ -12,7 +12,7 @@ import seaborn as sns; sns.set()
 
 ############################################################################################################
 # Step 0 - Choose paths to plot
-filename = "./results/eval_logs/logs_eval_CardiacMRI_TL2.csv"
+filename = "./results/eval_logs/logs_eval_CardiacMRI_TL3.csv"
 model_name = ""
 model_path = ""
 checkpoint = ""
@@ -84,7 +84,7 @@ ax = sns.lineplot(x="checkpoint", y="distance_error",
 #                 # hue="std_distance_error", style="std_distance_error",
 #                  markers=True, dashes=False, data=df_summary)
 # control x and y limits figsize=(10,6)
-plt.ylim(0, 12)
+plt.ylim(0, 20)
 plt.xlim(0, None)
-# plt.savefig('results/plots/cardiac_TL1_results.png', dpi=500)
+# plt.savefig('results/plots/cardiac_TL2_results.png', dpi=500)
 plt.show()

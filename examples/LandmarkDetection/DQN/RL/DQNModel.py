@@ -181,10 +181,9 @@ class Model3D(ModelDesc):
         cost = tf.losses.huber_loss(target, pred_action_value,
                                     reduction=tf.losses.Reduction.MEAN)
 
-###############################################################################
-# HITL UPDATE: Margin classification loss
-# This can only be calculated on the Human generated samples. Therefore, I
-# think that we need a flag. Not too bad to implement.
+        ###############################################################################
+        # HITL UPDATE: Margin classification loss
+        # This can only be calculated on the Human generated samples. 
         # Q(s,A_E) (The Q value of the action that was take by the human in that state)
         action_value_1 = tf.multiply(self.predict_value, self.action_onehot, name='action_value_1')
         tar = tf.reduce_sum(action_value_1, 1)
