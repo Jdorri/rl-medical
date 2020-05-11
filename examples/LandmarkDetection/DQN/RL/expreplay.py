@@ -135,22 +135,17 @@ class HumanDemReplayMemory(ReplayMemory):
         """
         ## Path for GPU cluster ##
         directory = "Documents/rl-medical/examples/LandmarkDetection/DQN/data/HITL"
-        # TODO directory needs to be flexible for pulling images
+        # Directory needs for pulling images
         image_directory = "/vol/project/2019/545/g1954503/aeg19/Fetal_US/"
         train_paths = "/vol/biomedic/users/aa16914/shared/data/RL_data/fetalUS_train_files_new_paths.txt"
-        ## Paths for local testing ##
-        # directory = "./data/HITL"
-        # image_directory = '/Volumes/project/2019/545/g1954503/aeg19/Brain_MRI'
-        # train_paths = "./brain_train_files_new_paths.txt"
-        ## Temporary fix to exclude testing images ##
+        ## Exclude testing images ##
         allowed_images = []
         with open(train_paths) as f:
             for line in f.readlines():
                 allowed_images.append((line.split("/")[-1]).split('.')[0])
         total_images = 0
         used_images = 0
-        ##
-        # Loop 1: Loops through all log files in the directory
+        ## Loop 1: Loops through all log files in the directory
         for filename in os.listdir(directory):
             if (filename.endswith(".pickle") or filename.endswith(".p")) and "FetalUS" in filename:
                 log_file = os.path.join(directory, filename)
