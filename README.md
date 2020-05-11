@@ -1,45 +1,46 @@
-# RL-Medical
+# **A**natomical **L**andmark **D**etection and **D**emonstration **I**nterface
 
-Deep Reinforcement Learning (DRL) agents applied to medical images
+*ALADDIN* is a platform offering automated solutions for the detection of human anatomical landmarks using Reinforcement Learning (RL) complete with a unified visualisation suite. *ALADDIN* is a tool that can be used by medical professional within image analysis or for a wide range of tasks by machine learning researchers.  
 
-## Examples
+<p style='color:#003E74'>Please visit main directory (examples/LandmarkDetection/DQN) after installation and follow Run Instruction to run ALADDIN.</p>
 
-- [Landmark detection using different DQN variants](examples/LandmarkDetection/DQN)
+**Main Directory**: [Landmark detection using different DQN variants](examples/LandmarkDetection/DQN)
 
 ## Installation
 
 ### Dependencies
-
-tensorpack-medical requires:
-
-+ Python=3.6
++ Python=3.8
++ [cycler=0.10.0](https://pypi.org/project/Cycler/)
 + [tensorflow-gpu=1.14.0](https://pypi.org/project/tensorflow-gpu/)
 + [tensorpack=0.9.5](https://github.com/tensorpack/tensorpack)
 + [opencv-python](https://pypi.org/project/opencv-python/)
 + [pillow](https://pypi.org/project/Pillow/)
 + [gym](https://pypi.org/project/gym/)
 + [SimpleITK](https://pypi.org/project/SimpleITK/)
++ [PyQt5](https://pypi.org/project/PyQt5/)
++ [ipython](https://pypi.org/project/ipython/)
++ [matplotlib](https://pypi.org/project/matplotlib/)
+
+### Installation Procedure
+Follow the following steps (in order) to install required dependencies.
+1. ``` pip install -r requirements.txt ```
+2. ``` pip install -U git+https://github.com/amiralansary/rl-medical.git ```
 
 
-### Install the libraries in the environment by launching the following command (note: Uninstall relevant libraries if downgrade required):
-```shell script
-pip3 install -r requirements.txt
-```
-
-### User installation
-```
-pip install -U git+https://github.com/amiralansary/rl-medical.git
-```
-
-## Development
-
-New contributors of any experience level are very welcomed
-
-### Source code
-You can clone the latest version of the source code with the command::
+### Legacy Code
+This project is forked from our supervisor legacy repository available on the following link:
 ```
 https://github.com/amiralansary/rl-medical.git
 ```
+
+## Authors
+- **Alexander Gaskell**: aeg19@imperial.ac.uk
+- **Maleakhi A. Wijaya**: maw219@imperial.ac.uk
+- **Faidon Mitzalis**: fm1710@imperial.ac.uk
+- **Olle Nilsson**: oen19@imperial.ac.uk
+- **Harry Coppock**:
+hgc19@imperial.ac.uk
+- **James Dorricott**: jd3114@imperial.ac.uk
 
 ## Citation
 
