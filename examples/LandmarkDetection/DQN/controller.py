@@ -107,7 +107,7 @@ class Tab(QFrame):
         self.tab_widget.currentChanged.connect(self.on_change)
 
         # Manage responsive design
-        self.setMaximumWidth(400)
+        self.setMaximumWidth(350)
         self.setStyleSheet("background:#EBEEEE")
 
         # Flag for unit testing
