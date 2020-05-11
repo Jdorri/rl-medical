@@ -62,11 +62,11 @@ class SimpleImageViewer(QWidget):
 
         # Initialise images with labels
         self.img = QPixmap(qImg)
-        self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        self.img = self.img.scaled(350, 350, QtCore.Qt.KeepAspectRatio)
         self.img_x = QPixmap(qImg_x)
-        self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        self.img_x = self.img_x.scaled(350, 350, QtCore.Qt.KeepAspectRatio)
         self.img_y = QPixmap(qImg_y)
-        self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+        self.img_y = self.img_y.scaled(350, 350, QtCore.Qt.KeepAspectRatio)
 
         self.label_img = QLabel()
         self.label_img.setPixmap(self.img)
@@ -139,9 +139,9 @@ class SimpleImageViewer(QWidget):
             grid.addWidget(self.plot_3d, 1, 1)
 
             # Set min size
-            self.label_img.setMinimumSize(400, 400)
-            self.label_img_x.setMinimumSize(400, 400)
-            self.label_img_y.setMinimumSize(400, 400)
+            self.label_img.setMinimumSize(350, 350)
+            self.label_img_x.setMinimumSize(350, 350)
+            self.label_img_y.setMinimumSize(350, 350)
 
             return grid
         else:
@@ -152,9 +152,9 @@ class SimpleImageViewer(QWidget):
             grid.addWidget(self.plot_3d, 0, 1)
 
             # Set min size
-            self.label_img.setMinimumSize(400, 400)
-            self.label_img_x.setMinimumSize(800, 200)
-            self.label_img_y.setMinimumSize(800, 200)
+            self.label_img.setMinimumSize(350, 350)
+            self.label_img_x.setMinimumSize(700, 175)
+            self.label_img_y.setMinimumSize(700, 175)
 
             return grid
 
@@ -187,13 +187,13 @@ class SimpleImageViewer(QWidget):
 
         # Scale the image accordingly depending on usecase
         if self.window.usecase != self.window.CARDIAC:
-            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-            self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-            self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img = self.img.scaled(350, 350, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(350, 350, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(350, 350, QtCore.Qt.KeepAspectRatio)
         else:
-            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-            self.img_x = self.img_x.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
-            self.img_y = self.img_y.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
+            self.img = self.img.scaled(350, 350, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(600, 175, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(600, 175, QtCore.Qt.KeepAspectRatio)
 
         # Set pixmap image
         self.label_img.setPixmap(self.img)
@@ -256,13 +256,13 @@ class SimpleImageViewer(QWidget):
 
         ## Set image that has been drawn
         if self.window.usecase != self.window.CARDIAC:
-            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-            self.img_x = self.img_x.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-            self.img_y = self.img_y.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
+            self.img = self.img.scaled(350, 350, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(350, 350, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(350, 350, QtCore.Qt.KeepAspectRatio)
         else:
-            self.img = self.img.scaled(400, 400, QtCore.Qt.KeepAspectRatio)
-            self.img_x = self.img_x.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
-            self.img_y = self.img_y.scaled(700, 200, QtCore.Qt.KeepAspectRatio)
+            self.img = self.img.scaled(350, 350, QtCore.Qt.KeepAspectRatio)
+            self.img_x = self.img_x.scaled(600, 175, QtCore.Qt.KeepAspectRatio)
+            self.img_y = self.img_y.scaled(600, 175, QtCore.Qt.KeepAspectRatio)
 
         self.label_img.setPixmap(self.img)
         self.label_img.setAlignment(QtCore.Qt.AlignCenter)
