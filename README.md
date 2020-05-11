@@ -1,4 +1,4 @@
-# **A**natomical **L**andmark **D**etection and **D**emonstration **I**nterface ![Aladdin](examples/LandmarkDetection/DQN/images/aladdin.png =50x)
+# **A**natomical **L**andmark **D**etection and **D**emonstration **I**nterface ![Aladdin](examples/LandmarkDetection/DQN/images/aladdin.png)
 
 *ALADDIN* is a platform offering automated solutions for the detection of human anatomical landmarks using Reinforcement Learning (RL) complete with a unified visualisation suite. *ALADDIN* is a tool that can be used by medical professional within image analysis or for a wide range of tasks by machine learning researchers.  
 
