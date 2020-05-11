@@ -5,8 +5,6 @@ Deep Reinforcement Learning (DRL) agents applied to medical images
 ## Examples
 
 - [Landmark detection using different DQN variants](examples/LandmarkDetection/DQN)
-- [Automatic view planning using different DQN variants](examples/AutomaticViewPlanning/DQN)
-
 
 ## Installation
 
