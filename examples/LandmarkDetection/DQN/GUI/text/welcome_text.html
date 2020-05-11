@@ -1,24 +1,30 @@
-<!-- 
+<!--
 # Simple HTML text for welcome page.
-# Author: Maleakhi
+# Author: Maleakhi, Jamie
  -->
- 
+
 <html>
 <body>
     <h1 style='color:#003E74'> Welcome! </h1><br />
 
-    <p>Welcome to <b>RL Medical GUI</b>! Reinforcement Learning (RL) Medical GUI is a GUI application for finding established standard views 
-    and landmarks in the image (for <i>Brain</i>, <i>Cardiac</i>, and <i>Fetal</i>). The GUI has two main features: 
-    (1) visualisation of trained agent's trajectories, (2) platform for collecting data (user interaction) 
-    for Human-in-the-loop (HITL) experiments.</p><br /> 
+    <p>Welcome to <b>A</b>natomical <b>L</b>andmark <b>D</b>etection and <b>D</b>emonstration <b>I</b>nterface!
+    ALADDIN is a interface for visualising landmark detection reinforcement learning (RL) agents trained on
+    brain MRI, cardiac MRI, and fetal ultrasound 3D images. ALADDIN also facilitates Human-in-the-Loop (HITL)
+    experiments by storing human steps in the environment.</p><br />
 
-    <h2 style='color:#009CBC'>Application Modes</h2><br />
-    <ul>
-        <li><b>- Automatic Mode:</b> allow visualisation of trained agent's trajectories.</li>
-        <li><b>- Browse Mode:</b> allow simple user interaction with RL agent, enabling collection of data for HITL experiments.</li>
-    </ul>
+    <h2 style='color:#009CBC'>Automatic mode</h2><br />
+    In Automatic mode, you can simultaneously visualise the learned policy of the agent on 2D projections
+    and within a 3D volume.<br />
 
-    <br />
-    <p><b>Notes:</b> For more information about installation, problem specification, and paper references, please visit <a href="https://github.com/ollenilsson19/rl-medical">https://github.com/ollenilsson19/rl-medical</a></p>
+    <h2 style='color:#009CBC'>Browse mode</h2><br />
+    In Browse mode, the user can select one of six possible actions to freely navigate through the 3D enviroment.<br />
+
+    <h2 style='color:#009CBC'>HITL mode</h2><br />
+    HITL mode allows an human expert to record steps in the enviroment towards an anatomical landmark. This data
+    is automatically stored for further use in HITL experiments.<br />
+
+    <hr>
+    <p><i>For more information about installation, problem specification, and paper references, please
+        visit <a href="https://github.com/ollenilsson19/rl-medical">https://github.com/ollenilsson19/rl-medical</a></i></p>
 </body>
  </html>

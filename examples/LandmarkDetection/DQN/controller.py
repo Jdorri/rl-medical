@@ -8,7 +8,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from RL.dataReader import *
 
-from RL.DQN import get_viewer_data
+from DQN import get_viewer_data
 
 def warn(*args, **kwargs):
     pass
@@ -107,7 +107,7 @@ class Tab(QFrame):
         self.tab_widget.currentChanged.connect(self.on_change)
 
         # Manage responsive design
-        self.setMaximumWidth(400)
+        self.setMaximumWidth(350)
         self.setStyleSheet("background:#EBEEEE")
 
         # Flag for unit testing

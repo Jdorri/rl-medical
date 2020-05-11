@@ -8,7 +8,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from RL.dataReader import *
 
-from RL.DQN import get_player
+from DQN import get_player
 
 def warn(*args, **kwargs):
     pass

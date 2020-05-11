@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from RL.DQN import get_player, Model
+from DQN import get_player, Model
 
 import os
 def warn(*args, **kwargs):
