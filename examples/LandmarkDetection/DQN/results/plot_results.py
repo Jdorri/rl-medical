@@ -1,5 +1,5 @@
 ################################################################################
-## Script to plot evaluation results from multiple models
+## Script to plot evaluation results from all model checkpoints during training
 # Author: Faidon
 ################################################################################
 
