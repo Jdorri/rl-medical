@@ -459,7 +459,7 @@ class SimpleImageViewer(QWidget):
 
                 # Make crosshair thicker for correct resolution
                 if self.scale == j:
-                    pen.setWidth(3)
+                    pen.setWidth(4)
                     self.painterInstance.setPen(pen)
 
                 if i[0] == 0:
