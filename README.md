@@ -42,6 +42,9 @@ https://github.com/amiralansary/rl-medical.git
 hgc19@imperial.ac.uk
 - **James Dorricott**: jd3114@imperial.ac.uk
 
+## Supervisor
+- **Amir Alansary**: a.alansary14@imperial.ac.uk
+
 ## Citation
 
 If you use this code in your research, please cite these paper:
