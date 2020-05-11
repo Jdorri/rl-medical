@@ -42,7 +42,6 @@ IMAGE_SIZE = (45, 45, 45)
 # how many frames to keep
 # in other words, how many observations the network can see
 FRAME_HISTORY = 4
-# the frequency of updating the target network --> this is wrong, this is the
 # number of steps to take with the episilon greedy policy before comitting it
 # memory.
 UPDATE_FREQ = 4
@@ -73,7 +72,7 @@ def get_player(directory=None, files_list= None, data_type=None, viz=False,
     env = MedicalPlayer(directory=directory, screen_dims=IMAGE_SIZE,
                         viz=viz, saveGif=saveGif, saveVideo=saveVideo,
                         task=task, files_list=files_list, data_type=data_type, max_num_frames=1500)
-                        
+
     if task not in ['browse','train']:
         # in training, env will be decorated by ExpReplay, and history
         # is taken care of in expreplay buffer
@@ -157,16 +156,12 @@ def get_config(files_list, data_type, trainable_variables):
         memory_size=MEMORY_SIZE,
         init_memory_size=INIT_MEMORY_SIZE,
         init_exploration=0.8, #0.0
-        #How my epsilon greedy steps to take before commiting to memory
-        #An idea to encorporate the pre-training phase is to schedule the
-        # the agent only to start taking steps after x amount of mini_batch
-        # samples......
         ###############################################################################
         # HITL UPDATE
         update_frequency=INIT_UPDATE_FREQ,
-        #update_frequency=UPDATE_FREQ,
         ###############################################################################
-        history_len=FRAME_HISTORY
+        history_len=FRAME_HISTORY,
+        arg_type=data_type
     )
 
     return TrainConfig(
@@ -185,7 +180,7 @@ def get_config(files_list, data_type, trainable_variables):
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'exploration'),
                 # 1->0.1 in the first million steps
-                [(0, 0.8), (1000000, 0.1), (32000000, 0.01)], #[(0, 1.0), (10, 0.1), (320, 0.01)],
+                [(0, 0.8), (1000000, 0.1), (32000000, 0.01)],
                 interp='linear',
                 step_based=True),
 ###############################################################################
@@ -193,10 +188,6 @@ def get_config(files_list, data_type, trainable_variables):
 # Here the number of steps taken in the environment is increased from 0, during
 # the pretraining phase, to 4 to allow the agent to take 4 steps in the env
 # between each TD update.
-# Key: a discussion with the team needs to be made as to whether we need to push
-# back the updated to the other hyperparameters by 750,000 steps. Need to read
-# papers to determine what is best.
-
             ScheduledHyperParamSetter(
                 ObjAttrParam(expreplay, 'update_frequency'),
 
@@ -271,7 +262,7 @@ if __name__ == '__main__':
     parser.add_argument('--HITL', help='perform HITL experiment', default=False, type=str2bool)
 
     parser.add_argument('--directory', help='file name to store evaluation results',
-                        default=None)                        
+                        default=None)
     args = parser.parse_args()
 
     # f1 = filenames_GUI()

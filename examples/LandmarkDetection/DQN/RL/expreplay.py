@@ -125,8 +125,9 @@ class ReplayMemory(object):
 # HITL UPDATE
 
 class HumanDemReplayMemory(ReplayMemory):
-    def __init__(self, max_size, state_shape, history_len):
+    def __init__(self, max_size, state_shape, history_len, arg_type=None):
         super(HumanDemReplayMemory, self).__init__(max_size, state_shape, history_len)
+        self.arg_type = arg_type
 
     def load_experience(self):
         """
@@ -136,8 +137,26 @@ class HumanDemReplayMemory(ReplayMemory):
         ## Path for GPU cluster ##
         directory = "Documents/rl-medical/examples/LandmarkDetection/DQN/data/HITL"
         # Directory needs for pulling images
-        image_directory = "/vol/project/2019/545/g1954503/aeg19/Fetal_US/"
-        train_paths = "/vol/biomedic/users/aa16914/shared/data/RL_data/fetalUS_train_files_new_paths.txt"
+        if self.arg_type == 'Fetal_us':
+            image_directory = "/vol/project/2019/545/g1954503/aeg19/Fetal_US/"
+            train_paths = "/vol/biomedic/users/aa16914/shared/data/RL_data/fetalUS_train_files_new_paths.txt"
+            type_name = "FetalUS"
+        elif self.arg_type == 'Brain_MRI':
+            image_directory = "/vol/project/2019/545/g1954503/aeg19/Brain_MRI/"
+            train_paths = "/vol/biomedic/users/aa16914/shared/data/RL_data/brain_train_files_new_paths.txt"
+            type_name = "BrainMRI"
+        else:
+            image_directory = "/vol/project/2019/545/g1954503/aeg19/Cardiac_MRI/"
+            train_paths = "/vol/biomedic/users/aa16914/shared/data/RL_data/cardiac_train_files_new_paths.txt"
+            type_name = "CardiacMRI"
+
+
+        # check that the path exists to the human data
+        assert os.path.exists(directory), ('For privacy reasons you need to be connected'
+                                            ' to a DOC computer to access the images.'
+                                            ' If however you have the files in a'
+                                            ' seperate folder please update the paths in'
+                                            ' expreplay.py in the HumanDemReplayMemory class')
         ## Exclude testing images ##
         allowed_images = []
         with open(train_paths) as f:
@@ -147,7 +166,7 @@ class HumanDemReplayMemory(ReplayMemory):
         used_images = 0
         ## Loop 1: Loops through all log files in the directory
         for filename in os.listdir(directory):
-            if (filename.endswith(".pickle") or filename.endswith(".p")) and "FetalUS" in filename:
+            if (filename.endswith(".pickle") or filename.endswith(".p")) and type_name in filename:
                 log_file = os.path.join(directory, filename)
                 logger.info("Log filename: {}".format(log_file))
                 file_contents = pickle.load( open( log_file, "rb" ) )
@@ -201,7 +220,8 @@ class ExpReplay(DataFlow, Callback):
                  batch_size,
                  memory_size, init_memory_size,
                  init_exploration,
-                 update_frequency, history_len):
+                 update_frequency, history_len,
+                 arg_type=None):
         """
         Args:
             predictor_io_names (tuple of list of str): input/output names to
@@ -233,7 +253,7 @@ class ExpReplay(DataFlow, Callback):
         # HITL UPDATE
         self.hmem_full = False
         if self.update_frequency < 4:
-            self.hmem = HumanDemReplayMemory(memory_size, state_shape, history_len)
+            self.hmem = HumanDemReplayMemory(memory_size, state_shape, history_len, arg_type=arg_type)
             self.hmem.load_experience()
             self.hmem_full = True
             logger.info("HITL buffer full")
