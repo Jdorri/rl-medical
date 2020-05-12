@@ -113,7 +113,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
 
         # Widget zoom in and zoom out
         hbox_zoom = QHBoxLayout()
-        hbox_zoom.addWidget(self.zoomInButton)
+        hbox_zoom.addWidget(self.zoomInButton) 
         hbox_zoom.addWidget(self.zoomOutButton)
         hbox_zoom.addStretch()
 
@@ -123,7 +123,7 @@ class RightWidgetSettingsBrowseMode(QFrame):
         hbox_image.addWidget(self.next_img)
         hbox_image.addWidget(self.HITL_delete)
 
-        vbox = QVBoxLayout()
+        vbox = QVBoxLayout() 
         vbox.setSpacing(20)
         vbox.addWidget(QLabel("Human Actions"))
         vbox.addLayout(hbox_action)
