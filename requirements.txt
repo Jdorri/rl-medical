@@ -9,3 +9,5 @@ SimpleITK
 PyQt5
 ipython
 matplotlib
+pandas
+seaborn
