@@ -4,7 +4,7 @@ import glob
 
 
 
-user = 'hgc19' # put your username here
+user = '...' # put your username here
 type_ = 'LandmarkDetection'
 task = 'train'
 algo = 'DQN'
