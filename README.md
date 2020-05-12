@@ -60,17 +60,17 @@ DQN allows expert to train and evaluate RL models with different hyperparameter 
 
 ##### Transfer Learning Train
 ```
-python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/brain_train_files_new_paths.txt' './data filenames/brain_train_landmarks_new_paths.txt' --type 'BrainMRI' --HITL False --transferModel data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 CNN FC
+python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/brain_train_files_new_paths.txt' './data filenames/brain_train_landmarks_new_paths.txt' --type 'BrainMRI' --HITL False --transferModel data/models/ CNN FC
 ```
 
 ##### Evaluate
 ```
-python DQN.py --task eval --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files './data/filenames/image_files.txt' './data/filenames/landmark_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'}
+python DQN.py --task eval --algo DQN --gpu 0 --load data/models/ './data/filenames/image_files.txt' './data/filenames/landmark_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'}
 ```
 
 ##### Test
 ```
-python DQN.py --task play --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files './data/filenames/image_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'}
+python DQN.py --task play --algo DQN --gpu 0 --load data/models/ --files './data/filenames/image_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'}
 ```
 
 ```
@@ -104,7 +104,8 @@ optional arguments:
                         be included to load human experience on the human experience buffer.
   --transferModel       To use transfer learning you specify the argument --transferModel which
                         as argument takes the path to a model followed by and optional list
-                        of variable groups to transfer after the path. Specifying no groups will transfer everything.
+                        of variable groups to transfer after the path. 
+                        Specifying no groups will transfer everything.
 
                         The variable groups are (as specifed in the report)
                         1. CNN: all convolutional layers
@@ -113,7 +114,7 @@ optional arguments:
                         4. FC_final: Only the final fully connected layer
 
                         You can also specify which variables that should be trainable by the argument 
-                        --trainable as trainable groups in any combo of variable groups from above, for example
+                        --trainable as trainable groups in any combo of variable groups from above (i.e.)
                         --trainable CNN FC will train everything and is the default value
                         --trainable FC will only train variable group FC and so on
 ```
