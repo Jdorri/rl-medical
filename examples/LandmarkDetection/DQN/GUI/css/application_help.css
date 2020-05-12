@@ -13,4 +13,5 @@ QListWidget {
 }
 QPlainTextEdit {
     border: none;
+    padding:10px;
 }

@@ -57,7 +57,7 @@ class ApplicationHelp(QWidget):
         self.leftlist.currentRowChanged.connect(self.display)
 
         # Responsive design 
-        self.leftlist.setMaximumWidth(300)
+        self.leftlist.setMaximumWidth(200)
         self.resize(800, 600)
         self.center()
         self.setWindowTitle('Application Help')
