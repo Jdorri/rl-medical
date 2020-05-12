@@ -55,22 +55,22 @@ DQN allows expert to train and evaluate RL models with different hyperparameter 
 
 ##### Train
 ```
- python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/image_files.txt' './data/filenames/landmark_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'} --HITL {True, False}
+python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/local/brain_train_files_new_paths.txt' './data/filenames/local/brain_train_landmarks_new_paths.txt' --type 'BrainMRI' --HITL False
 ```
 
 ##### Transfer Learning Train
 ```
-python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/brain_train_files_new_paths.txt' './data filenames/brain_train_landmarks_new_paths.txt' --type 'BrainMRI' --HITL False --transferModel data/models/ CNN FC
+python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/local/brain_train_files_new_paths.txt' './data/filenames/local/brain_train_landmarks_new_paths.txt' --type 'BrainMRI' --HITL False --transferModel data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 CNN FC
 ```
 
 ##### Evaluate
 ```
-python DQN.py --task eval --algo DQN --gpu 0 --load data/models/ './data/filenames/image_files.txt' './data/filenames/landmark_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'}
+python DQN.py --task eval --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files './data/filenames/image_files.txt' './data/filenames/landmark_files.txt' --type 'BrainMRI'
 ```
 
 ##### Test
 ```
-python DQN.py --task play --algo DQN --gpu 0 --load data/models/ --files './data/filenames/image_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'}
+python DQN.py --task play --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files './data/filenames/image_files.txt' --type 'BrainMRI'
 ```
 
 ```
