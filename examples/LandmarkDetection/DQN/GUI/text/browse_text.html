@@ -13,12 +13,13 @@ Once Browse mode has been selected, users can additionally chose to enter HITL m
 <hr>
 <b>1. Loading data</b>. There are two options to load the data: <i>Default</i> and
     <i>Custom</i>. To load default data, simply select the radio button from one of the three options. This will
-    prepare default model, image, and landmark data for the selected use-case. You can also load custom data by uploading your own model, image, and landmark files
-    through the <i>Browse</i> buttons. Then press <i>Load</i> to display your files. Please ensure that you select the correct combination of files.
+    prepare default model, image, and landmark data for the selected use-case. You can also load custom data by uploading your own image and landmark files
+    through the <i>Browse</i> buttons. Then press <i>Load</i> to display your files. Please ensure that you select the correct combination of files. The 
+    image and landmark uploads should be .txt files containing the paths to the image files.
 <br /><b>2. Enable HITL</b>. To notify ALADDIN that you want to store HITL data, toggle the <i>Enable HITL</i> checkbox. After toggling the checkbox, user data will be stored in a time-stamped pickle file.
 <br /><b>3. Navigating in HITL mode</b>. The task is to move towards the desired landmark.
     Press one of the six <i>Human Actions</i> to navigate through the environment until you reach the landmark. You can control the step size
     using the <i>-</i> and <i>+</i> buttons to respectively reduce or increase it. Alternatively, navigate by pressing the following keyboard shortcuts (w = +y, s = -y, a = -x, d = +x, z = +z, x = -z).
 <br /><b>4. Next image</b>. Press <i>Next Image</i> to annotate the next image in the loaded batch. Alternatively, you can delete the previous annotation by clicking <i>Delete Episode</i>.
 <br /><b>5. Save data</b>. Once finished, to save the HITL session, either: (1) close the GUI, or (2) click on the <i>Enable HITL</i> checkbox again. Either action will
-    automatically save a pickle file in the directory /data/HITL.
+    automatically save a pickle file in the directory ./data/HITL.
