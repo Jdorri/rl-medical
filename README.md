@@ -2,7 +2,7 @@
 
 *ALADDIN* is a platform offering automated solutions for the detection of human anatomical landmarks using Reinforcement Learning (RL) agents, complete with a unified visualisation suite. The tool can be used by medical professionals within image analysis, or for RL algorithmic experiments by machine learning researchers.
 
-This project is forked from our supervisor legacy repository available on the following link:
+This project is forked from following repository:
 ```
 https://github.com/amiralansary/rl-medical.git
 ```
@@ -24,8 +24,10 @@ https://github.com/amiralansary/rl-medical.git
 
 ### Installation Procedure
 Follow the following steps (in order) to install required dependencies.
-1. ``` pip install -r requirements.txt ```
-2. ``` pip install -U git+https://github.com/amiralansary/rl-medical.git ```
+1. Clone this repository
+2. ``` cd rl-medical ```
+3. ``` pip install -r requirements.txt ```
+4. ``` pip install -U git+https://github.com/amiralansary/rl-medical.git ```
 
 ## Run Code
 Follow the following steps (in order) after installing **all** required packages to run GUI or DQN.  
