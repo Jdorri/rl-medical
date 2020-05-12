@@ -52,16 +52,19 @@ class Terminal(QWidget):
         )
 
         self.terminal.appendHtml(
-            f"<i>Score:</i> {score}"
+            f"<i>Score:</i> {score:.2f}"
         )
 
         self.terminal.appendHtml(
-            f"<i>Distance Error:</i> {distance_error}"
+            f"<i>Distance Error:</i> {distance_error:.2f}"
         )
 
+        q_values = [round(q,2) for q in q_values]
         self.terminal.appendHtml(
             f"<i>Q Values:</i> {q_values} <hr />"
         )
+        self.terminal.moveCursor(QTextCursor.End)
+
     
     def add_log(self, color, log):
         """
@@ -73,3 +76,4 @@ class Terminal(QWidget):
 
         message = f"<b><p style='color:{color}'> &#36; {log}</p></b>"
         self.terminal.appendHtml(message)
+        self.terminal.moveCursor(QTextCursor.End)

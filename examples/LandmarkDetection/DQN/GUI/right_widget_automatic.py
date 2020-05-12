@@ -103,8 +103,8 @@ class RightWidgetSettings(QFrame):
         # Task
         self.task = QLabel('Task', self)
         self.play_button = QRadioButton("Play")
-        self.play_button.setChecked(True)
         self.eval_button = QRadioButton("Evaluation")
+        self.eval_button.setChecked(True)
 
         # Agent speed
         label_speed = QLabel("Agent Speed")
@@ -208,6 +208,7 @@ class RightWidgetSettings(QFrame):
         # Print in terminal and restart setup
         self.terminal.add_log("blue", "Terminate")
         self.restart()
+        self.enable_radio_button(True)
         
         # Reset simple image viewer and windows
         self.window.widget.reset()
@@ -415,13 +416,27 @@ class RightWidgetSettings(QFrame):
 
             # Change to appropriate layout
             self.window.widget.change_layout(self.window.usecase)
+            self.enable_radio_button(False)
             self.worker_thread.start()
 
         # If there is a problem with the loader, then user incorrectly add file
         except:
             self.terminal.add_log("red", "Error loading user defined settings. Please use appropriate model, image, and landmarks." )
             self.error_message_box()
-        
+    
+    def enable_radio_button(self, enabled):
+        """
+        Toggle radio button and disable irrelevant one.
+
+        :enabled: True if enabled, False if disabled
+        """
+
+         # Disable radio button for the irrelevant task
+        if self.which_task() == RightWidgetSettings.TASK_EVAL:
+            self.play_button.setEnabled(enabled)
+        else:
+            self.eval_button.setEnabled(enabled)
+
     def thread_function(self):
         """
         Run on secondary thread

@@ -130,6 +130,7 @@ class Tab(QFrame):
         """
 
         # Reset data
+        self.automatic_mode.enable_radio_button(True)
         self.browse_mode.clear_custom_load()
         self.automatic_mode.clear_custom_load()
         self.browse_mode.window.left_widget.space.hide()
