@@ -30,3 +30,7 @@ The following are description of files on main directory ```examples\LandmarkDet
 - **videos**: contains application video resources (for README)
 - **utils**: contains other utilities
 - **results**: contains result logs, result plots and scripts for batch evaluation and plotting results
+  - **evaluate_models.py**: script to evaluate multiple models on test dataset and store results
+  - **plot_results.py**: script to plot evaluation results from multiple models stored in log files
+  - **eval_logs**: folder contains log files (.csv) with the mean distance error and score on the test datasets
+  - **plots**: contains figures of the key results of the experiments carried out in the project
