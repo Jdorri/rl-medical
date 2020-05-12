@@ -1,9 +1,9 @@
 # Folder Structure
 
-The following are description of files on main directory ```examples\LandmarkDetection\DQN```.
+The following are description of files on main directory ```examples/LandmarkDetection/DQN```.
 
 - **controller.py**: doorway for launching GUI application
-- **DQN.py**: 
+- **DQN.py**: contains functions and parameters to initialise the RL environment and agent (main script for command line use)
 - **GUI_tests.py**: unit tests for GUI application
 - **data**: contains model, landmark, image data
 - **GUI**: contains codes related to GUI (frontend)
@@ -20,12 +20,12 @@ The following are description of files on main directory ```examples\LandmarkDet
   - **viewer.py**: controls and creates GUI simulation and various plots
   - **window.py**: integrate left,viewer, and right widgets
 - **RL**: contains codes related to algorithm (backend)
-  - **common.py**:
-  - **dataReader.py**:
-  - **DQNModel.py**:
-  - **expreplay.py**:
-  - **freeze_variables.py**:
-  - **medical.py**:
+  - **common.py**: contains functions to run evaluation using RL agent
+  - **dataReader.py**: contains functions to load and pre-process images from Brain MRI, Cardiac MRI and Fetal US datasets
+  - **DQNModel.py**: defines class for the Model of the RL agent for 3D images
+  - **expreplay.py**: contains classes for defining and using the agent and human experience buffers
+  - **freeze_variables.py**: contains functions to freeze selected parameters in tensorpack model
+  - **medical.py**: defines class for the MedicalPlayer which defines the RL environment using the 3D images
 - **images**: contains application image resources (i.e. icon, logo, etc)
 - **videos**: contains application video resources (for README)
 - **utils**: contains other utilities
