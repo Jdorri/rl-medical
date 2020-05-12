@@ -350,10 +350,5 @@ class NiftiImage(object):
         # Convert from [depth, width, height] to [width, height, depth]
         image.data = sitk.GetArrayFromImage(sitk_image).transpose(2, 1, 0)  # .astype('uint8')
         image.dims = image.data.shape
-
-        # Align caridac images so all are horizontal
-        if is_cardiac and all(i < 0 for i in sitk_image.GetOrigin()):
-            image.data = ndimage.rotate(image.data, -90, axes=(0,1), reshape=True)
-            image.dims = image.data.shape
         
         return sitk_image, image
