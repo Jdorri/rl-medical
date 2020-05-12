@@ -1,6 +1,6 @@
 # **A**natomical **L**andmark **D**etection and **D**emonstration **I**nterface <img src="examples/LandmarkDetection/DQN/images/aladdin.png" width="100" />
 
-*ALADDIN* is a platform offering automated solutions for the detection of human anatomical landmarks using Reinforcement Learning (RL) complete with a unified visualisation suite. *ALADDIN* is a tool that can be used by medical professional within image analysis or for a wide range of tasks by machine learning researchers. 
+*ALADDIN* is a platform offering automated solutions for the detection of human anatomical landmarks using Reinforcement Learning (RL) agents, complete with a unified visualisation suite. The tool can be used by medical professionals within image analysis, or for RL algorithmic experiments by machine learning researchers.
 
 This project is forked from our supervisor legacy repository available on the following link:
 ```
@@ -104,16 +104,16 @@ optional arguments:
                         be included to load human experience on the human experience buffer.
   --transferModel       To use transfer learning you specify the argument --transferModel which
                         as argument takes the path to a model followed by and optional list
-                        of variable groups to transfer after the path. Specifying no groups will 
+                        of variable groups to transfer after the path. Specifying no groups will
                         transfer everything.
 
                         The variable groups are (as specifed in the report)
                         1. CNN: all convolutional layers
                         2. FC: all fully connected layers
-                        3. FC_intermediate: All fully connected layers excluding the final one 
+                        3. FC_intermediate: All fully connected layers excluding the final one
                         4. FC_final: Only the final fully connected layer
 
-                        You can also specify which variables that should be trainable by the argument 
+                        You can also specify which variables that should be trainable by the argument
                         --trainable as trainable groups in any combo of variable groups from above (i.e.)
                         --trainable CNN FC will train everything and is the default value
                         --trainable FC will only train variable group FC and so on
@@ -161,8 +161,8 @@ If you use this code in your research, please cite these paper:
 ```
 @article{alansary2019evaluating,
   title={{Evaluating Reinforcement Learning Agents for Anatomical Landmark Detection}},
-  author={Alansary, Amir and Oktay, Ozan and Li, Yuanwei and Le Folgoc, Loic and 
-          Hou, Benjamin and Vaillant, Ghislain and Kamnitsas, Konstantinos and 
+  author={Alansary, Amir and Oktay, Ozan and Li, Yuanwei and Le Folgoc, Loic and
+          Hou, Benjamin and Vaillant, Ghislain and Kamnitsas, Konstantinos and
           Vlontzos, Athanasios and Glocker, Ben and Kainz, Bernhard and Rueckert, Daniel},
   journal={Medical Image Analysis},
   year={2019},
