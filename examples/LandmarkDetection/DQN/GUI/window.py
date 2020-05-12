@@ -241,7 +241,7 @@ class Window(QMainWindow):
                 self.right_widget.browse_mode.z_action.on_clicking_in()
             elif event.key() == Qt.Key_X:
                 self.right_widget.browse_mode.z_action.on_clicking_out()
-            elif event.key() == Qt.Key_Space:
+            elif event.key() == Qt.Key_N:
                 self.right_widget.browse_mode.on_clicking_nextImg()
 
             # HITL mode additional key bindings

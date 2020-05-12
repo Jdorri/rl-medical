@@ -484,7 +484,11 @@ class YMove(QFrame):
         """
 
         if self.right_widget.env:
-            action = 1
+            # Adjust keybindings to acccount for rotation of fetal images
+            if self.right_widget.window.usecase == Window.FETAL:
+                action = 3
+            else:
+                action = 1 
             self.right_widget.move_img(action)
 
     def on_clicking_down(self):
@@ -493,7 +497,11 @@ class YMove(QFrame):
         """
 
         if self.right_widget.env:
-            action = 4
+            # Adjust keybindings to acccount for rotation of fetal images
+            if self.right_widget.window.usecase == Window.FETAL:
+                action = 2
+            else:
+                action = 4
             self.right_widget.move_img(action)
 
 
@@ -540,7 +548,11 @@ class XMove(QFrame):
         """
 
         if self.right_widget.env:
-            action = 3 
+            # Adjust keybindings to acccount for rotation of fetal images
+            if self.right_widget.window.usecase == Window.FETAL:
+                action = 4
+            else:
+                action = 3
             self.right_widget.move_img(action)
 
     def on_clicking_right(self):
@@ -549,7 +561,11 @@ class XMove(QFrame):
         """
 
         if self.right_widget.env:
-            action = 2 
+            # Adjust keybindings to acccount for rotation of fetal images
+            if self.right_widget.window.usecase == Window.FETAL:
+                action = 1
+            else:
+                action = 2
             self.right_widget.move_img(action)
 
 
