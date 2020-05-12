@@ -139,9 +139,9 @@ class SimpleImageViewer(QWidget):
             grid.addWidget(self.plot_3d, 1, 1)
 
             # Set min size
-            self.label_img.setMinimumSize(350, 350)
-            self.label_img_x.setMinimumSize(350, 350)
-            self.label_img_y.setMinimumSize(350, 350)
+            self.label_img.setMinimumSize(350, 380)
+            self.label_img_x.setMinimumSize(350, 380)
+            self.label_img_y.setMinimumSize(350, 380)
 
             return grid
         else:
@@ -152,9 +152,9 @@ class SimpleImageViewer(QWidget):
             grid.addWidget(self.plot_3d, 0, 1)
 
             # Set min size
-            self.label_img.setMinimumSize(350, 350)
-            self.label_img_x.setMinimumSize(700, 175)
-            self.label_img_y.setMinimumSize(700, 175)
+            self.label_img.setMinimumSize(350, 380)
+            self.label_img_x.setMinimumSize(700, 190)
+            self.label_img_y.setMinimumSize(700, 190)
 
             return grid
 

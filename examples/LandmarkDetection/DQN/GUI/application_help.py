@@ -58,7 +58,7 @@ class ApplicationHelp(QWidget):
 
         # Responsive design 
         self.leftlist.setMaximumWidth(300)
-        self.resize(1000, 800)
+        self.resize(800, 600)
         self.center()
         self.setWindowTitle('Application Help')
         
