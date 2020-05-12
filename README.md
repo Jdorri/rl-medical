@@ -12,15 +12,18 @@ https://github.com/amiralansary/rl-medical.git
 ### Dependencies
 + Python=3.8
 + [cycler=0.10.0](https://pypi.org/project/Cycler/)
-+ [tensorflow-gpu=1.14.0](https://pypi.org/project/tensorflow-gpu/)
++ [tensorflow=1.14.0](https://pypi.org/project/tensorflow/)
 + [tensorpack=0.9.5](https://github.com/tensorpack/tensorpack)
-+ [opencv-python](https://pypi.org/project/opencv-python/)
++ [opencv-python=4.2.0.32](https://pypi.org/project/opencv-python/)
 + [pillow](https://pypi.org/project/Pillow/)
 + [gym](https://pypi.org/project/gym/)
 + [SimpleITK](https://pypi.org/project/SimpleITK/)
 + [PyQt5](https://pypi.org/project/PyQt5/)
 + [ipython](https://pypi.org/project/ipython/)
 + [matplotlib](https://pypi.org/project/matplotlib/)
++ [pandas](https://pypi.org/project/pandas/)
++ [seaborn](https://pypi.org/project/seaborn/)
+
 
 ### Installation Procedure
 Follow the following steps (in order) to install required dependencies.
