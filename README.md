@@ -31,8 +31,8 @@ Follow the following steps (in order) to install required dependencies.
 Follow the following steps (in order) after installing **all** required packages to run GUI or DQN.  
 
 **Note**: the main product is the GUI; DQN serves as a backend for training and logging models. Before running DQN script, keep in mind that a model is usually trained for at least 2 days and requires GPU.
-- To view the main product with pre-trained model follow [GUI run procedure](###gui)   
-- To train your own model/ view detailed logs follow [DQN run procedure](###dqn)
+- To view the main product with pre-trained model follow **GUI**   
+- To train your own model/ view detailed logs follow **DQN**
 
 *Please email one of us or our supervisor if you have any issues with code execution.*
 
@@ -51,7 +51,7 @@ DQN allows expert to train and evaluate RL models with different hyperparameter 
 
 1. Open ```Terminal```
 2. Go to the [main directory](examples/LandmarkDetection/DQN) by using the command ```cd examples/LandmarkDetection/DQN```
-3. Run the command depending on usage and extensions used. Please see subsections below. For more information about options and flags, see usage documentation below.
+3. Run the command depending on usage and extensions used (see subsections below). For more information about options and flags, see usage documentation below.
 
 ##### Train
 ```
@@ -95,8 +95,28 @@ optional arguments:
   --name NAME           name of current experiment for logs
   --type                type of dataset can be either 'BrainMRI', 'CardiacMRI', or 'FetalUS'
   --HITL                flag to indicate (for training) to use HITL.
-                        In order to run in HITL mode, the required training files need to be included to load human experience on the human experience buffer.
+                        In order to run in HITL mode, the required training files need to
+                        be included to load human experience on the human experience buffer.
 ```
+
+## Results
+
+Here are few examples of the learned agent for landmark detection on unseen data displayed on the GUI:
+
+* Detecting the anterior commissure (AC) point in adult brain MRI
+<p align="center">
+<img src="examples/LandmarkDetection/DQN/videos/brain.gif" width="500">
+</p>
+
+* Detecting the apex point in short-axis cardiac MRI
+<p align="center">
+<img src="examples/LandmarkDetection/DQN/videos/cardiac.gif" width="500">
+</p>
+
+* Detecting the cavum septum pellucidum (CSP) point in fetal head ultrasound
+<p align="center">
+<img src="examples/LandmarkDetection/DQN/videos/fetal.gif" width="500">
+</p>
 
 ## Authors
 - **Alexander Gaskell**: aeg19@imperial.ac.uk
