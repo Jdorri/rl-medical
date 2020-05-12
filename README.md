@@ -1,10 +1,11 @@
 # **A**natomical **L**andmark **D**etection and **D**emonstration **I**nterface <img src="examples/LandmarkDetection/DQN/images/aladdin.png" width="100" />
 
-*ALADDIN* is a platform offering automated solutions for the detection of human anatomical landmarks using Reinforcement Learning (RL) complete with a unified visualisation suite. *ALADDIN* is a tool that can be used by medical professional within image analysis or for a wide range of tasks by machine learning researchers.  
+*ALADDIN* is a platform offering automated solutions for the detection of human anatomical landmarks using Reinforcement Learning (RL) complete with a unified visualisation suite. *ALADDIN* is a tool that can be used by medical professional within image analysis or for a wide range of tasks by machine learning researchers. 
 
-*<p style='color:#003E74'>Please visit main directory (examples/LandmarkDetection/DQN) after installation and follow Run Instruction to run ALADDIN.</p>*
-
-**Main Directory**: [Landmark detection using different DQN variants](examples/LandmarkDetection/DQN)
+This project is forked from our supervisor legacy repository available on the following link:
+```
+https://github.com/amiralansary/rl-medical.git
+```
 
 ## Installation
 
@@ -26,11 +27,75 @@ Follow the following steps (in order) to install required dependencies.
 1. ``` pip install -r requirements.txt ```
 2. ``` pip install -U git+https://github.com/amiralansary/rl-medical.git ```
 
+## Run Code
+Follow the following steps (in order) after installing **all** required packages to run GUI or DQN.  
 
-### Legacy Code
-This project is forked from our supervisor legacy repository available on the following link:
+**Note**: the main product is the GUI; DQN serves as a backend for training and logging models. Before running DQN script, keep in mind that a model is usually trained for at least 2 days and requires GPU.
+- To view the main product with pre-trained model follow [GUI run procedure](###gui)   
+- To train your own model/ view detailed logs follow [DQN run procedure](###dqn)
+
+*Please email one of us or our supervisor if you have any issues with code execution.*
+
+### GUI
+
+GUI allows running, visualising, and evaluating the performance of (already trained) RL agents in locating landmarks on medical imaging datasets (*Brain*, *Cardiac*, *Fetal*).
+
+1. Open ```Terminal```
+2. Go to the [main directory](examples/LandmarkDetection/DQN) by using the command ```cd examples/LandmarkDetection/DQN```
+3. Run the GUI by using the command ```python controller.py```
+4. For further instruction on how to use the GUI, open 'Application Help Window' on the GUI through the 'Help' menu on the GUI.
+
+### DQN
+
+DQN allows expert to train and evaluate RL models with different hyperparameter choices using a basic DQN implementation, HITL, and Transfer Learning extensions.
+
+1. Open ```Terminal```
+2. Go to the [main directory](examples/LandmarkDetection/DQN) by using the command ```cd examples/LandmarkDetection/DQN```
+3. Run the command depending on usage and extensions used. Please see subsections below. For more information about options and flags, see usage documentation below.
+
+##### Train
 ```
-https://github.com/amiralansary/rl-medical.git
+ python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/image_files.txt' './data/filenames/landmark_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'} --HITL {True, False}
+```
+
+##### Evaluate
+```
+python DQN.py --task eval --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files './data/filenames/image_files.txt' './data/filenames/landmark_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'}
+```
+
+##### Test
+```
+python DQN.py --task play --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files './data/filenames/image_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'}
+```
+
+```
+usage: DQN.py [-h] [--gpu GPU] [--load LOAD] [--task {play,eval,train}]
+              [--algo {DQN,Double,Dueling,DuelingDouble}]
+              [--files FILES [FILES ...]] [--saveGif] [--saveVideo]
+              [--logDir LOGDIR] [--name NAME][--type {'BrainMRI', 'CardiacMRI', 'FetalUS'}]
+              [--HITL {True, False}]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --gpu GPU             comma separated list of GPU(s) to use.
+  --load LOAD           load model
+  --task {play,eval,train}
+                        task to perform. Must load a pretrained model if task
+                        is "play" or "eval"
+  --algo {DQN,Double,Dueling,DuelingDouble}
+                        algorithm
+  --files FILES [FILES ...]
+                        Filepath to the text file that comtains list of
+                        images. Each line of this file is a full path to an
+                        image scan. For (task == train or eval) there should
+                        be two input files ['images', 'landmarks']
+  --saveGif             save gif image of the game
+  --saveVideo           save video of the game
+  --logDir LOGDIR       store logs in this directory during training
+  --name NAME           name of current experiment for logs
+  --type                type of dataset can be either 'BrainMRI', 'CardiacMRI', or 'FetalUS'
+  --HITL                flag to indicate (for training) to use HITL.
+                        In order to run in HITL mode, the required training files need to be included to load human experience on the human experience buffer.
 ```
 
 ## Authors
@@ -58,15 +123,5 @@ If you use this code in your research, please cite these paper:
   journal={Medical Image Analysis},
   year={2019},
   publisher={Elsevier}
-}
-
-@inproceedings{alansary2018automatic,
-  title={Automatic view planning with multi-scale deep reinforcement learning agents},
-  author={Alansary, Amir and Le Folgoc, Loic and Vaillant, Ghislain and Oktay, Ozan and Li, Yuanwei and 
-  Bai, Wenjia and Passerat-Palmbach, Jonathan and Guerrero, Ricardo and Kamnitsas, Konstantinos and Hou, Benjamin and others},
-  booktitle={International Conference on Medical Image Computing and Computer-Assisted Intervention},
-  pages={277--285},
-  year={2018},
-  organization={Springer}
 }
  ```
