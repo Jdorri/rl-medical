@@ -511,15 +511,10 @@ class SimpleImageViewer(QWidget):
             self.painterInstance.drawLine(k['loc'], k['loc'] + corner_len * k['d1'])
             self.painterInstance.drawLine(k['loc'], k['loc'] + corner_len * k['d2'])
 
-        # # Annotate rectangle (uncomment if wish to use this)
-        # self.painterInstance.setFont(QFont('Decorative', max(abs(yLen)//12, 15)))
-        # self.painterInstance.drawText(xPos, yPos-8, "Agent ROI")
-
     def units(self):
         """
-        Helper functions to return all corner of a unit squares.
+        Helper functions to return all corners of a unit squares.
         """
-
         return [[1,0],[0,-1],[-1,0],[0,1]]
 
     def agent_signal_handler(self, value):
