@@ -86,8 +86,13 @@ class Model(DQNModel):
     def __init__(self,IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA, trainable_variables):
         super(Model, self).__init__(IMAGE_SIZE, FRAME_HISTORY, METHOD, NUM_ACTIONS, GAMMA)
         self.conv_freeze = "CNN" not in trainable_variables
-        self.fc_freeze = "DQN" not in trainable_variables
-        self.final_layer_freeze = "LAST" not in trainable_variables
+        if "FC" not in trainable_variables:
+            self.fc_freeze = "FC_intermediate" not in trainable_variables
+            self.final_layer_freeze = "FC_final" not in trainable_variables
+        else:
+            self.fc_freeze = False
+            self.final_layer_freeze = False
+
 
     def _get_DQN_prediction(self, image):
         """ image: [0,255]
@@ -238,7 +243,7 @@ if __name__ == '__main__':
     parser.add_argument('--gpu', help='comma separated list of GPU(s) to use.')
     parser.add_argument('--load', help='load model to resume traning')
     parser.add_argument('--transferModel',  nargs='+', help='load model for transfer learning' , type=str)
-    parser.add_argument('--trainable',  nargs='+', help='list of trainable variables' , type=str, default=['CNN', 'DQN', 'LAST'])
+    parser.add_argument('--trainable',  nargs='+', help='list of trainable variables' , type=str, default=['CNN', 'FC'])
     parser.add_argument('--task', help='task to perform. Must load a pretrained model if task is "play" or "eval"',
                         choices=['play', 'eval', 'train'], default='train')
     parser.add_argument('--algo', help='algorithm',
@@ -330,7 +335,6 @@ if __name__ == '__main__':
         else:
             INIT_UPDATE_FREQ = 4
         config = get_config(args.files, args.type, args.trainable)
-        not_ignore = None
         if args.load:  # resume training from a saved checkpoint
             session_init = get_model_loader(args.load)
         elif args.transferModel:
@@ -352,14 +356,18 @@ if __name__ == '__main__':
             else:
                 if 'CNN' not in args.transferModel[1:]:#ignore CNN part
                     ignore_list.append("conv")
-                if 'DQN' not in args.transferModel[1:]:#ignore DQN
-                    ignore_list.append("fc")
+                if 'FC' not in args.transferModel[1:]:#ignore FC
+                    if 'FC_intermediate' not in args.transferModel[1:]:
+                        ignore_list.append("fc0")
+                        ignore_list.append("fc1")
+                        ignore_list.append("fc2")
+                    if 'FC_final' not in args.transferModel[1:]:
+                        ignore_list.append("fct")
 
             session_init = get_model_loader(args.transferModel[0])
             reader, variables = session_init._read_checkpoint_vars(args.transferModel[0])
 
             ignore = [var for var in variables if any([i in var for i in ignore_list])]
-            not_ignore = (list(set(variables) - set(ignore)))#not ignored
             session_init.ignore = [i if i.endswith(':0') else i + ':0' for i in ignore]
             config.session_init = session_init
 

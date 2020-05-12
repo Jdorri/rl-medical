@@ -267,7 +267,7 @@ class LeftWidgetSettings(QFrame):
             self.fname_landmarks = ('./data/filenames/brain_test_landmarks_new_paths.txt', '')
         else:
             self.fname_landmarks = QFileDialog.getOpenFileName(self, "Browse Landmark",
-                "./data/filenames", filter="txt files (*landmark*.txt)")
+                "./data/filenames/local", filter="txt files (*landmark*.txt)")
             
         # Set text to label
         filename = self.fname_landmarks[0].split("/")
@@ -292,7 +292,7 @@ class LeftWidgetSettings(QFrame):
             self.fname_images = ('./data/filenames/brain_test_files_new_paths.txt', '')
         else:
             self.fname_images = QFileDialog.getOpenFileName(self, "Browse Image",
-                "./data/filenames")
+                "./data/filenames/local", filter="txt files (*files*.txt)")
 
         # Set text to label
         filename = self.fname_images[0].split("/")
