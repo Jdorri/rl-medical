@@ -355,7 +355,7 @@ class RightWidgetSettings(QFrame):
         elif self.window.usecase == Window.FETAL:
             # Default fetal
             self.fname_images.name = f"./data/filenames/{redir}fetalUS_train_files_new_paths.txt"
-            self.fname_model.name = './data/models/DQN_ultrasound/model-25000.data-00000-of-00001'
+            self.fname_model.name = './data/models/DQN_ultrasound/model-600000.data-00000-of-00001'
             self.fname_landmarks.name = f"./data/filenames/{redir}fetalUS_train_landmarks_new_paths.txt"
         else:
             # User defined file selection
