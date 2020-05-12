@@ -58,6 +58,11 @@ DQN allows expert to train and evaluate RL models with different hyperparameter 
  python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/image_files.txt' './data/filenames/landmark_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'} --HITL {True, False}
 ```
 
+##### Transfer Learning Train
+```
+python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/brain_train_files_new_paths.txt' './data filenames/brain_train_landmarks_new_paths.txt' --type 'BrainMRI' --HITL False --transferModel data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 CNN FC
+```
+
 ##### Evaluate
 ```
 python DQN.py --task eval --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files './data/filenames/image_files.txt' './data/filenames/landmark_files.txt' --type {'BrainMRI', 'CardiacMRI', 'FetalUS'}
@@ -73,7 +78,7 @@ usage: DQN.py [-h] [--gpu GPU] [--load LOAD] [--task {play,eval,train}]
               [--algo {DQN,Double,Dueling,DuelingDouble}]
               [--files FILES [FILES ...]] [--saveGif] [--saveVideo]
               [--logDir LOGDIR] [--name NAME][--type {'BrainMRI', 'CardiacMRI', 'FetalUS'}]
-              [--HITL {True, False}]
+              [--HITL {True, False}] [--transferModel MODEL_PATH [VARIABLE_GROUPS ...]]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -97,6 +102,20 @@ optional arguments:
   --HITL                flag to indicate (for training) to use HITL.
                         In order to run in HITL mode, the required training files need to
                         be included to load human experience on the human experience buffer.
+  --transferModel       To use transfer learning you specify the argument --transferModel which
+                        as argument takes the path to a model followed by and optional list
+                        of variable groups to transfer after the path. Specifying no groups will transfer everything.
+
+                        The variable groups are (as specifed in the report)
+                        1. CNN: all convolutional layers
+                        2. FC: all fully connected layers
+                        3. FC_intermediate: All fully connected layers excluding the final one 
+                        4. FC_final: Only the final fully connected layer
+
+                        You can also specify which variables that should be trainable by the argument 
+                        --trainable as trainable groups in any combo of variable groups from above, for example
+                        --trainable CNN FC will train everything and is the default value
+                        --trainable FC will only train variable group FC and so on
 ```
 
 ## Results
