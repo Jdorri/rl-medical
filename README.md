@@ -118,6 +118,10 @@ Here are few examples of the learned agent for landmark detection on unseen data
 <img src="examples/LandmarkDetection/DQN/videos/fetal.gif" width="500">
 </p>
 
+## Folder Structure
+
+For description of main directory folder structure, click [here](folder_structure.md).
+
 ## Authors
 - **Alexander Gaskell**: aeg19@imperial.ac.uk
 - **Maleakhi A. Wijaya**: maw219@imperial.ac.uk
