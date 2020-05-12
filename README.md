@@ -104,8 +104,8 @@ optional arguments:
                         be included to load human experience on the human experience buffer.
   --transferModel       To use transfer learning you specify the argument --transferModel which
                         as argument takes the path to a model followed by and optional list
-                        of variable groups to transfer after the path. 
-                        Specifying no groups will transfer everything.
+                        of variable groups to transfer after the path. Specifying no groups will 
+                        transfer everything.
 
                         The variable groups are (as specifed in the report)
                         1. CNN: all convolutional layers
