@@ -16,25 +16,23 @@ This command can be used to evaluate the model on the specified dataset from the
 
 TL:
 
-The variable groups are(as specifed in the report)
+The variable groups are (as specifed in the report)
 
 CNN: all convolutuional layers
 FC: all fully connected layers
-FC_intermetiate: All fully connected layers excluding the final one 
+FC_intermediate: All fully connected layers excluding the final one 
 FC_final: Only the final fully connected layer
 
 to use transfer learning you specify the argument --transferModel which as argument takes the path to a model followed by and optional list of variable groups to transfer
 after the path. Specifying no groups will tranfer everything.
 
-The below command will transfer from model data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-60000 and transfers groups CNN and FC. The list of variable froups can be any combo of the
+The below command will transfer from model data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-60000 and transfers groups CNN and FC. The list of variable groups can be any combo of the
 groups listed above.
 
-python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/local/brain_train_files_new_paths.txt' './data/filenames/local/brain_train_landmarks_new_paths.txt' 
---type 'BrainMRI' --HITL False --transferModel data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 CNN FC
+python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/local/brain_train_files_new_paths.txt' './data/filenames/local/brain_train_landmarks_new_paths.txt' --type 'BrainMRI' --HITL False --transferModel data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 CNN FC
 
-
-You can also specify which variables that shouldb be trainable by the argument --trainable
-as trainable groups in any combo of variable groups from above for example
+You can also specify which variables that should be trainable by the argument --trainable
+as trainable groups in any combo of variable groups from above, for example
 
 --trainable CNN FC will train everything and is the default value
 --trainable FC will only train variable group FC and so on
