@@ -54,8 +54,8 @@ Follow the following steps (in order) to install the required dependencies.
 
 The ALADDIN platform has two distinct modes of use: 'GUI' and 'DQN'. Follow the relevant steps (in order) after installing **all** required packages.
 
-- To view the main product with pre-trained models, follow **GUI**   
-- To train your own model/view detailed logs, follow **DQN**
+- To view the main product with pre-trained models, follow **GUI**.   
+- To train your own model/view detailed logs, follow **DQN**.
 
 **Note**: the main product is the GUI; DQN serves as a backend for training and logging models. Before running a DQN training script, also keep in mind that a model is usually trained for at least 2 days and requires use of GPU.
 
