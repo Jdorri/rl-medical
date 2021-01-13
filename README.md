@@ -2,7 +2,7 @@
 
 ALADDIN is a platform offering automated solutions for the detection of anatomical landmarks using Reinforcement Learning (RL) agents, complete with a unified visualisation suite. The tool is targeted at both medical imaging professionals and machine learning researchers conducting research into medical RL algorithms.
 
-The work was completed as part of the course [Software Engineering Practice & Group Project](https://www.imperial.ac.uk/computing/current-students/courses/70048/) (MSc AI, Imperial College) and builds on the RL framework of the [Biomedical Image Anaysis Group](https://biomedia.doc.ic.ac.uk). 
+The work was completed as part of the course [Software Engineering Practice & Group Project](https://www.imperial.ac.uk/computing/current-students/courses/70048/) (MSc AI, Imperial College) and builds on the deep [RL framework](https://github.com/amiralansary/rl-medical) of the [Biomedical Image Anaysis Group](https://biomedia.doc.ic.ac.uk). 
 
 ## Results
 
@@ -91,14 +91,18 @@ python DQN.py --task train --algo DQN --gpu 0 --files './data/filenames/local/br
 ```
 
 ##### Evaluate
+
 ```
 python DQN.py --task eval --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files './data/filenames/image_files.txt' './data/filenames/landmark_files.txt' --type 'BrainMRI'
 ```
 
 ##### Test
+
 ```
 python DQN.py --task play --algo DQN --gpu 0 --load data/models/DQN_multiscale_brain_mri_point_pc_ROI_45_45_45/model-600000 --files './data/filenames/image_files.txt' --type 'BrainMRI'
 ```
+
+##### Usage
 
 ```
 usage: DQN.py [-h] [--gpu GPU] [--load LOAD] [--task {play,eval,train}]
