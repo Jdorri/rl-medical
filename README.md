@@ -8,17 +8,17 @@ The work was completed as part of the course [Software Engineering Practice & Gr
 
 Here are few examples of learned landmark detection agents on unseen data. These are displayed on a GUI, the core product:
 
-* Detecting the anterior commissure (AC) point in adult brain MRI
+* Detecting the anterior commissure (AC) point in adult brain MRI.
 <p align="center">
 <img src="examples/LandmarkDetection/DQN/videos/brain.gif" width="500">
 </p>
 
-* Detecting the apex point in short-axis cardiac MRI
+* Detecting the apex point in short-axis cardiac MRI.
 <p align="center">
 <img src="examples/LandmarkDetection/DQN/videos/cardiac.gif" width="500">
 </p>
 
-* Detecting the cavum septum pellucidum (CSP) point in fetal head ultrasound
+* Detecting the cavum septum pellucidum (CSP) point in fetal head ultrasound.
 <p align="center">
 <img src="examples/LandmarkDetection/DQN/videos/fetal.gif" width="500">
 </p>
