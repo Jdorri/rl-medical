@@ -2,7 +2,7 @@
 
 ALADDIN is a platform offering automated solutions for the detection of anatomical landmarks using Reinforcement Learning (RL) agents, complete with a unified visualisation suite. The tool is targeted at both medical imaging professionals and machine learning researchers conducting research into medical RL algorithms.
 
-The work was completed as part of the course [Software Engineering Practice & Group Project](https://www.imperial.ac.uk/computing/current-students/courses/70048/) (MSc AI, Imperial College) and builds on the deep [RL framework](https://github.com/amiralansary/rl-medical) of the [Biomedical Image Anaysis Group](https://biomedia.doc.ic.ac.uk). 
+The work was completed as part of the course [Software Engineering Practice & Group Project](https://www.imperial.ac.uk/computing/current-students/courses/70048/) (MSc AI, Imperial College) and builds on the [deep RL framework](https://github.com/amiralansary/rl-medical) of the [Biomedical Image Anaysis Group](https://biomedia.doc.ic.ac.uk). 
 
 ## Results
 
