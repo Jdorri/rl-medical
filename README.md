@@ -1,6 +1,6 @@
 # **A**natomical **L**andmark **D**etection and **D**emonstration **I**nterface (ALADDIN) <img src="examples/LandmarkDetection/DQN/images/aladdin.png" width="100" />
 
-ALADDIN is a platform offering automated solutions for the detection of anatomical landmarks using Reinforcement Learning (RL) agents, complete with a unified visualisation suite. The tool is targeted at both medical imaging professionals and machine learning researchers conducting research into medical RL algorithms.
+ALADDIN is a platform offering automated solutions for the detection of anatomical landmarks using Reinforcement Learning (RL) agents, complete with a unified visualisation suite. The tool is targeted at both medical imaging professionals and machine learning researchers.
 
 The work was completed as part of the course [Software Engineering Practice & Group Project](https://www.imperial.ac.uk/computing/current-students/courses/70048/) (MSc AI, Imperial College) and builds on the [deep RL framework](https://github.com/amiralansary/rl-medical) of the [Biomedical Image Anaysis Group](https://biomedia.doc.ic.ac.uk). 
 
@@ -52,7 +52,7 @@ Follow the following steps (in order) to install the required dependencies.
 
 ## Running the Code
 
-The ALADDIN platform has two distinct modes of use: 'GUI' and 'DQN'. Follow the relevant steps (in order) after installing **all** required packages.
+The ALADDIN platform has two distinct modes of use: 'GUI' and 'DQN'. Follow the relevant steps (in order) after installing all required packages.
 
 - To view the main product with pre-trained models, follow **GUI**.   
 - To train your own model/view detailed logs, follow **DQN**.
