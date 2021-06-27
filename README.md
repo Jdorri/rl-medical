@@ -1,12 +1,12 @@
 # **A**natomical **L**andmark **D**etection and **D**emonstration **I**nterface (ALADDIN) <img src="examples/LandmarkDetection/DQN/images/aladdin.png" width="100" />
 
-ALADDIN is a platform offering automated solutions for the detection of anatomical landmarks using Reinforcement Learning (RL) agents, complete with a unified visualisation suite. The tool is targeted at both medical imaging professionals and machine learning researchers.
+ALADDIN is a platform offering automated solutions for the detection of anatomical landmarks using reinforcement learning (RL) agents, complete with a unified visualisation suite. The tool is targeted at both medical imaging professionals and machine learning researchers.
 
 The work was completed as part of the course [Software Engineering Practice & Group Project](https://www.imperial.ac.uk/computing/current-students/courses/70048/) (MSc AI, Imperial College) and builds on the [deep RL framework](https://github.com/amiralansary/rl-medical) of the [Biomedical Image Anaysis Group](https://biomedia.doc.ic.ac.uk). 
 
 ## Results
 
-Here are few examples of learned landmark detection agents on unseen data. These are displayed on a GUI, the core product:
+Here are a few examples of learned landmark detection agents on unseen data. These are displayed on a custom graphical user interface, the core product:
 
 * Detecting the anterior commissure (AC) point in adult brain MRI.
 <p align="center">
